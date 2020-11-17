@@ -16,45 +16,55 @@ namespace BarbarianCall
     {
         internal static void SelectNearbyLocationsWithHeading(List<Vector3> listLoc, List<float> listHead, out Vector3 sp, out float heading)
         {
-            List<Vector3> locsToSelect = new List<Vector3>();
             sp = Vector3.Zero;
             heading = 0f;
-            Vector3 perLocation;
-            var playerPos = Game.LocalPlayer.Character.Position;
-            if (listLoc.Count != listHead.Count) return;
-            ToLog($"Calculating the best location for callout");
-            for (int i = 0; i < listLoc.Count; i++)
+            try
             {
-                perLocation = listLoc[i];
-                if (perLocation.TravelDistanceTo(playerPos) > 2500f) continue;
-                if (perLocation.DistanceTo(playerPos) < 1000f && perLocation.DistanceTo(playerPos) > 300f)
+                List<Vector3> locsToSelect = new List<Vector3>();
+                Vector3 perLocation;
+                var playerPos = Game.LocalPlayer.Character.Position;
+                if (listLoc.Count != listHead.Count) return;
+                ToLog($"Calculating the best location for callout");
+                for (int i = 0; i < listLoc.Count; i++)
                 {
-                    locsToSelect.Add(perLocation);
-                }
-            }
-            if (locsToSelect.Count > 0)
-            {
-                sp = locsToSelect[MathHelper.GetRandomInteger(0, locsToSelect.Count - 1)];
-            }
-            else
-            {
-                foreach (Vector3 l in listLoc)
-                {
-                    if (l.DistanceTo(playerPos) < 1500f && l.DistanceTo(playerPos) > 250f)
+                    perLocation = listLoc[i];
+                    if (perLocation.TravelDistanceTo(playerPos) > 2500f) continue;
+                    if (perLocation.DistanceTo(playerPos) < 1000f && perLocation.DistanceTo(playerPos) > 300f)
                     {
-                        if (l.TravelDistanceTo(playerPos) > 3000) continue;
-                        sp = l;
-                        break;
+                        locsToSelect.Add(perLocation);
                     }
                 }
-            }        
-            if (listLoc.Contains(sp)) heading = listHead[listLoc.IndexOf(sp)];
-            else heading = 0f;
+                if (locsToSelect.Count > 0)
+                {
+                    sp = locsToSelect[MathHelper.GetRandomInteger(0, locsToSelect.Count - 1)];
+                }
+                else
+                {
+                    foreach (Vector3 l in listLoc)
+                    {
+                        if (l.DistanceTo(playerPos) < 1500f && l.DistanceTo(playerPos) > 250f)
+                        {
+                            if (l.TravelDistanceTo(playerPos) > 3000) continue;
+                            sp = l;
+                            break;
+                        }
+                    }
+                }
+                if (listLoc.Contains(sp)) heading = listHead[listLoc.IndexOf(sp)];
+                else heading = 0f;
 
-            if (sp != Vector3.Zero && heading != 0f)
+                if (sp != Vector3.Zero && heading != 0f)
+                {
+                    ToLog($"Location found X:{sp.X} Y:{sp.Y} Z:{sp.Z}. Heading: {heading}");
+                    ToLog($"Location found in {GetZoneName(sp)} near {World.GetStreetName(sp)}");
+                }
+            }
+            catch (Exception e)
             {
-                ToLog($"Location found X:{sp.X} Y:{sp.Y} Z:{sp.Z}. Heading: {heading}");
-                ToLog($"Location found in {GetZoneName(sp)} near {World.GetStreetName(sp)}");
+                sp = Vector3.Zero;
+                heading = 0f;
+                "Failed when try to select nearby locations".ToLog();
+                e.Message.ToLog();
             }
             return;
         }
@@ -101,6 +111,7 @@ namespace BarbarianCall
             Speaking = true;
             var playerPos = Game.LocalPlayer.Character.Position;
             var playerHead = Game.LocalPlayer.Character.Heading;
+            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, false);
             GameFiber.StartNew(delegate
             {
                 while (Speaking)
@@ -115,7 +126,6 @@ namespace BarbarianCall
                         Game.LocalPlayer.Character.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion(1800);
                     }
                 }
-                GameFiber.Hibernate();
             });
             if (talker.IsValid() && talker.Exists() && talker.IsInAnyVehicle(false))
             {
@@ -125,17 +135,20 @@ namespace BarbarianCall
             {
                 for (int i = 0; i < Dialogue.Count; i++)
                 {
-                    while (true)
+                    while (Speaking)
                     {
                         GameFiber.Yield();
                         if (Game.IsKeyDown(Keys.Y)) break;
                     }
+                    var dir = Game.LocalPlayer.Character.Position - talker.Position;
+                    dir.Normalize();
+                    talker.Tasks.AchieveHeading(MathHelper.ConvertDirectionToHeading(dir));
                     Game.DisplaySubtitle(Dialogue[i]);
                     if (!Speaking) break;
                 }
                 Speaking = false;
+                NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, true);
                 if (talker.IsValid() && talker.Exists()) talker.Tasks.ClearImmediately();
-                GameFiber.Hibernate();
             });
         }
         internal static void MakeMissionPed(this Ped ped, bool invincible = false)
@@ -148,7 +161,7 @@ namespace BarbarianCall
             if (invincible) ped.IsInvincible = true;
         }
         internal static void DisplayNotifWithLogo(this string msg, string calloutName = "") => 
-            Game.DisplayNotification("WEB_LOSSANTOSPOLICEDEPT", "WEB_LOSSANTOSPOLICEDEPT", "~y~BarbarianCall", "~y~" + calloutName, msg);
+            Game.DisplayNotification("WEB_LOSSANTOSPOLICEDEPT", "WEB_LOSSANTOSPOLICEDEPT", "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static IEnumerable<Ped> GetNearbyPedByRadius(this Vector3 pos, float radius)
         {
             List<Ped> peds = new List<Ped>();
@@ -186,32 +199,14 @@ namespace BarbarianCall
             $"Selected model is {ret.Name}".ToLog();
             return ret;
         }
-        internal static Color GetRandomColor(this IEnumerable<Color> list)
+        internal static Color GetRandomColor(this IEnumerable<Color> list, out string tostr)
         {
             var colorList = list.ToList();
             var ret = colorList[MathHelper.GetRandomInteger(0, colorList.Count - 1)];
             if (!ret.IsKnownColor) $"{ret.Name} is invalid color".ToLog();
             $"Selected color is {ret.Name}".ToLog();
+            tostr = ret.Name;
             return ret;
-        }
-        internal static string GetVehicleColor(this Vehicle v)
-        {
-            NativeFunction.Natives.GET_VEHICLE_COLOR(v, out int cr, out int cb, out int cg);
-            Color col = Color.FromArgb(cr, cg, cb);
-            var colorLookup = Enum.GetValues(typeof(KnownColor))
-               .Cast<KnownColor>()
-               .Select(Color.FromKnownColor)
-               .ToLookup(c => c.ToArgb());
-            List<Color> listc = new List<Color>();
-            foreach (var namedColor in colorLookup[col.ToArgb()])
-            {
-                listc.Add(namedColor);
-            }
-            if (listc.Count > 0)
-            {
-                return listc[MathHelper.GetRandomInteger(0, listc.Count - 1)].Name;
-            }
-            else return "weirdly colored";
         }
     }
 }

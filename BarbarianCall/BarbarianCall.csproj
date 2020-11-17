@@ -9,10 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BarbarianCall</RootNamespace>
     <AssemblyName>BarbarianCall</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <LangVersion>8.0</LangVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,7 +35,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GrammarPolice">
+    <Reference Include="GrammarPolice, Version=1.3.1.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\GrammarPolice.dll</HintPath>
     </Reference>
     <Reference Include="LSPD_First_Response">
@@ -64,6 +66,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Callouts\OfficerStabbed.cs" />
     <Compile Include="Callouts\StrangeLookingVehicle.cs" />
     <Compile Include="Callouts\Trespassing.cs" />
     <Compile Include="CommonVariables.cs" />

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace BarbarianCall
 {
+    //Variable-Only class
     public class CommonVariables
     {
         public static string[] CarsToSelect =
@@ -25,6 +26,10 @@ namespace BarbarianCall
             "a small cardboard filled with crystal methamphetamine", "an automatic rifle", "a small bag with 250 grams of cocain inside", "a bottle crates with full of molotov cocktail",
             "an USB with several hacking software", "an USB that contains a collection of child pornography videos", "a withcraft doll", "a withcraft doll and a photo of the mayor of Los Santos",
             "a heavvy sniper mk2", "a dismantled combat mg mk2", "50kg of unmarked powder"
+        };
+        public static string[] DonutModel =
+        {
+            "prop_donut_01", "prop_donut_02", "prop_donut_02b", "prop_amb_donut"
         };
     }
 }
