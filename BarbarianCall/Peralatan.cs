@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using RAGENativeUI;
 using System.Drawing;
 using BarbarianCall;
+using LSPD_First_Response.Engine.Scripting.Entities;
+using LSPD_First_Response.Mod.API;
 
 namespace BarbarianCall
 {
@@ -77,8 +79,8 @@ namespace BarbarianCall
             foreach (char c in licensePlate)
             {
                 count++;
-                if (count == 1) metu = metu + "BAR_" + c.ToString().ToUpper() + "_HIGH";
-                if (count == 8) metu = metu + "BAR_" + c.ToString().ToUpper() + "_LOW";
+                if (count == 1) metu = metu + "BAR_" + c.ToString().ToUpper() + "_HIGH ";
+                else if (count == 8) metu = metu + "BAR_" + c.ToString().ToUpper() + "_LOW";
                 else metu = metu + "BAR_" + c.ToString().ToUpper() + " ";
             }
             return metu;
@@ -104,6 +106,12 @@ namespace BarbarianCall
             string gameName = NativeFunction.Natives.GET_NAME_OF_ZONE<string>(pos.X, pos.Y, pos.Z);
             return Game.GetLocalizedString(gameName);
         }
+        public static string GetCardinalDirectionLowDetailedAudio(this Entity e)
+        {
+            float degrees = e.Heading;
+            string[] cardinals = { "DIRECTION_BOUND_NORTH", "DIRECTION_BOUND_WEST", "DIRECTION_BOUND_SOUTH", "DIRECTION_BOUND_EAST", "DIRECTION_BOUND_NORTH" };
+            return cardinals[(int)Math.Round(((double)degrees % 360) / 90)];
+        }
         internal static bool Speaking;
         internal static void HandleSpeech(List<string> Dialogue, Ped talker)
         {
@@ -119,7 +127,7 @@ namespace BarbarianCall
                     GameFiber.Yield();
                     if (Vector3.Distance(Game.LocalPlayer.Character.Position, playerPos) > 2.5f)
                     {
-                        Game.LocalPlayer.Character.Tasks.FollowNavigationMeshToPosition(playerPos, playerHead, 1f).WaitForCompletion(1000);
+                        Game.LocalPlayer.Character.Tasks.FollowNavigationMeshToPosition(playerPos, playerHead, 1.5f).WaitForCompletion(1000);
                     }
                     if (Game.LocalPlayer.Character.IsInAnyVehicle(false))
                     {
@@ -133,7 +141,8 @@ namespace BarbarianCall
             }
             GameFiber.StartNew(delegate
             {
-                for (int i = 0; i < Dialogue.Count; i++)
+                Game.DisplaySubtitle(Dialogue[0], 10000);
+                for (int i = 1; i < Dialogue.Count; i++)
                 {
                     while (Speaking)
                     {
@@ -143,7 +152,7 @@ namespace BarbarianCall
                     var dir = Game.LocalPlayer.Character.Position - talker.Position;
                     dir.Normalize();
                     talker.Tasks.AchieveHeading(MathHelper.ConvertDirectionToHeading(dir));
-                    Game.DisplaySubtitle(Dialogue[i]);
+                    Game.DisplaySubtitle(Dialogue[i], 10000);
                     if (!Speaking) break;
                 }
                 Speaking = false;
@@ -156,12 +165,14 @@ namespace BarbarianCall
             ped.MakePersistent();
             ped.BlockPermanentEvents = true;
             ped.Money = 1;
-            ped.Health = 100;
+            ped.Health = 200;
             ped.Armor = 0;
-            if (invincible) ped.IsInvincible = true;
+            ped.IsInvincible = invincible;
         }
-        internal static void DisplayNotifWithLogo(this string msg, string calloutName = "") => 
-            Game.DisplayNotification("WEB_LOSSANTOSPOLICEDEPT", "WEB_LOSSANTOSPOLICEDEPT", "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
+        internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") => 
+            Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
+        internal static void DisplayNotifWithLogo(this string msg, out uint notifId, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") =>
+            notifId = Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static IEnumerable<Ped> GetNearbyPedByRadius(this Vector3 pos, float radius)
         {
             List<Ped> peds = new List<Ped>();
@@ -208,6 +219,275 @@ namespace BarbarianCall
             tostr = ret.Name;
             return ret;
         }
+        internal static void InjectRandomItemToVehicle(this Vehicle vehicle)
+        {
+            try
+            {
+                if (!Initialization.IsLSPDFRPluginRunning("StopThePed")) return;
+                if (vehicle.Exists())
+                {
+                    string selected;
+                    int rand1 = MathHelper.GetRandomInteger(1, 10);
+                    if (rand1 < 3)
+                    {
+                        selected = "~r~" + CommonVariables.DangerousVehicleItems.GetRandomElement();
+                    }
+                    else if (rand1 > 2 && rand1 < 6)
+                    {
+                        selected = "~y~" + CommonVariables.SuspiciousItems.GetRandomElement();
+                    }
+                    else
+                    {
+                        selected = "~g~" + CommonVariables.CommonItems.GetRandomElement();
+                    }
+                    vehicle.Metadata.searchTrunk = selected;
+                    if (Random.Next(1, 6800) % 2 == 0)
+                    {
+                        vehicle.Metadata.searchDriver = "~y~" + CommonVariables.SuspiciousItems.GetRandomElement();
+                    }
+                    else
+                    {
+                        vehicle.Metadata.searchDriver = "~g~" + CommonVariables.CommonItems.GetRandomElement();
+                    }
+                    vehicle.Metadata.searchPassenger = "~g~" + CommonVariables.CommonItems.GetRandomElement();
+                }
+            } catch (Exception e)
+            {
+                $"Failed to inject item to vehicle {vehicle.Model.Name}".ToLog();
+                e.Message.ToLog();
+            }          
+        }
+        /// <summary>
+        /// Gets the heading towards an entity
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="towardsEntity">Entity to face to</param>
+        /// <returns>the heading towards an entity</returns>
+        public static float GetHeadingTowards(this ISpatial spatial, ISpatial towards)
+        {
+            return GetHeadingTowards(spatial, towards.Position);
+        }
+
+
+        /// <summary>
+        /// Gets the heading towards a position
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="towardsPosition">Position to face to</param>
+        /// <returns>the heading towards a position</returns>
+        public static float GetHeadingTowards(this ISpatial spatial, Vector3 towardsPosition)
+        {
+            return GetHeadingTowards(spatial.Position, towardsPosition);
+        }
+
+
+        /// <summary>
+        /// Gets the heading towards an entity
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="towardsEntity">Entity to face to</param>
+        /// <returns>the heading towards an entity</returns>
+        public static float GetHeadingTowards(this Vector3 position, Vector3 towardsPosition)
+        {
+            Vector3 directionFromEntityToPosition = (towardsPosition - position);
+            directionFromEntityToPosition.Normalize();
+
+            float heading = MathHelper.ConvertDirectionToHeading(directionFromEntityToPosition);
+            return heading;
+        }
+
+        /// <summary>
+        /// Gets the heading towards an entity
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="towardsEntity">Entity to face to</param>
+        /// <returns>the heading towards an entity</returns>
+        public static float GetHeadingTowards(this Vector3 position, ISpatial towards)
+        {
+            return GetHeadingTowards(position, towards.Position);
+        }
+
+        internal static string GetPedHeadshotTxd(this Ped ped)
+        {
+            try
+            {
+                unsafe
+                {
+                    string ret;
+                    uint handle = (uint)NativeFunction.CallByHash<uint>(0x953563ce563143af, ped);
+                    int count = 0;
+                    while (!NativeFunction.Natives.IS_PEDHEADSHOT_READY<bool>(handle) && !NativeFunction.Natives.IS_PEDHEADSHOT_VALID<bool>(handle))
+                    {
+                        count++;
+                        GameFiber.Yield();
+                        if (count >= 40) break;
+                    }
+                    if (NativeFunction.Natives.IS_PEDHEADSHOT_READY<bool>(handle) && NativeFunction.Natives.IS_PEDHEADSHOT_VALID<bool>(handle))
+                    {
+                        ret = NativeFunction.Natives.GET_PEDHEADSHOT_TXD_STRING<string>(handle);
+                        return ret;
+                    }
+                    else
+                    {
+                        $"{handle} Mugshot is invalid".ToLog();
+                        return "WEB_LOSSANTOSPOLICEDEPT";
+                    }
+                }
+            } catch (Exception e)
+            {
+                "Failed to get mugshot of the ped".ToLog();
+                e.Message.ToLog();
+                return "WEB_LOSSANTOSPOLICEDEPT";
+            }
+        }
+        internal static void DisplayNotificationsWithPedHeadshot(this Ped ped, string subtitle, string text, string title = "Barbarian Call")
+        {
+            GameFiber.StartNew(() =>
+            {
+                try
+                {
+                    uint headshotHandle = NativeFunction.Natives.x953563CE563143AF<uint>(ped); //RegisterPedHeadshotTransparent
+                    int startTime = Environment.TickCount;
+                    GameFiber.WaitUntil(() => NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle), 10000);
+                    string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
+                    string txn = txd;                  
+                    Game.DisplayNotification(txn, txd, title, subtitle, text);
+                    NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
+                }
+                catch (Exception e)
+                {
+                    Game.DisplayNotification("srange_gen", "blanktrophy_gold", title, subtitle, text);
+                    "Display notification with mugshot error".ToLog();
+                    e.ToString().ToLog();
+                    e.Message.ToLog();
+                }
+            });
+        }
+
+        public static Random Random = new Random(MathHelper.GetRandomInteger(1000, 10000));
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                int k = Random.Next(n--);
+                T temp = list[n];
+                list[n] = list[k];
+                list[k] = temp;
+            }
+        }
+
+        public static T GetRandomElement<T>(this IList<T> list, bool shuffle = false)
+        {
+            if (list == null || list.Count <= 0)
+                return default(T);
+
+            if (shuffle) list.Shuffle();
+            return list[Random.Next(list.Count)];
+        }
+
+        public static T GetRandomElement<T>(this IEnumerable<T> enumarable, bool shuffle = false)
+        {
+            if (enumarable == null || enumarable.Count() <= 0)
+                return default(T);
+
+            T[] array = enumarable.ToArray();
+            return GetRandomElement(array, shuffle);
+        }
+
+        public static T GetRandomElement<T>(this Enum items)
+        {
+            if (typeof(T).BaseType != typeof(Enum))
+                throw new InvalidCastException();
+
+            var types = Enum.GetValues(typeof(T));
+            return GetRandomElement<T>(types.Cast<T>());
+        }
+
+        public static IList<T> GetRandomNumberOfElements<T>(this IList<T> list, int numOfElements, bool shuffle = false)
+        {
+            List<T> givenList = new List<T>(list);
+            List<T> l = new List<T>();
+            for (int i = 0; i < numOfElements; i++)
+            {
+                T t = givenList.GetRandomElement(shuffle);
+                givenList.Remove(t);
+                l.Add(t);
+            }
+            return l;
+        }
+
+        public static IEnumerable<T> GetRandomNumberOfElements<T>(this IEnumerable<T> enumarable, int numOfElements, bool shuffle = false)
+        {
+            List<T> givenList = new List<T>(enumarable);
+            List<T> l = new List<T>();
+            for (int i = 0; i < numOfElements; i++)
+            {
+                T t = givenList.Except(l).GetRandomElement(shuffle);
+                l.Add(t);
+            }
+            return l;
+        }
+        internal static void PlaceWaypoint(this Vector3 pos) => PlaceWaypoint(new Vector2(pos.X, pos.Y));
+        internal static void PlaceWaypoint(this Vector2 pos) => NativeFunction.Natives.SET_NEW_WAYPOINT(pos.X, pos.Y);
+        internal static void RemoveWaypoint() => NativeFunction.Natives.SET_WAYPOINT_OFF();
+        internal static void SetPedAsWanted(this Ped ped)
+        {
+            Persona pedPersona = Functions.GetPersonaForPed(ped);
+            Persona newWantedPersona = new Persona(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
+            {
+                Wanted = true,
+                Citations = pedPersona.Citations,
+                ELicenseState = pedPersona.ELicenseState,
+                TimesStopped = pedPersona.TimesStopped,
+                RuntimeInfo = pedPersona.RuntimeInfo
+            };
+            Functions.SetPersonaForPed(ped, newWantedPersona);
+        }
+        internal static bool GetClosestVehicleNodeWithheading(Vector3 pos, out Vector3 outpos, out float heading) => NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out outpos, out heading, 0, 3, 0);
+        internal static bool GetRoadSidePointWithHeading(this Vector3 pos, out Vector3 outPos,out float outHeading)
+        {
+            outPos = Vector3.Zero;
+            outHeading = float.NaN;
+            try
+            {
+                if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0)) //GetNTHClosestVehicleNodeWithHeadingFavourDirections
+                {
+                    if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //GetRoadSidePointWithHeading
+                    {
+                        outPos = rsPos;
+                        outHeading = nodeHeading;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.ToString().ToLog();
+            }
+            return false;
+        }
+        internal static bool GetRoadSidePointFavourDirections(Vector3 pos, Vector3 favoredPos, out Vector3 outPos, out float heading)
+        {
+            heading = float.NaN;
+            outPos = Vector3.Zero;
+            try
+            {
+                if (NativeFunction.Natives.x45905BE8654AE067<bool>(pos.X, pos.Y, pos.Z, favoredPos.X, favoredPos.Y, favoredPos.Z, 1, out Vector3 nodePos, out float nodeHeading, 0, 0x40400000, 0)) //GetNTHClosestVehicleNodeFavourDirection
+                {
+                    if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsp)) //GetRoadSidePointWithHeading
+                    {
+                        heading = nodeHeading;
+                        outPos = rsp;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.ToString().ToLog();
+            }
+            return false;
+        }
     }
 }
-    

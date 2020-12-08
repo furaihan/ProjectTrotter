@@ -28,6 +28,9 @@ namespace BarbarianCall.Callouts
         private Model vehModel;
         private Persona driverPersona;
         private Persona passengerPersona;
+        private bool driverArrested = false;
+        private bool passengerArrested = false;
+        private enum CalloutState { EnRoute, OnScene, Pursuit, Finish}
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -100,25 +103,42 @@ namespace BarbarianCall.Callouts
         {
            if (Game.IsKeyDown(Keys.End) || Game.LocalPlayer.Character.IsDead)
             {
-                GameFiber.StartNew(DisplayCodeFourMessage);
+                if (state != CalloutState.Finish) GameFiber.StartNew(End);
+                else DisplayCodeFourMessage();
             }
-           if (passenger.Exists())
+           if (state != CalloutState.Finish)
             {
-                if (Functions.IsPedArrested(passenger))
+                if (driver.Exists() && Functions.IsPedArrested(driver) && !driverArrested)
                 {
-                    Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS SUSPECT_IN_CUSTODY", passenger.Position);
+                    driverArrested = true;
+                    Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS SUSPECT_IN_CUSTODY IN_OR_ON_POSITION", driver.Position);
                 }
-            }
+                if (passenger.Exists() && Functions.IsPedArrested(passenger) && !passengerArrested)
+                {
+                    passengerArrested = true;
+                    Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS SUSPECT_IN_CUSTODY IN_OR_ON_POSITION", passenger.Position);
+                }
+            }         
             base.Process();
         }
         public override void End()
         {
-            if (driver.Exists() && driver.IsAlive) driver.Dismiss();
-            if (passenger.Exists()) passenger.Dismiss();
-            if (blip.Exists()) blip.Delete();
-            if (susVeh.Exists()) susVeh.Dismiss();
-            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version("1.3.1.0")))
-                GrammarPolice.API.Functions.Available(false, false);
+            if (state == CalloutState.Finish)
+            {
+                if (driver.Exists() && driver.IsAlive) driver.Dismiss();
+                if (passenger.Exists()) passenger.Dismiss();
+                if (blip.Exists()) blip.Delete();
+                if (susVeh.Exists()) susVeh.Dismiss();
+            }
+            else
+            {
+                if (driver.Exists() && driver.IsAlive) driver.Delete();
+                if (passenger.Exists()) passenger.Delete();
+                if (blip.Exists()) blip.Delete();
+                if (susVeh.Exists()) susVeh.Delete();
+            }
+            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice"))
+                GrammarPolice.API.Functions.Available(true, false);
             CalloutRunning = false;
             Peralatan.Speaking = false;
             base.End();
@@ -128,7 +148,10 @@ namespace BarbarianCall.Callouts
             CalloutRunning = true;
             GameFiber.StartNew(delegate
             {
-                GameFiber.Sleep(2000);
+                while (Functions.GetIsAudioEngineBusy())
+                {
+                    GameFiber.Yield();
+                }
                 Functions.PlayScannerAudio($"ATTENTION_ALL_UNITS CITIZENS_REPORT SUSPECT_IS DRIVING_A COLOR_{vehColor} {susVeh.Model.Name.ToUpper()} BAR_TARGET_PLATE "
                     + Peralatan.GetLicensePlateAudio(susVeh.LicensePlate) + " BAR_PROCEED_WITH_CAUTION");
                 bool njeblug = false;
@@ -156,7 +179,7 @@ namespace BarbarianCall.Callouts
                     if (MathHelper.GetRandomInteger(1, 10) < 4) susVeh.IsStolen = true;
                     if (Initialization.IsLSPDFRPluginRunning("StopThePed"))
                     {
-                        susVeh.Metadata.searchDriver = "~r~ an automatic rifle";
+                        susVeh.InjectRandomItemToVehicle();
                         if (MathHelper.GetRandomInteger(1, 100) < 30 )
                         {
                             susVeh.IsStolen = false;
@@ -192,7 +215,10 @@ namespace BarbarianCall.Callouts
             CalloutRunning = true;
             GameFiber.StartNew(delegate
             {
-                GameFiber.Sleep(2000);
+                while (Functions.GetIsAudioEngineBusy())
+                {
+                    GameFiber.Yield();
+                }
                 Functions.PlayScannerAudio($"ATTENTION_ALL_UNITS CITIZENS_REPORT SUSPECT_IS DRIVING_A COLOR_{vehColor} {susVeh.Model.Name.ToUpper()} BAR_TARGET_PLATE "
                     + Peralatan.GetLicensePlateAudio(susVeh.LicensePlate) + " BAR_PROCEED_WITH_CAUTION");
                 GetClose();
@@ -202,6 +228,7 @@ namespace BarbarianCall.Callouts
                     if (Game.LocalPlayer.Character.Position.DistanceTo(susVeh.Position) < 10f) break;
                 }
                 Game.HideHelp();
+                susVeh.InjectRandomItemToVehicle();
                 while (CalloutRunning)
                 {
                     GameFiber.Yield();
@@ -219,18 +246,30 @@ namespace BarbarianCall.Callouts
                                 if (random1 < 4)
                                 {
                                     if (Initialization.IsLSPDFRPluginRunning("StopThePed")) StopThePed.API.Functions.setPedUnderDrugsInfluence(passenger, true);
-                                    passengerPersona.Wanted = true;
+                                    passenger.SetPedAsWanted();
                                     var random2 = MathHelper.GetRandomInteger(1, 10);
                                     if (random2 < 3)
                                     {
+                                        passenger.Metadata.searchPed = CommonVariables.DangerousVehicleItems.GetRandomElement();
                                         pursuit = Functions.CreatePursuit();
                                         Functions.AddPedToPursuit(pursuit, passenger);
                                         Functions.SetPursuitIsActiveForPlayer(pursuit, true);
                                         pursuitCreated = true;
                                         Functions.RequestBackup(passenger.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.LocalUnit);
                                         Functions.PlayScannerAudioUsingPosition("WE_HAVE CRIME_RESIST_ARREST IN_OR_ON_POSITION", passenger.Position);
-                                    }                                   
+                                    }
+                                    else if (random2 > 2 && random2 < 6)
+                                    {
+                                        passenger.Metadata.searchPed = CommonVariables.DangerousPedItem.GetRandomElement();
+                                    }
+                                    else passenger.Metadata.stpAlcoholDetected = true;
                                 }
+                                else if (random1 > 3 && random1 < 7)
+                                {
+                                    if (Peralatan.Random.Next(50) % 2 == 0) passenger.Metadata.searchPed = CommonVariables.DangerousPedItem.GetRandomElement();
+                                    else passenger.Metadata.searchPed = CommonVariables.SuspiciousItems.GetRandomElement();
+                                }
+                                else passenger.Metadata.searchPed = CommonVariables.CommonItems.GetRandomElement();
                             }                                
                             break;
                         }
@@ -243,12 +282,81 @@ namespace BarbarianCall.Callouts
                     "~y~Suspect~s~: Oh my god, I was surprised by your presence here, sir",
                     "~b~Officer~s~: Just answer my question, what are you doing here?",
                     "~y~Suspect~s~: I was sleepy while on the way sir, I decided to stop here for a moment to release my sleepiness",
-                    "~b~Officer~s~: You know what, your vehicle here has been reported as a suspicious vehicle",
+                    "~b~Officer~s~: You know what, your vehicle has been reported as a suspicious vehicle",
                     "~y~Suspect~s~: I don't intend to do anything sir, I just want to sleep",
+                    "~b~Officer~s~: Hmm, do you consent if i search your vehicle",
+                    "~y~Suspect~s~: Absolutely, go ahead officer",
                     "~y~[CONVERSATION IS OVER]"
                 };
                 Game.LocalPlayer.Character.PlayAmbientSpeech("Generic_Hi");
-                if (!pursuitCreated) Peralatan.HandleSpeech(cakap, driver);
+                if (!pursuitCreated)
+                {
+                    Peralatan.HandleSpeech(cakap, driver);
+                    "Proceed with further ~o~investigation~s~ ~y~(you can do record check or frisk the suspect)".DisplayNotifWithLogo("SuspiciousVehicle");
+                    uint notif = 0;
+                    if (Initialization.IsLSPDFRPluginRunning("StopThePed"))
+                    {
+                        StopThePed.API.Events.searchVehicleEvent += (Vehicle veh) =>
+                        {
+                            if (veh = susVeh)
+                            {
+                                if (notif != 0) Game.RemoveNotification(notif);
+                                "if you found something suspicious, you can arrest the suspect".DisplayNotifWithLogo(out notif ,"Strange Looking Vehicle");
+                            }
+                        };
+                        StopThePed.API.Events.patDownPedEvent += (Ped Ped) =>
+                        {
+                            if (Ped == driver || Ped == passenger)
+                            {
+                                if (notif != 0) Game.RemoveNotification(notif);
+                                "if you found something suspicious, you can arrest the suspect".DisplayNotifWithLogo(out notif, "Strange Looking Vehicle");
+                            }
+                        };
+                    }
+                }
+                while (CalloutRunning)
+                {
+                    GameFiber.Yield();
+                    if (passenger.Exists())
+                    {
+                        if (driver.Exists() && driverArrested && passengerArrested )
+                        {
+                            "Attention! ~g~driver~s~ is ~r~arrested~s~ and ~g~passenger~s~ is ~r~arrested~s~".DisplayNotifWithLogo("A Strange Looking Vehicle");
+                            DisplayCodeFourMessage();
+                        }
+                        else if (driver.Exists() && driverArrested && passenger.IsDead)
+                        {
+                            "Attention! ~g~driver~s~ is ~r~dead~s~ and ~g~passenger~s~ is ~r~arrested~s~".DisplayNotifWithLogo("A Strange Looking Vehicle");
+                            DisplayCodeFourMessage();
+                        }
+                        else if ((driver.Exists() && driver.IsDead && passengerArrested))
+                        {
+                            "Attention! ~g~driver~s~ is ~r~arrested~s~ and ~g~passenger~s~ is ~r~dead~s~".DisplayNotifWithLogo("A Strange Looking Vehicle");
+                            DisplayCodeFourMessage();
+                        }
+                        else if (driver.Exists() && driver.IsDead && passenger.IsDead)
+                        {
+                            "Attention! ~g~driver~s~ is ~r~dead~s~ and ~g~passenger~s~ is ~r~dead~s~".DisplayNotifWithLogo("A Strange Looking Vehicle");
+                            DisplayCodeFourMessage();
+                        }
+                    }
+                    else
+                    {
+                        if (driver.Exists() && !passenger.Exists())
+                        {
+                            if (driver.IsDead)
+                            {
+                                "Attention!~g~driver~s~ is ~r~dead~s~".DisplayNotifWithLogo("A Strange Looking Vehicle");
+                                DisplayCodeFourMessage();
+                            }
+                            else if (driverArrested)
+                            {
+                                "Attention! ~g~driver~s~ is ~r~arrested~s~".DisplayNotifWithLogo("A Strange Looking Vehicle");
+                                DisplayCodeFourMessage();
+                            }
+                        }
+                    }
+                }
             });
         }
         private void GetClose()
@@ -258,11 +366,11 @@ namespace BarbarianCall.Callouts
             {
                 GameFiber.Yield();
                 counter++;
-                if (counter % 600 == 0) Game.DisplayHelp($"The suspect's vehicle is {vehColor} {susVeh.Model.Name}", 4500);
+                if (counter % 300 == 0) Game.DisplayHelp($"~y~The suspect's vehicle is ~c~{vehColor}~s~ ~g~{susVeh.Model.Name}~s~", 6500);
                 if (Game.LocalPlayer.Character.Position.DistanceTo(susVeh.Position) < 45f)
                 {
                     state = CalloutState.OnScene;
-                    if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version("1.3.1.0")))
+                    if (Initialization.IsLSPDFRPluginRunning("GrammarPolice"))
                         GrammarPolice.API.Functions.Scene(false, false);
                     break;
                 }
@@ -284,15 +392,6 @@ namespace BarbarianCall.Callouts
                 Functions.PlayScannerAudio("ATTENTION_THIS_IS_DISPATCH_HIGH WE_ARE_CODE FOUR NO_FURTHER_UNITS_REQUIRED");
                 End();
             }
-        }
-        private enum CalloutState
-        {
-            EnRoute,
-            OnScene,
-            TalkWithSuspect,
-            Pursuit,
-            AfterTalk,
-            Finish
         }
     }
 }

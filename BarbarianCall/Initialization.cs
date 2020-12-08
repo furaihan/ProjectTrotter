@@ -36,18 +36,43 @@ namespace BarbarianCall
             {
                 GameFiber.Wait(5600);
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
+                foreach (Assembly assembly in Functions.GetAllUserPlugins())
+                {
+                    $"Detected {assembly.GetName().Name} is running".ToLog();
+                }
+                CheckPluginRunning();
             });
         }
-        public static bool IsLSPDFRPluginRunning(string Plugin, Version minversion = null)
+        public static bool IsLSPDFRPluginRunning(string Plugin)
         {
-            foreach (Assembly assembly in Functions.GetAllUserPlugins())
+            try
             {
-                AssemblyName an = assembly.GetName(); if (an.Name.ToLower() == Plugin.ToLower())
+                foreach (Assembly assembly in Functions.GetAllUserPlugins())
                 {
-                    if (minversion == null || an.Version.CompareTo(minversion) >= 0) { return true; }
+                    if (string.Equals(assembly.GetName().Name, Plugin, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        return true;
+                    }
                 }
+
+                return false;
             }
-            return false;
+            catch (Exception e)
+            {
+                e.ToString().ToLog();
+                return false;
+            }
+        }
+        private static void CheckPluginRunning()
+        {
+            string[] plugins = { "GrammarPolice", "UltimateBackup", "StopThePed", "BetterEMS" };
+            foreach (string plug in plugins)
+            {
+                var assem = Functions.GetAllUserPlugins();
+                string[] semName = (from x in assem select x.GetName().Name.ToLower()).ToArray();
+                if (semName.Contains(plug.ToLower())) $"{plug} is installed".ToLog();
+                else $"{plug} is not installed".ToLog();
+            }
         }
     }
 }

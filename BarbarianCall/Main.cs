@@ -26,6 +26,7 @@ namespace BarbarianCall
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(Initialization.LSPDFRResolveEventHandler);
             Functions.RegisterCallout(typeof(Callouts.StrangeLookingVehicle));
+            Functions.RegisterCallout(typeof(Callouts.OfficerStabbed));
             Initialization.Initialize();
         }
     }
