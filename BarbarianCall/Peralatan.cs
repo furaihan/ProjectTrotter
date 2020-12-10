@@ -135,38 +135,36 @@ namespace BarbarianCall
                     }
                 }
             });
-            if (talker.IsValid() && talker.Exists() && talker.IsInAnyVehicle(false))
+            if (talker.Exists() && !talker.IsInAnyVehicle(false))
             {
                 talker.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 1f, AnimationFlags.Loop);
             }
-            GameFiber.StartNew(delegate
+            for (int i = 0; i < Dialogue.Count; i++)
             {
-                Game.DisplaySubtitle(Dialogue[0], 10000);
-                for (int i = 1; i < Dialogue.Count; i++)
+                while (Speaking)
                 {
-                    while (Speaking)
-                    {
-                        GameFiber.Yield();
-                        if (Game.IsKeyDown(Keys.Y)) break;
-                    }
-                    var dir = Game.LocalPlayer.Character.Position - talker.Position;
-                    dir.Normalize();
-                    talker.Tasks.AchieveHeading(MathHelper.ConvertDirectionToHeading(dir));
-                    Game.DisplaySubtitle(Dialogue[i], 10000);
-                    if (!Speaking) break;
+                    GameFiber.Yield();
+                    if (Game.IsKeyDown(Keys.Y)) break;
                 }
-                Speaking = false;
-                NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, true);
-                if (talker.IsValid() && talker.Exists()) talker.Tasks.ClearImmediately();
-            });
+                var dir = Game.LocalPlayer.Character.Position - talker.Position;
+                dir.Normalize();
+                talker.Tasks.AchieveHeading(MathHelper.ConvertDirectionToHeading(dir));
+                Game.DisplaySubtitle(Dialogue[i], 10000);
+                if (!Speaking) break;
+            }
+            Speaking = false;
+            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, true);
+            if (talker.IsValid() && talker.Exists()) talker.Tasks.ClearImmediately();
         }
         internal static void MakeMissionPed(this Ped ped, bool invincible = false)
         {
             ped.MakePersistent();
             ped.BlockPermanentEvents = true;
             ped.Money = 1;
-            ped.Health = 200;
-            ped.Armor = 0;
+            ped.Health = 500;
+            ped.Armor = 50;
+            ped.Opacity = 1.0f;
+            ped.IsVisible = true;
             ped.IsInvincible = invincible;
         }
         internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") => 

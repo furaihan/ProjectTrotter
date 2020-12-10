@@ -23,6 +23,8 @@ namespace BarbarianCall.Callouts
         public float SpawnHeading  = float.NaN;
         public LHandle Pursuit; 
         public bool GrammarPoliceRunning  = false;
+        public bool StopThePedRunning = false;
+        public bool UltimateBackupRunning = false;
         public Persona SuspectPersona;
         public Ped PlayerPed = Game.LocalPlayer.Character;
 
@@ -39,6 +41,8 @@ namespace BarbarianCall.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             GrammarPoliceRunning = Initialization.IsLSPDFRPluginRunning("GrammarPolice");
+            UltimateBackupRunning = Initialization.IsLSPDFRPluginRunning("UltimateBackup");
+            StopThePedRunning = Initialization.IsLSPDFRPluginRunning("StopThePed");
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()

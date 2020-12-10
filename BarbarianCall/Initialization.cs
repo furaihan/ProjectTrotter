@@ -51,10 +51,11 @@ namespace BarbarianCall
                 {
                     if (string.Equals(assembly.GetName().Name, Plugin, StringComparison.CurrentCultureIgnoreCase))
                     {
+                        $"Plugin : {Plugin} Assembly : {assembly.GetName().Name} is running".ToLog();
                         return true;
                     }
                 }
-
+                $"{Plugin} is not running".ToLog();
                 return false;
             }
             catch (Exception e)
