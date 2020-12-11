@@ -28,6 +28,10 @@ namespace BarbarianCall.API
             }
 
         }
+        public static void SetPedDeathDetails(Ped ped, string injuredName, string causeOfDeath, uint dethTime, float surviveProbability)
+        {
+            EMSFunctions.OverridePedDeathDetails(ped, injuredName, causeOfDeath, dethTime, surviveProbability);
+        }
 
         public static bool HasBeenTreated(Ped p)
         {

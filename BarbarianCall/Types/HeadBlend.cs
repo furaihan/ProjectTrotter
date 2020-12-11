@@ -76,6 +76,7 @@
             NativeFunction.Natives.UpdatePedHeadBlendData(ped, shapeMix, skinMix, thirdMix);
         }
 
+        public static void SetPedEyeColor(Ped ped, EyeColor eyeColor) => SetPedEyeColor(ped, (int)eyeColor);
         public static void SetPedEyeColor(Ped ped, int index)
         {
             NativeFunction.Natives.x50B56988B170AFDF(ped, index);
@@ -223,5 +224,38 @@
         Chimp_Bone_Width,
         Chimp_Hole,
         Neck_Thikness,
+    }
+    public enum EyeColor
+    {
+        Black,
+        VeryLightBlueORGreen,
+        DarkBlue,
+        Brown,
+        DarkerBrown,
+        LightBrown,
+        Blue,
+        LightBlue,
+        Pink,
+        Yellow,
+        Purple,
+        Black2,
+        DarkGreen,
+        LightBrown2,
+        YellowORBlackPattern,
+        LightColoredSpiralPattern,
+        ShinyRed,
+        ShinyHalfBlueORHalfRed,
+        HalfBlackORHalfLightBlue,
+        WhiteORRedPerimter,
+        GreenSnake,
+        RedSnake,
+        DarkBlueSnake,
+        DarkYellow,
+        BrightYellow,
+        AllBlack,
+        RedSmallPupil,
+        DevilBlueORBlack,
+        WhiteSmallPupil,
+        GlossedOver,
     }
 }

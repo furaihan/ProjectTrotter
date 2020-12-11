@@ -81,6 +81,7 @@
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />
     <Compile Include="EventHandler.cs" />
+    <Compile Include="Extension.cs" />
     <Compile Include="Initialization.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Peralatan.cs" />

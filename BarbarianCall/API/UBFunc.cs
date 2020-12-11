@@ -41,6 +41,8 @@ namespace BarbarianCall.API
             {
                 case EUltimateBackupResponseType.Code2: Functions.callCode2Backup(false, stateBackup); break;
                 case EUltimateBackupResponseType.Code3: Functions.callCode3Backup(false, stateBackup); break;
+                case EUltimateBackupResponseType.Ambulance: Functions.callAmbulance(); break;
+                case EUltimateBackupResponseType.Firetruk: Functions.callFireDepartment(); break;
                 case EUltimateBackupResponseType.Pursuit: Functions.callPursuitBackup(false, stateBackup); break;
                 case EUltimateBackupResponseType.TrafficStop: Functions.callTrafficStopBackup(false, stateBackup); break;
                 case EUltimateBackupResponseType.FelonyStop: Functions.callFelonyStopBackup(false, stateBackup); break;
@@ -70,6 +72,8 @@ namespace BarbarianCall.API
         {
             Code2,
             Code3,
+            Ambulance,
+            Firetruk,
             Pursuit,
             TrafficStop,
             FelonyStop,

@@ -71,6 +71,7 @@ namespace BarbarianCall
             return;
         }
         internal static void ToLog(this string micin) => Game.LogTrivial("[BarbarianCall]: " + micin);
+        internal static string GetLicensePlateAudio(Vehicle veh) => GetLicensePlateAudio(veh.LicensePlate);
         internal static string GetLicensePlateAudio(string licensePlate)
         {
             int count = 0;
@@ -97,7 +98,7 @@ namespace BarbarianCall
                                        MathHelper.GetRandomInteger(9).ToString() +
                                        MathHelper.GetRandomInteger(9).ToString() +
                                        MathHelper.GetRandomInteger(9).ToString();
-                ToLog($"{vehicle.PrimaryColor.Name} {vehicle.Model.Name} license plate changed to {vehicle.LicensePlate}");
+                ToLog($"{vehicle.PrimaryColor.Name} {Game.GetLocalizedString(vehicle.Model.Name)} license plate changed to {vehicle.LicensePlate}");
                 GameFiber.Sleep(1);
             }
         }
@@ -137,7 +138,7 @@ namespace BarbarianCall
             });
             if (talker.Exists() && !talker.IsInAnyVehicle(false))
             {
-                talker.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 1f, AnimationFlags.Loop);
+                talker.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 1f, AnimationFlags.Loop | AnimationFlags.SecondaryTask);
             }
             for (int i = 0; i < Dialogue.Count; i++)
             {
@@ -203,8 +204,9 @@ namespace BarbarianCall
         internal static Model GetRandomModel(this IEnumerable<string> list)
         {
             var list1 = list.ToList();
-            var ret = new Model(list1[MathHelper.GetRandomInteger(0, list1.Count - 1)]);
-            if (!ret.IsValid) $"{ret.Name} is invalid".ToLog();
+            string selected = list1[MathHelper.GetRandomInteger(0, list1.Count - 1)];
+            var ret = new Model(selected);
+            if (!ret.IsValid) $"{selected} is invalid".ToLog();
             $"Selected model is {ret.Name}".ToLog();
             return ret;
         }
@@ -361,8 +363,9 @@ namespace BarbarianCall
                 }
             });
         }
+        internal static int GetGameSecond() => NativeFunction.Natives.x494E97C2EF27C470<int>();
 
-        public static Random Random = new Random(MathHelper.GetRandomInteger(1000, 10000));
+        public static Random Random = new Random(DateTime.Now.Millisecond + GetGameSecond());
         public static void Shuffle<T>(this IList<T> list)
         {
             int n = list.Count;
@@ -378,7 +381,7 @@ namespace BarbarianCall
         public static T GetRandomElement<T>(this IList<T> list, bool shuffle = false)
         {
             if (list == null || list.Count <= 0)
-                return default(T);
+                return default;
 
             if (shuffle) list.Shuffle();
             return list[Random.Next(list.Count)];

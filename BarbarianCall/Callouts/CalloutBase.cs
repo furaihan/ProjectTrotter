@@ -13,28 +13,32 @@ namespace BarbarianCall.Callouts
     public abstract class CalloutBase : Callout
     {
         public enum ESuspectStates { InPursuit, Arrested, Dead, Escaped };
-        public enum ECalloutStates { EnRoute, OnScene, InPursuit, Finish };
+        public enum ECalloutStates { UnAccepted, EnRoute, OnScene, InPursuit, Finish };
         public ECalloutStates CalloutStates;
         public Ped Suspect;
         public Vehicle SuspectCar;
         public Blip Blip;
         public bool CalloutRunning = false;
         public Vector3 SpawnPoint = Vector3.Zero;
-        public float SpawnHeading  = float.NaN;
-        public LHandle Pursuit; 
+        public float SpawnHeading = 0f;
+        public LHandle Pursuit;
+        public LHandle PullOver;
+        public bool PursuitCreated = false;
         public bool GrammarPoliceRunning  = false;
         public bool StopThePedRunning = false;
         public bool UltimateBackupRunning = false;
         public Persona SuspectPersona;
         public Ped PlayerPed = Game.LocalPlayer.Character;
+        public GameFiber CalloutMainFiber;
 
         public override void OnCalloutNotAccepted()
         {
             CalloutRunning = false;
+            PursuitCreated = false;
             if (Suspect.Exists()) Suspect.Delete();
             if (SuspectCar.Exists()) SuspectCar.Delete();
             if (Blip.Exists()) Blip.Delete();
-            if (GrammarPoliceRunning) GrammarPolice.API.Functions.Available(false, false);
+            if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.Available, true, false);
             Functions.PlayScannerAudio("BAR_AI_RESPOND");
             base.OnCalloutNotAccepted();
         }
@@ -43,10 +47,14 @@ namespace BarbarianCall.Callouts
             GrammarPoliceRunning = Initialization.IsLSPDFRPluginRunning("GrammarPolice");
             UltimateBackupRunning = Initialization.IsLSPDFRPluginRunning("UltimateBackup");
             StopThePedRunning = Initialization.IsLSPDFRPluginRunning("StopThePed");
+            CalloutRunning = false;
+            PursuitCreated = false;
+            CalloutStates = ECalloutStates.UnAccepted;
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
-        {           
+        {
+            CalloutStates = ECalloutStates.EnRoute;
             return base.OnCalloutAccepted();
         }
         public override void End()
@@ -60,6 +68,7 @@ namespace BarbarianCall.Callouts
                 if (SuspectCar.Exists()) SuspectCar.Dismiss();
                 if (Blip.Exists()) Blip.Delete();
                 if (GrammarPoliceRunning) GrammarPolice.API.Functions.Available(false, false);
+                if (CalloutMainFiber.IsAlive) CalloutMainFiber.Abort();
             }
             catch (Exception e)
             {

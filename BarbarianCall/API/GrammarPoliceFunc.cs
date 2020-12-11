@@ -11,7 +11,8 @@ namespace BarbarianCall.API
 {
     internal static class GrammarPoliceFunc
     {
-        public static void SetStatus(EGrammarPoliceStatusType statusType, bool displayNotification = false, bool playSound = false)
+        public static void SetStatus(EGrammarPoliceStatusType statusType) => SetStatus(statusType, false, false);
+        public static void SetStatus(EGrammarPoliceStatusType statusType, bool displayNotification, bool playSound )
         {
             switch (statusType)
             {
