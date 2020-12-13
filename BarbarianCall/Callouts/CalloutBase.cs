@@ -21,6 +21,7 @@ namespace BarbarianCall.Callouts
         public bool CalloutRunning = false;
         public Vector3 SpawnPoint = Vector3.Zero;
         public float SpawnHeading = 0f;
+        public long Timer;
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;
@@ -68,7 +69,6 @@ namespace BarbarianCall.Callouts
                 if (SuspectCar.Exists()) SuspectCar.Dismiss();
                 if (Blip.Exists()) Blip.Delete();
                 if (GrammarPoliceRunning) GrammarPolice.API.Functions.Available(false, false);
-                if (CalloutMainFiber.IsAlive) CalloutMainFiber.Abort();
             }
             catch (Exception e)
             {

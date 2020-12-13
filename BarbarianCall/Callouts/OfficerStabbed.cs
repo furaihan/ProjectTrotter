@@ -60,7 +60,7 @@ namespace BarbarianCall.Callouts
             susVehModel.LoadAndWait();
             CalloutPosition = SpawnPoint;
             CalloutMessage = "Officer Stabbed";
-            CalloutAdvisory = $"Suspect vehicle is {susVehModel.Name}";
+            CalloutAdvisory = $"Suspect vehicle is {Game.GetLocalizedString(susVehModel.Name)}";
             uint zoneHash = Rage.Native.NativeFunction.CallByHash<uint>(0x7ee64d51e8498728, SpawnPoint.X, SpawnPoint.Y, SpawnPoint.Z);
             if (UltimateBackupRunning)
             {
@@ -137,7 +137,11 @@ namespace BarbarianCall.Callouts
             Game.SetRelationshipBetweenRelationshipGroups("CRIMINAL", "COP", Relationship.Hate);
             Game.SetRelationshipBetweenRelationshipGroups("COP", "CRIMINAL", Relationship.Hate);
             Game.SetRelationshipBetweenRelationshipGroups("CRIMINAL", "PLAYER", Relationship.Hate);
-            Proses3();
+            if (Initialization.IsLSPDFRPluginRunning("BetterEMS"))
+            {
+                API.BetterEMSFunc.SetPedDeathDetails(officer, injuredBodyParts.GetRandomElement(), "Stabbed with a knife", Game.GameTime, 0.8f);
+            }
+            Proses4();
             return base.OnCalloutAccepted();
         }
         public override void Process()
@@ -173,7 +177,7 @@ namespace BarbarianCall.Callouts
                 if ((SuspectState == ESuspectStates.Arrested || SuspectState == ESuspectStates.Dead || SuspectState == ESuspectStates.Escaped) && 
                     (PassengerState == ESuspectStates.Escaped || PassengerState == ESuspectStates.Dead || PassengerState == ESuspectStates.Arrested))
                 {
-                    Game.DisplayNotification($"We Are ~g~Code 4~s~ suspect is {SuspectState} and passenger is {PassengerState}");
+                    Game.DisplayNotification($"We Are ~g~Code 4~s~ suspect is ~o~{SuspectState}~s~ and passenger is ~o~{PassengerState}");
                     CalloutStates = ECalloutStates.Finish;
                     GameFiber.StartNew(DisplayCodeFourMessage);
                 }
@@ -286,8 +290,7 @@ namespace BarbarianCall.Callouts
                     "We have send an ambulance to your location".DisplayNotifWithLogo("Officer Stabbed");
                     if (Initialization.IsLSPDFRPluginRunning("BetterEMS"))
                     {
-                        API.BetterEMSFunc.SetPedDeathDetails(officer, injuredBodyParts.GetRandomElement(), "Stabbed with a knife", deathTime, 0.8f);
-                        API.BetterEMSFunc.RequestAmbulancePickup(officer);
+                        API.BetterEMSFunc.CallAmbulance(SpawnPoint);
                     }
                     else if (UltimateBackupRunning) API.UBFunc.CallUnit(API.UBFunc.EUltimateBackupResponseType.Ambulance);
                     else Functions.RequestBackup(officer.Position, LSPD_First_Response.EBackupResponseType.Code3, LSPD_First_Response.EBackupUnitType.Ambulance);
@@ -418,6 +421,7 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.PlayAnimation("amb@medic@standing@tendtodead@idle_a", tendToDeadIdles.GetRandomElement(), 2.0f, AnimationFlags.Loop);
                     Suspect.PlayAmbientSpeech(null, Speech.GENERIC_SHOCKED_HIGH, 0, SpeechModifier.ForceShouted);
                     Game.DisplayHelp($"~y~Approach the suspect and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
+                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     List<string> conv = new List<string>()
                     {
                         "~r~Suspect~s~: " + proses2Sorry.GetRandomElement(),
@@ -427,6 +431,11 @@ namespace BarbarianCall.Callouts
                     };
                     while (CalloutRunning)
                     {
+                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 10000L)
+                        {
+                            Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            Game.DisplayHelp($"~y~Approach the suspect and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
+                        }
                         if (Game.IsKeyDown(System.Windows.Forms.Keys.Y))
                         {
                             if (PlayerPed.DistanceTo(Suspect) < 15f) break;
@@ -563,9 +572,16 @@ namespace BarbarianCall.Callouts
                     officer.Kill();
                     GetClose();
                     Suspect.Tasks.CruiseWithVehicle(20f, VehicleDrivingFlags.Emergency);
+                    
                     Game.DisplayHelp($"~y~Get ~o~closer~y~ to the ~g~paramedic~y~ and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ ~y~to talk");
+                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     while (CalloutRunning)
                     {
+                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 10000L)
+                        {
+                            Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            Game.DisplayHelp($"~y~Get ~o~closer~y~ to the ~g~paramedic~y~ and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ ~y~to talk", false);
+                        }
                         if (Game.IsKeyDown(System.Windows.Forms.Keys.Y))
                         {
                             if (PlayerPed.DistanceTo(AmbulancePed1) < 6f)
@@ -697,13 +713,7 @@ namespace BarbarianCall.Callouts
             GameFiber.StartNew(() =>
             {
                 try
-                {
-                    Suspect.DisplayNotificationsWithPedHeadshot("~y~Driver Details", $"~y~Name~s~: {DriverPersona.FullName}~n~" +
-                        $"~y~BirthDay~s~: {DriverPersona.Birthday}");
-                    passenger.DisplayNotificationsWithPedHeadshot("~y~Passenger Details", $"~y~Name~s~: {PassengerPersona.FullName}~n~" +
-                        $"~y~BirthDay~s~: {PassengerPersona.Birthday}");
-                    $"~y~Model~s~: {Game.GetLocalizedString(SuspectCar.Model.Name)}~n~~y~Color~s~: {susVehColor}~n~~y~License Plate~s~: {SuspectCar.LicensePlate}".DisplayNotifWithLogo("Vehicle Details");
-                    CalloutRunning = true;
+                {                   
                     offVeh.Position = SpawnPoint;
                     offVeh.Heading = SpawnHeading;
                     if (!passenger.Exists())
@@ -723,6 +733,13 @@ namespace BarbarianCall.Callouts
                     officer.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut).WaitForCompletion(500);
                     officer.Position = offVeh.GetOffsetPosition(Vector3.RelativeLeft * 2f);
                     officer.Kill();
+                    Suspect.DisplayNotificationsWithPedHeadshot("~y~Driver Details", $"~y~Name~s~: {DriverPersona.FullName}~n~" +
+                        $"~y~BirthDay~s~: {DriverPersona.Birthday}");
+                    GameFiber.Wait(2500);
+                    passenger.DisplayNotificationsWithPedHeadshot("~y~Passenger Details", $"~y~Name~s~: {PassengerPersona.FullName}~n~" +
+                        $"~y~BirthDay~s~: {PassengerPersona.Birthday}");
+                    $"~y~Model~s~: {Game.GetLocalizedString(SuspectCar.Model.Name)}~n~~y~Color~s~: {susVehColor}~n~~y~License Plate~s~: {SuspectCar.LicensePlate}".DisplayNotifWithLogo("Vehicle Details");
+                    CalloutRunning = true;
                     GetClose();
                     if (Suspect.IsInVehicle(SuspectCar, false)) Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.None);
                     if (passenger.IsInVehicle(SuspectCar, false)) passenger.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion();
