@@ -2,6 +2,7 @@
 using Rage;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -36,11 +37,10 @@ namespace BarbarianCall
             {
                 GameFiber.Wait(5600);
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
-                foreach (Assembly assembly in Functions.GetAllUserPlugins())
-                {
-                    $"Detected {assembly.GetName().Name} is running".ToLog();
-                }
                 CheckPluginRunning();
+                $"RAGENativeUi in installed: {IsRageNativeUIInstalled()}".ToLog();
+                "Prepering to create pause menu".ToLog();
+                Menus.PauseMenu.CreatePauseMenu();
             });
         }
         public static bool IsLSPDFRPluginRunning(string Plugin)
@@ -66,14 +66,9 @@ namespace BarbarianCall
         }
         private static void CheckPluginRunning()
         {
-            string[] plugins = { "GrammarPolice", "UltimateBackup", "StopThePed", "BetterEMS" };
-            foreach (string plug in plugins)
-            {
-                var assem = Functions.GetAllUserPlugins();
-                string[] semName = (from x in assem select x.GetName().Name.ToLower()).ToArray();
-                if (semName.Contains(plug.ToLower())) $"{plug} is installed".ToLog();
-                else $"{plug} is not installed".ToLog();
-            }
+            System.Globalization.CultureInfo.CurrentCulture.ToString().ToLog();
+            TimeZoneInfo.Local.StandardName.ToLog();
         }
+        internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");
     }
 }

@@ -9,6 +9,7 @@ using LSPD_First_Response.Mod.API;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using System.Drawing;
 using BarbarianCall.Types;
+using RAGENativeUI.Elements;
 
 namespace BarbarianCall.Callouts
 {
@@ -20,14 +21,13 @@ namespace BarbarianCall.Callouts
         private Vehicle offVeh;
         private Model susVehModel;
         private Persona DriverPersona;
-        private Persona PassengerPersona;
         private string susVehColor;
         private ESuspectStates SuspectState;
         private ESuspectStates PassengerState;
+        private WeaponDescriptor passengerWeapon;
 
         private readonly string[] CityCarModels = new string[] { "POLICE", "POLICE2", "POLICE3", "POLICE4" };
         private readonly string[] CountrysideCarModels = new string[] { "SHERIFF", "SHERIFF2" };
-        private readonly string path = @"Plugins/LSPDFR/BarbarianCall/OfficerStabbed/";
 
         private Ped AmbulancePed1;
         private Ped AmbulancePed2;
@@ -38,15 +38,15 @@ namespace BarbarianCall.Callouts
         private Rage.Object Notepad;
 
         private static readonly string[] tendToDeadIdles = { "idle_a", "idle_b", "idle_c" };
-        private static readonly string[] injuredBodyParts = { "Belly", "Right Arm", "Left Arm", PedBoneId.LeftThigh.ToString(), PedBoneId.RightThigh.ToString(), "Left Calf", "Right Calf" };
-        private static readonly uint[] weapons = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A };
+        private static readonly string[] injuredBodyParts = { "Belly", "Right Arm", "Left Arm", "Left Thigh", "Right Thigh", "Left Calf", "Right Calf" };
 
         public override bool OnBeforeCalloutDisplayed()
         {
+            Path = @"Plugins/LSPDFR/BarbarianCall/OfficerStabbed/";
             PursuitCreated = false;
             CalloutRunning = false;
             
-            DivisiXml.Deserialization.GetDataFromXml(path + "Locations.xml", out List<Vector3> locationToSelect, out List<float> headingToSelect);
+            DivisiXml.Deserialization.GetDataFromXml(Path + "Locations.xml", out List<Vector3> locationToSelect, out List<float> headingToSelect);
             Peralatan.SelectNearbyLocationsWithHeading(locationToSelect, headingToSelect, out SpawnPoint, out SpawnHeading);
             if (SpawnPoint == Vector3.Zero || SpawnHeading == 0f)
             {
@@ -121,6 +121,7 @@ namespace BarbarianCall.Callouts
             Suspect.RelationshipGroup = new RelationshipGroup("CRIMINAL");
             Suspect.SetPedAsWanted();
             Suspect.MaxHealth = 500;
+            Suspect.Inventory.GiveNewWeapon(WeaponHash.Knife, -1, false);
             DriverPersona = Functions.GetPersonaForPed(Suspect);
             if (MathHelper.GetRandomInteger(1, 10) > 7)
             {
@@ -131,8 +132,14 @@ namespace BarbarianCall.Callouts
                 passenger.RelationshipGroup = Suspect.RelationshipGroup;
                 passenger.MaxHealth = 2500;
                 passenger.SetPedAsWanted();
-                PassengerPersona = Functions.GetPersonaForPed(passenger);
+                GameFiber.Wait(10);
+                if (Peralatan.Random.Next(8740) % 5 == 0)
+                {
+                    passengerWeapon = passenger.Inventory.GiveNewWeapon(0xDBBD7280, -1, false);
+                }
             }
+            SuspectState = ESuspectStates.InAction;
+            PassengerState = ESuspectStates.InAction;
             Functions.AddPedContraband(Suspect, ContrabandType.Weapon, "Knife");
             Game.SetRelationshipBetweenRelationshipGroups("CRIMINAL", "COP", Relationship.Hate);
             Game.SetRelationshipBetweenRelationshipGroups("COP", "CRIMINAL", Relationship.Hate);
@@ -141,32 +148,37 @@ namespace BarbarianCall.Callouts
             {
                 API.BetterEMSFunc.SetPedDeathDetails(officer, injuredBodyParts.GetRandomElement(), "Stabbed with a knife", Game.GameTime, 0.8f);
             }
-            Proses4();
+            var scenario = Peralatan.Random.Next(1, 4000);
+            $"Callout Scenario: {scenario}".ToLog();
+            if (scenario <= 1000) Proses();
+            else if (scenario <= 2000) Proses2();
+            else if (scenario <= 3000) Proses3();
+            else if (scenario <= 4000) Proses4();
+            else Proses();
             return base.OnCalloutAccepted();
         }
         public override void Process()
         {
             if (Game.IsKeyDown(System.Windows.Forms.Keys.End))
             {
-                Game.DisplayNotification("Callout force ended");
                 GameFiber.StartNew(End);
             }
-            if (Functions.IsPedArrested(Suspect)) { Game.DisplayNotification("Suspect Is ~g~Arrested"); SuspectState = ESuspectStates.Arrested; }
-            else if (Suspect.IsDead) { Game.DisplayNotification("Suspect is ~r~Deceased"); SuspectState = ESuspectStates.Dead; }
-            else if (PursuitCreated && !Suspect.Exists()) { Game.DisplayNotification("Suspect is ~o~escaped"); SuspectState = ESuspectStates.Escaped; }
+            if (Functions.IsPedArrested(Suspect) && SuspectState != ESuspectStates.Arrested) { Game.DisplayNotification("Suspect Is ~g~Arrested"); SuspectState = ESuspectStates.Arrested; }
+            else if (Suspect.IsDead && SuspectState != ESuspectStates.Dead) { Game.DisplayNotification("Suspect is ~r~Deceased"); SuspectState = ESuspectStates.Dead; }
+            else if (PursuitCreated && !Suspect.Exists() && SuspectState != ESuspectStates.Escaped) { Game.DisplayNotification("Suspect is ~o~escaped"); SuspectState = ESuspectStates.Escaped; }
             if (passenger.Exists())
             {
-                if (Functions.IsPedArrested(Suspect))
+                if (Functions.IsPedArrested(passenger) && PassengerState != ESuspectStates.Arrested)
                 {
                     Game.DisplayNotification("Passenger is ~g~arrested");
                     PassengerState = ESuspectStates.Arrested;
                 }
-                else if (passenger.IsDead)
+                else if (passenger.IsDead && PassengerState != ESuspectStates.Dead)
                 {
                     Game.DisplayNotification("Passenger is ~r~deceased");
                     PassengerState = ESuspectStates.Dead;
                 }
-                else if (PursuitCreated && !passenger.Exists())
+                else if (PursuitCreated && !passenger.Exists() && PassengerState != ESuspectStates.Escaped)
                 {
                     Game.DisplayNotification("Passenger is ~o~escaped");
                     PassengerState = ESuspectStates.Escaped;
@@ -244,7 +256,7 @@ namespace BarbarianCall.Callouts
                     Ambulance.Occupants.ToList().ForEach(p => p.Dismiss());
                     Ambulance.Dismiss();
                 }
-            });          
+            });
             base.End();
         }
         private void DisplayCodeFourMessage()
@@ -260,11 +272,16 @@ namespace BarbarianCall.Callouts
             {
                 GameFiber.Yield();
                 counter++;
-                if (Game.LocalPlayer.Character.DistanceTo(officer) < 45f)
+                if (officer.Exists() && Game.LocalPlayer.Character.DistanceTo(officer) < 45f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                     break;
-                }          
+                }
+                else if (!officer.Exists())
+                {
+                    "Officer Stabbed callout crash or force ended too early".DisplayNotifWithLogo("~y~Officer Stabbed");
+                    GameFiber.StartNew(End);
+                }
             }
             if (Blip.Exists())
             {
@@ -305,7 +322,8 @@ namespace BarbarianCall.Callouts
                     GameFiber.Sleep(Peralatan.Random.Next(8000, 10000));
                     Game.HideHelp();
                     Game.DisplaySubtitle("~g~Dispatch~s~: the Ambulance will handle the officer you can go and chase the suspect");
-                    Suspect.DisplayNotificationsWithPedHeadshot("Suspect Details", $"~y~Name~s~: {DriverPersona.FullName}~n~Suspect is driving a ~y~{susVehColor} {SuspectCar.Model.Name.ToUpper()}~s~ in " +
+                    Suspect.DisplayNotificationsWithPedHeadshot("Suspect Details", $"~y~Name~s~: {DriverPersona.FullName}~n~~y~Vehicle Color:~s~{susVehColor}~n~~y~Vehicle Model~s~:" +
+                        $"{SuspectCar.Model.Name.ToUpper()}~s~~n~~y~Last Seen~s~:" +
                         $"~g~{Suspect.Position.GetZoneName()}~s~~n~~y~License Plate~s~: {SuspectCar.LicensePlate}");
                     Suspect.Tasks.CruiseWithVehicle(18f, VehicleDrivingFlags.AllowMedianCrossing | VehicleDrivingFlags.DriveAroundPeds |
                 VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundVehicles);
@@ -315,21 +333,21 @@ namespace BarbarianCall.Callouts
                     Blip.Color = Color.Yellow;
                     Blip.EnableRoute(Color.Yellow);
                     var currSusPos = Suspect.Position;
-                    int updateCount = 0;
+                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     while (CalloutRunning)
                     {
                         Suspect.Health = Suspect.MaxHealth;
                         if (passenger.Exists()) passenger.Health = passenger.MaxHealth;
                         if (Suspect.DistanceTo(currSusPos) > 80f)
                         {
-                            updateCount++;
                             currSusPos = Suspect.Position;
                             if (Blip.Exists()) Blip.Delete();
                             Blip = new Blip(currSusPos.Around2D(10f), 80f);
                             Blip.Color = Color.Yellow;
                             Blip.EnableRoute(Color.Yellow);
-                            if (updateCount % 5 == 0)
+                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 15000L)
                             {
+                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                                 Functions.PlayScannerAudioUsingPosition($"SUSPECT_HEADING {Suspect.GetCardinalDirectionLowDetailedAudio()} IN_OR_ON_POSITION", currSusPos);
                                 Suspect.DisplayNotificationsWithPedHeadshot("Suspect Details", $"~y~Name~s~: {DriverPersona.FullName}~n~Suspect is driving a ~y~{susVehColor} {SuspectCar.Model.Name.ToUpper()}~s~~n~" +
                                     $"Suspect Location: ~g~{Suspect.Position.GetZoneName()}~s~ Near ~g~{World.GetStreetName(Suspect.Position)}~n~~y~License Plate~s~: {SuspectCar.LicensePlate}");
@@ -353,12 +371,16 @@ namespace BarbarianCall.Callouts
                             }
                             else
                             {
-                                Game.DisplayHelp("~y~Perform a pullover on a ~r~suspect", 8500);
+                                Game.DisplayHelp("Suspect Found, ~y~Perform pullover on a ~r~suspect", 8500);
                             }
                             break;
                         }
                         GameFiber.Yield();
                     }
+                    if (Blip.Exists()) Blip.Delete();
+                    Blip = Suspect.AttachBlip();
+                    Blip.Color = Color.Red;
+                    Blip.IsFriendly = false;
                     if (PursuitCreated)
                     {
                         if (GrammarPoliceRunning) GrammarPolice.API.Functions.InPursit(true, true);
@@ -372,8 +394,22 @@ namespace BarbarianCall.Callouts
                     }
                     else
                     {
-                        GameFiber.SleepUntil(() => Functions.IsPlayerPerformingPullover(), -1);
-                        Peralatan.DisplayNotifWithLogo("~r~Arrest the suspect", "~r~Officer Stabbed");
+                        Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                        while (CalloutRunning)
+                        {
+                            if (Functions.IsPlayerPerformingPullover())
+                            {
+                                PullOver = Functions.GetCurrentPullover();
+                                if (Functions.GetPulloverSuspect(PullOver) == Suspect)
+                                    break;
+                            }
+                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000L)
+                            {
+                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                                Game.DisplayHelp("Suspect found. ~y~Perform pullover on a ~r~suspect ~s~and then~r~bring the suspect to jail~s~, ~g~please be careful~s~, suspect may armed with ~o~weapon", 8500);
+                            }
+                            GameFiber.Yield();
+                        }
                     }
                 } catch (Exception e)
                 {
@@ -479,7 +515,7 @@ namespace BarbarianCall.Callouts
                         Suspect.Health = Suspect.MaxHealth;
                         $"Health scenario {Suspect.MaxHealth}".ToLog();
                         Suspect.Armor = 500;
-                        Suspect.Inventory.GiveNewWeapon(new WeaponAsset(weapons.GetRandomElement()), -1, true);
+                        Suspect.Inventory.GiveNewWeapon(new WeaponAsset(WeaponHashes.GetRandomElement()), -1, true);
                         Suspect.Tasks.FightAgainst(PlayerPed);
                     } else
                     {
@@ -626,22 +662,22 @@ namespace BarbarianCall.Callouts
                     Suspect.DisplayNotificationsWithPedHeadshot("Suspect Details", $"~y~Name~s~: {DriverPersona.FullName}~n~Suspect is driving a ~y~{susVehColor} {SuspectCar.Model.Name.ToUpper()}~s~ in " +
                         $"~g~{Suspect.Position.GetZoneName()}~s~~n~~y~License Plate~s~: {SuspectCar.LicensePlate}");
                     Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS SUSPECT_LAST_SEEN IN_OR_ON_POSITION", Suspect.Position);
-                    int updateCount = 0;
                     var currSusPos = Suspect.Position;
+                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     while (CalloutRunning)
                     {
                         Suspect.Health = Suspect.MaxHealth;
                         if (passenger.Exists()) passenger.Health = passenger.MaxHealth;
                         if (Suspect.DistanceTo(currSusPos) > 80f)
                         {
-                            updateCount++;
                             currSusPos = Suspect.Position;
                             if (Blip.Exists()) Blip.Delete();
                             Blip = new Blip(currSusPos.Around2D(10f), 80f);
                             Blip.Color = Color.Yellow;
                             Blip.EnableRoute(Color.Yellow);
-                            if (updateCount % 5 == 0)
+                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000L)
                             {
+                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                                 Functions.PlayScannerAudioUsingPosition($"SUSPECT_HEADING {Suspect.GetCardinalDirectionLowDetailedAudio()} IN_OR_ON_POSITION", currSusPos);
                                 Suspect.DisplayNotificationsWithPedHeadshot("Suspect Details", $"~y~Name~s~: {DriverPersona.FullName}~n~Suspect is driving a ~y~{susVehColor} {SuspectCar.Model.Name.ToUpper()}~s~~n~" +
                                     $"Suspect Location: ~g~{Suspect.Position.GetZoneName()}~s~ Near ~g~{World.GetStreetName(Suspect.Position)}~n~~y~License Plate~s~: {SuspectCar.LicensePlate}");
@@ -666,7 +702,7 @@ namespace BarbarianCall.Callouts
                             }
                             else
                             {
-                                Game.DisplayHelp("Suspect found. ~y~Perform a pullover on a ~r~suspect ~y~ and handle the situation as you see fit", 8500);
+                                Game.DisplayHelp("Suspect found. ~y~Perform a pullover on a ~r~suspect ~y~ and arrest the suspect", 8500);
                             }
                             break;
                         }
@@ -686,6 +722,7 @@ namespace BarbarianCall.Callouts
                     }
                     else
                     {
+                        Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         while (CalloutRunning)
                         {
                             if (Functions.IsPlayerPerformingPullover())
@@ -694,9 +731,14 @@ namespace BarbarianCall.Callouts
                                 if (Functions.GetPulloverSuspect(PullOver) == Suspect)
                                 break;
                             }
+                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000L)
+                            {
+                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                                Game.DisplayHelp("Suspect found. ~y~Perform a pullover on a ~r~suspect ~s~and then handcuff the suspect, ~g~please be careful~s~, suspect may armed with ~o~weapon", 8500);
+                            }
                             GameFiber.Yield();
                         }
-                        Peralatan.DisplayNotifWithLogo("~r~Arrest the suspect", "~y~Officer Stabbed");
+                        "Pullover detected, waiting to for player to arrest the suspect".ToLog();
                     }
                 }
                 catch (Exception e)
@@ -723,7 +765,6 @@ namespace BarbarianCall.Callouts
                         passenger.SetPedAsWanted();
                         passenger.RelationshipGroup = Suspect.RelationshipGroup;
                         passenger.WarpIntoVehicle(SuspectCar, 0);
-                        PassengerPersona = Functions.GetPersonaForPed(passenger);
                         passenger.MaxHealth = 2500;
                         passenger.Armor = 500;
                     }
@@ -734,18 +775,16 @@ namespace BarbarianCall.Callouts
                     officer.Position = offVeh.GetOffsetPosition(Vector3.RelativeLeft * 2f);
                     officer.Kill();
                     Suspect.DisplayNotificationsWithPedHeadshot("~y~Driver Details", $"~y~Name~s~: {DriverPersona.FullName}~n~" +
-                        $"~y~BirthDay~s~: {DriverPersona.Birthday}");
-                    GameFiber.Wait(2500);
-                    passenger.DisplayNotificationsWithPedHeadshot("~y~Passenger Details", $"~y~Name~s~: {PassengerPersona.FullName}~n~" +
-                        $"~y~BirthDay~s~: {PassengerPersona.Birthday}");
-                    $"~y~Model~s~: {Game.GetLocalizedString(SuspectCar.Model.Name)}~n~~y~Color~s~: {susVehColor}~n~~y~License Plate~s~: {SuspectCar.LicensePlate}".DisplayNotifWithLogo("Vehicle Details");
+                        $"~y~BirthDay~s~: {DriverPersona.Birthday.ToShortDateString()}");                    
+                    $"~y~Model~s~: {SuspectCar.Class} {Game.GetLocalizedString(SuspectCar.Model.Name)}~n~~y~Color~s~: {susVehColor}~n~~y~License Plate~s~: {SuspectCar.LicensePlate}".DisplayNotifWithLogo("Vehicle Details");
                     CalloutRunning = true;
                     GetClose();
                     if (Suspect.IsInVehicle(SuspectCar, false)) Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.None);
                     if (passenger.IsInVehicle(SuspectCar, false)) passenger.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion();
-                    Suspect.Inventory.GiveNewWeapon(new WeaponAsset(weapons.GetRandomElement()), -1, true);
+                    Suspect.Inventory.GiveNewWeapon(new WeaponAsset(WeaponHashes.GetRandomElement()), -1, true);
                     GameFiber.Wait(75);
-                    passenger.Inventory.GiveNewWeapon(new WeaponAsset(weapons.GetRandomElement()), -1, true);
+                    if (passengerWeapon != null && passenger.Inventory.Weapons.Contains(passengerWeapon)) passenger.Inventory.EquippedWeapon = passengerWeapon;
+                    else passenger.Inventory.GiveNewWeapon(new WeaponAsset(WeaponHashes.GetRandomElement()), -1, true);
                     Suspect.Tasks.FightAgainst(PlayerPed);
                     passenger.Tasks.FightAgainst(PlayerPed);
                     GameFiber.Wait(2000);
@@ -759,6 +798,19 @@ namespace BarbarianCall.Callouts
                     "Officer Stabbed callout crashed, please send your log".DisplayNotifWithLogo("Officer Stabbed");
                 }
             });
+        }
+        internal static UIMenuNumericScrollerItem<float> minimumDistance;
+        internal static UIMenuNumericScrollerItem<float> maximumDistance;
+        internal List<UIMenuItem> CreateMenu()
+        {
+            Path = @"Plugins/LSPDFR/BarbarianCall/OfficerStabbed/";
+            minimumDistance = new UIMenuNumericScrollerItem<float>("Minimum Distance", "Set the callout minimum distance", 100f, 500f, 25f);
+            maximumDistance = new UIMenuNumericScrollerItem<float>("Maximum Distance", "set the callout maximus distance", 500f, 1650f, 50f);
+            List<UIMenuItem> ret = new List<UIMenuItem>()
+            {
+                minimumDistance, maximumDistance
+            };
+            return ret;
         }
     }
 }

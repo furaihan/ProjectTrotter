@@ -32,6 +32,7 @@ namespace BarbarianCall.API
         public static bool IsPedAlcoholOverLimit(Rage.Ped ped) => Functions.isPedAlcoholOverLimit(ped);
         public static void RequestPedCheck(bool playingRadio) => Functions.requestDispatchPedCheck(playingRadio);
         public static void RequestVehicleCheck(bool playingRadio) => Functions.requestDispatchVehiclePlateCheck(playingRadio);
+        public static bool IsPedStoppedWithSTP(Rage.Ped ped) => Functions.isPedStopped(ped);
         public enum EStopThePedUnitServices
         {
             Insurance,

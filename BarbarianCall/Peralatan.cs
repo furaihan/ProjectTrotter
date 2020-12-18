@@ -38,13 +38,13 @@ namespace BarbarianCall
                 }
                 if (locsToSelect.Count > 0)
                 {
-                    sp = locsToSelect[MathHelper.GetRandomInteger(0, locsToSelect.Count - 1)];
+                    sp = locsToSelect.GetRandomElement(true);
                 }
                 else
                 {
                     foreach (Vector3 l in listLoc)
                     {
-                        if (l.DistanceTo(playerPos) < 1500f && l.DistanceTo(playerPos) > 250f)
+                        if (l.DistanceTo(playerPos) < 1200f && l.DistanceTo(playerPos) > 250f)
                         {
                             if (l.TravelDistanceTo(playerPos) > 3000) continue;
                             sp = l;
@@ -84,21 +84,41 @@ namespace BarbarianCall
                 else if (count == 8) metu = metu + "BAR_" + c.ToString().ToUpper() + "_LOW";
                 else metu = metu + "BAR_" + c.ToString().ToUpper() + " ";
             }
+            Game.Console.Print(metu);
             return metu;
+        }
+        internal static string GetColorAudio(Color color)
+        {
+            ToLog("Trying to get color audio");
+            var audibleArgb = (from x in CommonVariables.AudibleColor select x.ToArgb()).ToArray();
+            Color selected;
+            if (audibleArgb.Contains(color.ToArgb()))
+            {
+                ToLog("Color match, converting to scanner audio");
+                selected = CommonVariables.AudibleColor[audibleArgb.ToList().IndexOf(color.ToArgb())];
+                var ret = "COLOR_" + selected.Name.AddSpacesToSentence().Replace(" ", "_").ToUpper();
+                ret.ToLog();
+                return ret;
+            }
+            ToLog($"Color not match {color.ToArgb()}");
+            return string.Empty;
         }
         internal static void RandomiseLicencePlate(this Vehicle vehicle)
         {
             if (vehicle.Exists())
             {
-                vehicle.LicensePlate = MathHelper.GetRandomInteger(9).ToString() +
-                                       MathHelper.GetRandomInteger(9).ToString() +
-                                       Convert.ToChar(MathHelper.GetRandomInteger(0, 25) + 65) +
-                                       Convert.ToChar(MathHelper.GetRandomInteger(0, 25) + 65) +
-                                       Convert.ToChar(MathHelper.GetRandomInteger(0, 25) + 65) +
-                                       MathHelper.GetRandomInteger(9).ToString() +
-                                       MathHelper.GetRandomInteger(9).ToString() +
-                                       MathHelper.GetRandomInteger(9).ToString();
+                vehicle.LicensePlate = 
+                                    Random.Next(9).ToString() +
+                                    Random.Next(9).ToString() +
+                                    Convert.ToChar(Random.Next(0, 25) + 65) +
+                                    Convert.ToChar(Random.Next(0, 25) + 65) +
+                                    Convert.ToChar(Random.Next(0, 25) + 65) +
+                                    Random.Next(9).ToString() +
+                                    Random.Next(9).ToString() +
+                                    Random.Next(9).ToString();
                 ToLog($"{vehicle.PrimaryColor.Name} {Game.GetLocalizedString(vehicle.Model.Name)} license plate changed to {vehicle.LicensePlate}");
+                ToLog($"{GetColorAudio(vehicle.PrimaryColor)}");
+                Game.Console.Print($"{vehicle.GetVehicleDisplayName()}");
                 GameFiber.Sleep(1);
             }
         }
@@ -107,6 +127,7 @@ namespace BarbarianCall
             string gameName = NativeFunction.Natives.GET_NAME_OF_ZONE<string>(pos.X, pos.Y, pos.Z);
             return Game.GetLocalizedString(gameName);
         }
+        internal static string GetVehicleDisplayName(this Vehicle veh) => NativeFunction.Natives.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL<string>(veh.Model.Hash);
         public static string GetCardinalDirectionLowDetailedAudio(this Entity e)
         {
             float degrees = e.Heading;
@@ -138,6 +159,7 @@ namespace BarbarianCall
             });
             if (talker.Exists() && !talker.IsInAnyVehicle(false))
             {
+                talker.Tasks.AchieveHeading(GetHeadingTowards(talker, playerPos));
                 talker.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 1f, AnimationFlags.Loop | AnimationFlags.SecondaryTask);
             }
             for (int i = 0; i < Dialogue.Count; i++)
@@ -147,9 +169,7 @@ namespace BarbarianCall
                     GameFiber.Yield();
                     if (Game.IsKeyDown(Keys.Y)) break;
                 }
-                var dir = Game.LocalPlayer.Character.Position - talker.Position;
-                dir.Normalize();
-                talker.Tasks.AchieveHeading(MathHelper.ConvertDirectionToHeading(dir));
+                talker.Tasks.AchieveHeading(talker.GetHeadingTowards(Game.LocalPlayer.Character));
                 Game.DisplaySubtitle(Dialogue[i], 10000);
                 if (!Speaking) break;
             }
@@ -201,6 +221,16 @@ namespace BarbarianCall
         internal static string FormatKeyBinding(Keys modifierKey, Keys key)
             => modifierKey == Keys.None ? $"~{key.GetInstructionalId()}~" :
                                           $"~{modifierKey.GetInstructionalId()}~ ~+~ ~{key.GetInstructionalId()}~";
+        internal static bool CheckKey(Keys modifierKey, Keys key)
+        {
+            bool keyboardInputCheck = NativeFunction.CallByHash<int>(0x0CF2B696BBF945AE) == 0;
+            if (!keyboardInputCheck)
+            {
+                if (Game.IsKeyDown(key) && modifierKey == Keys.None) return true;
+                if (Game.IsKeyDownRightNow(modifierKey) && Game.IsKeyDown(key)) return true;
+            }
+            return false;
+        }
         internal static Model GetRandomModel(this IEnumerable<string> list)
         {
             var list1 = list.ToList();
@@ -306,40 +336,6 @@ namespace BarbarianCall
         {
             return GetHeadingTowards(position, towards.Position);
         }
-
-        internal static string GetPedHeadshotTxd(this Ped ped)
-        {
-            try
-            {
-                unsafe
-                {
-                    string ret;
-                    uint handle = (uint)NativeFunction.CallByHash<uint>(0x953563ce563143af, ped);
-                    int count = 0;
-                    while (!NativeFunction.Natives.IS_PEDHEADSHOT_READY<bool>(handle) && !NativeFunction.Natives.IS_PEDHEADSHOT_VALID<bool>(handle))
-                    {
-                        count++;
-                        GameFiber.Yield();
-                        if (count >= 40) break;
-                    }
-                    if (NativeFunction.Natives.IS_PEDHEADSHOT_READY<bool>(handle) && NativeFunction.Natives.IS_PEDHEADSHOT_VALID<bool>(handle))
-                    {
-                        ret = NativeFunction.Natives.GET_PEDHEADSHOT_TXD_STRING<string>(handle);
-                        return ret;
-                    }
-                    else
-                    {
-                        $"{handle} Mugshot is invalid".ToLog();
-                        return "WEB_LOSSANTOSPOLICEDEPT";
-                    }
-                }
-            } catch (Exception e)
-            {
-                "Failed to get mugshot of the ped".ToLog();
-                e.Message.ToLog();
-                return "WEB_LOSSANTOSPOLICEDEPT";
-            }
-        }
         internal static void DisplayNotificationsWithPedHeadshot(this Ped ped, string subtitle, string text, string title = "Barbarian Call")
         {
             GameFiber.StartNew(() =>
@@ -362,6 +358,31 @@ namespace BarbarianCall
                     e.Message.ToLog();
                 }
             });
+        }
+        internal static string GetPedHeadshotTexture(this Ped ped, out uint? Handle, string failedReturn = "WEB_LOSSANTOSPOLICEDEPT")
+        {
+            try
+            {
+                uint headshotHandle = NativeFunction.Natives.x953563CE563143AF<uint>(ped); //RegisterPedHeadshotTransparent
+                int startTime = Environment.TickCount;
+                GameFiber.WaitUntil(() => NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle), 10000);
+                string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
+                Handle = headshotHandle;
+                return txd;
+            }
+            catch (Exception)
+            {
+                "Get ped headshot failed".ToLog();
+            }
+            Handle = null;
+            return failedReturn;
+        }
+        internal static void UnregisterPedHeadshot(this uint? handle)
+        {
+            if (handle.HasValue)
+            {
+                NativeFunction.Natives.UnregisterPedheadshot<uint>(handle.Value);
+            }
         }
         internal static int GetGameSecond() => NativeFunction.Natives.x494E97C2EF27C470<int>();
 
@@ -429,10 +450,21 @@ namespace BarbarianCall
             }
             return l;
         }
-        internal static void PlaceWaypoint(this Vector3 pos) => PlaceWaypoint(new Vector2(pos.X, pos.Y));
-        internal static void PlaceWaypoint(this Vector2 pos) => NativeFunction.Natives.SET_NEW_WAYPOINT(pos.X, pos.Y);
-        internal static void RemoveWaypoint() => NativeFunction.Natives.SET_WAYPOINT_OFF();
-        internal static void SetPedAsWanted(this Ped ped)
+        internal static string AddSpacesToSentence(this string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return "";
+            StringBuilder newText = new StringBuilder(text.Length * 2);
+            newText.Append(text[0]);
+            for (int i = 1; i < text.Length; i++)
+            {
+                if (char.IsUpper(text[i]) && text[i - 1] != ' ')
+                    newText.Append(' ');
+                newText.Append(text[i]);
+            }
+            return newText.ToString();
+        }
+        internal static void SetPedAsWanted(this Ped ped, out Persona newPersona)
         {
             Persona pedPersona = Functions.GetPersonaForPed(ped);
             Persona newWantedPersona = new Persona(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
@@ -443,8 +475,12 @@ namespace BarbarianCall
                 TimesStopped = pedPersona.TimesStopped,
                 RuntimeInfo = pedPersona.RuntimeInfo
             };
+            newPersona = newWantedPersona;
             Functions.SetPersonaForPed(ped, newWantedPersona);
+            $"Setting ped {ped.Model.Name} {newWantedPersona.FullName} as wanted".ToLog();
+            return;
         }
+        internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);
         internal static bool GetClosestVehicleNodeWithheading(Vector3 pos, out Vector3 outpos, out float heading) => NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out outpos, out heading, 0, 3, 0);
         internal static bool GetRoadSidePointWithHeading(this Vector3 pos, out Vector3 outPos,out float outHeading)
         {
@@ -452,15 +488,18 @@ namespace BarbarianCall
             outHeading = float.NaN;
             try
             {
-                if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0)) //GetNTHClosestVehicleNodeWithHeadingFavourDirections
+                unsafe
                 {
-                    if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //GetRoadSidePointWithHeading
+                    if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0)) //GetNTHClosestVehicleNodeWithHeadingFavourDirections
                     {
-                        outPos = rsPos;
-                        outHeading = nodeHeading;
-                        return true;
+                        if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //GetRoadSidePointWithHeading
+                        {
+                            outPos = rsPos;
+                            outHeading = nodeHeading;
+                            return true;
+                        }
                     }
-                }
+                }              
             }
             catch (Exception e)
             {

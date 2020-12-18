@@ -25,7 +25,7 @@ namespace BarbarianCall
 		/// <param name="rotateY">if set to <c>true</c> rotates only on the y axis(heading).</param>
 		/// <param name="textueDict">Name of texture dictionary to load the texture from, leave null for no texture in the marker.</param>
 		/// <param name="textureName">Name of texture inside the dictionary to load the texture from, leave null for no texture in the marker.</param>
-		/// <param name="drawOnEntity">if set to <c>true</c> draw on any <see cref="Entity"/> that intersects the marker.</param>
+		/// <param name="drawOnEntity">if set to <c>true</c> draw on any <see cref="Rage.Entity"/> that intersects the marker.</param>
 		public static void DrawMarker(MarkerType type, Vector3 pos, Vector3 dir, Vector3 rot, Vector3 scale, Color color,
 			bool bobUpAndDown = false, bool faceCamera = false, bool rotateY = false, string textueDict = null, string textureName = null, bool drawOnEntity = false)
 		{
@@ -41,6 +41,36 @@ namespace BarbarianCall
 					scale.Y, scale.Z, color.R, color.G, color.B, color.A, bobUpAndDown, faceCamera, 2, rotateY, null, null, drawOnEntity);
 			}
 		}
+		internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.CallByHash<int>(0x87B63E25A529D526, veh);
+		internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ped"></param>
+		/// <param name="veh"></param>
+		/// <param name="location"></param>
+		/// <param name="heading"></param>
+		/// <param name="mode"></param>
+		/// <param name="radius">Radius seems to define how close the vehicle has to be -after parking- to the position for this task considered completed. 
+		/// If the value is too small, the vehicle will try to park again until it's exactly where it should be. 20.0 Works well but lower values don't, 
+		/// like the radius is measured in centimeters or something.  </param>
+		/// <param name="keepEngineOn"></param>
+		/// <returns></returns>
+		internal static Rage.Task ParkVehicle(this Ped ped, Vehicle veh, Vector3 location, float heading, EParkMode mode, float radius, bool keepEngineOn)
+		{
+			var diff = ped.Heading.CompareTo(heading);
+			$"Heading difference : {diff}".ToLog();
+			NativeFunction.Natives.TASK_VEHICLE_PARK(ped, veh, location.X, location.Y, location.Z, heading, (int)mode, radius, keepEngineOn);
+			return Rage.Task.GetTask(ped, "TASK_VEHICLE_PARK");
+		}
+		internal static Rage.Task ParkVehicle(this Ped ped, Vector3 location, float heading, EParkMode mode, float radius, bool keepEngineOn) => 
+			ParkVehicle(ped, ped.CurrentVehicle, location, heading, mode, radius, keepEngineOn);
+		internal static Ped CreateRandomPedAtCoords(Vector3 coord) => NativeFunction.Natives.CREATE_RANDOM_PED<Ped>(coord.X, coord.Y, coord.Z);
+		public enum EParkMode:int { IgnoreHeading = 0, ParkForward, ParkBackWards}
+
+		internal static void PlaceWaypoint(this Vector3 pos) => PlaceWaypoint(new Vector2(pos.X, pos.Y));
+		internal static void PlaceWaypoint(this Vector2 pos) => NativeFunction.Natives.SET_NEW_WAYPOINT(pos.X, pos.Y);
+		internal static void RemoveWaypoint() => NativeFunction.Natives.SET_WAYPOINT_OFF();
 
 		public enum VehicleWindowIndex
         {

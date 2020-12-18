@@ -6,13 +6,16 @@ using System.Threading.Tasks;
 using LSPD_First_Response.Mod.Callouts;
 using LSPD_First_Response.Mod.API;
 using Rage;
+using Rage.Native;
 using LSPD_First_Response.Engine.Scripting.Entities;
+using RAGENativeUI.Elements;
 
 namespace BarbarianCall.Callouts
 {
     public abstract class CalloutBase : Callout
     {
-        public enum ESuspectStates { InPursuit, Arrested, Dead, Escaped };
+        #region Fields
+        public enum ESuspectStates { InAction, Arrested, Dead, Escaped };
         public enum ECalloutStates { UnAccepted, EnRoute, OnScene, InPursuit, Finish };
         public ECalloutStates CalloutStates;
         public Ped Suspect;
@@ -31,6 +34,9 @@ namespace BarbarianCall.Callouts
         public Persona SuspectPersona;
         public Ped PlayerPed = Game.LocalPlayer.Character;
         public GameFiber CalloutMainFiber;
+        public string Path;
+        public static readonly uint[] WeaponHashes = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A, 0xBD248B55, 0x13532244, 0x624FE830 };
+        #endregion
 
         public override void OnCalloutNotAccepted()
         {
@@ -56,7 +62,12 @@ namespace BarbarianCall.Callouts
         public override bool OnCalloutAccepted()
         {
             CalloutStates = ECalloutStates.EnRoute;
+
             return base.OnCalloutAccepted();
+        }
+        public override void OnCalloutDisplayed()
+        {
+            base.OnCalloutDisplayed();
         }
         public override void End()
         {
@@ -65,7 +76,7 @@ namespace BarbarianCall.Callouts
             {
                 CalloutRunning = false;
                 Peralatan.Speaking = false;
-                if (Suspect.Exists()) Suspect.Dismiss();
+                if (Suspect.Exists() && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
                 if (SuspectCar.Exists()) SuspectCar.Dismiss();
                 if (Blip.Exists()) Blip.Delete();
                 if (GrammarPoliceRunning) GrammarPolice.API.Functions.Available(false, false);
@@ -74,6 +85,15 @@ namespace BarbarianCall.Callouts
             {
                 e.ToString().ToLog();
             }
+        }
+        public static UIMenuItem[] CreateMenu()
+        {
+            "Creating callout menu tab, menu items".ToLog();
+            return new UIMenuItem[]
+            {
+                new UIMenuNumericScrollerItem<float>("Minimum Distance", "Set the callout minimum distance", 100f, 500f, 20f),
+                new UIMenuNumericScrollerItem<float>("Maximum Distance", "Set the callout maximum distance", 500f, 2000f, 50f)
+            };
         }
     }
 }
