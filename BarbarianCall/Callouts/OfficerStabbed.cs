@@ -66,9 +66,9 @@ namespace BarbarianCall.Callouts
             {
                 Tuple<Vehicle, List<Ped>> ubApi;
                 var offRand = Peralatan.Random.Next(0, 100);
-                if (offRand <= 60) ubApi = API.UBFunc.GetUnit(API.UBFunc.EUltimateBackupUnitType.LocalPatrol, SpawnPoint, 1);
-                else if (offRand > 60 && offRand <= 90) ubApi = API.UBFunc.GetUnit(API.UBFunc.EUltimateBackupUnitType.StatePatrol, SpawnPoint, 1);
-                else ubApi = API.UBFunc.GetUnit(API.UBFunc.EUltimateBackupUnitType.LocalSwat, SpawnPoint, 1);
+                if (offRand <= 60) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalPatrol, SpawnPoint, 1);
+                else if (offRand > 60 && offRand <= 90) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.StatePatrol, SpawnPoint, 1);
+                else ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalSwat, SpawnPoint, 1);
                 offVeh = ubApi.Item1;
                 officer = ubApi.Item2[0];
             }
@@ -95,6 +95,7 @@ namespace BarbarianCall.Callouts
             officer.MakeMissionPed();
             officer.CanRagdoll = true;
             if (!officer.IsInVehicle(offVeh, false)) officer.WarpIntoVehicle(offVeh, -1);
+            Functions.SetPedAsCop(officer);
             offVeh.MakePersistent();
             offVeh.RandomiseLicencePlate();
             offVeh.IsVisible = true;
@@ -309,7 +310,7 @@ namespace BarbarianCall.Callouts
                     {
                         API.BetterEMSFunc.CallAmbulance(SpawnPoint);
                     }
-                    else if (UltimateBackupRunning) API.UBFunc.CallUnit(API.UBFunc.EUltimateBackupResponseType.Ambulance);
+                    else if (UltimateBackupRunning) API.UltimateBackupFunc.CallUnit(API.UltimateBackupFunc.EUltimateBackupCallType.Ambulance);
                     else Functions.RequestBackup(officer.Position, LSPD_First_Response.EBackupResponseType.Code3, LSPD_First_Response.EBackupUnitType.Ambulance);
                     while (CalloutRunning)
                     {
@@ -442,7 +443,7 @@ namespace BarbarianCall.Callouts
                         API.BetterEMSFunc.SetPedDeathDetails(officer, injuredBodyParts.GetRandomElement(), "Stabbed with a knife", deathTime, 0.8f);
                         API.BetterEMSFunc.CallAmbulance(officer.Position);
                     }
-                    else if (UltimateBackupRunning) API.UBFunc.CallUnit(API.UBFunc.EUltimateBackupResponseType.Ambulance);
+                    else if (UltimateBackupRunning) API.UltimateBackupFunc.CallUnit(API.UltimateBackupFunc.EUltimateBackupCallType.Ambulance);
                     else Functions.RequestBackup(officer.Position, LSPD_First_Response.EBackupResponseType.Code3, LSPD_First_Response.EBackupUnitType.Ambulance);
                     if (passenger.Exists() && passenger.IsInAnyVehicle(false)) passenger.Tasks.LeaveVehicle(LeaveVehicleFlags.None);
                     if (Suspect.IsInAnyVehicle(false)) Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(5000);
@@ -584,8 +585,8 @@ namespace BarbarianCall.Callouts
                     Ambulance.RandomiseLicencePlate();
                     if (UltimateBackupRunning)
                     {
-                        AmbulancePed1 = API.UBFunc.GetPed(API.UBFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
-                        AmbulancePed2 = API.UBFunc.GetPed(API.UBFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
+                        AmbulancePed1 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
+                        AmbulancePed2 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
                     }
                     else
                     {

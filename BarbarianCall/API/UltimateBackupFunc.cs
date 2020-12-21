@@ -8,8 +8,14 @@ using Rage;
 
 namespace BarbarianCall.API
 {
-    internal static class UBFunc
+    internal static class UltimateBackupFunc
     {
+        public static Tuple<Vehicle, Ped> GetUnit(EUltimateBackupUnitType unitType, Vector3 location)
+        {
+            var ub = GetUnit(unitType, location, 1);
+            Tuple<Vehicle, Ped> ret = new Tuple<Vehicle, Ped>(ub.Item1, ub.Item2[0]);
+            return ret;
+        }
         public static Tuple<Vehicle, List<Ped>> GetUnit(EUltimateBackupUnitType backupType , Vector3 location, int numPeds)
         {
             return backupType switch
@@ -35,28 +41,27 @@ namespace BarbarianCall.API
                 _ => throw new NotSupportedException("selected unit type is not supported"),
             };
         }
-        public static void CallUnit(EUltimateBackupResponseType responseType, bool stateBackup)
+        public static void CallUnit(EUltimateBackupCallType responseType) => CallUnit(responseType, false);
+        public static void CallUnit(EUltimateBackupCallType responseType, bool stateBackup)
         {
             switch (responseType)
             {
-                case EUltimateBackupResponseType.Code2: Functions.callCode2Backup(false, stateBackup); break;
-                case EUltimateBackupResponseType.Code3: Functions.callCode3Backup(false, stateBackup); break;
-                case EUltimateBackupResponseType.Ambulance: Functions.callAmbulance(); break;
-                case EUltimateBackupResponseType.Firetruk: Functions.callFireDepartment(); break;
-                case EUltimateBackupResponseType.Pursuit: Functions.callPursuitBackup(false, stateBackup); break;
-                case EUltimateBackupResponseType.TrafficStop: Functions.callTrafficStopBackup(false, stateBackup); break;
-                case EUltimateBackupResponseType.FelonyStop: Functions.callFelonyStopBackup(false, stateBackup); break;
-                case EUltimateBackupResponseType.Panic: Functions.callPanicButtonBackup(false); break;
-                case EUltimateBackupResponseType.SpikeStrips: Functions.callSpikeStripsBackup(); break;
-                case EUltimateBackupResponseType.RoadBlock: Functions.callRoadBlockBackup(); break;
-                case EUltimateBackupResponseType.K9: Functions.callK9Backup(false, stateBackup); break;
-                case EUltimateBackupResponseType.Female: Functions.callFemaleBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.Code2: Functions.callCode2Backup(false, stateBackup); break;
+                case EUltimateBackupCallType.Code3: Functions.callCode3Backup(false, stateBackup); break;
+                case EUltimateBackupCallType.Ambulance: Functions.callAmbulance(); break;
+                case EUltimateBackupCallType.Firetruk: Functions.callFireDepartment(); break;
+                case EUltimateBackupCallType.Pursuit: Functions.callPursuitBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.TrafficStop: Functions.callTrafficStopBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.FelonyStop: Functions.callFelonyStopBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.Panic: Functions.callPanicButtonBackup(false); break;
+                case EUltimateBackupCallType.SpikeStrips: Functions.callSpikeStripsBackup(); break;
+                case EUltimateBackupCallType.RoadBlock: Functions.callRoadBlockBackup(); break;
+                case EUltimateBackupCallType.K9: Functions.callK9Backup(false, stateBackup); break;
+                case EUltimateBackupCallType.Female: Functions.callFemaleBackup(false, stateBackup); break;
                 default: Functions.callCode2Backup(); break;
 
             }
         }
-        public static void CallUnit(EUltimateBackupResponseType responseType) => CallUnit(responseType, false);
-
         public enum EUltimateBackupUnitType
         {
             LocalPatrol,
@@ -68,7 +73,7 @@ namespace BarbarianCall.API
             NOOSESwat,
             PoliceTransport,
         }
-        public enum EUltimateBackupResponseType
+        public enum EUltimateBackupCallType
         {
             Code2,
             Code3,

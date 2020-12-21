@@ -25,6 +25,7 @@ namespace BarbarianCall.Callouts
         public Vector3 SpawnPoint = Vector3.Zero;
         public float SpawnHeading = 0f;
         public long Timer;
+        public DateTime Time;
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;

@@ -34,5 +34,11 @@ namespace BarbarianCall.DivisiXml
                 headings.Add(heading);
             }
         }
+        public static List<SpawnPoint> GetSpawnPointFromXml(string filename)
+        {
+            GetDataFromXml(filename, out var vector3s, out var hs);
+            List<SpawnPoint> spawnPoints = vector3s.Select(s => new SpawnPoint(s, hs[vector3s.IndexOf(s)])).ToList();
+            return spawnPoints;
+        }
     }
 }

@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using Rage;
 using Rage.Native;
 using System.Windows.Forms;
 using RAGENativeUI;
 using System.Drawing;
-using BarbarianCall;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using LSPD_First_Response.Mod.API;
 
@@ -16,6 +15,8 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
+        public static Random Random = new Random(DateTime.Now.Millisecond + GetGameSecond());
+        public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
         internal static void SelectNearbyLocationsWithHeading(List<Vector3> listLoc, List<float> listHead, out Vector3 sp, out float heading)
         {
             sp = Vector3.Zero;
@@ -70,13 +71,19 @@ namespace BarbarianCall
             }
             return;
         }
-        internal static void ToLog(this string micin) => Game.LogTrivial("[BarbarianCall]: " + micin);
+        internal static void Print(this string msg) => Game.Console.Print(msg);
+        internal static void ToLog(this string micin) => ToLog(micin, false);
+        internal static void ToLog(this string micin, bool makeUppercase)
+        {
+            string text = makeUppercase ? micin.ToUpper() : micin;
+            Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " : "[BarbarianCall]: " + text);
+        }
         internal static string GetLicensePlateAudio(Vehicle veh) => GetLicensePlateAudio(veh.LicensePlate);
         internal static string GetLicensePlateAudio(string licensePlate)
         {
             int count = 0;
             string metu = string.Empty;
-            if (licensePlate.Length > 8) return string.Empty;
+            if (licensePlate.Length != 8) return string.Empty;
             foreach (char c in licensePlate)
             {
                 count++;
@@ -90,7 +97,7 @@ namespace BarbarianCall
         internal static string GetColorAudio(Color color)
         {
             ToLog("Trying to get color audio");
-            var audibleArgb = (from x in CommonVariables.AudibleColor select x.ToArgb()).ToArray();
+            var audibleArgb = (from x in CommonVariables.AudibleColor select x.ToArgb()).ToList();
             Color selected;
             if (audibleArgb.Contains(color.ToArgb()))
             {
@@ -122,6 +129,7 @@ namespace BarbarianCall
                 GameFiber.Sleep(1);
             }
         }
+        internal static string GetZoneName(this ISpatial spatial) => GetZoneName(spatial.Position);
         internal static string GetZoneName(this Vector3 pos)
         {
             string gameName = NativeFunction.Natives.GET_NAME_OF_ZONE<string>(pos.X, pos.Y, pos.Z);
@@ -141,6 +149,14 @@ namespace BarbarianCall
             Speaking = true;
             var playerPos = Game.LocalPlayer.Character.Position;
             var playerHead = Game.LocalPlayer.Character.Heading;
+            Dialogue.ForEach(s=>
+            {
+                if (s.Contains("Officer:")) s.Replace("Officer:", "~b~Officer~s~:");
+                else if (s.Contains("Witness:")) s.Replace("Witness:", "~o~Witness~s~:");
+                else if (s.Contains("Suspect:")) s.Replace("Suspect:", "~r~Suspect~s~:");
+                else if (s.Contains("Paramedic:")) s.Replace("Paramedic:", "~g~Paramedic~s~:");
+                else if (s.Contains("Medic:")) s.Replace("Medic:", "~g~Medic~s~:");
+            });
             NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, false);
             GameFiber.StartNew(delegate
             {
@@ -342,12 +358,26 @@ namespace BarbarianCall
             {
                 try
                 {
+                    "Attempting to register ped headshot transparent".ToLog();
                     uint headshotHandle = NativeFunction.Natives.x953563CE563143AF<uint>(ped); //RegisterPedHeadshotTransparent
-                    int startTime = Environment.TickCount;
-                    GameFiber.WaitUntil(() => NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle), 10000);
+                    DateTime endTime = DateTime.Now + new TimeSpan(0, 0, 10);
+                    var start = DateTime.Now;                   
+                    while (true)
+                    {
+                        GameFiber.Yield();
+                        if (NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle))
+                        {
+                            $"Ped Headshot found with handle {headshotHandle}".ToLog();
+                            break;
+                        }
+                        if (DateTime.Now >= endTime) break;
+                    }
                     string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
-                    string txn = txd;                  
+                    string txn = txd;
+                    TimeSpan duration = DateTime.Now - start;
+                    $"Register ped headshot transparent is took {duration.TotalMilliseconds} ms".ToLog();
                     Game.DisplayNotification(txn, txd, title, subtitle, text);
+                    GameFiber.Wait(2000);
                     NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
                 }
                 catch (Exception e)
@@ -386,7 +416,6 @@ namespace BarbarianCall
         }
         internal static int GetGameSecond() => NativeFunction.Natives.x494E97C2EF27C470<int>();
 
-        public static Random Random = new Random(DateTime.Now.Millisecond + GetGameSecond());
         public static void Shuffle<T>(this IList<T> list)
         {
             int n = list.Count;
@@ -480,54 +509,6 @@ namespace BarbarianCall
             $"Setting ped {ped.Model.Name} {newWantedPersona.FullName} as wanted".ToLog();
             return;
         }
-        internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);
-        internal static bool GetClosestVehicleNodeWithheading(Vector3 pos, out Vector3 outpos, out float heading) => NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out outpos, out heading, 0, 3, 0);
-        internal static bool GetRoadSidePointWithHeading(this Vector3 pos, out Vector3 outPos,out float outHeading)
-        {
-            outPos = Vector3.Zero;
-            outHeading = float.NaN;
-            try
-            {
-                unsafe
-                {
-                    if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0)) //GetNTHClosestVehicleNodeWithHeadingFavourDirections
-                    {
-                        if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //GetRoadSidePointWithHeading
-                        {
-                            outPos = rsPos;
-                            outHeading = nodeHeading;
-                            return true;
-                        }
-                    }
-                }              
-            }
-            catch (Exception e)
-            {
-                e.ToString().ToLog();
-            }
-            return false;
-        }
-        internal static bool GetRoadSidePointFavourDirections(Vector3 pos, Vector3 favoredPos, out Vector3 outPos, out float heading)
-        {
-            heading = float.NaN;
-            outPos = Vector3.Zero;
-            try
-            {
-                if (NativeFunction.Natives.x45905BE8654AE067<bool>(pos.X, pos.Y, pos.Z, favoredPos.X, favoredPos.Y, favoredPos.Z, 1, out Vector3 nodePos, out float nodeHeading, 0, 0x40400000, 0)) //GetNTHClosestVehicleNodeFavourDirection
-                {
-                    if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsp)) //GetRoadSidePointWithHeading
-                    {
-                        heading = nodeHeading;
-                        outPos = rsp;
-                        return true;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                e.ToString().ToLog();
-            }
-            return false;
-        }
+        internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);       
     }
 }

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Drawing;
 using Rage;
 using Rage.Native;
+using System.Diagnostics;
+using System.IO;
 
 namespace BarbarianCall
 {
@@ -71,6 +73,61 @@ namespace BarbarianCall
 		internal static void PlaceWaypoint(this Vector3 pos) => PlaceWaypoint(new Vector2(pos.X, pos.Y));
 		internal static void PlaceWaypoint(this Vector2 pos) => NativeFunction.Natives.SET_NEW_WAYPOINT(pos.X, pos.Y);
 		internal static void RemoveWaypoint() => NativeFunction.Natives.SET_WAYPOINT_OFF();
+		internal static string GetCardinalDirectionFullForm(this Entity e) => GetCardinalDirectionFullForm(e.Heading);
+		internal static string GetCardinalDirectionFullForm(float direction)
+		{
+			float degrees = Math.Abs(direction);
+			Game.Console.Print(degrees.ToString());
+			List<string> cardinals = new List<string>() { "North", "NorthEast", "East", "SouthEast","South", "SouthWest", "West", "NorthWest", "North" };
+			var ret = (int)Math.Round((double)degrees % 360 / 45);
+			$"Found cardinal index {ret}".ToLog();
+			return cardinals[(int)Math.Round(((double)degrees % 360) / 45)];
+		}
+		internal static string GetCardinalDirentionDetailedFullForm(float direction)
+        {
+			float degrees = Math.Abs(direction);
+			List<string> cardinals = new List<string>()
+			{
+				"North", "North-NorthEast", "NorthEast", "East-NorthEast", "East",
+				"East-SouthEast", "SouthEast", "South-SouthEast", "South", "South-SouthWest",
+				"SouthWest", "West-SouthWest", "West", "West-NorthWest", "NorthWest", "North-NorthWest", "North"
+			};
+			return cardinals[(int)Math.Round((double)degrees * 10 % 3600 / 225)];
+		}
+		internal static string DegreesToCardinal(this Entity e)
+		{
+			float degrees = e.Heading;
+			string[] caridnals = { "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" };
+			return caridnals[(int)Math.Round((double)degrees % 360 / 45)];
+		}
+		internal static string DegreesToCardinalDetailed(this Entity e)
+		{
+			float degrees = e.Heading;
+			string[] caridnals = { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N" };
+			return caridnals[(int)Math.Round((double)degrees * 10 % 3600 / 225)];
+		}
+		internal static string GetFileVersion(string filepath)
+        {
+			if (!File.Exists(filepath)) return $"{AppDomain.CurrentDomain}/{filepath} File doesn't exist";
+            try
+            {
+				var ver = FileVersionInfo.GetVersionInfo(filepath);
+				return $"{ver.FileMajorPart}.{ver.FileMinorPart}.{ver.FileBuildPart}.{ver.FilePrivatePart}";
+            }
+            catch (Exception e)
+            {
+				"Get file version error".ToLog();
+				e.ToString().ToLog();
+            }
+			return "Unknown version";
+        }
+		internal static float GetRandomSingle() => GetRandomSingle(Peralatan.Random.Next(), Peralatan.Random.Next());
+		internal static float GetRandomSingle(int min, int max)
+        {
+			var siji = Peralatan.Random.Next(min, max);
+			var loro = Peralatan.Random.NextDouble();
+			return (float)((float)siji + loro);
+        }
 
 		public enum VehicleWindowIndex
         {
@@ -82,7 +139,7 @@ namespace BarbarianCall
 			BackRightWindow,
 			WindscreenFront,
 			BackWindow,
-		}
+		}		
 		public enum VehicleDoorIndex
 		{
 			FrontRightDoor = 1,

@@ -34,10 +34,7 @@ namespace BarbarianCall.Menus
                 MoneySubtitle = "~b~Los Santos ~g~Police ~y~Department",
                 PauseGame = true,
                 Name = LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Game.LocalPlayer.Character).FullName,
-            };
-            string headshot = Game.LocalPlayer.Character.GetPedHeadshotTexture(out uint? pmh);
-            playerMugshotHandle = pmh;
-            pauseMenu.Photo = new Sprite(headshot, headshot, Point.Empty, Size.Empty);
+            };          
             pauseMenu.OnMenuClose += (s, e) => playerMugshotHandle.UnregisterPedHeadshot();
 
             List<TabItem> CalloutList = new List<TabItem>();
@@ -102,8 +99,11 @@ namespace BarbarianCall.Menus
                 {
                     "Opening pause menu".ToLog();
                     string headshot = Game.LocalPlayer.Character.GetPedHeadshotTexture(out uint? pmh);
+                    "Requesting ped headshot for pause menu".ToLog();
                     playerMugshotHandle = pmh;
+                    "Setting pause menu photo with player mugshot".ToLog();
                     pauseMenu.Photo = new Sprite(headshot, headshot, Point.Empty, Size.Empty);
+                    "Set pause menu to visible".ToLog();
                     pauseMenu.Visible = !pauseMenu.Visible;
                 }
             }

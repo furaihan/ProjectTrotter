@@ -14,7 +14,7 @@ namespace BarbarianCall
     {
         public static void Main()
         {
-            Game.DisplayNotification("~r~BARBARIANCALLS FAILED TO LOAD, PLEASE PUT THE DLL FILES INSIDE ~g~\"Plugins/LSPDFR\"~r~ FOLDER");
+            Game.DisplayNotification("~r~BARBARIANCALL FAILED TO LOAD, PLEASE PUT THE DLL FILES INSIDE ~g~\"Plugins/LSPDFR\"~r~ FOLDER");
             return;
         }
     }
@@ -38,8 +38,9 @@ namespace BarbarianCall
                 GameFiber.Wait(5600);
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
+                $"Found male model: {CommonVariables.MaleModel.Length}".ToLog();
                 $"RAGENativeUi in installed: {IsRageNativeUIInstalled()}".ToLog();
-                "Prepering to create pause menu".ToLog();
+                "Prepering to create pause menu".ToLog();               
                 Menus.PauseMenu.CreatePauseMenu();
             });
         }
@@ -51,7 +52,7 @@ namespace BarbarianCall
                 {
                     if (string.Equals(assembly.GetName().Name, Plugin, StringComparison.CurrentCultureIgnoreCase))
                     {
-                        $"Plugin : {Plugin} Assembly : {assembly.GetName().Name} is running".ToLog();
+                        $"Plugin : {Plugin} Assembly : {assembly.GetName().Name} is running version {assembly.GetName().Version}".ToLog();
                         return true;
                     }
                 }
@@ -68,6 +69,20 @@ namespace BarbarianCall
         {
             System.Globalization.CultureInfo.CurrentCulture.ToString().ToLog();
             TimeZoneInfo.Local.StandardName.ToLog();
+            "=========================================================================================================".ToLog();
+            "".ToLog();
+            "".ToLog();
+            "VERSION INFO".ToLog();
+            $"LSPD First Response : {Extension.GetFileVersion(@"Plugins/LSPD First Response.dll")}".ToLog();
+            $"RAGENativeUI : {Extension.GetFileVersion("RAGENativeUI.dll")}".ToLog();
+            $"RAGEPluginHook : {Extension.GetFileVersion("RAGEPluginHook.exe")}".ToLog();
+            $"ScriptHookV : {Extension.GetFileVersion("ScriptHookV.dll")}".ToLog();
+            $"StopThePed : {Extension.GetFileVersion(@"Plugins/LSPDFR/StopThePed.dll")}".ToLog();
+            $"UltimateBackup : {Extension.GetFileVersion(@"Plugins/LSPDFR/UltimateBackup.dll")}".ToLog();
+            $"GrammarPolice : {Extension.GetFileVersion(@"Plugins/LSPDFR/GrammarPolice.dll")}".ToLog();
+            "".ToLog();
+            "".ToLog();
+            "=========================================================================================================".ToLog();
         }
         internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");
     }
