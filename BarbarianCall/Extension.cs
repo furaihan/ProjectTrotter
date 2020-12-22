@@ -43,68 +43,35 @@ namespace BarbarianCall
 					scale.Y, scale.Z, color.R, color.G, color.B, color.A, bobUpAndDown, faceCamera, 2, rotateY, null, null, drawOnEntity);
 			}
 		}
+		internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
 		internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.CallByHash<int>(0x87B63E25A529D526, veh);
 		internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="ped"></param>
-		/// <param name="veh"></param>
-		/// <param name="location"></param>
-		/// <param name="heading"></param>
-		/// <param name="mode"></param>
-		/// <param name="radius">Radius seems to define how close the vehicle has to be -after parking- to the position for this task considered completed. 
-		/// If the value is too small, the vehicle will try to park again until it's exactly where it should be. 20.0 Works well but lower values don't, 
-		/// like the radius is measured in centimeters or something.  </param>
-		/// <param name="keepEngineOn"></param>
-		/// <returns></returns>
-		internal static Rage.Task ParkVehicle(this Ped ped, Vehicle veh, Vector3 location, float heading, EParkMode mode, float radius, bool keepEngineOn)
-		{
-			var diff = ped.Heading.CompareTo(heading);
-			$"Heading difference : {diff}".ToLog();
-			NativeFunction.Natives.TASK_VEHICLE_PARK(ped, veh, location.X, location.Y, location.Z, heading, (int)mode, radius, keepEngineOn);
-			return Rage.Task.GetTask(ped, "TASK_VEHICLE_PARK");
-		}
-		internal static Rage.Task ParkVehicle(this Ped ped, Vector3 location, float heading, EParkMode mode, float radius, bool keepEngineOn) => 
-			ParkVehicle(ped, ped.CurrentVehicle, location, heading, mode, radius, keepEngineOn);
-		internal static Ped CreateRandomPedAtCoords(Vector3 coord) => NativeFunction.Natives.CREATE_RANDOM_PED<Ped>(coord.X, coord.Y, coord.Z);
-		public enum EParkMode:int { IgnoreHeading = 0, ParkForward, ParkBackWards}
-
 		internal static void PlaceWaypoint(this Vector3 pos) => PlaceWaypoint(new Vector2(pos.X, pos.Y));
 		internal static void PlaceWaypoint(this Vector2 pos) => NativeFunction.Natives.SET_NEW_WAYPOINT(pos.X, pos.Y);
 		internal static void RemoveWaypoint() => NativeFunction.Natives.SET_WAYPOINT_OFF();
-		internal static string GetCardinalDirectionFullForm(this Entity e) => GetCardinalDirectionFullForm(e.Heading);
-		internal static string GetCardinalDirectionFullForm(float direction)
+		internal static string GetCardinalDirection(this Entity e, bool fullform) => GetCardinalDirection(e.Heading, fullform);
+		internal static string GetCardinalDirection(this Entity e) => GetCardinalDirection(e.Heading, false);
+		internal static string GetCardinalDirection(float direction, bool fullform)
 		{
 			float degrees = Math.Abs(direction);
 			Game.Console.Print(degrees.ToString());
-			List<string> cardinals = new List<string>() { "North", "NorthEast", "East", "SouthEast","South", "SouthWest", "West", "NorthWest", "North" };
-			var ret = (int)Math.Round((double)degrees % 360 / 45);
-			$"Found cardinal index {ret}".ToLog();
+			string[] abb = { "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" };
+			string[] full = { "North", "NorthEast", "East", "SouthEast", "South", "SouthWest", "West", "NorthWest", "North" };
+			List<string> cardinals = fullform ? full.ToList() : abb.ToList();
 			return cardinals[(int)Math.Round(((double)degrees % 360) / 45)];
 		}
-		internal static string GetCardinalDirentionDetailedFullForm(float direction)
+		internal static string GetCardinalDirentionDetailed(float direction, bool fullform)
         {
 			float degrees = Math.Abs(direction);
-			List<string> cardinals = new List<string>()
-			{
+			string[] abb = { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N" };
+			string [] full = 
+				{
 				"North", "North-NorthEast", "NorthEast", "East-NorthEast", "East",
 				"East-SouthEast", "SouthEast", "South-SouthEast", "South", "South-SouthWest",
 				"SouthWest", "West-SouthWest", "West", "West-NorthWest", "NorthWest", "North-NorthWest", "North"
 			};
+			List<string> cardinals = fullform ? full.ToList() : abb.ToList();
 			return cardinals[(int)Math.Round((double)degrees * 10 % 3600 / 225)];
-		}
-		internal static string DegreesToCardinal(this Entity e)
-		{
-			float degrees = e.Heading;
-			string[] caridnals = { "N", "NE", "E", "SE", "S", "SW", "W", "NW", "N" };
-			return caridnals[(int)Math.Round((double)degrees % 360 / 45)];
-		}
-		internal static string DegreesToCardinalDetailed(this Entity e)
-		{
-			float degrees = e.Heading;
-			string[] caridnals = { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N" };
-			return caridnals[(int)Math.Round((double)degrees * 10 % 3600 / 225)];
 		}
 		internal static string GetFileVersion(string filepath)
         {
@@ -122,6 +89,7 @@ namespace BarbarianCall
 			return "Unknown version";
         }
 		internal static float GetRandomSingle() => GetRandomSingle(Peralatan.Random.Next(), Peralatan.Random.Next());
+		internal static float GetRandomSingle(float min, float max) => GetRandomSingle(Math.Abs((int)Math.Round(min)), Math.Abs((int)Math.Round(max)));
 		internal static float GetRandomSingle(int min, int max)
         {
 			var siji = Peralatan.Random.Next(min, max);

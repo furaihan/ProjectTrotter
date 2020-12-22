@@ -15,28 +15,24 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new Random(DateTime.Now.Millisecond + GetGameSecond());
+        public static Random Random = new Random(DateTime.Now.Millisecond + World.TimeOfDay.Seconds + (Environment.TickCount % 7450));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
+
+        internal static SpawnPoint SelectNearbySpawnpoint(List<SpawnPoint> spawnPoints)
+        {
+            SelectNearbyLocationsWithHeading(spawnPoints.Select(s => s.Position).ToList(), spawnPoints.Select(s => s.Heading).ToList(), out var vector3, out var heading);
+            return new SpawnPoint(vector3, heading);
+        }
         internal static void SelectNearbyLocationsWithHeading(List<Vector3> listLoc, List<float> listHead, out Vector3 sp, out float heading)
         {
             sp = Vector3.Zero;
             heading = 0f;
             try
             {
-                List<Vector3> locsToSelect = new List<Vector3>();
-                Vector3 perLocation;
                 var playerPos = Game.LocalPlayer.Character.Position;
                 if (listLoc.Count != listHead.Count) return;
                 ToLog($"Calculating the best location for callout");
-                for (int i = 0; i < listLoc.Count; i++)
-                {
-                    perLocation = listLoc[i];
-                    if (perLocation.TravelDistanceTo(playerPos) > 2500f) continue;
-                    if (perLocation.DistanceTo(playerPos) < 1000f && perLocation.DistanceTo(playerPos) > 300f)
-                    {
-                        locsToSelect.Add(perLocation);
-                    }
-                }
+                List<Vector3> locsToSelect = listLoc.Where(l => l.DistanceTo(playerPos) < 1000f && l.DistanceTo(playerPos) > 300f && l.TravelDistanceTo(playerPos) < 2000f).ToList();
                 if (locsToSelect.Count > 0)
                 {
                     sp = locsToSelect.GetRandomElement(true);
@@ -149,14 +145,18 @@ namespace BarbarianCall
             Speaking = true;
             var playerPos = Game.LocalPlayer.Character.Position;
             var playerHead = Game.LocalPlayer.Character.Heading;
-            Dialogue.ForEach(s=>
+            List<string> modifiedDialogue = new List<string>();
+            Dialogue.ForEach(cakap=>
             {
-                if (s.Contains("Officer:")) s.Replace("Officer:", "~b~Officer~s~:");
-                else if (s.Contains("Witness:")) s.Replace("Witness:", "~o~Witness~s~:");
-                else if (s.Contains("Suspect:")) s.Replace("Suspect:", "~r~Suspect~s~:");
-                else if (s.Contains("Paramedic:")) s.Replace("Paramedic:", "~g~Paramedic~s~:");
-                else if (s.Contains("Medic:")) s.Replace("Medic:", "~g~Medic~s~:");
+                var modified = cakap;
+                if (modified.Contains("Officer:")) modified = modified.Replace("Officer:", "~b~Officer~s~:");
+                else if (modified.Contains("Witness:")) modified = modified.Replace("Witness:", "~o~Witness~s~:");
+                else if (modified.Contains("Suspect:")) modified = modified.Replace("Suspect:", "~r~Suspect~s~:");
+                else if (modified.Contains("Paramedic:")) modified = modified.Replace("Paramedic:", "~g~Paramedic~s~:");
+                else if (modified.Contains("Medic:")) modified = modified.Replace("Medic:", "~g~Medic~s~:");
+                modifiedDialogue.Add(modified);
             });
+            (modifiedDialogue.Count == Dialogue.Count).ToString().ToLog();
             NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, false);
             GameFiber.StartNew(delegate
             {
@@ -178,7 +178,7 @@ namespace BarbarianCall
                 talker.Tasks.AchieveHeading(GetHeadingTowards(talker, playerPos));
                 talker.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 1f, AnimationFlags.Loop | AnimationFlags.SecondaryTask);
             }
-            for (int i = 0; i < Dialogue.Count; i++)
+            for (int i = 0; i < modifiedDialogue.Count; i++)
             {
                 while (Speaking)
                 {
@@ -186,7 +186,7 @@ namespace BarbarianCall
                     if (Game.IsKeyDown(Keys.Y)) break;
                 }
                 talker.Tasks.AchieveHeading(talker.GetHeadingTowards(Game.LocalPlayer.Character));
-                Game.DisplaySubtitle(Dialogue[i], 10000);
+                Game.DisplaySubtitle(modifiedDialogue[i], 10000);
                 if (!Speaking) break;
             }
             Speaking = false;
@@ -352,14 +352,14 @@ namespace BarbarianCall
         {
             return GetHeadingTowards(position, towards.Position);
         }
-        internal static void DisplayNotificationsWithPedHeadshot(this Ped ped, string subtitle, string text, string title = "Barbarian Call")
+        internal static void DisplayNotificationsWithPedHeadshot(this Ped ped, string subtitle, string text, string title = "~y~Barbarian Call")
         {
             GameFiber.StartNew(() =>
             {
                 try
                 {
                     "Attempting to register ped headshot transparent".ToLog();
-                    uint headshotHandle = NativeFunction.Natives.x953563CE563143AF<uint>(ped); //RegisterPedHeadshotTransparent
+                    uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
                     DateTime endTime = DateTime.Now + new TimeSpan(0, 0, 10);
                     var start = DateTime.Now;                   
                     while (true)
@@ -377,7 +377,7 @@ namespace BarbarianCall
                     TimeSpan duration = DateTime.Now - start;
                     $"Register ped headshot transparent is took {duration.TotalMilliseconds} ms".ToLog();
                     Game.DisplayNotification(txn, txd, title, subtitle, text);
-                    GameFiber.Wait(2000);
+                    //GameFiber.Wait(200);
                     NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
                 }
                 catch (Exception e)
@@ -393,9 +393,19 @@ namespace BarbarianCall
         {
             try
             {
-                uint headshotHandle = NativeFunction.Natives.x953563CE563143AF<uint>(ped); //RegisterPedHeadshotTransparent
+                uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped); //RegisterPedHeadshotTransparent
                 int startTime = Environment.TickCount;
-                GameFiber.WaitUntil(() => NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle), 10000);
+                DateTime endTime = DateTime.Now + new TimeSpan(0, 0, 10);
+                while (true)
+                {
+                    GameFiber.Yield();
+                    if (NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle))
+                    {
+                        $"Ped Headshot found with handle {headshotHandle}".ToLog();
+                        break;
+                    }
+                    if (DateTime.Now >= endTime) break;
+                }
                 string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                 Handle = headshotHandle;
                 return txd;
@@ -414,7 +424,6 @@ namespace BarbarianCall
                 NativeFunction.Natives.UnregisterPedheadshot<uint>(handle.Value);
             }
         }
-        internal static int GetGameSecond() => NativeFunction.Natives.x494E97C2EF27C470<int>();
 
         public static void Shuffle<T>(this IList<T> list)
         {
@@ -440,19 +449,19 @@ namespace BarbarianCall
         public static T GetRandomElement<T>(this IEnumerable<T> enumarable, bool shuffle = false)
         {
             if (enumarable == null || enumarable.Count() <= 0)
-                return default(T);
+                return default;
 
             T[] array = enumarable.ToArray();
             return GetRandomElement(array, shuffle);
         }
 
-        public static T GetRandomElement<T>(this Enum items)
+        public static T GetRandomElement<T>(this Enum items) where T : Enum
         {
             if (typeof(T).BaseType != typeof(Enum))
                 throw new InvalidCastException();
 
             var types = Enum.GetValues(typeof(T));
-            return GetRandomElement<T>(types.Cast<T>());
+            return GetRandomElement(types.Cast<T>());
         }
 
         public static IList<T> GetRandomNumberOfElements<T>(this IList<T> list, int numOfElements, bool shuffle = false)

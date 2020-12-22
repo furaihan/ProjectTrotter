@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Rage;
@@ -60,6 +61,7 @@ namespace BarbarianCall
         {
             "prop_donut_01", "prop_donut_02", "prop_donut_02b", "prop_amb_donut"
         };
-        public static Model[] MaleModel = Model.PedModels.Where(m => m.Name.Contains("_m_") && !m.Name.Contains("_f_")).ToArray();
+        public static Model[] MaleModel = File.ReadLines(@"Plugins\LSPDFR\BarbarianCall\PedList.txt").ToList().Where(s => s.Substring(1, 3) == "_m_").Select(s => new Model(s)).ToArray();
+        public static Model[] FemaleModel = File.ReadLines(@"Plugins\LSPDFR\BarbarianCall\PedList.txt").ToList().Where(s => s.Substring(1, 3) == "_f_").Select(s => new Model(s)).ToArray();
     }
 }

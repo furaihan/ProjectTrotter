@@ -95,14 +95,16 @@ namespace BarbarianCall.Menus
             {
                 GameFiber.Yield();
                 pauseMenu.Update();
-                if (!UIMenu.IsAnyMenuVisible && Game.IsKeyDownRightNow(Keys.RControlKey) && Game.IsKeyDown(Keys.D0))
+                if (!UIMenu.IsAnyMenuVisible && Peralatan.CheckKey(Keys.RControlKey, Keys.D0))
                 {
                     "Opening pause menu".ToLog();
+                    DateTime start = DateTime.Now;
                     string headshot = Game.LocalPlayer.Character.GetPedHeadshotTexture(out uint? pmh);
                     "Requesting ped headshot for pause menu".ToLog();
                     playerMugshotHandle = pmh;
                     "Setting pause menu photo with player mugshot".ToLog();
                     pauseMenu.Photo = new Sprite(headshot, headshot, Point.Empty, Size.Empty);
+                    $"Set photo took {(DateTime.Now - start).TotalMilliseconds} ms".Print();
                     "Set pause menu to visible".ToLog();
                     pauseMenu.Visible = !pauseMenu.Visible;
                 }

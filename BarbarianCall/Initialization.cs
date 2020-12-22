@@ -39,6 +39,7 @@ namespace BarbarianCall
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
                 $"Found male model: {CommonVariables.MaleModel.Length}".ToLog();
+                $"Found common weapon {Callouts.CalloutBase.WeaponHashes.Where(h => new Model(h).Name != null).ToList().Count}".ToLog();
                 $"RAGENativeUi in installed: {IsRageNativeUIInstalled()}".ToLog();
                 "Prepering to create pause menu".ToLog();               
                 Menus.PauseMenu.CreatePauseMenu();
