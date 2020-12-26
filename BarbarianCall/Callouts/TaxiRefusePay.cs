@@ -23,15 +23,15 @@ namespace BarbarianCall.Callouts
         private RelationshipGroup TaxiRelation;
         private RelationshipGroup CriminalRelation;
         private ESuspectStates SuspectState;
-        private bool VictimSafe = true;
         private bool SuspectStopped = false;
-        private string[] InsultSpeech = { Speech.GENERIC_CURSE_HIGH, Speech.GENERIC_CURSE_MED, Speech.GENERIC_FUCK_YOU, Speech.GENERIC_INSULT_HIGH, Speech.GENERIC_INSULT_MED };
+        private readonly string[] InsultSpeech = { Speech.GENERIC_CURSE_HIGH, Speech.GENERIC_CURSE_MED, Speech.GENERIC_FUCK_YOU, Speech.GENERIC_INSULT_HIGH, Speech.GENERIC_INSULT_MED };
 
         private Ped Witness;
+        private Vehicle WitnessCar;
         private Blip WitnessBlip;
 
         private string suspectManWoman = "Man";
-        private int suspectCount = 1;
+        private readonly int suspectCount = 1;
         
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -53,7 +53,6 @@ namespace BarbarianCall.Callouts
         }
         public override bool OnCalloutAccepted()
         {
-            VictimSafe = true;
             SuspectState = ESuspectStates.InAction;
             CalloutStates = ECalloutStates.EnRoute;
             TaxiModel.LoadAndWait();
@@ -79,40 +78,64 @@ namespace BarbarianCall.Callouts
             Blip.EnableRoute(Color.Yellow);
             Game.SetRelationshipBetweenRelationshipGroups(TaxiRelation, CriminalRelation, Relationship.Hate);
             Game.SetRelationshipBetweenRelationshipGroups(TaxiRelation, RelationshipGroup.Cop, Relationship.Respect);
+            TaxiRelation.SetRelationshipWith(RelationshipGroup.Player, Relationship.Respect);
             Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, TaxiRelation, Relationship.Hate);
-            Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Cop, Relationship.Dislike);
-            Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Player, Relationship.Dislike);
+            Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Cop, Relationship.Hate);
+            Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Player, Relationship.Hate);
             Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, TaxiRelation, Relationship.Neutral);
-            Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, CriminalRelation, Relationship.Dislike);
+            Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, CriminalRelation, Relationship.Neutral);
             suspectManWoman = Suspect.IsMale ? "Man" : "Woman";
-            SituationDead();
+            var calloutScenario = Peralatan.Random.Next(1, 300);
+            $"Callout scenario {calloutScenario}".ToLog();
+            if (calloutScenario < 100) SituationFight();
+            else if (calloutScenario < 200) SituationHostage();
+            else SituationDead();
             return base.OnCalloutAccepted();
         }
         public override void End()
-        {           
-            if (Suspect.Exists() && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
+        {
+            CalloutRunning = false;
+            if (Suspect && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
             TaxiModel.Dismiss();
             GameFiber.StartNew(() =>
             {
-                if (Taxi.Exists() && TaxiDriver.Exists() && !Functions.IsPedArrested(TaxiDriver))
+                if (Taxi && TaxiDriver && TaxiDriver.IsAlive && !Functions.IsPedArrested(TaxiDriver))
                 {
                     TaxiDriver.Tasks.FollowNavigationMeshToPosition(Taxi.LeftPosition, Taxi.Heading, 10f).WaitForCompletion(10000);
-                    if (Taxi.Exists() && TaxiDriver.Exists()) TaxiDriver.Tasks.EnterVehicle(Taxi, -1).WaitForCompletion(5000);
-                    if (Taxi.Exists() && TaxiDriver.Exists() && TaxiDriver.IsInVehicle(Taxi, false)) TaxiDriver.Tasks.EnterVehicle(Taxi, -1, EnterVehicleFlags.WarpTo).WaitForCompletion(3000);
-                    if (Taxi.Exists() && TaxiDriver.Exists() && TaxiDriver.IsInVehicle(Taxi, false)) TaxiDriver.WarpIntoVehicle(Taxi, -1);
-                    if (Taxi.Exists()) Taxi.Dismiss();
-                    if (TaxiDriver.Exists()) TaxiDriver.Dismiss();
+                    if (Taxi && TaxiDriver) TaxiDriver.Tasks.EnterVehicle(Taxi, -1).WaitForCompletion(5000);
+                    if (Taxi && TaxiDriver && TaxiDriver.IsInVehicle(Taxi, false)) TaxiDriver.Tasks.EnterVehicle(Taxi, -1, EnterVehicleFlags.WarpTo).WaitForCompletion(3000);
+                    if (Taxi && TaxiDriver && TaxiDriver.IsInVehicle(Taxi, false)) TaxiDriver.WarpIntoVehicle(Taxi, -1);
+                    if (Taxi) Taxi.Dismiss();
+                    if (TaxiDriver) TaxiDriver.Dismiss();
                 }
+                if (TaxiDriver) TaxiDriver.Dismiss();
+                if (Taxi) Taxi.Dismiss();
             });
-            if (Blip.Exists()) Blip.Delete();
-            if (Witness.Exists()) 
-                if (!Witness.IsOnScreen) Witness.Delete(); 
-                else Witness.Dismiss();
+            if (Blip) Blip.Delete();
+            GameFiber.StartNew(() =>
+            {
+                if (Witness && WitnessCar && Witness.IsAlive && !Functions.IsPedArrested(Witness))
+                {
+                    Witness.Tasks.FollowNavigationMeshToPosition(WitnessCar.LeftPosition, WitnessCar.Heading, 10f).WaitForCompletion(10000);
+                    if (Witness) Witness.Tasks.EnterVehicle(WitnessCar, -1).WaitForCompletion(10000);
+                    if (Witness && !Witness.IsInVehicle(WitnessCar, false)) Witness.Tasks.EnterVehicle(WitnessCar, -1, EnterVehicleFlags.WarpTo).WaitForCompletion(3000);
+                    if (Witness && !Witness.IsInVehicle(WitnessCar, false)) Witness.WarpIntoVehicle(WitnessCar, -1);
+                    if (Witness) Witness.Dismiss();
+                }
+                if (WitnessCar && WitnessCar.Driver == null)
+                {
+                    var pas = WitnessCar.GetPedOnSeat(0);
+                    if (pas) pas.WarpIntoVehicle(WitnessCar, -1);
+                    if (pas) pas.Dismiss();
+                }
+                if (WitnessCar) WitnessCar.Occupants.ToList().ForEach(p => { if (p) p.Dismiss(); });
+                if (WitnessCar) WitnessCar.Dismiss();
+            });           
             base.End();
         }
         public override void Process()
-        {
-            if (Suspect.Exists())
+        {            
+            if (Suspect)
             {
                 if (Functions.IsPedArrested(Suspect) && SuspectState == ESuspectStates.InAction)
                 {
@@ -124,7 +147,7 @@ namespace BarbarianCall.Callouts
                     Game.DisplayNotification("Suspect is ~r~dead");
                     SuspectState = ESuspectStates.Dead;
                 }
-                else if (PursuitCreated && !Suspect.Exists())
+                else if (PursuitCreated && !Suspect)
                 {
                     Game.DisplayNotification("Suspect is escaped");
                     SuspectState = ESuspectStates.Escaped;
@@ -136,7 +159,7 @@ namespace BarbarianCall.Callouts
         {
             if (!CalloutRunning) return;
             CalloutStates = ECalloutStates.Finish;
-            string victim = TaxiDriver.Exists() && TaxiDriver.IsAlive? "~g~safe~s~" : "~r~dead~s~";
+            string victim = TaxiDriver && TaxiDriver.IsAlive? "~g~safe~s~" : "~r~dead~s~";
             $"~g~We Are Code 4.~s~ ~y~Suspect~s~ is ~o~{SuspectState}~s~ and ~b~victim~s~ is {victim}".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
             Functions.PlayScannerAudioUsingPosition("BAR_ALL_UNIT_CODE_FOUR IN_OR_ON_POSITION", PlayerPed.Position);
             End();
@@ -160,16 +183,17 @@ namespace BarbarianCall.Callouts
         }
         private void SituationFight() //Geloood
         {
-            GameFiber.StartNew(() =>
+            CalloutMainFiber = GameFiber.StartNew(() =>
             {
                 try
                 {
                     CalloutRunning = true;
-                    if (Suspect.Exists()) Suspect.Delete();
+                    if (Suspect) Suspect.Delete();
                     Suspect = new Ped(CommonVariables.MaleModel.GetRandomElement(), SpawnPoint, SpawnHeading);
                     Suspect.WarpIntoVehicle(Taxi, 2);
                     SuspectPersona = Functions.GetPersonaForPed(Suspect);
                     GameFiber.Wait(200);
+                    suspectManWoman = Suspect.IsMale ? "Man" : "Woman";
                     Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
                         $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}");
                     if (Peralatan.Random.Next(2500, 3500) % 4 == 0)
@@ -179,7 +203,8 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut).WaitForCompletion(200);
                     TaxiDriver.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut).WaitForCompletion(200);
                     GetClose();
-                    if (Blip.Exists()) Blip.Delete();
+                    if (!CalloutRunning) return;
+                    if (Blip) Blip.Delete();
                     Blip = new Blip(Suspect);
                     Blip.Color = Color.Yellow;
                     Blip.Scale = 0.91685f;
@@ -203,16 +228,12 @@ namespace BarbarianCall.Callouts
                                 Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                                 Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout~n~" +
                        $"~y~Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Home)}~y~ to see suspect details");
-                            }
-                            if (Game.IsKeyDown(System.Windows.Forms.Keys.End) || Functions.IsPedStoppedByPlayer(Suspect)) break;
-                            if (StopThePedRunning)
-                            {
-                                if (API.StopThePedFunc.IsPedStoppedWithSTP(Suspect)) break;
-                            }
+                            }                            
                             if (Peralatan.CheckKey(System.Windows.Forms.Keys.Control, System.Windows.Forms.Keys.Y)) 
                                 Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
                        $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}");
                             GameFiber.Yield();
+                            if (SuspectStopped) break;
                         }
                     });
                     while (CalloutRunning)
@@ -245,7 +266,7 @@ namespace BarbarianCall.Callouts
                 }
             });
         }
-        private string[] insultOfficer =
+        private readonly string[] insultOfficer =
         {
             "Get out of here, this is none of your bussiness",
             "Get the f*ck out of here, or i will shoot",
@@ -255,7 +276,7 @@ namespace BarbarianCall.Callouts
         };
         private void SituationHostage()
         {
-            GameFiber.StartNew(() =>
+            CalloutMainFiber = GameFiber.StartNew(() =>
             {
                 try
                 {
@@ -263,8 +284,8 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut);
                     TaxiDriver.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut);
                     GameFiber.Wait(200);
-                    Suspect.Position = Taxi.RearPosition;
-                    TaxiDriver.Position = Taxi.FrontPosition;
+                    Suspect.Position = Taxi.GetOffsetPositionFront(2f);
+                    TaxiDriver.Position = Taxi.GetOffsetPositionFront(-2f);
                     Suspect.Heading = Suspect.GetHeadingTowards(TaxiDriver);
                     TaxiDriver.Heading = TaxiDriver.GetHeadingTowards(Suspect);
                     GameFiber.Wait(75);
@@ -275,7 +296,8 @@ namespace BarbarianCall.Callouts
                     TaxiDriver.Tasks.PutHandsUp(-1, Suspect);
                     Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
                        $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}");
-                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    Time = DateTime.Now + new TimeSpan(0, 0, 20);
+                    bool alerted = false;
                     while (CalloutRunning)
                     {
                         if (PlayerPed.DistanceTo(SpawnPoint) < 45f)
@@ -287,14 +309,17 @@ namespace BarbarianCall.Callouts
                             }
                             break;
                         }
-                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 10000L)
+                        if (DateTime.Now >= Time && !Game.IsPaused && !alerted)
                         {
-
+                            Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS WE_HAVE BAR_CRIME_ASSAULT IN_OR_ON_POSITION", SpawnPoint);
+                            "~b~Dispatch~s~: ~y~We have report that the taxi driver is being held at gunpoint, respond ~r~Code 3~s~".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
+                            alerted = true;
                         }
                         GameFiber.Yield();
                     }
+                    if (!CalloutRunning) return;
                     Game.DisplayHelp("Your goal is to ~g~protect~s~ the ~b~victim~s~ and ~y~arrest~s~ the ~o~suspect~s~ ~g~alive");
-                    if (Blip.Exists()) Blip.Delete();
+                    if (Blip) Blip.Delete();
                     Blip = Suspect.AttachBlip();
                     Blip.Color = Color.Red;
                     Blip.Scale = 0.9285f;
@@ -307,7 +332,7 @@ namespace BarbarianCall.Callouts
                             if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000)
                             {
                                 Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                                Game.DisplayHelp("Your goal is to ~g~protect~s~ the ~b~victim~s~ and ~y~arrest~s~ the ~o~suspect~s~ ~g~alive");
+                                Game.DisplayHelp("Your goal is to ~g~protect~s~ the ~p~victim~s~ and ~y~arrest~s~ the ~o~suspect~s~ ~g~alive");
                             }
                             if (Functions.IsPedArrested(Suspect) || TaxiDriver.IsDead) break;
                             GameFiber.Yield();
@@ -315,6 +340,12 @@ namespace BarbarianCall.Callouts
                     });
                     int HostageScenario = Peralatan.Random.Next(1, 4000);
                     $"Callout scenario: {HostageScenario}".ToLog();
+                    while (CalloutRunning)
+                    {
+                        if (PlayerPed.DistanceTo(Suspect) < 12f || PlayerPed.DistanceTo(TaxiDriver) < 12f) break;
+                        GameFiber.Yield();
+                    }
+                    if (!CalloutRunning) return;
                     if (HostageScenario < 1000)
                     {
                         Suspect.Tasks.FireWeaponAt(TaxiDriver.GetBonePosition(PedBoneId.Head), -1, FiringPattern.BurstFirePistol);
@@ -348,7 +379,7 @@ namespace BarbarianCall.Callouts
                                 TaxiDriver.PlayAmbientSpeech(null, Speech.DYING_HELP, 0, SpeechModifier.AllowRepeat);
                                 TaxiDriver.Tasks.FollowNavigationMeshToPosition(PlayerPed.LastVehicle.RearPosition, 
                                     MathHelper.GetRandomSingle(PlayerPed.LastVehicle.Heading, PlayerPed.LastVehicle.Heading + 180f), 10f).WaitForCompletion(20000);
-                                if (TaxiDriver.Exists()) TaxiDriver.Tasks.Cower(-1);
+                                if (TaxiDriver) TaxiDriver.Tasks.Cower(-1);
                             }
                         });
                         Pursuit = Functions.CreatePursuit();
@@ -361,6 +392,19 @@ namespace BarbarianCall.Callouts
                     }
                     else if (HostageScenario < 3000)
                     {
+                        GameFiber.StartNew(() =>
+                        {
+                            GameFiber.Wait(2500);
+                            TaxiDriver.Tasks.Clear();
+                            GameFiber.Wait(1500);
+                            if (PlayerPed.LastVehicle.Exists() && PlayerPed.LastVehicle.DistanceTo(TaxiDriver) < 100f)
+                            {
+                                TaxiDriver.PlayAmbientSpeech(null, Speech.DYING_HELP, 0, SpeechModifier.AllowRepeat);
+                                TaxiDriver.Tasks.FollowNavigationMeshToPosition(PlayerPed.LastVehicle.RearPosition,
+                                    MathHelper.GetRandomSingle(PlayerPed.LastVehicle.Heading, PlayerPed.LastVehicle.Heading + 180f), 10f).WaitForCompletion(20000);
+                                if (TaxiDriver) TaxiDriver.Tasks.Cower(-1);
+                            }
+                        });
                         Suspect.Tasks.FightAgainst(PlayerPed).WaitForCompletion(15000);
                         if (SuspectState == ESuspectStates.InAction)
                         {
@@ -395,7 +439,7 @@ namespace BarbarianCall.Callouts
         }
         private void SituationDead()
         {
-            GameFiber.StartNew(() =>
+            CalloutMainFiber = GameFiber.StartNew(() =>
             {
                 try
                 {
@@ -403,22 +447,28 @@ namespace BarbarianCall.Callouts
                     Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
                        $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}");
                     Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut);
-                    Vector3 suspectLocation = SpawnManager.GetPedSpawnPoint(SpawnPoint, 250, 325);
-                    Vector3 witnessLocation = Taxi.Position + Vector3.RelativeBack * 9f;
-                    if (suspectLocation == Vector3.Zero) suspectLocation = World.GetNextPositionOnStreet(SpawnPoint.Around(345, 350));
                     GameFiber.Sleep(200);
-                    Suspect.Position = suspectLocation;
+                    Suspect.IsVisible = false;
                     Functions.AddPedContraband(Suspect, ContrabandType.Weapon, "Pistol");
-                    Witness = new Ped(witnessLocation, witnessLocation.GetHeadingTowards(SpawnPoint));
-                    Suspect.Tasks.Wander();
+                    Witness = new Ped(SpawnPoint, SpawnHeading);
+                    Witness.MakeMissionPed();
+                    WitnessCar = new Vehicle(m => m.IsCar && !m.IsBigVehicle && m.NumberOfSeats == 4, Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
+                    Witness.WarpIntoVehicle(WitnessCar, -1);
+                    if (Peralatan.Random.Next() % 5 == 0)
+                    {
+                        Ped witnPass = new Ped(SpawnPoint, SpawnHeading);
+                        witnPass.MakeMissionPed();
+                        witnPass.WarpIntoVehicle(WitnessCar, 0);
+                    }
                     GetClose();
+                    if (!CalloutRunning) return;
                     TaxiDriver.Kill();
-                    if (Blip.Exists()) Blip.Delete();
+                    if (Blip) Blip.Delete();
                     Blip = TaxiDriver.AttachBlip();
                     Blip.Color = Color.Red;
                     WitnessBlip = Witness.AttachBlip();
                     WitnessBlip.Color = Color.Orange;
-                    Game.DisplayHelp($"~y~Please move closer to the witness, press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~y~ to speak with the witness");
+                    Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
                     Functions.RequestBackup(TaxiDriver.Position, EBackupResponseType.Code3, EBackupUnitType.Ambulance);
                     "Ambulance is en route to the scene".DisplayNotifWithLogo("~y~Taxi Passenger Refuse To Pay");                  
                     Game.DisplayHelp($"~y~Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~y~ to speak with the witness");
@@ -429,14 +479,20 @@ namespace BarbarianCall.Callouts
                         if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y))
                         {
                             if (PlayerPed.DistanceTo(Witness) < 5f && PlayerPed.IsOnFoot) break;
-                            else Game.DisplayHelp("~y~Please move ~p~closer~y~ and ~o~leave~y~ from vehicle");
+                            else Game.DisplayHelp("~s~Please move ~p~closer~s~ and ~o~leave~s~ from vehicle");
                         }
                         if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000)
                         {
                             Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                            Game.DisplayHelp($"~y~Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~y~ to speak with the witness");
+                            Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
                         }
-                    }                   
+                    }
+                    if (!CalloutRunning) return;
+                    var spawnPoint = SpawnManager.GetPedSpawnPoint(SpawnPoint, 250, 350);
+                    if (spawnPoint.Position == Vector3.Zero) spawnPoint.Position = World.GetNextPositionOnStreet(SpawnPoint.Around(250, 650f));
+                    Suspect.Position = spawnPoint;
+                    Suspect.IsVisible = true;
+                    Suspect.Tasks.Wander();
                     List<string> witnessFlow = new List<string>()
                      {
                         "Officer: Hello are you the caller?",
@@ -450,15 +506,19 @@ namespace BarbarianCall.Callouts
                         "Officer: Thank you for your information i will find the suspect",
                         "Witness: Okay, be careful officer"
                      };
+                    Witness.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
+                    Time = DateTime.Now;
                     Peralatan.HandleSpeech(witnessFlow, Witness);
                     Game.DisplayHelp("~y~Dispatch is trying to find ~o~suspect~y~ information, please wait...", 10000);
+                    $"Conversation is took {(DateTime.Now - Time).TotalSeconds} seconds".ToLog();
                     GameFiber.Wait(Peralatan.Random.Next(7500, 10000));
+                    Manusia = new Manusia(Suspect, SuspectPersona);
                     Game.HideHelp();
                     Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS SUSPECT_LAST_SEEN IN_OR_ON_POSITION", Suspect.Position);
                     Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
                        $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}~n~~y~Last Seen~s~: {Suspect.Position.GetZoneName()}");
-                    if (Blip.Exists()) Blip.Delete();
-                    if (WitnessBlip.Exists()) WitnessBlip.Delete();
+                    if (Blip) Blip.Delete();
+                    if (WitnessBlip) WitnessBlip.Delete();
                     Blip = new Blip(Suspect.Position.Around(10f), 70f);
                     Blip.Color = Color.Yellow;
                     Blip.EnableRoute(Color.Yellow);
@@ -475,7 +535,7 @@ namespace BarbarianCall.Callouts
                                $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}~n~~y~Last Seen~s~: {Suspect.Position.GetZoneName()}");
                             if (Suspect.DistanceTo(curPos) > 80f)
                             {
-                                if (Blip.Exists()) Blip.Delete();
+                                if (Blip) Blip.Delete();
                                 Blip = new Blip(Suspect.Position.Around(8f, 10f), 70f);
                                 Blip.Color = Color.Yellow;
                                 Blip.EnableRoute(Color.Yellow);
@@ -484,6 +544,7 @@ namespace BarbarianCall.Callouts
                         }                       
                         GameFiber.Yield();
                     }
+                    if (!CalloutRunning) return;
                     if (Peralatan.Random.Next(2150, 3500) % 8 == 0)
                     {
                         Suspect.Tasks.PutHandsUp(-1, PlayerPed);
@@ -499,13 +560,22 @@ namespace BarbarianCall.Callouts
                         CalloutStates = ECalloutStates.InPursuit;
                         if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.InPursuit);
                     }
-                    if (Blip.Exists()) Blip.Delete();
+                    if (Blip) Blip.Delete();
                     Blip = Suspect.AttachBlip();
                     Blip.Color = Color.Red;
+                    bool stealCar = false;
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
                         if (SuspectState != ESuspectStates.InAction) break;
+                        if (PursuitCreated && !stealCar && Suspect.IsInAnyVehicle(false))
+                        {
+                            stealCar = true;
+                            if (!Blip) Blip = Suspect.AttachBlip();
+                            Blip.Color = Color.Red;
+                            Blip.EnableRoute(Color.Red);
+                            Functions.RequestBackup(Suspect.Position, EBackupResponseType.Pursuit, EBackupUnitType.NooseAirUnit);
+                        }
                     }
                     DisplayCodeFourMessage();
                 }
@@ -516,6 +586,13 @@ namespace BarbarianCall.Callouts
                     End();
                 }
             });
-        }       
+        }
+        private void SituationCommon()
+        {
+            CalloutMainFiber = GameFiber.StartNew(() =>
+            {
+                
+            });
+        }
     }
 }

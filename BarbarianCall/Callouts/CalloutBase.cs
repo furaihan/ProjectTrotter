@@ -20,10 +20,13 @@ namespace BarbarianCall.Callouts
         public ECalloutStates CalloutStates;
         public Ped Suspect;
         public Vehicle SuspectCar;
+        public Types.Manusia Manusia;
+        public Model CarModel;
         public Blip Blip;
         public bool CalloutRunning = false;
         public Vector3 SpawnPoint = Vector3.Zero;
         public float SpawnHeading = 0f;
+        public SpawnPoint Spawn = BarbarianCall.SpawnPoint.Zero;
         public long Timer;
         public DateTime Time;
         public LHandle Pursuit;
@@ -35,7 +38,7 @@ namespace BarbarianCall.Callouts
         public Persona SuspectPersona;
         public Ped PlayerPed = Game.LocalPlayer.Character;
         public GameFiber CalloutMainFiber;
-        public string Path;
+        public string FilePath;
         public static readonly uint[] WeaponHashes = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A, 0xBD248B55, 0x13532244, 0x624FE830 };
         #endregion
 
@@ -43,10 +46,11 @@ namespace BarbarianCall.Callouts
         {
             CalloutRunning = false;
             PursuitCreated = false;
-            if (Suspect.Exists()) Suspect.Delete();
-            if (SuspectCar.Exists()) SuspectCar.Delete();
-            if (Blip.Exists()) Blip.Delete();
+            if (Suspect) Suspect.Delete();
+            if (SuspectCar) SuspectCar.Delete();
+            if (Blip) Blip.Delete();
             if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.Available, true, false);
+            Types.Manusia.CurrentManusia = null;
             Functions.PlayScannerAudio("BAR_AI_RESPOND");
             base.OnCalloutNotAccepted();
         }
@@ -63,7 +67,8 @@ namespace BarbarianCall.Callouts
         public override bool OnCalloutAccepted()
         {
             CalloutStates = ECalloutStates.EnRoute;
-
+            HandleEnd();
+            GameFiber.Sleep(75);
             return base.OnCalloutAccepted();
         }
         public override void OnCalloutDisplayed()
@@ -72,20 +77,38 @@ namespace BarbarianCall.Callouts
         }
         public override void End()
         {
-            base.End();
-            try
+            CalloutRunning = false;
+            Peralatan.Speaking = false;
+            if (Suspect && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
+            if (SuspectCar) SuspectCar.Dismiss();
+            if (Blip) Blip.Delete();
+            if (GrammarPoliceRunning && Menus.PauseMenu.autoAvailable.Checked) GrammarPolice.API.Functions.Available(false, false);
+            if (Pursuit != null && Functions.IsPursuitStillRunning(Pursuit)) Functions.ForceEndPursuit(Pursuit);
+            Types.Manusia.CurrentManusia = null;
+            base.End();              
+        }
+        private void HandleEnd()
+        {
+            "Starting EndHandler loop".ToLog();
+            GameFiber.StartNew(() =>
             {
-                CalloutRunning = false;
-                Peralatan.Speaking = false;
-                if (Suspect.Exists() && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
-                if (SuspectCar.Exists()) SuspectCar.Dismiss();
-                if (Blip.Exists()) Blip.Delete();
-                if (GrammarPoliceRunning) GrammarPolice.API.Functions.Available(false, false);
-            }
-            catch (Exception e)
-            {
-                e.ToString().ToLog();
-            }
+                DateTime dateTime = DateTime.Now;
+                while (CalloutRunning)
+                {
+                    GameFiber.Yield();
+                    if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End))
+                    {
+                        GameFiber.Sleep(300);
+                        if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
+                        {
+                            GameFiber.Sleep(1700);
+                            if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End)) End();
+                        }
+                        else Game.DisplayHelp($"~y~To force end the callout, press and hold down {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ for 2 second");
+                    }
+                }
+                $"Callout ended successfully, that callout took {(DateTime.Now - dateTime).TotalSeconds:0.00} seconds".ToLog();
+            }, "[BarbarianCall] Callout End Handler Fiber");
         }
         public static UIMenuItem[] CreateMenu()
         {

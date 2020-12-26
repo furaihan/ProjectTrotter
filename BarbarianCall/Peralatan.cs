@@ -15,7 +15,7 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new Random(DateTime.Now.Millisecond + World.TimeOfDay.Seconds + (Environment.TickCount % 7450));
+        public static Random Random = new Random(DateTime.Now.Ticks.GetHashCode());
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         internal static SpawnPoint SelectNearbySpawnpoint(List<SpawnPoint> spawnPoints)
@@ -175,7 +175,7 @@ namespace BarbarianCall
             });
             if (talker.Exists() && !talker.IsInAnyVehicle(false))
             {
-                talker.Tasks.AchieveHeading(GetHeadingTowards(talker, playerPos));
+                talker.Tasks.AchieveHeading(talker.GetHeadingTowards(Game.LocalPlayer.Character));
                 talker.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 1f, AnimationFlags.Loop | AnimationFlags.SecondaryTask);
             }
             for (int i = 0; i < modifiedDialogue.Count; i++)
@@ -204,7 +204,7 @@ namespace BarbarianCall
             ped.IsVisible = true;
             ped.IsInvincible = invincible;
         }
-        internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") => 
+        internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT") => 
             Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static void DisplayNotifWithLogo(this string msg, out uint notifId, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") =>
             notifId = Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
@@ -358,7 +358,7 @@ namespace BarbarianCall
             {
                 try
                 {
-                    "Attempting to register ped headshot transparent".ToLog();
+                    "Attempting to register ped headshot".ToLog();
                     uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
                     DateTime endTime = DateTime.Now + new TimeSpan(0, 0, 10);
                     var start = DateTime.Now;                   
@@ -373,12 +373,12 @@ namespace BarbarianCall
                         if (DateTime.Now >= endTime) break;
                     }
                     string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
-                    string txn = txd;
-                    TimeSpan duration = DateTime.Now - start;
-                    $"Register ped headshot transparent is took {duration.TotalMilliseconds} ms".ToLog();
+                    string txn = txd;                
                     Game.DisplayNotification(txn, txd, title, subtitle, text);
                     //GameFiber.Wait(200);
                     NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
+                    TimeSpan duration = DateTime.Now - start;
+                    $"Register ped headshot transparent is took {duration.TotalMilliseconds} ms".ToLog();
                 }
                 catch (Exception e)
                 {

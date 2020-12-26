@@ -25,7 +25,7 @@ namespace BarbarianCall
         private void Functions_OnOnDutyStateChanged(bool onDuty)
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(Initialization.LSPDFRResolveEventHandler);
-            Functions.RegisterCallout(typeof(Callouts.StrangeLookingVehicle));
+            Functions.RegisterCallout(typeof(Callouts.SuspiciousVehicle));
             Functions.RegisterCallout(typeof(Callouts.OfficerStabbed));
             Functions.RegisterCallout(typeof(Callouts.TaxiRefusePay));
             Initialization.Initialize();

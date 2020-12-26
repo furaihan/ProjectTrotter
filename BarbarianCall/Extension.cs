@@ -46,11 +46,14 @@ namespace BarbarianCall
 		internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
 		internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.CallByHash<int>(0x87B63E25A529D526, veh);
 		internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
-		internal static void PlaceWaypoint(this Vector3 pos) => PlaceWaypoint(new Vector2(pos.X, pos.Y));
-		internal static void PlaceWaypoint(this Vector2 pos) => NativeFunction.Natives.SET_NEW_WAYPOINT(pos.X, pos.Y);
-		internal static void RemoveWaypoint() => NativeFunction.Natives.SET_WAYPOINT_OFF();
 		internal static string GetCardinalDirection(this Entity e, bool fullform) => GetCardinalDirection(e.Heading, fullform);
 		internal static string GetCardinalDirection(this Entity e) => GetCardinalDirection(e.Heading, false);
+		/// <summary>
+		/// Sets a vehicle on the ground on all wheels.  Returns whether or not the operation was successful.
+		/// </summary>
+		/// <param name="vehicle"></param>
+		/// <returns>return true if the operation was successful, otherwise false</returns>
+		internal static bool PlaceOnGroundProperly(this Vehicle vehicle) => NativeFunction.Natives.SET_VEHICLE_ON_GROUND_PROPERLY<bool>(vehicle);
 		internal static string GetCardinalDirection(float direction, bool fullform)
 		{
 			float degrees = Math.Abs(direction);
@@ -88,9 +91,9 @@ namespace BarbarianCall
             }
 			return "Unknown version";
         }
-		internal static float GetRandomSingle() => GetRandomSingle(Peralatan.Random.Next(), Peralatan.Random.Next());
-		internal static float GetRandomSingle(float min, float max) => GetRandomSingle(Math.Abs((int)Math.Round(min)), Math.Abs((int)Math.Round(max)));
-		internal static float GetRandomSingle(int min, int max)
+		internal static float GetRandomAbsoluteSingle() => GetRandomAbsoluteSingle(Peralatan.Random.Next(), Peralatan.Random.Next());
+		internal static float GetRandomAbsoluteSingle(float min, float max) => GetRandomAbsoluteSingle(Math.Abs((int)Math.Round(min)), Math.Abs((int)Math.Round(max)));
+		internal static float GetRandomAbsoluteSingle(int min, int max)
         {
 			var siji = Peralatan.Random.Next(min, max);
 			var loro = Peralatan.Random.NextDouble();

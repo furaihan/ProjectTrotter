@@ -17,40 +17,40 @@ namespace BarbarianCall.API
             switch (statusType)
             {
                 case EGrammarPoliceStatusType.Available:
-                    Functions.Available(playSound, displayNotification);
+                    GrammarPolice.API.Functions.Available(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.StartPatrol:
-                    Functions.StartPatrol(playSound, displayNotification);
+                    GrammarPolice.API.Functions.StartPatrol(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.Busy:
-                    Functions.Busy(playSound, displayNotification);
+                    GrammarPolice.API.Functions.Busy(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.EnRoute:
                     Callout.Accept();
                     break;
                 case EGrammarPoliceStatusType.OnScene:
-                    Functions.Scene(playSound, displayNotification);
+                    GrammarPolice.API.Functions.Scene(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.Investigation:
-                    Functions.Investigating(playSound, displayNotification);
+                    GrammarPolice.API.Functions.Investigating(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.Panic:
-                    Functions.Panic();
+                    GrammarPolice.API.Functions.Panic();
                     break;
                 case EGrammarPoliceStatusType.Emergency:
                     Backup.Panic();
                     break;
                 case EGrammarPoliceStatusType.InPursuit:
-                    Functions.InPursit(playSound, displayNotification);
+                    GrammarPolice.API.Functions.InPursit(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.TrafficStop:
-                    Functions.TrafficStop(playSound, displayNotification);
+                    GrammarPolice.API.Functions.TrafficStop(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.ReturnToStation:
-                    Functions.ReturnToStation(playSound, displayNotification);
+                    GrammarPolice.API.Functions.ReturnToStation(playSound, displayNotification);
                     break;
                 default:
-                    Functions.Busy(playSound, displayNotification);
+                    GrammarPolice.API.Functions.Busy(playSound, displayNotification);
                     break;
             }
         }

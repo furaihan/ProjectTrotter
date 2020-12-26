@@ -52,39 +52,41 @@ namespace BarbarianCall.Menus
             pauseMenu.AddTab(calloutMenu);
             "Done creating callouts tab".ToLog();
 
-            autoAvailable = new UIMenuCheckboxItem("Available After Finishing A Callout", true, "If you have GrammarPolice installed, enable this setting will set you " +
+            autoAvailable = new UIMenuCheckboxItem("Set Player Available After Finishing A Callout", true, "If you have GrammarPolice installed, enable this setting will set you " +
                 "available for calls after you have finished your callout");
             otherUnitAudio = new UIMenuCheckboxItem("Play Other Unit Respond Audio", true, "If you did not accept a callout from this plugin, a sound from other unit taking a callout will be played");
             onSceneAudio = new UIMenuCheckboxItem("Play Officer On Scene Audio", true, "Play scanner audio when you arrived on scene");
             offStabCB = new UIMenuCheckboxItem("Officer Stabbed", true, "Enable or disable \"Officer Stabbed\" callout");
             taxiCB = new UIMenuCheckboxItem("Taxi Passenger Refuse To Pay", true, "Enable or disable \"Taxi Passenger Refuse To Pay\" callout");
             susVehCB = new UIMenuCheckboxItem("Strange Looking Vehicle", true, "Enable or disable \"Strange Looking Vehicle\" callout");
+            var gpSection = new UIMenuItem("Grammar Police Integration");
+            SetUIMenuAsSection(gpSection);
             List<UIMenuItem> settings = new List<UIMenuItem>()
             {
-                autoAvailable, otherUnitAudio, onSceneAudio, offStabCB, taxiCB, susVehCB
+                gpSection, autoAvailable, otherUnitAudio, onSceneAudio, offStabCB, taxiCB, susVehCB
             };
 
             pluginSettingMenu = new TabInteractiveListItem("Plugin Settings", settings);
+            pluginSettingMenu.Items.ForEach(ui =>
+            {
+                ui.Activated += (m, s) => Game.DisplaySubtitle(s.Description);
+            });
             pauseMenu.AddTab(pluginSettingMenu);
             "Creating pause menu is nearly done".ToLog();
             pauseMenu.RefreshIndex();
             "Refreshing pause menu index".ToLog();
             ProcessMenus();
         }
-        internal List<UIMenuItem> sectionItem;
-        private void SetUIMenuAsSection(UIMenuItem menuItem)
+        internal static List<UIMenuItem> sectionItem = new List<UIMenuItem>();
+        private static void SetUIMenuAsSection(UIMenuItem menuItem)
         {
-            menuItem.TextStyle = new TextStyle(TextFont.HouseScript, menuItem.ForeColor, 0.35f, TextJustification.Center);
+            menuItem.TextStyle = new TextStyle(TextFont.ChaletLondon, menuItem.ForeColor, 0.35f);
             menuItem.Enabled = false;
             menuItem.BackColor = HudColor.PurpleDark.GetColor();
             menuItem.HighlightedBackColor = HudColor.Purple.GetColor();
             menuItem.RightBadge = UIMenuItem.BadgeStyle.Heart;
             menuItem.LeftBadge = UIMenuItem.BadgeStyle.Heart;
             sectionItem.Add(menuItem);
-        }
-        private static void ReadIniGlobal()
-        {
-            
         }
         internal static void ProcessMenus()
         {

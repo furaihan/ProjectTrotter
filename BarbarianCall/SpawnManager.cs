@@ -59,35 +59,6 @@ namespace BarbarianCall
             }
             return false;
         }
-        internal static Vector3 GetNextPositionOnSideWalk(this Vector3 posi, float radius)
-        {
-            Vector3 result;
-            DateTime dateTime = DateTime.Now;
-            for (int i = 0; i < 50; i++)
-            {
-                Vector3 pos = posi.Around(radius + Convert.ToSingle(Peralatan.Random.Next(1, 6)) + Convert.ToSingle(Peralatan.Random.NextDouble()));
-                if (NativeFunction.Natives.GET_SAFE_COORD_FOR_PED<bool>(pos.X, pos.Y, pos.Z, true, out Vector3 outpost, 0))
-                {
-                    result = outpost;
-                    $"Safe Coord found {i} on sidewalk {outpost}".ToLog();
-                    $"Time elapsed: {(DateTime.Now - dateTime).TotalMilliseconds} ms".ToLog();
-                    return result;
-                }
-            }
-            for (int i = 0; i < 50; i++)
-            {
-                Vector3 pos = posi.Around(radius + Convert.ToSingle(Peralatan.Random.Next(1, 6)) + Convert.ToSingle(Peralatan.Random.NextDouble()));
-                if (NativeFunction.Natives.GET_SAFE_COORD_FOR_PED<bool>(pos.X, pos.Y, pos.Z, false, out Vector3 outpost, 0))
-                {
-                    result = outpost;
-                    $"Safe Coord found {i} not on sidewalk {outpost}".ToLog();
-                    $"Time elapsed: {(DateTime.Now - dateTime).TotalMilliseconds} ms".ToLog();
-                    return result;
-                }
-            }
-            $"Safe Coord not found. Time elapsed: {(DateTime.Now - dateTime).TotalMilliseconds} ms".ToLog();
-            return Vector3.Zero;
-        }
         internal static SpawnPoint GetVehicleSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
             DateTime start = DateTime.Now;
@@ -97,7 +68,8 @@ namespace BarbarianCall
                 if (i % 12 == 0) GameFiber.Yield();
                 if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 5, 3.0, 0))
                 {
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 3f && nodeP.TravelDistanceTo(pos) > maximumDistance)
+                    if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 3f)
                     {
                         SpawnPoint ret = new SpawnPoint(nodeP, nodeH);
                         $"Vehicle Spawn found {ret}".ToLog();
@@ -117,9 +89,10 @@ namespace BarbarianCall
                 if (i % 15 == 0) GameFiber.Yield();
                 if (NativeFunction.Natives.GET_SAFE_COORD_FOR_PED<bool>(v.X, v.Y, v.Z, true, out Vector3 nodeP, 0))
                 {
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 3f && nodeP.TravelDistanceTo(pos) > maximumDistance)
+                    if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 3f)
                     {
-                        SpawnPoint ret = new SpawnPoint(nodeP, Extension.GetRandomSingle(1, 360));
+                        SpawnPoint ret = new SpawnPoint(nodeP, Extension.GetRandomAbsoluteSingle(1, 360));
                         $"Ped Spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
                         $"{i} Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
                         return ret;
@@ -128,33 +101,22 @@ namespace BarbarianCall
             }
             for (int i = 0; i < 600; i++)
             {
-                Vector3 v = pos.Around(minimalDistance, maximumDistance);
+                Vector3 v = pos.Around(minimalDistance, maximumDistance + Extension.GetRandomAbsoluteSingle(1f, 5f));
                 if (i % 30 == 0) GameFiber.Yield();
                 if (NativeFunction.Natives.GET_SAFE_COORD_FOR_PED<bool>(v.X, v.Y, v.Z, false, out Vector3 nodeP, 0))
                 {
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 3f && nodeP.TravelDistanceTo(pos) > maximumDistance)
+                    if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 3f)
                     {
-                        SpawnPoint ret = new SpawnPoint(nodeP, Extension.GetRandomSingle(1, 360));
+                        SpawnPoint ret = new SpawnPoint(nodeP, Extension.GetRandomAbsoluteSingle(1, 360));
                         $"Ped safe spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
                         $"{i + 600} Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
                         return ret;
                     }
                 }
             }
-            for (int i = 0; i < 600; i++)
-            {
-                Vector3 v = pos.Around(minimalDistance, maximumDistance);
-                if (!v.IsPointOnRoad() && v.DistanceTo(pos) > minimalDistance)
-                {
-                    SpawnPoint ret = new SpawnPoint(v, Extension.GetRandomSingle(1f, 360f));
-                    $"Ped wilderness spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
-                    $"{i + 600 + 600} Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
-                    return ret;
-                }
-                if (i % 45 == 0) GameFiber.Yield();
-            }
             $"Safe coord not found".ToLog();
-            $"900 process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
+            $"1200 process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
             return SpawnPoint.Zero;
         }
     }
@@ -172,6 +134,16 @@ namespace BarbarianCall
             get
             {
                 return new SpawnPoint();
+            }
+        }
+        public SpawnPoint GroundPosition
+        {
+            get
+            {
+                float? zpos = World.GetGroundZ(Position, true, true);
+                Vector3 ground = Position;
+                ground.Z = zpos ?? Position.Z;
+                return new SpawnPoint(ground, Heading);
             }
         }
         public SpawnPoint()
