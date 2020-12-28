@@ -165,9 +165,12 @@ namespace BarbarianCall.Callouts
             //{
                // GameFiber.StartNew(End);
             //}
-            if (Functions.IsPedArrested(Suspect) && SuspectState != ESuspectStates.Arrested) { Game.DisplayNotification("Suspect Is ~g~Arrested"); SuspectState = ESuspectStates.Arrested; }
-            else if (Suspect.IsDead && SuspectState != ESuspectStates.Dead) { Game.DisplayNotification("Suspect is ~r~Deceased"); SuspectState = ESuspectStates.Dead; }
-            else if (PursuitCreated && !Suspect && SuspectState != ESuspectStates.Escaped) { Game.DisplayNotification("Suspect is ~o~escaped"); SuspectState = ESuspectStates.Escaped; }
+            if (Suspect)
+            {
+                if (Functions.IsPedArrested(Suspect) && SuspectState != ESuspectStates.Arrested) { Game.DisplayNotification("Suspect Is ~g~Arrested"); SuspectState = ESuspectStates.Arrested; }
+                else if (Suspect.IsDead && SuspectState != ESuspectStates.Dead) { Game.DisplayNotification("Suspect is ~r~Deceased"); SuspectState = ESuspectStates.Dead; }
+                else if (PursuitCreated && !Suspect && SuspectState != ESuspectStates.Escaped) { Game.DisplayNotification("Suspect is ~o~escaped"); SuspectState = ESuspectStates.Escaped; }
+            }         
             if (passenger)
             {
                 if (Functions.IsPedArrested(passenger) && PassengerState != ESuspectStates.Arrested)
@@ -188,8 +191,7 @@ namespace BarbarianCall.Callouts
             }
             if (passenger)
             {
-                if ((SuspectState == ESuspectStates.Arrested || SuspectState == ESuspectStates.Dead || SuspectState == ESuspectStates.Escaped) && 
-                    (PassengerState == ESuspectStates.Escaped || PassengerState == ESuspectStates.Dead || PassengerState == ESuspectStates.Arrested))
+                if (SuspectState != ESuspectStates.InAction && PassengerState != ESuspectStates.InAction)
                 {
                     Game.DisplayNotification($"We Are ~g~Code 4~s~ suspect is ~o~{SuspectState}~s~ and passenger is ~o~{PassengerState}");
                     CalloutStates = ECalloutStates.Finish;
@@ -198,7 +200,7 @@ namespace BarbarianCall.Callouts
             }
             else
             {
-                if (SuspectState == ESuspectStates.Arrested || SuspectState == ESuspectStates.Dead || SuspectState == ESuspectStates.Escaped)
+                if (SuspectState != ESuspectStates.InAction)
                 {
                     Game.DisplayNotification($"We Are ~g~Code 4~s~ suspect is {SuspectState}");
                     CalloutStates = ECalloutStates.Finish;
@@ -312,7 +314,6 @@ namespace BarbarianCall.Callouts
                     {
                         API.BetterEMSFunc.CallAmbulance(SpawnPoint);
                     }
-                    else if (UltimateBackupRunning) API.UltimateBackupFunc.CallUnit(API.UltimateBackupFunc.EUltimateBackupCallType.Ambulance);
                     else Functions.RequestBackup(officer.Position, LSPD_First_Response.EBackupResponseType.Code3, LSPD_First_Response.EBackupUnitType.Ambulance);
                     while (CalloutRunning)
                     {
@@ -369,6 +370,10 @@ namespace BarbarianCall.Callouts
                         if (Game.LocalPlayer.Character.DistanceTo(Suspect) < 15f)
                         {
                             var chaseScenario = Peralatan.Random.Next(7250);
+                            if (PlayerPed.IsInAnyVehicle(false) && PlayerPed.CurrentVehicle.IsSirenOn)
+                            {
+                                chaseScenario = 2;
+                            }
                             if (chaseScenario % 2 == 0)
                             {
                                 Pursuit = Functions.CreatePursuit();
@@ -458,7 +463,6 @@ namespace BarbarianCall.Callouts
                         API.BetterEMSFunc.SetPedDeathDetails(officer, injuredBodyParts.GetRandomElement(), "Stabbed with a knife", deathTime, 0.8f);
                         API.BetterEMSFunc.CallAmbulance(officer.Position);
                     }
-                    else if (UltimateBackupRunning) API.UltimateBackupFunc.CallUnit(API.UltimateBackupFunc.EUltimateBackupCallType.Ambulance);
                     else Functions.RequestBackup(officer.Position, LSPD_First_Response.EBackupResponseType.Code3, LSPD_First_Response.EBackupUnitType.Ambulance);
                     if (passenger && passenger.IsInAnyVehicle(false)) passenger.Tasks.LeaveVehicle(LeaveVehicleFlags.None);
                     if (Suspect.IsInAnyVehicle(false)) Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(5000);

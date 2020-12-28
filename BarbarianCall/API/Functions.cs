@@ -13,7 +13,7 @@ namespace BarbarianCall.API
     {
         public static void DisplayPedDetails()
         {
-            $"Executing DisplayPedDetails. Request form {Assembly.GetCallingAssembly().GetName()}".ToLog();
+            $"Executing DisplayPedDetails. Request from {Assembly.GetCallingAssembly().GetName().FullName}".ToLog();
             if (Types.Manusia.CurrentManusia == null)
             {
                 "Ped description is null".ToLog();

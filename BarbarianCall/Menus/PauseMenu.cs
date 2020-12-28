@@ -51,7 +51,7 @@ namespace BarbarianCall.Menus
             calloutMenu = new TabSubmenuItem("Callout Settings", CalloutList);
             pauseMenu.AddTab(calloutMenu);
             "Done creating callouts tab".ToLog();
-
+            
             autoAvailable = new UIMenuCheckboxItem("Set Player Available After Finishing A Callout", true, "If you have GrammarPolice installed, enable this setting will set you " +
                 "available for calls after you have finished your callout");
             otherUnitAudio = new UIMenuCheckboxItem("Play Other Unit Respond Audio", true, "If you did not accept a callout from this plugin, a sound from other unit taking a callout will be played");

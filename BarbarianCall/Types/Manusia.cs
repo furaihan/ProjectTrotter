@@ -56,7 +56,7 @@ namespace BarbarianCall.Types
             if (Car && WithVehicle)
             {
                 Game.DisplayNotification("mpcarhud", "transport_car_icon", "~y~BarbarianCall", "~y~Vehicle Details~s~",
-                    $"~y~Model~s~: {Car.Class} {Game.GetLocalizedString(Car.Model.Name)}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}");
+                    $"~y~Model~s~: {Car.GetVehicleDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}");
             }
         }
         private string GetCarColor()

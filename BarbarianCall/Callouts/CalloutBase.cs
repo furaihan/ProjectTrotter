@@ -17,6 +17,8 @@ namespace BarbarianCall.Callouts
         #region Fields
         public enum ESuspectStates { InAction, Arrested, Dead, Escaped };
         public enum ECalloutStates { UnAccepted, EnRoute, OnScene, InPursuit, Finish };
+        public static List<Blip> CalloutBlips { get; protected set; } = new List<Blip>();
+        public static List<Entity> CalloutEntities { get; protected set; } = new List<Entity>();
         public ECalloutStates CalloutStates;
         public Ped Suspect;
         public Vehicle SuspectCar;
@@ -29,6 +31,7 @@ namespace BarbarianCall.Callouts
         public SpawnPoint Spawn = BarbarianCall.SpawnPoint.Zero;
         public long Timer;
         public DateTime Time;
+        public TimeSpan TimeSpan = new TimeSpan(0, 0, 15);
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;
@@ -62,6 +65,7 @@ namespace BarbarianCall.Callouts
             CalloutRunning = false;
             PursuitCreated = false;
             CalloutStates = ECalloutStates.UnAccepted;
+            $"Callout Created From {CreationSource}".ToLog();
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -85,9 +89,21 @@ namespace BarbarianCall.Callouts
             if (GrammarPoliceRunning && Menus.PauseMenu.autoAvailable.Checked) GrammarPolice.API.Functions.Available(false, false);
             if (Pursuit != null && Functions.IsPursuitStillRunning(Pursuit)) Functions.ForceEndPursuit(Pursuit);
             Types.Manusia.CurrentManusia = null;
+            CalloutBlips.ForEach(b => { if (b) b.Delete(); });
+            CalloutEntities.ForEach(e =>
+            {
+                if (e)
+                {
+                    if (e.Model.IsPed && e.IsAlive && !Functions.IsPedArrested((Ped)e)) e.Dismiss();
+                    else if (e.Model.IsPed && e.IsAlive && Functions.IsPedArrested((Ped)e)) e.IsInvincible = false;
+                    else if (e.Model.IsVehicle) e.Dismiss();
+                    else if (e.Model.IsObject) e.Delete();
+                    else e.Dismiss();
+                }
+            });
             base.End();              
         }
-        private void HandleEnd()
+        protected void HandleEnd()
         {
             "Starting EndHandler loop".ToLog();
             GameFiber.StartNew(() =>
@@ -101,7 +117,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Sleep(300);
                         if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
                         {
-                            GameFiber.Sleep(1700);
+                            GameFiber.Sleep(1850);
                             if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End)) End();
                         }
                         else Game.DisplayHelp($"~y~To force end the callout, press and hold down {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ for 2 second");
@@ -109,6 +125,14 @@ namespace BarbarianCall.Callouts
                 }
                 $"Callout ended successfully, that callout took {(DateTime.Now - dateTime).TotalSeconds:0.00} seconds".ToLog();
             }, "[BarbarianCall] Callout End Handler Fiber");
+        }
+        public void DisplayGPNotif()
+        {
+            GrammarPoliceRunning = Initialization.IsLSPDFRPluginRunning("GrammarPolice");
+            if (GrammarPoliceRunning)
+            {
+                "If you have GrammarPolice installed, you can ask dispatch to display the suspect detail ~y~e.g. ~b~\"Dispatch requesting suspect details\"".DisplayNotifWithLogo("~y~" + GetType().Name + "~s~");
+            }
         }
         public static UIMenuItem[] CreateMenu()
         {

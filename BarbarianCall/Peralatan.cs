@@ -10,6 +10,7 @@ using RAGENativeUI;
 using System.Drawing;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using LSPD_First_Response.Mod.API;
+using BarbarianCall.Types;
 
 namespace BarbarianCall
 {
@@ -120,9 +121,18 @@ namespace BarbarianCall
                                     Random.Next(9).ToString() +
                                     Random.Next(9).ToString();
                 ToLog($"{vehicle.PrimaryColor.Name} {Game.GetLocalizedString(vehicle.Model.Name)} license plate changed to {vehicle.LicensePlate}");
-                ToLog($"{GetColorAudio(vehicle.PrimaryColor)}");
-                Game.Console.Print($"{vehicle.GetVehicleDisplayName()}");
-                GameFiber.Sleep(1);
+            }
+        }
+        internal static string GetVehicleDisplayName(this Vehicle vehicle)
+        {
+            unsafe
+            {
+                CVehicle* vehPtr = (CVehicle*)vehicle.MemoryAddress;
+                IntPtr makeNamePtr = vehPtr->GetMakeName();
+                IntPtr gameNamePtr = vehPtr->GetGameName();
+                string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
+                string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
+                return makeName == null ? gameName : $"{makeName} {gameName}";
             }
         }
         internal static string GetZoneName(this ISpatial spatial) => GetZoneName(spatial.Position);
@@ -131,7 +141,6 @@ namespace BarbarianCall
             string gameName = NativeFunction.Natives.GET_NAME_OF_ZONE<string>(pos.X, pos.Y, pos.Z);
             return Game.GetLocalizedString(gameName);
         }
-        internal static string GetVehicleDisplayName(this Vehicle veh) => NativeFunction.Natives.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL<string>(veh.Model.Hash);
         public static string GetCardinalDirectionLowDetailedAudio(this Entity e)
         {
             float degrees = e.Heading;
@@ -139,44 +148,63 @@ namespace BarbarianCall
             return cardinals[(int)Math.Round(((double)degrees % 360) / 90)];
         }
         internal static bool Speaking;
-        internal static void HandleSpeech(List<string> Dialogue, Ped talker)
+        internal static void HandleSpeech(List<string> Dialogue, params Ped[] talkers)
         {
             ToLog("Speech Started");
             Speaking = true;
+            var playerPed = Game.LocalPlayer.Character;
             var playerPos = Game.LocalPlayer.Character.Position;
             var playerHead = Game.LocalPlayer.Character.Heading;
+            IDictionary<string, string> valuePairs = new Dictionary<string, string>()
+            {
+                {"Officer:", "~b~Officer~s~:" },
+                {"Commander:", "~b~Commander~s~:" },
+                {"Dispatch:", "~b~Dispatch~s~:" },
+                {"Witness:", "~o~Witness~s~:" },
+                {"Suspect:", "~r~Suspect~s~:" },
+                {"Paramedic:", "~g~Paramedic~s~:" },
+                {"Medic:", "~g~Medic~s~:" },
+                {"EMS Officer:", "~g~EMS Officer~s~:" },
+                {"Victim:", "~o~Victim~s~:" },
+                {"Hostage:", "~o~Hostage~s~:" },
+                {"Citizen:", "~o~Citizen~s~:" },
+            };
             List<string> modifiedDialogue = new List<string>();
             Dialogue.ForEach(cakap=>
             {
                 var modified = cakap;
-                if (modified.Contains("Officer:")) modified = modified.Replace("Officer:", "~b~Officer~s~:");
-                else if (modified.Contains("Witness:")) modified = modified.Replace("Witness:", "~o~Witness~s~:");
-                else if (modified.Contains("Suspect:")) modified = modified.Replace("Suspect:", "~r~Suspect~s~:");
-                else if (modified.Contains("Paramedic:")) modified = modified.Replace("Paramedic:", "~g~Paramedic~s~:");
-                else if (modified.Contains("Medic:")) modified = modified.Replace("Medic:", "~g~Medic~s~:");
+                if (valuePairs.Any(st=> modified.StartsWith(st.Key)))
+                {
+                    string key = valuePairs.Keys.Where(s => modified.StartsWith(s)).FirstOrDefault();
+                    if (valuePairs.TryGetValue(key, out string val)) modified = modified.Replace(key, val);
+                    else $"Try get value error {key}".ToLog();
+                    //Game.Console.Print("IDict: " + modified);
+                }
                 modifiedDialogue.Add(modified);
             });
             (modifiedDialogue.Count == Dialogue.Count).ToString().ToLog();
-            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, false);
+            var currentWeapon = playerPed.Inventory.EquippedWeapon;
+            playerPed.Inventory.GiveNewWeapon("WEAPON_UNARMED", -1, true);
+            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, false);
             GameFiber.StartNew(delegate
             {
                 while (Speaking)
                 {
                     GameFiber.Yield();
-                    if (Vector3.Distance(Game.LocalPlayer.Character.Position, playerPos) > 2.5f)
+                    if (Vector3.Distance(playerPed.Position, playerPos) > 2.5f)
                     {
-                        Game.LocalPlayer.Character.Tasks.FollowNavigationMeshToPosition(playerPos, playerHead, 1.5f).WaitForCompletion(1000);
+                        playerPed.Tasks.FollowNavigationMeshToPosition(playerPos, playerHead, 1.5f).WaitForCompletion(1000);
                     }
-                    if (Game.LocalPlayer.Character.IsInAnyVehicle(false))
+                    if (playerPed.IsInAnyVehicle(false))
                     {
-                        Game.LocalPlayer.Character.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion(1800);
+                        playerPed.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion(1800);
                     }
                 }
-            });
-            if (talker.Exists() && !talker.IsInAnyVehicle(false))
+            }, "[BarbarianCall] Player Position Handler Fiber");
+            if (talkers.All(p=> p && p.IsInAnyVehicle(false)))
             {
-                talker.Tasks.AchieveHeading(talker.GetHeadingTowards(Game.LocalPlayer.Character));
-                talker.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 1f, AnimationFlags.Loop | AnimationFlags.SecondaryTask);
+                talkers.ToList().ForEach(p=> p.Tasks.AchieveHeading(p.GetHeadingTowards(playerPed)));
+                talkers.ToList().ForEach(p => p.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 4f, AnimationFlags.Loop | AnimationFlags.SecondaryTask));
             }
             for (int i = 0; i < modifiedDialogue.Count; i++)
             {
@@ -185,13 +213,14 @@ namespace BarbarianCall
                     GameFiber.Yield();
                     if (Game.IsKeyDown(Keys.Y)) break;
                 }
-                talker.Tasks.AchieveHeading(talker.GetHeadingTowards(Game.LocalPlayer.Character));
+                talkers.ToList().ForEach(p => p.Tasks.AchieveHeading(p.GetHeadingTowards(playerPed)));
                 Game.DisplaySubtitle(modifiedDialogue[i], 10000);
                 if (!Speaking) break;
             }
             Speaking = false;
-            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(Game.LocalPlayer.Character, true);
-            if (talker.IsValid() && talker.Exists()) talker.Tasks.ClearImmediately();
+            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, true);
+            if (currentWeapon != null && playerPed.Inventory.Weapons.Contains(currentWeapon)) playerPed.Inventory.EquippedWeapon = currentWeapon;
+            if (talkers.All(p => p)) talkers.ToList().ForEach(p => p.Tasks.Clear());
         }
         internal static void MakeMissionPed(this Ped ped, bool invincible = false)
         {
@@ -199,10 +228,12 @@ namespace BarbarianCall
             ped.BlockPermanentEvents = true;
             ped.Money = 1;
             ped.Health = 500;
+            ped.MaxHealth = 500;
             ped.Armor = 50;
             ped.Opacity = 1.0f;
             ped.IsVisible = true;
             ped.IsInvincible = invincible;
+            //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
         internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT") => 
             Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
@@ -239,7 +270,7 @@ namespace BarbarianCall
                                           $"~{modifierKey.GetInstructionalId()}~ ~+~ ~{key.GetInstructionalId()}~";
         internal static bool CheckKey(Keys modifierKey, Keys key)
         {
-            bool keyboardInputCheck = NativeFunction.CallByHash<int>(0x0CF2B696BBF945AE) == 0;
+            bool keyboardInputCheck = NativeFunction.Natives.UPDATE_ONSCREEN_KEYBOARD<int>() == 0;
             if (!keyboardInputCheck)
             {
                 if (Game.IsKeyDown(key) && modifierKey == Keys.None) return true;

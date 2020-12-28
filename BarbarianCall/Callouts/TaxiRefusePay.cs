@@ -46,7 +46,7 @@ namespace BarbarianCall.Callouts
             ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 20f);
             AddMinimumDistanceCheck(100f, SpawnPoint);
             CalloutPosition = SpawnPoint;
-            CalloutMessage = "Taxi Passenger Refuse To Pay";
+            CalloutMessage = "Taxi Refuse Pay";
             SuspectStopped = false;
             Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS CITIZENS_REPORT BAR_CRIME_CIVILIAN_NEEDING_ASSISTANCE IN_OR_ON_POSITION", SpawnPoint);
             return base.OnBeforeCalloutDisplayed();
@@ -87,7 +87,8 @@ namespace BarbarianCall.Callouts
             suspectManWoman = Suspect.IsMale ? "Man" : "Woman";
             var calloutScenario = Peralatan.Random.Next(1, 300);
             $"Callout scenario {calloutScenario}".ToLog();
-            if (calloutScenario < 100) SituationFight();
+            if (Peralatan.Random.Next() % 2 == 0) SituationCommon();
+            else if (calloutScenario < 100) SituationFight();
             else if (calloutScenario < 200) SituationHostage();
             else SituationDead();
             return base.OnCalloutAccepted();
@@ -216,8 +217,7 @@ namespace BarbarianCall.Callouts
                     TaxiDriver.Tasks.FightAgainst(Suspect);
                     Suspect.PlayAmbientSpeech(null, InsultSpeech.GetRandomElement(), 0, SpeechModifier.AllowRepeat);
                     TaxiDriver.PlayAmbientSpeech(null, InsultSpeech.GetRandomElement(), 0, SpeechModifier.AllowRepeat);
-                    Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout~n~" +
-                        $"~y~Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.LControlKey, System.Windows.Forms.Keys.Y)}~y~ to see suspect details");
+                    Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout");
                     Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     GameFiber.StartNew(() =>
                     {
@@ -226,12 +226,8 @@ namespace BarbarianCall.Callouts
                             if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000L)
                             {
                                 Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                                Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout~n~" +
-                       $"~y~Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Home)}~y~ to see suspect details");
-                            }                            
-                            if (Peralatan.CheckKey(System.Windows.Forms.Keys.Control, System.Windows.Forms.Keys.Y)) 
-                                Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
-                       $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}");
+                                Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout");
+                            }                                                        
                             GameFiber.Yield();
                             if (SuspectStopped) break;
                         }
@@ -322,7 +318,11 @@ namespace BarbarianCall.Callouts
                     if (Blip) Blip.Delete();
                     Blip = Suspect.AttachBlip();
                     Blip.Color = Color.Red;
-                    Blip.Scale = 0.9285f;
+                    Blip.Scale = 0.752145f;
+                    var victimBlip = TaxiDriver.AttachBlip();
+                    victimBlip.Color = Color.Orange;
+                    victimBlip.Scale = 0.75f;
+                    CalloutBlips.Add(victimBlip);
                     Game.DisplaySubtitle("~r~Suspect~s~: " + insultOfficer.GetRandomElement());
                     GameFiber.StartNew(() =>
                     {
@@ -452,7 +452,7 @@ namespace BarbarianCall.Callouts
                     Functions.AddPedContraband(Suspect, ContrabandType.Weapon, "Pistol");
                     Witness = new Ped(SpawnPoint, SpawnHeading);
                     Witness.MakeMissionPed();
-                    WitnessCar = new Vehicle(m => m.IsCar && !m.IsBigVehicle && m.NumberOfSeats == 4, Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
+                    WitnessCar = new Vehicle(m => m.IsCar && !m.IsBigVehicle && m.NumberOfSeats == 4 && !m.IsLawEnforcementVehicle, Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
                     Witness.WarpIntoVehicle(WitnessCar, -1);
                     if (Peralatan.Random.Next() % 5 == 0)
                     {
@@ -591,8 +591,151 @@ namespace BarbarianCall.Callouts
         {
             CalloutMainFiber = GameFiber.StartNew(() =>
             {
-                
+                try
+                {
+                    CalloutRunning = true;
+                    TaxiDriver.WarpIntoVehicle(Taxi, -1);
+                    Suspect.Tasks.LeaveVehicle(Taxi, LeaveVehicleFlags.None);
+                    if (StopThePedRunning)
+                    {
+                        var rand1 = Peralatan.Random.Next();
+                        var rand2 = Peralatan.Random.Next(1, 1000);
+                        if (rand1 % 2 == 0)
+                        {
+                            API.StopThePedFunc.SetPedAlcoholOverLimit(Suspect, true);
+                        }
+                        else if (rand2 < 50) API.StopThePedFunc.SetPedUnderDrugsInfluence(Suspect, true);
+                        else API.StopThePedFunc.InjectPedDangerousItem(Suspect);
+                    }
+                    if (Peralatan.Random.Next() % 4 == 0) Suspect.SetPedAsWanted();
+                    SuspectPersona = Functions.GetPersonaForPed(Suspect);
+                    Manusia = new Manusia(Suspect, SuspectPersona);
+                    Manusia.DisplayNotif();
+                    DisplayGPNotif();
+                    GetClose();
+                    if (!CalloutRunning) return;
+                    if (Blip) Blip.Delete();
+                    Blip = Suspect.AttachBlip();
+                    Blip.Color = Color.Yellow;
+                    Blip.Scale = 0.75f;
+                    Game.DisplayHelp($"Get closer with the driver, and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
+                    Time = DateTime.Now + TimeSpan;
+                    while (CalloutRunning)
+                    {
+                        if (DateTime.Now > Time)
+                        {
+                            Time = DateTime.Now + TimeSpan;
+                            Game.DisplayHelp($"Get closer with the driver, Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
+                        }
+                        if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y))
+                        {
+                            if (!PlayerPed.IsInAnyVehicle(false))
+                            {
+                                if (PlayerPed.DistanceTo(TaxiDriver) < 6f) break;
+                                else Game.DisplayHelp("Please move ~g~closer");
+                            }
+                            else Game.DisplayHelp("~y~Get out~s~ from vehicle first");
+                        }
+                        GameFiber.Yield();
+                    }
+                    if (!CalloutRunning) return;
+                    TaxiDriver.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(4000);
+                    if (TaxiDriver.IsInVehicle(Taxi, false)) TaxiDriver.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut).WaitForCompletion(500);
+                    if (Peralatan.Random.Next() % 4 == 0)
+                    {
+                        Suspect.Tasks.Flee(PlayerPed, 500f, -1);
+                        GameFiber.Wait(2000);
+                        Pursuit = Functions.CreatePursuit();
+                        Functions.AddPedToPursuit(Pursuit, Suspect);
+                        Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
+                        if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.InPursuit);
+                        PursuitCreated = true;
+                        if (Blip) Blip.Color = Color.Red;
+                        GameFiber.Wait(200);
+                        Functions.RequestBackup(Suspect.Position, EBackupResponseType.Pursuit, EBackupUnitType.LocalUnit);
+                        while (CalloutRunning)
+                        {
+                            GameFiber.Yield();
+                            if (SuspectState != ESuspectStates.InAction) break;
+                        }
+                        DisplayCodeFourMessage();
+                        CalloutRunning = false;
+                    }
+                    else Peralatan.HandleSpeech(commond.GetRandomElement(), TaxiDriver, Suspect);
+                    if (!CalloutRunning) return;
+                    Game.DisplayHelp("~y~Handle the situation as you see fit, you can do some investigation ~g~(e.g. ped check, frisk, or ask some question)~s~~n~" +
+                        $"To end the callout, press and ~y~hold~s~ {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}");
+                    DisplayGPNotif();
+                    while (CalloutRunning)
+                    {
+                        GameFiber.Yield();
+                        if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End))
+                        {
+                            GameFiber.Sleep(320);
+                            if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
+                            {
+                                GameFiber.Sleep(1600);
+                                if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End)) break;
+                            }
+                            else Game.DisplayHelp($"To end the callout, press and ~y~hold~s~ {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}");
+                        }
+                        if (SuspectState != ESuspectStates.InAction) break;
+                    }
+                    DisplayCodeFourMessage();
+                }
+                catch (Exception e)
+                {
+                    "Taxi Refuse Pay callout crash".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
+                    e.ToString().ToLog();
+                    End();
+                }
             });
         }
+        private void SituationNasty()
+        {
+            CalloutMainFiber = GameFiber.StartNew(() =>
+            {
+                try
+                {
+
+                }
+                catch (Exception e)
+                {
+                    "Taxi Refuse Pay callout crash".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
+                    e.ToString().ToLog();
+                    End();
+                }
+            });
+        }
+        private static readonly List<List<string>> commond = new List<List<string>>()
+        {
+            new List<string>()
+            {
+                "Victim: Officer, this person right here is refusing to pay me",
+                "Suspect: im sorry, i left my wallet at the home earlier, if the driver want to take me back i will i'll pay him double",
+                "Victim: No no no!, i can't do that, my working hours are up, i'm tired",
+                "Suspect: See officer, i have offered him a solution, but he refused",
+                "Victim: Hey, i also need time with my family, if i take you there, my family will be mad at me",
+                "Officer: Okey citizen, calm down, lets solve this peacefully",
+            },
+            new List<string>()
+            {
+                "Victim: Officer, this person pissed me off, he refuses to pay his bills to me",
+                "Suspect: Officer, dont listen to him, he was driving recklessly and when i told him to drive slower, he dont listen",
+                "Victim: Thats not a reason for you to not paying me",
+                "Suspect: You know, what you did earlier made me worry on the trip, what kind of service is that",
+                "Victim: all this time i was driving like that, only you who feel uncomfortable, whats wrong with you",
+                "Officer: Enough, lets talk peacefully no need to angry"
+            },
+            new List<string>()
+            {
+                "Victim: Officer, i have some garbage here, this person is refuse to pay me",
+                "Suspect: What did you say?",
+                "Suspect: Officer, listen to me! This driver is always angry with anger during the trip, i feel so annoyed, how could I pay a person who bothered me",
+                "Victim: Oh come on, seriously!, you are the one who angry, look at your red face",
+                "Suspect: F*ck You",
+                "Officer: Hey hey hey, calm down citizens, problems cannot be solved with anger, so calm down and lets talk peacefully",
+            }
+        };
     }
 }

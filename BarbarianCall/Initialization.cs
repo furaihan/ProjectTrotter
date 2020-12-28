@@ -36,6 +36,13 @@ namespace BarbarianCall
             GameFiber.StartNew(delegate
             {
                 GameFiber.Wait(5600);
+                if (!Types.GameOffsets.Init())
+                {
+                    $"Game Version is not supported".ToLog();
+                    $"Supported Version: {new Version(1, 0, 2189, 0)}".ToLog();
+                    $"Current Version: {Game.ProductVersion}".ToLog();
+                    Game.UnloadActivePlugin();
+                }
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
                 $"Found male model: {CommonVariables.MaleModel.Length}".ToLog();
