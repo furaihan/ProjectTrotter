@@ -86,7 +86,7 @@ namespace BarbarianCall.Callouts
             if (Suspect && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
             if (SuspectCar) SuspectCar.Dismiss();
             if (Blip) Blip.Delete();
-            if (GrammarPoliceRunning && Menus.PauseMenu.autoAvailable.Checked) GrammarPolice.API.Functions.Available(false, false);
+            if (GrammarPoliceRunning && Menus.PauseMenu.autoAvailable.Checked) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.Available);
             if (Pursuit != null && Functions.IsPursuitStillRunning(Pursuit)) Functions.ForceEndPursuit(Pursuit);
             Types.Manusia.CurrentManusia = null;
             CalloutBlips.ForEach(b => { if (b) b.Delete(); });
@@ -126,13 +126,23 @@ namespace BarbarianCall.Callouts
                 $"Callout ended successfully, that callout took {(DateTime.Now - dateTime).TotalSeconds:0.00} seconds".ToLog();
             }, "[BarbarianCall] Callout End Handler Fiber");
         }
-        public void DisplayGPNotif()
+        protected void DisplayGPNotif()
         {
-            GrammarPoliceRunning = Initialization.IsLSPDFRPluginRunning("GrammarPolice");
-            if (GrammarPoliceRunning)
+            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice"))
             {
                 "If you have GrammarPolice installed, you can ask dispatch to display the suspect detail ~y~e.g. ~b~\"Dispatch requesting suspect details\"".DisplayNotifWithLogo("~y~" + GetType().Name + "~s~");
             }
+        }
+        protected void PlayScannerWithCallsign(string audio)
+        {
+            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2))) Functions.PlayScannerAudio("DISP_ATTENTION_UNIT " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio);
+            else Functions.PlayScannerAudio($"ATTENTION_ALL_UNITS {audio}");
+        }
+        protected void PlayScannerWithCallsign(string audio, Vector3 position)
+        {
+            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2))) 
+                Functions.PlayScannerAudioUsingPosition("DISP_ATTENTION_UNIT " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio, position);
+            else Functions.PlayScannerAudioUsingPosition($"ATTENTION_ALL_UNITS {audio}", position);
         }
         public static UIMenuItem[] CreateMenu()
         {

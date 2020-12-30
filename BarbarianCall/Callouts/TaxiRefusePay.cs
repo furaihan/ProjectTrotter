@@ -48,7 +48,7 @@ namespace BarbarianCall.Callouts
             CalloutPosition = SpawnPoint;
             CalloutMessage = "Taxi Refuse Pay";
             SuspectStopped = false;
-            Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS CITIZENS_REPORT BAR_CRIME_CIVILIAN_NEEDING_ASSISTANCE IN_OR_ON_POSITION", SpawnPoint);
+            PlayScannerWithCallsign("CITIZENS_REPORT BAR_CRIME_CIVILIAN_NEEDING_ASSISTANCE IN_OR_ON_POSITION", SpawnPoint);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()

@@ -51,23 +51,33 @@ namespace BarbarianCall.Types
         public void DisplayNotif()
         {
             if (CurrentManusia == null) return;
-            Pedestrian.DisplayNotificationsWithPedHeadshot("Ped Database", $"~y~Name~s~: {Fullname}~n~~y~Brithday~s~: {BirthDay.ToShortDateString()}~n~~y~Last Seen~s~: {Pedestrian.Position.GetZoneName()}, " +
+            Pedestrian.DisplayNotificationsWithPedHeadshot("Ped Database", $"~y~Name~s~: {Fullname}~n~~y~Brithday~s~: {BirthDay.ToShortDateString()}~n~~y~Last Seen~s~: {Pedestrian.GetZoneName()}, " +
                 $"{World.GetStreetName(Pedestrian.Position)}");
             if (Car && WithVehicle)
             {
+                GameFiber.Wait(575);
                 Game.DisplayNotification("mpcarhud", "transport_car_icon", "~y~BarbarianCall", "~y~Vehicle Details~s~",
                     $"~y~Model~s~: {Car.GetVehicleDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}");
             }
         }
         private string GetCarColor()
         {
-            PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
-            List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
-            var cint = colour.Select(c => c.ToArgb()).ToList();
-            if (cint.Contains(Car.PrimaryColor.ToArgb()))
+            try
             {
-                return cname[cint.IndexOf(Car.PrimaryColor.ToArgb())].Name;
+                PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
+                List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
+                var cint = colour.Select(c => c.ToArgb()).ToList();
+                if (cint.Contains(Car.PrimaryColor.ToArgb()))
+                {
+                    return cname[cint.IndexOf(Car.PrimaryColor.ToArgb())].Name;
+                }
             }
+            catch (Exception e)
+            {
+                "Get car color error".ToLog();
+                e.ToString().ToLog();
+            }          
+            $"{Car.GetVehicleDisplayName()} color is unknown, Argb: {Car.PrimaryColor.ToArgb()}".ToLog();
             return "Weirdly colored";
         }
     }

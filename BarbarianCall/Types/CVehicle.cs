@@ -11,7 +11,6 @@ namespace BarbarianCall.Types
     using Rage;
 
     //Thanks to alexguirre for his open source plugin
-    [System.Security.SecuritySafeCritical]
     internal static unsafe class GameOffsets
     {
         public static int CVehicleModelInfo_VehicleMakeName { get; private set; }

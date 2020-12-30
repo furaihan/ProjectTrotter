@@ -52,7 +52,7 @@ namespace BarbarianCall
                 Menus.PauseMenu.CreatePauseMenu();
             });
         }
-        public static bool IsLSPDFRPluginRunning(string Plugin)
+        public static bool IsLSPDFRPluginRunning(string Plugin, Version minVersion = null)
         {
             try
             {
@@ -60,11 +60,11 @@ namespace BarbarianCall
                 {
                     if (string.Equals(assembly.GetName().Name, Plugin, StringComparison.CurrentCultureIgnoreCase))
                     {
-                        $"Plugin : {Plugin} Assembly : {assembly.GetName().Name} is running version {assembly.GetName().Version}".ToLog();
+                        if (minVersion == null || assembly.GetName().Version.CompareTo(minVersion) >= 0)
                         return true;
                     }
                 }
-                $"{Plugin} is not running".ToLog();
+                $"{Plugin} is not running or outdated".ToLog();
                 return false;
             }
             catch (Exception e)

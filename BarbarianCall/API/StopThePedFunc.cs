@@ -24,8 +24,24 @@ namespace BarbarianCall.API
         }
         public static STPVehicleStatus GetVehicleRegistration(Rage.Vehicle veh) => StopThePed.API.Functions.getVehicleInsuranceStatus(veh);
         public static STPVehicleStatus GetVehicleInsurance(Rage.Vehicle veh) => StopThePed.API.Functions.getVehicleInsuranceStatus(veh);
-        public static void SetVehicleRegistration(Rage.Vehicle veh, STPVehicleStatus status) => StopThePed.API.Functions.setVehicleRegistrationStatus(veh, status);
-        public static void SetVehicleInsurance(Rage.Vehicle veh, STPVehicleStatus status) => StopThePed.API.Functions.setVehicleInsuranceStatus(veh, status);
+        public static void SetVehicleRegistration(Rage.Vehicle veh, StopThePedVehicleStatus status)
+        {
+            switch (status)
+            {
+                case StopThePedVehicleStatus.None: StopThePed.API.Functions.setVehicleRegistrationStatus(veh, STPVehicleStatus.None); break;
+                case StopThePedVehicleStatus.Expired: StopThePed.API.Functions.setVehicleRegistrationStatus(veh, STPVehicleStatus.Expired); break;
+                case StopThePedVehicleStatus.Valid: StopThePed.API.Functions.setVehicleRegistrationStatus(veh, STPVehicleStatus.Valid); break;
+            }
+        }
+        public static void SetVehicleInsurance(Rage.Vehicle veh, StopThePedVehicleStatus status)
+        {
+            switch (status)
+            {
+                case StopThePedVehicleStatus.None: StopThePed.API.Functions.setVehicleInsuranceStatus(veh, STPVehicleStatus.None); break;
+                case StopThePedVehicleStatus.Expired: StopThePed.API.Functions.setVehicleInsuranceStatus(veh, STPVehicleStatus.Expired); break;
+                case StopThePedVehicleStatus.Valid: StopThePed.API.Functions.setVehicleInsuranceStatus(veh, STPVehicleStatus.Valid); break;
+            }
+        }
         public static void SetPedUnderDrugsInfluence(Rage.Ped ped, bool set) => StopThePed.API.Functions.setPedUnderDrugsInfluence(ped, set);
         public static bool IsPedUnderDrugsInfluence(Rage.Ped ped) => StopThePed.API.Functions.isPedUnderDrugsInfluence(ped);
         public static void SetPedAlcoholOverLimit(Rage.Ped ped, bool set) => StopThePed.API.Functions.setPedAlcoholOverLimit(ped, set);
@@ -64,6 +80,12 @@ namespace BarbarianCall.API
             Coroner,
             PrisonerTransport,
             TowTruck,
+        }
+        public enum StopThePedVehicleStatus
+        {
+            None = 0,
+            Expired = 1,
+            Valid = 2,
         }
     }
 }

@@ -54,6 +54,7 @@ namespace BarbarianCall.Menus
             
             autoAvailable = new UIMenuCheckboxItem("Set Player Available After Finishing A Callout", true, "If you have GrammarPolice installed, enable this setting will set you " +
                 "available for calls after you have finished your callout");
+            autoAvailable.Activated += (m, s) => LSPD_First_Response.Mod.API.Functions.PlayScannerAudio(API.GrammarPoliceFunc.GetCallsignAudio());
             otherUnitAudio = new UIMenuCheckboxItem("Play Other Unit Respond Audio", true, "If you did not accept a callout from this plugin, a sound from other unit taking a callout will be played");
             onSceneAudio = new UIMenuCheckboxItem("Play Officer On Scene Audio", true, "Play scanner audio when you arrived on scene");
             offStabCB = new UIMenuCheckboxItem("Officer Stabbed", true, "Enable or disable \"Officer Stabbed\" callout");
@@ -80,10 +81,10 @@ namespace BarbarianCall.Menus
         internal static List<UIMenuItem> sectionItem = new List<UIMenuItem>();
         private static void SetUIMenuAsSection(UIMenuItem menuItem)
         {
-            menuItem.TextStyle = new TextStyle(TextFont.ChaletLondon, menuItem.ForeColor, 0.35f);
+            menuItem.TextStyle = new TextStyle(TextFont.HouseScript, menuItem.ForeColor, 0.45f);
             menuItem.Enabled = false;
-            menuItem.BackColor = HudColor.PurpleDark.GetColor();
-            menuItem.HighlightedBackColor = HudColor.Purple.GetColor();
+            menuItem.BackColor = HudColor.NetPlayer10Dark.GetColor();
+            menuItem.HighlightedBackColor = HudColor.NetPlayer10.GetColor();
             menuItem.RightBadge = UIMenuItem.BadgeStyle.Heart;
             menuItem.LeftBadge = UIMenuItem.BadgeStyle.Heart;
             sectionItem.Add(menuItem);

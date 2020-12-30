@@ -16,7 +16,7 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new Random(DateTime.Now.Ticks.GetHashCode());
+        public static Random Random = new Random(unchecked(DateTime.Now.Ticks.GetHashCode() + 1453));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         internal static SpawnPoint SelectNearbySpawnpoint(List<SpawnPoint> spawnPoints)
@@ -39,7 +39,7 @@ namespace BarbarianCall
                     sp = locsToSelect.GetRandomElement(true);
                 }
                 else
-                {
+                {                    
                     foreach (Vector3 l in listLoc)
                     {
                         if (l.DistanceTo(playerPos) < 1200f && l.DistanceTo(playerPos) > 250f)

@@ -34,11 +34,8 @@ namespace BarbarianCall.API
                 case EGrammarPoliceStatusType.Investigation:
                     GrammarPolice.API.Functions.Investigating(playSound, displayNotification);
                     break;
-                case EGrammarPoliceStatusType.Panic:
-                    GrammarPolice.API.Functions.Panic();
-                    break;
-                case EGrammarPoliceStatusType.Emergency:
-                    Backup.Panic();
+                case EGrammarPoliceStatusType.Emergency: case EGrammarPoliceStatusType.Panic:
+                    GrammarPolice.API.Functions.SetPanicStatus(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.InPursuit:
                     GrammarPolice.API.Functions.InPursit(playSound, displayNotification);
@@ -54,6 +51,8 @@ namespace BarbarianCall.API
                     break;
             }
         }
+        public static string GetCallsign() => GrammarPolice.API.Functions.GetCallsign();
+        public static string GetCallsignAudio() => string.Join(" ", GrammarPolice.API.Functions.GetCallsignAudioParts());
         public enum EGrammarPoliceStatusType
         {
             Available,

@@ -26,12 +26,15 @@ namespace BarbarianCall.DivisiXml
             locations = new List<Vector3>();
             headings = new List<float>();
             var outVar = Deserialize(filename);
+            int count = 0;
             foreach (Coordinate c in outVar)
             {
+                count++;
                 Vector3 location = new Vector3(c.AxisX, c.AxisY, c.AxisZ);
                 float heading = c.Heading;                
                 locations.Add(location);
                 headings.Add(heading);
+                if (count % 5 == 0) GameFiber.Yield();
             }
         }
         public static List<SpawnPoint> GetSpawnPointFromXml(string filename)
