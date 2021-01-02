@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace BarbarianCall
 {
@@ -92,6 +94,6 @@ namespace BarbarianCall
             "".ToLog();
             "=========================================================================================================".ToLog();
         }
-        internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");
+        internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");       
     }
 }

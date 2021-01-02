@@ -51,7 +51,7 @@ namespace BarbarianCall.Types
         public void DisplayNotif()
         {
             if (CurrentManusia == null) return;
-            Pedestrian.DisplayNotificationsWithPedHeadshot("Ped Database", $"~y~Name~s~: {Fullname}~n~~y~Brithday~s~: {BirthDay.ToShortDateString()}~n~~y~Last Seen~s~: {Pedestrian.GetZoneName()}, " +
+            Pedestrian.DisplayNotificationsWithPedHeadshot("Ped Database", $"~y~Name~s~: {Fullname}~n~~y~DOB~s~: {BirthDay.ToShortDateString()} ({GetAge()} Y.O)~n~~y~Last Seen~s~: {Pedestrian.GetZoneName()}, " +
                 $"{World.GetStreetName(Pedestrian.Position)}");
             if (Car && WithVehicle)
             {
@@ -79,6 +79,13 @@ namespace BarbarianCall.Types
             }          
             $"{Car.GetVehicleDisplayName()} color is unknown, Argb: {Car.PrimaryColor.ToArgb()}".ToLog();
             return "Weirdly colored";
+        }
+        private int GetAge()
+        {
+            var today = DateTime.Today;
+            var age = today.Year - BirthDay.Year;
+            if (BirthDay.Date < today.AddYears(-age)) age--;
+            return age;
         }
     }
 }

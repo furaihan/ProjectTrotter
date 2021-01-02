@@ -35,6 +35,7 @@ namespace BarbarianCall.Callouts
         
         public override bool OnBeforeCalloutDisplayed()
         {
+            CheckOtherPluginRunning();
             DivisiXml.Deserialization.GetDataFromXml(path + "Locations.xml", out List<Vector3> locationToSelect, out List<float> headingToSelect);
             Peralatan.SelectNearbyLocationsWithHeading(locationToSelect, headingToSelect, out SpawnPoint, out SpawnHeading);
             if (SpawnPoint == Vector3.Zero || SpawnHeading == 0f)
@@ -450,15 +451,18 @@ namespace BarbarianCall.Callouts
                     GameFiber.Sleep(200);
                     Suspect.IsVisible = false;
                     Functions.AddPedContraband(Suspect, ContrabandType.Weapon, "Pistol");
+                    if (StopThePedRunning) API.StopThePedFunc.InjectPedItem(Suspect, "~r~Pistol");
                     Witness = new Ped(SpawnPoint, SpawnHeading);
                     Witness.MakeMissionPed();
-                    WitnessCar = new Vehicle(m => m.IsCar && !m.IsBigVehicle && m.NumberOfSeats == 4 && !m.IsLawEnforcementVehicle, Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
+                    WitnessCar = new Vehicle(m => m.IsCar && !m.IsBigVehicle && m.NumberOfSeats == 4 && !m.IsLawEnforcementVehicle && !m.IsEmergencyVehicle,
+                        Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
                     Witness.WarpIntoVehicle(WitnessCar, -1);
                     if (Peralatan.Random.Next() % 5 == 0)
                     {
                         Ped witnPass = new Ped(SpawnPoint, SpawnHeading);
                         witnPass.MakeMissionPed();
                         witnPass.WarpIntoVehicle(WitnessCar, 0);
+                        CalloutEntities.Add(witnPass);
                     }
                     GetClose();
                     if (!CalloutRunning) return;
@@ -468,6 +472,7 @@ namespace BarbarianCall.Callouts
                     Blip.Color = Color.Red;
                     WitnessBlip = Witness.AttachBlip();
                     WitnessBlip.Color = Color.Orange;
+                    CalloutBlips.Add(WitnessBlip);
                     Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
                     Functions.RequestBackup(TaxiDriver.Position, EBackupResponseType.Code3, EBackupUnitType.Ambulance);
                     "Ambulance is en route to the scene".DisplayNotifWithLogo("~y~Taxi Passenger Refuse To Pay");                  
@@ -524,6 +529,13 @@ namespace BarbarianCall.Callouts
                     Blip.EnableRoute(Color.Yellow);
                     Time = DateTime.Now + new TimeSpan(0, 0, 20);
                     Vector3 curPos = Suspect.Position;
+                    GameFiber.StartNew(() =>
+                    {
+                        GameFiber.Wait(5000);
+                        if (CalloutRunning) DisplayGPNotif();
+                        GameFiber.Wait(120000);
+                        if (CalloutRunning) DisplayGPNotif();
+                    });
                     while (CalloutRunning)
                     {
                         if (PlayerPed.DistanceTo(Suspect) < 18f) break;
@@ -607,7 +619,7 @@ namespace BarbarianCall.Callouts
                         else if (rand2 < 50) API.StopThePedFunc.SetPedUnderDrugsInfluence(Suspect, true);
                         else API.StopThePedFunc.InjectPedDangerousItem(Suspect);
                     }
-                    if (Peralatan.Random.Next() % 4 == 0) Suspect.SetPedAsWanted();
+                    if (Peralatan.Random.Next() % 5 == 0) Suspect.SetPedAsWanted();
                     SuspectPersona = Functions.GetPersonaForPed(Suspect);
                     Manusia = new Manusia(Suspect, SuspectPersona);
                     Manusia.DisplayNotif();

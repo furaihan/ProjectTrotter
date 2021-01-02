@@ -34,7 +34,7 @@ namespace BarbarianCall.DivisiXml
                 float heading = c.Heading;                
                 locations.Add(location);
                 headings.Add(heading);
-                if (count % 5 == 0) GameFiber.Yield();
+                if (count % 45 == 0) GameFiber.Yield();
             }
         }
         public static List<SpawnPoint> GetSpawnPointFromXml(string filename)

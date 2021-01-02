@@ -41,6 +41,7 @@ namespace BarbarianCall.Callouts
         public Persona SuspectPersona;
         public Ped PlayerPed = Game.LocalPlayer.Character;
         public GameFiber CalloutMainFiber;
+        public System.Drawing.Color Yellow = System.Drawing.Color.Yellow;
         public string FilePath;
         public static readonly uint[] WeaponHashes = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A, 0xBD248B55, 0x13532244, 0x624FE830 };
         #endregion
@@ -53,19 +54,27 @@ namespace BarbarianCall.Callouts
             if (SuspectCar) SuspectCar.Delete();
             if (Blip) Blip.Delete();
             if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.Available, true, false);
+            CalloutBlips.ForEach(b => { if (b) b.Delete(); });
+            CalloutEntities.ForEach(e =>
+            {
+                if (e)
+                {
+                    if (e.Model.IsPed && e.IsAlive && !Functions.IsPedArrested((Ped)e)) e.Dismiss();
+                    else if (e.Model.IsPed && e.IsAlive && Functions.IsPedArrested((Ped)e)) e.IsInvincible = false;
+                    else if (e.Model.IsVehicle) e.Dismiss();
+                    else if (e.Model.IsObject) e.Delete();
+                    else e.Dismiss();
+                }
+
+
+            });
+            CalloutMainFiber?.Abort();
             Types.Manusia.CurrentManusia = null;
             Functions.PlayScannerAudio("BAR_AI_RESPOND");
             base.OnCalloutNotAccepted();
         }
         public override bool OnBeforeCalloutDisplayed()
-        {
-            GrammarPoliceRunning = Initialization.IsLSPDFRPluginRunning("GrammarPolice");
-            UltimateBackupRunning = Initialization.IsLSPDFRPluginRunning("UltimateBackup");
-            StopThePedRunning = Initialization.IsLSPDFRPluginRunning("StopThePed");
-            CalloutRunning = false;
-            PursuitCreated = false;
-            CalloutStates = ECalloutStates.UnAccepted;
-            $"Callout Created From {CreationSource}".ToLog();
+        {                 
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -101,6 +110,7 @@ namespace BarbarianCall.Callouts
                     else e.Dismiss();
                 }
             });
+            CalloutMainFiber?.Abort();
             base.End();              
         }
         protected void HandleEnd()
@@ -143,6 +153,16 @@ namespace BarbarianCall.Callouts
             if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2))) 
                 Functions.PlayScannerAudioUsingPosition("DISP_ATTENTION_UNIT " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio, position);
             else Functions.PlayScannerAudioUsingPosition($"ATTENTION_ALL_UNITS {audio}", position);
+        }
+        protected void CheckOtherPluginRunning()
+        {
+            GrammarPoliceRunning = Initialization.IsLSPDFRPluginRunning("GrammarPolice");
+            UltimateBackupRunning = Initialization.IsLSPDFRPluginRunning("UltimateBackup");
+            StopThePedRunning = Initialization.IsLSPDFRPluginRunning("StopThePed");
+            CalloutRunning = false;
+            PursuitCreated = false;
+            CalloutStates = ECalloutStates.UnAccepted;
+            $"Callout Created From {CreationSource}".ToLog();
         }
         public static UIMenuItem[] CreateMenu()
         {

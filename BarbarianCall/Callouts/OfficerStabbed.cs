@@ -29,8 +29,8 @@ namespace BarbarianCall.Callouts
         private readonly string[] CityCarModels = new string[] { "POLICE", "POLICE2", "POLICE3", "POLICE4" };
         private readonly string[] CountrysideCarModels = new string[] { "SHERIFF", "SHERIFF2" };
 
-        private Ped AmbulancePed1;
-        private Ped AmbulancePed2;
+        private Ped Paramedic1;
+        private Ped Paramedic2;
         private Vehicle Ambulance;
         private readonly Model AmbulanceModel = new Model("AMBULANCE");
         private readonly Model AmbulancePedModel = new Model(0xB353629E);
@@ -45,6 +45,7 @@ namespace BarbarianCall.Callouts
             FilePath = @"Plugins/LSPDFR/BarbarianCall/OfficerStabbed/";
             PursuitCreated = false;
             CalloutRunning = false;
+            CheckOtherPluginRunning();
             
             DivisiXml.Deserialization.GetDataFromXml(Path.Combine(FilePath,"Locations.xml"), out List<Vector3> locationToSelect, out List<float> headingToSelect);
             Peralatan.SelectNearbyLocationsWithHeading(locationToSelect, headingToSelect, out SpawnPoint, out SpawnHeading);
@@ -61,13 +62,13 @@ namespace BarbarianCall.Callouts
             CalloutPosition = SpawnPoint;
             CalloutMessage = "Officer Stabbed";
             CalloutAdvisory = $"Suspect vehicle is {Game.GetLocalizedString(susVehModel.Name)}";
-            uint zoneHash = Rage.Native.NativeFunction.CallByHash<uint>(0x7ee64d51e8498728, SpawnPoint.X, SpawnPoint.Y, SpawnPoint.Z);
+            uint zoneHash = Rage.Native.NativeFunction.Natives.GET_HASH_OF_MAP_AREA_AT_COORDS<uint>(SpawnPoint.X, SpawnPoint.Y, SpawnPoint.Z);
             if (UltimateBackupRunning)
             {
                 Tuple<Vehicle, Ped> ubApi;
                 var offRand = Peralatan.Random.Next(0, 100);
                 if (offRand <= 60) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalPatrol, SpawnPoint);
-                else if (offRand > 60 && offRand <= 90) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.StatePatrol, SpawnPoint);
+                else if (offRand < 90) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.StatePatrol, SpawnPoint);
                 else ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalSwat, SpawnPoint);
                 offVeh = ubApi.Item1;
                 officer = ubApi.Item2;
@@ -86,6 +87,8 @@ namespace BarbarianCall.Callouts
                 }
                 officer = offVeh.CreateRandomDriver();
             }
+            officer.MakeMissionPed();
+            offVeh.MakePersistent();
             PlayScannerWithCallsign("WE_HAVE BAR_CRIME_STABBED IN_OR_ON_POSITION", SpawnPoint);
             return base.OnBeforeCalloutDisplayed();
         }
@@ -245,20 +248,23 @@ namespace BarbarianCall.Callouts
             if (Notepad) { Notepad.Detach(); GameFiber.Wait(75); Notepad.Delete(); }
             GameFiber.StartNew(() =>
             {
-                if (Ambulance)
+                if (Ambulance || Paramedic1 || Paramedic2)
                 {
-                    AmbulancePed1.Tasks.FollowNavigationMeshToPosition(Ambulance.Position + Ambulance.LeftPosition * 1.8f, Ambulance.Heading, 10f);
-                    AmbulancePed2.Tasks.FollowNavigationMeshToPosition(Ambulance.Position + Ambulance.RightPosition * 1.8f, Ambulance.Heading, 10f).WaitForCompletion(7000);
-                    Ambulance.LockStatus = VehicleLockStatus.Unlocked;
-                    AmbulancePed1.Tasks.EnterVehicle(Ambulance, -1);
-                    AmbulancePed2.Tasks.EnterVehicle(Ambulance, 0).WaitForCompletion(3500);
-                    if (!AmbulancePed1.IsInVehicle(Ambulance, false)) AmbulancePed1.Tasks.EnterVehicle(Ambulance, -1, EnterVehicleFlags.WarpTo).WaitForCompletion(2000);
-                    if (!AmbulancePed2.IsInVehicle(Ambulance, false)) AmbulancePed2.Tasks.EnterVehicle(Ambulance, 0, EnterVehicleFlags.WarpTo).WaitForCompletion(2000);
-                    if (!AmbulancePed1.IsInVehicle(Ambulance, false)) AmbulancePed1.WarpIntoVehicle(Ambulance, -1);
-                    if (!AmbulancePed2.IsInVehicle(Ambulance, false)) AmbulancePed2.WarpIntoVehicle(Ambulance, 0);
+                    if (Paramedic1 && Ambulance) Paramedic1.Tasks.FollowNavigationMeshToPosition(Ambulance.Position + Ambulance.LeftPosition * 1.8f, Ambulance.Heading, 10f);
+                    if (Paramedic2 && Ambulance) Paramedic2.Tasks.FollowNavigationMeshToPosition(Ambulance.Position + Ambulance.RightPosition * 1.8f, Ambulance.Heading, 10f).WaitForCompletion(7000);
+                    if (Ambulance) Ambulance.LockStatus = VehicleLockStatus.Unlocked;
+                    if (Paramedic1) Paramedic1.Tasks.EnterVehicle(Ambulance, -1);
+                    if (Paramedic2) Paramedic2.Tasks.EnterVehicle(Ambulance, 0).WaitForCompletion(3500);
+                    if (Paramedic1 && !Paramedic1.IsInVehicle(Ambulance, false)) Paramedic1.Tasks.EnterVehicle(Ambulance, -1, EnterVehicleFlags.WarpTo).WaitForCompletion(2000);
+                    if (Paramedic2 && !Paramedic2.IsInVehicle(Ambulance, false)) Paramedic2.Tasks.EnterVehicle(Ambulance, 0, EnterVehicleFlags.WarpTo).WaitForCompletion(2000);
+                    if (Paramedic1 && !Paramedic1.IsInVehicle(Ambulance, false)) Paramedic1.WarpIntoVehicle(Ambulance, -1);
+                    if (Paramedic2 && !Paramedic2.IsInVehicle(Ambulance, false)) Paramedic2.WarpIntoVehicle(Ambulance, 0);
                     GameFiber.Sleep(2000);
-                    Ambulance.Occupants.ToList().ForEach(p => p.Dismiss());
-                    Ambulance.Dismiss();
+                    Ambulance.Occupants.ToList().ForEach(p => { if (p) p.Dismiss(); });
+                    if (Ambulance) Ambulance.Dismiss();
+                    GameFiber.Sleep(2000);
+                    if (Paramedic1) Paramedic1.Dismiss();
+                    if (Paramedic2) Paramedic2.Dismiss();
                 }
             });
             base.End();
@@ -266,7 +272,7 @@ namespace BarbarianCall.Callouts
         private void DisplayCodeFourMessage()
         {
             if (!CalloutRunning) return;
-            Functions.PlayScannerAudio("ATTENTION_THIS_IS_DISPATCH_HIGH WE_ARE_CODE FOUR NO_FURTHER_UNITS_REQUIRED");
+            PlayScannerWithCallsign("WE_ARE_CODE_4");
             End();
         }
         private void GetClose()
@@ -608,28 +614,32 @@ namespace BarbarianCall.Callouts
                     Ambulance.RandomiseLicencePlate();
                     if (UltimateBackupRunning)
                     {
-                        AmbulancePed1 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
-                        AmbulancePed2 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
+                        Paramedic1 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
+                        Paramedic2 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
                     }
                     else
                     {
                         AmbulancePedModel.LoadAndWait();
-                        AmbulancePed1 = new Ped(AmbulancePedModel, SpawnPoint, SpawnHeading);
-                        AmbulancePed2 = new Ped(AmbulancePedModel, SpawnPoint, SpawnHeading);
+                        Paramedic1 = new Ped(AmbulancePedModel, SpawnPoint, SpawnHeading);
+                        Paramedic2 = new Ped(AmbulancePedModel, SpawnPoint, SpawnHeading);
                     }
-                    AmbulancePed1.RelationshipGroup = RelationshipGroup.Medic;
-                    AmbulancePed2.RelationshipGroup = RelationshipGroup.Medic;
-                    AmbulancePed1.MakeMissionPed(true);
-                    AmbulancePed2.MakeMissionPed(true);
+                    Paramedic1.RelationshipGroup = RelationshipGroup.Medic;
+                    Paramedic2.RelationshipGroup = RelationshipGroup.Medic;
+                    Paramedic1.MakeMissionPed(true);
+                    Paramedic2.MakeMissionPed(true);
                     Notepad = new Rage.Object(NotepadModel, Vector3.Zero);
-                    Notepad.AttachTo(AmbulancePed2, AmbulancePed2.GetBoneIndex(PedBoneId.LeftPhHand), Vector3.Zero, Rotator.Zero);
-                    AmbulancePed1.Position = medPos1; AmbulancePed1.Heading = AmbulancePed1.GetHeadingTowards(officer);
+                    Notepad.AttachTo(Paramedic2, Paramedic2.GetBoneIndex(PedBoneId.LeftPhHand), Vector3.Zero, Rotator.Zero);
+                    Paramedic1.Position = medPos1; Paramedic1.Heading = Paramedic1.GetHeadingTowards(officer);
                     GameFiber.Wait(75);
-                    AmbulancePed2.Position = AmbulancePed1.Position + AmbulancePed2.ForwardVector * 2.225f; AmbulancePed2.Heading = AmbulancePed2.GetHeadingTowards(officer);
-                    AmbulancePed1.Tasks.PlayAnimation("amb@medic@standing@tendtodead@idle_a", tendToDeadIdles.GetRandomElement(), 2.0f, AnimationFlags.Loop);
+                    Paramedic2.Position = Paramedic1.Position + Paramedic2.ForwardVector * 2.225f; Paramedic2.Heading = Paramedic2.GetHeadingTowards(officer);
+                    Paramedic1.Tasks.PlayAnimation("amb@medic@standing@tendtodead@idle_a", tendToDeadIdles.GetRandomElement(), 2.0f, AnimationFlags.Loop);
                     GameFiber.Wait(75);
-                    AmbulancePed2.Tasks.PlayAnimation("amb@medic@standing@timeofdeath@base", "base", 2.0f, AnimationFlags.Loop);
+                    Paramedic2.Tasks.PlayAnimation("amb@medic@standing@timeofdeath@base", "base", 2.0f, AnimationFlags.Loop);
                     officer.Kill();
+                    CalloutEntities.Add(Notepad);
+                    CalloutEntities.Add(Paramedic1);
+                    CalloutEntities.Add(Paramedic2);
+                    CalloutEntities.Add(Ambulance);
                     GetClose();
                     if (!CalloutRunning) return;
                     Suspect.Tasks.CruiseWithVehicle(20f, VehicleDrivingFlags.Emergency);
@@ -645,7 +655,7 @@ namespace BarbarianCall.Callouts
                         }
                         if (Game.IsKeyDown(System.Windows.Forms.Keys.Y))
                         {
-                            if (PlayerPed.DistanceTo(AmbulancePed1) < 6f)
+                            if (PlayerPed.DistanceTo(Paramedic1) < 6f)
                             {
                                 Game.DisplaySubtitle("~b~Officer~s~: Is he alright? Where is the suspect?");
                                 break;
@@ -663,13 +673,13 @@ namespace BarbarianCall.Callouts
                         "~g~Paramedic~s~: Please be careful, suspect may bring some weapon",
                         "~b~Officer~s~: Sure, thank you"
                     };
-                    var amb1Heading = AmbulancePed1.Heading;
-                    Peralatan.HandleSpeech(ambulanceConversation, AmbulancePed1);
+                    var amb1Heading = Paramedic1.Heading;
+                    Peralatan.HandleSpeech(ambulanceConversation, Paramedic1);
                     Functions.PlayScannerAudio($"ATTENTION_ALL_UNITS BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
                     GameFiber.StartNew(() =>
                     {
-                        AmbulancePed1.Tasks.FollowNavigationMeshToPosition(medPos1, amb1Heading, 1f).WaitForCompletion(-1);
-                        AmbulancePed1.Tasks.PlayAnimation("amb@medic@standing@tendtodead@idle_a", tendToDeadIdles.GetRandomElement(), 2.0f, AnimationFlags.Loop);
+                        Paramedic1.Tasks.FollowNavigationMeshToPosition(medPos1, amb1Heading, 1f).WaitForCompletion(-1);
+                        Paramedic1.Tasks.PlayAnimation("amb@medic@standing@tendtodead@idle_a", tendToDeadIdles.GetRandomElement(), 2.0f, AnimationFlags.Loop);
                     });
                     Game.DisplayHelp("~y~Standby for suspect details");
                     GameFiber.Wait(Peralatan.Random.Next(7500, 10000));
