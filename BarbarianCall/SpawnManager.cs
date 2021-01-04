@@ -20,7 +20,7 @@ namespace BarbarianCall
             {
                 unsafe
                 {
-                    if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0)) //GetNTHClosestVehicleNodeWithHeadingFavourDirections
+                    if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0))
                     {
                         if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //GetRoadSidePointWithHeading
                         {
@@ -62,22 +62,23 @@ namespace BarbarianCall
         internal static SpawnPoint GetVehicleSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
             DateTime start = DateTime.Now;
-            for (int i = 0; i < 600; i++)
+            for (int i = 0; i < 900; i++)
             {
-                Vector3 v = pos.Around(minimalDistance, maximumDistance);
-                if (i % 12 == 0) GameFiber.Yield();
-                if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 5, 3.0, 0))
+                Vector3 v = pos.Around(minimalDistance, maximumDistance + Extension.GetRandomAbsoluteSingle(1,5));
+                if (i % 35 == 0) GameFiber.Yield();
+                if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 5, 3.0f, 0))
                 {
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
                     if (nodeP.TravelDistanceTo(pos) < maximumDistance * 3f)
                     {
                         SpawnPoint ret = new SpawnPoint(nodeP, nodeH);
                         $"Vehicle Spawn found {ret}".ToLog();
-                        $"Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
+                        $"{i} Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
                         return ret;
                     }
                 }
             }
+            "Vehicle spawn point is not found".ToLog();
             return SpawnPoint.Zero;
         }
         internal static SpawnPoint GetPedSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)

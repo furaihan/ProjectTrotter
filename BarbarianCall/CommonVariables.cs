@@ -63,5 +63,16 @@ namespace BarbarianCall
         };
         public static Model[] MaleModel = Model.PedModels.Where(m => m.Name.ToLower().Substring(1, 3) == "_m_").ToArray();
         public static Model[] FemaleModel = Model.PedModels.Where(m => m.Name.ToLower().Substring(1, 3) == "_f_").ToArray();
+        public static Dictionary<string, List<Model>> GangPedModels = new Dictionary<string, List<Model>>()
+        {
+            {"Mexican", new List<Model>(){ "g_m_y_mexgang_01", "g_m_y_mexgoon_01", "g_m_y_mexgoon_02", "g_m_y_mexgoon_03", "g_m_y_mexgoon_03", "g_m_m_mexboss_01", "g_m_m_mexboss_02" } },
+            {"Ballas", new List<Model>() { "g_m_y_ballasout_01", "g_m_y_ballaeast_01", "g_m_y_ballaorig_01", "ig_ballasog"} },
+            {"Families", new List<Model>(){ "g_m_y_famca_01", "mp_m_famdd_01", "g_m_y_famdnf_01", "g_m_y_famfor_01" } },
+            {"Salvadoran", new List<Model>(){ "g_m_y_salvagoon_01", "g_m_y_salvagoon_02", "g_m_y_salvagoon_03", "g_m_y_salvaboss_01" } },
+            {"Chinese", new List<Model>(){ "g_m_m_chigoon_01", "g_m_m_chigoon_02", "g_m_m_chigoon_03", "g_m_m_chiboss_01" } },
+            {"Korean", new List<Model>(){ "g_m_y_korean_01", "g_m_y_korean_02", "g_m_y_korlieut_01", "g_m_m_korboss_01" } },
+            {"Armenian", new List<Model>(){ "g_m_m_armboss_01", "g_m_m_armgoon_01", "g_m_y_armgoon_02", "g_m_m_armlieut_01" } },
+            {"The Lost MC", new List<Model>(){ "g_m_y_lost_01", "g_m_y_lost_02", "g_m_y_lost_03" } },
+        };
     }
 }

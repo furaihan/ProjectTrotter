@@ -72,6 +72,7 @@ namespace BarbarianCall
             catch (Exception e)
             {
                 e.ToString().ToLog();
+                "IsLSPDFRPluginRunning error".ToLog();
                 return false;
             }
         }

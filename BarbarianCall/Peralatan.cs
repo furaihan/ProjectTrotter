@@ -65,6 +65,7 @@ namespace BarbarianCall
                 heading = 0f;
                 "Failed when try to select nearby locations".ToLog();
                 e.Message.ToLog();
+                GameFiber.StartNew(() => NetExtension.SendError(e));
             }
             return;
         }

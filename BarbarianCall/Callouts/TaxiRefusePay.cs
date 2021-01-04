@@ -259,6 +259,7 @@ namespace BarbarianCall.Callouts
                 {
                     "Taxi Refuse Pay callout crash".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
                     e.ToString().ToLog();
+                    NetExtension.SendError(e);
                     End();
                 }
             });
@@ -308,9 +309,11 @@ namespace BarbarianCall.Callouts
                         }
                         if (DateTime.Now >= Time && !Game.IsPaused && !alerted)
                         {
-                            Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS WE_HAVE BAR_CRIME_ASSAULT IN_OR_ON_POSITION", SpawnPoint);
+                            PlayScannerWithCallsign("WE_HAVE BAR_CRIME_ASSAULT IN_OR_ON_POSITION", SpawnPoint);
                             "~b~Dispatch~s~: ~y~We have report that the taxi driver is being held at gunpoint, respond ~r~Code 3~s~".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
                             alerted = true;
+                            GameFiber.WaitUntil(() => !Functions.GetIsAudioEngineBusy(), 8500);
+                            Functions.PlayScannerAudio("UNITS_RESPOND_CODE_3");
                         }
                         GameFiber.Yield();
                     }
@@ -434,6 +437,7 @@ namespace BarbarianCall.Callouts
                 {
                     "Taxi Refuse Pay callout crash".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
                     e.ToString().ToLog();
+                    NetExtension.SendError(e);
                     End();
                 }
             });
@@ -595,6 +599,7 @@ namespace BarbarianCall.Callouts
                 {
                     "Taxi Refuse Pay callout crash".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
                     e.ToString().ToLog();
+                    NetExtension.SendError(e);
                     End();
                 }
             });
@@ -699,6 +704,7 @@ namespace BarbarianCall.Callouts
                 {
                     "Taxi Refuse Pay callout crash".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
                     e.ToString().ToLog();
+                    NetExtension.SendError(e);
                     End();
                 }
             });
@@ -715,6 +721,7 @@ namespace BarbarianCall.Callouts
                 {
                     "Taxi Refuse Pay callout crash".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
                     e.ToString().ToLog();
+                    NetExtension.SendError(e);
                     End();
                 }
             });

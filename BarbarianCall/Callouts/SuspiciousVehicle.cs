@@ -156,7 +156,8 @@ namespace BarbarianCall.Callouts
                     SuspectCar.Heading = Spawn;
                     GameFiber.WaitUntil(() => !Functions.GetIsAudioEngineBusy());
                     PlayScannerWithCallsign($"CITIZENS_REPORT {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
-
+                    GetClose();
+                    DisplayCodeFourMessage();
                 }
                 catch (Exception e)
                 {

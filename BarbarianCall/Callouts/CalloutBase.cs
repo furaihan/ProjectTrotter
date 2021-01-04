@@ -59,10 +59,10 @@ namespace BarbarianCall.Callouts
             {
                 if (e)
                 {
-                    if (e.Model.IsPed && e.IsAlive && !Functions.IsPedArrested((Ped)e)) e.Dismiss();
-                    else if (e.Model.IsPed && e.IsAlive && Functions.IsPedArrested((Ped)e)) e.IsInvincible = false;
-                    else if (e.Model.IsVehicle) e.Dismiss();
-                    else if (e.Model.IsObject) e.Delete();
+                    if (e is Ped ped && e.IsAlive && !Functions.IsPedArrested(ped)) e.Dismiss();
+                    else if (e is Ped ped1 && e.IsAlive && Functions.IsPedArrested(ped1)) e.IsInvincible = false;
+                    else if (e is Vehicle) e.Dismiss();
+                    else if (e is Rage.Object) e.Delete();
                     else e.Dismiss();
                 }
 
@@ -110,7 +110,7 @@ namespace BarbarianCall.Callouts
                     else e.Dismiss();
                 }
             });
-            CalloutMainFiber?.Abort();
+            //CalloutMainFiber?.Abort();
             base.End();              
         }
         protected void HandleEnd()
@@ -140,8 +140,10 @@ namespace BarbarianCall.Callouts
         {
             if (Initialization.IsLSPDFRPluginRunning("GrammarPolice"))
             {
-                "If you have GrammarPolice installed, you can ask dispatch to display the suspect detail ~y~e.g. ~b~\"Dispatch requesting suspect details\"".DisplayNotifWithLogo("~y~" + GetType().Name + "~s~");
+                "If you have GrammarPolice installed, you can ask dispatch to display the suspect detail ~y~e.g. ~b~\"Dispatch requesting suspect details\"".DisplayNotifWithLogo("~y~"
+                    + API.GrammarPoliceFunc.GetCallsign() + "~s~");
             }
+            else "This Callout work better if ~y~GrammarPolice~s~ is installed, you can ask dispatch to display suspect details anytime with ~y~GrammarPolice".DisplayNotifWithLogo(GetType().Name);
         }
         protected void PlayScannerWithCallsign(string audio)
         {
