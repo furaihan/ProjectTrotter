@@ -19,6 +19,7 @@ namespace BarbarianCall.Callouts
         private Blip PassengerBlip;
         private ESuspectStates PassengerState;
         private ESuspectStates SuspectState;
+        private bool SuperModel = false;
         public override bool OnBeforeCalloutDisplayed()
         {
             FilePath = @"Plugins/LSPDFR/BarbarianCall/StrangeLookingVehicle/";
@@ -32,7 +33,7 @@ namespace BarbarianCall.Callouts
                 Peralatan.ToLog("No nearby location found");
                 return false;
             }
-            CarModel = Model.VehicleModels.Where(m => m.IsSuitableCar()).GetRandomElement();
+            CarModel = CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid, true);
             CarModel.LoadAndWait();
             SuspectCar = new Vehicle(CarModel, Spawn, Spawn);
             SuspectCar.MakePersistent();
@@ -41,20 +42,22 @@ namespace BarbarianCall.Callouts
             CalloutPosition = SpawnPoint;
             CalloutMessage = "A Strange Looking Vehicle";
             CalloutAdvisory = $"Vehicle is {SuspectCar.GetVehicleDisplayName()}";
-            Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS CITIZENS_REPORT BAR_SUSPICIOUS_VEHICLE IN_OR_ON_POSITION", SpawnPoint);
+            PlayScannerWithCallsign($"CITIZENS_REPORT BAR_SUSPICIOUS_VEHICLE IN_OR_ON_POSITION", SpawnPoint);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
         {
             CalloutRunning = true;
+            GangModels = CommonVariables.GangPedModels.Values.GetRandomElement();
             SuspectCar.RandomiseLicencePlate();
             SuspectCar.PrimaryColor = CommonVariables.AudibleColor.GetRandomElement();
-            Suspect = SuspectCar.CreateRandomDriver();
+            Suspect = new Ped(GangModels.GetRandomElement(), Spawn, SpawnHeading);
             Suspect.MakeMissionPed();
+            Suspect.WarpIntoVehicle(SuspectCar, -1);
             SuspectState = ESuspectStates.InAction;
             if (Peralatan.Random.Next() % 4 == 0)
             {
-                Passenger = new Ped(SpawnPoint, SpawnHeading);
+                Passenger = new Ped(GangModels.GetRandomElement(true), SpawnPoint, SpawnHeading);
                 CalloutEntities.Add(Passenger);
                 Passenger.WarpIntoVehicle(SuspectCar, 0);
                 Passenger.MakeMissionPed();
@@ -67,6 +70,7 @@ namespace BarbarianCall.Callouts
             Blip = new Blip(Spawn, 45f);
             Blip.Color = Color.Yellow;
             Blip.EnableRoute(Color.Yellow);
+            SituationRun();
             return base.OnCalloutAccepted();
         }
         public override void Process()
@@ -154,9 +158,41 @@ namespace BarbarianCall.Callouts
                     CalloutRunning = true;
                     SuspectCar.Position = Spawn;
                     SuspectCar.Heading = Spawn;
-                    GameFiber.WaitUntil(() => !Functions.GetIsAudioEngineBusy());
-                    PlayScannerWithCallsign($"CITIZENS_REPORT {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                    SuspectCar.IsEngineStarting = true;
+                    if (!Suspect.IsInVehicle(SuspectCar, false)) Suspect.WarpIntoVehicle(SuspectCar, -1);
+                    if (Passenger && !Passenger.IsInVehicle(SuspectCar, false)) Passenger.WarpIntoVehicle(SuspectCar, 0);
+                    Manusia = new Types.Manusia(Suspect, SuspectPersona);
+                    Suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
+                    GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), 8500);
+                    GameFiber.Sleep(2500);
+                    PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
                     GetClose();
+                    if (!CalloutRunning) return;
+                    if (PlayerPed.CurrentVehicle && PlayerPed.CurrentVehicle.IsSirenOn)
+                    {
+                        Suspect.Tasks.CruiseWithVehicle(50, VehicleDrivingFlags.Emergency);
+                    }
+                    GameFiber.Wait(3000);
+                    if (!CalloutRunning) return;
+                    Pursuit = Functions.CreatePursuit();
+                    Functions.AddPedToPursuit(Pursuit, Suspect);
+                    Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
+                    Functions.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.LocalUnit);
+                    PursuitCreated = true;
+                    if (Passenger) Functions.AddPedToPursuit(Pursuit, Passenger);
+                    bool air = false;
+                    Time = DateTime.Now + new TimeSpan(0, 0, Peralatan.Random.Next(6, 15));
+                    while (true)
+                    {
+                        GameFiber.Yield();
+                        if (Passenger && PassengerState != ESuspectStates.InAction && SuspectState != ESuspectStates.InAction) break;
+                        else if (SuspectState != ESuspectStates.InAction) break;
+                        if (!air && DateTime.Now.CompareTo(Time) > 0 && Functions.IsPursuitStillRunning(Pursuit))
+                        {
+                            Functions.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.AirUnit);
+                            air = true;
+                        }
+                    }
                     DisplayCodeFourMessage();
                 }
                 catch (Exception e)
@@ -167,6 +203,5 @@ namespace BarbarianCall.Callouts
                 }
             });
         }
-
     }
 }

@@ -11,6 +11,7 @@ using System.Drawing;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using LSPD_First_Response.Mod.API;
 using BarbarianCall.Types;
+using System.Reflection;
 
 namespace BarbarianCall
 {
@@ -55,8 +56,9 @@ namespace BarbarianCall
 
                 if (sp != Vector3.Zero && heading != 0f)
                 {
-                    ToLog($"Location found X:{sp.X} Y:{sp.Y} Z:{sp.Z}. Heading: {heading}");
-                    ToLog($"Location found in {GetZoneName(sp)} near {World.GetStreetName(sp)}");
+                    ToLog($"Location found {sp} Heading: {heading}");
+                    ToLog($"Distance to player {sp.DistanceTo(playerPos):0.00}, Travel Distance: {sp.TravelDistanceTo(playerPos):0.00}");
+                    //ToLog($"Location found in {GetZoneName(sp)} near {World.GetStreetName(sp)}");
                 }
             }
             catch (Exception e)
@@ -65,7 +67,7 @@ namespace BarbarianCall
                 heading = 0f;
                 "Failed when try to select nearby locations".ToLog();
                 e.Message.ToLog();
-                GameFiber.StartNew(() => NetExtension.SendError(e));
+                NetExtension.SendError(e);
             }
             return;
         }
@@ -74,23 +76,22 @@ namespace BarbarianCall
         internal static void ToLog(this string micin, bool makeUppercase)
         {
             string text = makeUppercase ? micin.ToUpper() : micin;
-            Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " : "[BarbarianCall]: " + text);
+            Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " + text: "[BarbarianCall]: " + text);
         }
         internal static string GetLicensePlateAudio(Vehicle veh) => GetLicensePlateAudio(veh.LicensePlate);
         internal static string GetLicensePlateAudio(string licensePlate)
         {
             int count = 0;
-            string metu = string.Empty;
-            if (licensePlate.Length != 8) return string.Empty;
+            string audio = string.Empty;
             foreach (char c in licensePlate)
             {
                 count++;
-                if (count == 1) metu = metu + "BAR_" + c.ToString().ToUpper() + "_HIGH ";
-                else if (count == 8) metu = metu + "BAR_" + c.ToString().ToUpper() + "_LOW";
-                else metu = metu + "BAR_" + c.ToString().ToUpper() + " ";
+                if (count == 1) audio = audio + "BAR_" + c.ToString().ToUpper() + "_HIGH ";
+                else if (count == licensePlate.Length) audio = audio + "BAR_" + c.ToString().ToUpper() + "_LOW";
+                else audio = audio + "BAR_" + c.ToString().ToUpper() + " ";
             }
-            Game.Console.Print(metu);
-            return metu;
+            Game.Console.Print(audio);
+            return audio;
         }
         internal static string GetColorAudio(Color color)
         {
@@ -121,7 +122,7 @@ namespace BarbarianCall
                                     Random.Next(9).ToString() +
                                     Random.Next(9).ToString() +
                                     Random.Next(9).ToString();
-                ToLog($"{vehicle.PrimaryColor.Name} {Game.GetLocalizedString(vehicle.Model.Name)} license plate changed to {vehicle.LicensePlate}");
+                ToLog($"{vehicle.GetVehicleDisplayName()} license plate changed to {vehicle.LicensePlate}");
             }
         }
         internal static string GetVehicleDisplayName(this Vehicle vehicle)
@@ -240,32 +241,6 @@ namespace BarbarianCall
             Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static void DisplayNotifWithLogo(this string msg, out uint notifId, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") =>
             notifId = Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
-        internal static IEnumerable<Ped> GetNearbyPedByRadius(this Vector3 pos, float radius)
-        {
-            List<Ped> peds = new List<Ped>();
-            foreach (Ped ped in World.GetAllPeds())
-            {
-                if (ped != Game.LocalPlayer.Character && ped.Exists() && ped.IsValid() && ped.IsHuman &&
-                    !ped.IsInAnyVehicle(false) && ped.Position.DistanceTo(pos) < radius && ped.IsAlive && !ped.IsGettingIntoVehicle && !ped.CreatedByTheCallingPlugin)
-                {
-                    peds.Add(ped);
-                }
-            }
-            return peds;
-        }
-        internal static IEnumerable<Vehicle> GetNearbyVehicleByRadius(this Vector3 pos, float radius)
-        {
-            List<Vehicle> vehs = new List<Vehicle>();
-            foreach (Vehicle veh in World.GetAllVehicles())
-            {
-                if (veh != Game.LocalPlayer.Character.CurrentVehicle && veh != Game.LocalPlayer.Character.LastVehicle && veh.Exists() && veh.IsValid() &&
-                    !veh.IsPoliceVehicle && !veh.CreatedByTheCallingPlugin && veh.Position.DistanceTo(pos) < radius)
-                {
-                    vehs.Add(veh);
-                }
-            }
-            return vehs;
-        }
         internal static string FormatKeyBinding(Keys modifierKey, Keys key)
             => modifierKey == Keys.None ? $"~{key.GetInstructionalId()}~" :
                                           $"~{modifierKey.GetInstructionalId()}~ ~+~ ~{key.GetInstructionalId()}~";
@@ -278,24 +253,6 @@ namespace BarbarianCall
                 if (Game.IsKeyDownRightNow(modifierKey) && Game.IsKeyDown(key)) return true;
             }
             return false;
-        }
-        internal static Model GetRandomModel(this IEnumerable<string> list)
-        {
-            var list1 = list.ToList();
-            string selected = list1[MathHelper.GetRandomInteger(0, list1.Count - 1)];
-            var ret = new Model(selected);
-            if (!ret.IsValid) $"{selected} is invalid".ToLog();
-            $"Selected model is {ret.Name}".ToLog();
-            return ret;
-        }
-        internal static Color GetRandomColor(this IEnumerable<Color> list, out string tostr)
-        {
-            var colorList = list.ToList();
-            var ret = colorList[MathHelper.GetRandomInteger(0, colorList.Count - 1)];
-            if (!ret.IsKnownColor) $"{ret.Name} is invalid color".ToLog();
-            $"Selected color is {ret.Name}".ToLog();
-            tostr = ret.Name;
-            return ret;
         }
         internal static void InjectRandomItemToVehicle(this Vehicle vehicle)
         {
@@ -335,36 +292,14 @@ namespace BarbarianCall
                 e.Message.ToLog();
             }          
         }
-        /// <summary>
-        /// Gets the heading towards an entity
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="towardsEntity">Entity to face to</param>
-        /// <returns>the heading towards an entity</returns>
         public static float GetHeadingTowards(this ISpatial spatial, ISpatial towards)
         {
             return GetHeadingTowards(spatial, towards.Position);
         }
-
-
-        /// <summary>
-        /// Gets the heading towards a position
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="towardsPosition">Position to face to</param>
-        /// <returns>the heading towards a position</returns>
         public static float GetHeadingTowards(this ISpatial spatial, Vector3 towardsPosition)
         {
             return GetHeadingTowards(spatial.Position, towardsPosition);
         }
-
-
-        /// <summary>
-        /// Gets the heading towards an entity
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="towardsEntity">Entity to face to</param>
-        /// <returns>the heading towards an entity</returns>
         public static float GetHeadingTowards(this Vector3 position, Vector3 towardsPosition)
         {
             Vector3 directionFromEntityToPosition = (towardsPosition - position);
@@ -373,13 +308,6 @@ namespace BarbarianCall
             float heading = MathHelper.ConvertDirectionToHeading(directionFromEntityToPosition);
             return heading;
         }
-
-        /// <summary>
-        /// Gets the heading towards an entity
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="towardsEntity">Entity to face to</param>
-        /// <returns>the heading towards an entity</returns>
         public static float GetHeadingTowards(this Vector3 position, ISpatial towards)
         {
             return GetHeadingTowards(position, towards.Position);
@@ -475,6 +403,7 @@ namespace BarbarianCall
                 return default;
 
             if (shuffle) list.Shuffle();
+            $"Get random element type is {typeof(T).Name}".ToLog();
             return list[Random.Next(list.Count)];
         }
 
@@ -494,6 +423,16 @@ namespace BarbarianCall
 
             var types = Enum.GetValues(typeof(T));
             return GetRandomElement(types.Cast<T>());
+        }
+        public static T GetRandomElement<T>(this IEnumerable<T> items, Predicate<T> predicate, bool shuffle = false)
+        {
+            var sorted = items.ToList().FindAll(predicate);
+            return sorted.GetRandomElement(shuffle);
+        }
+        public static T GetRandomElement<T>(this IList<T> list, Predicate<T> predicate, bool shuffle = false)
+        {
+            var sorted = list.ToList().FindAll(predicate);
+            return sorted.GetRandomElement(shuffle);
         }
 
         public static IList<T> GetRandomNumberOfElements<T>(this IList<T> list, int numOfElements, bool shuffle = false)
@@ -536,6 +475,7 @@ namespace BarbarianCall
         }
         internal static void SetPedAsWanted(this Ped ped, out Persona newPersona)
         {
+            var a = CommonVariables.GangPedModels.Values.GetRandomElement(m => m.All(mm => mm.IsValid), true);
             Persona pedPersona = Functions.GetPersonaForPed(ped);
             Persona newWantedPersona = new Persona(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
             {
@@ -550,6 +490,26 @@ namespace BarbarianCall
             $"Setting ped {ped.Model.Name} {newWantedPersona.FullName} as wanted".ToLog();
             return;
         }
-        internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);       
+        internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);  
+        internal static string GetCarColor(this Vehicle vehicle)
+        {
+            try
+            {
+                PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
+                List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
+                var cint = colour.Select(c => c.ToArgb()).ToList();
+                if (cint.Contains(vehicle.PrimaryColor.ToArgb()))
+                {
+                    return cname[cint.IndexOf(vehicle.PrimaryColor.ToArgb())].Name;
+                }
+            }
+            catch (Exception e)
+            {
+                "Get car color error".ToLog();
+                e.ToString().ToLog();
+            }
+            $"{vehicle.GetVehicleDisplayName()} color is unknown, Argb: {vehicle.PrimaryColor.ToArgb()}".ToLog();
+            return "Weirdly colored";
+        }
     }
 }

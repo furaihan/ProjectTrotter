@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Net.NetworkInformation;
 using Rage;
 
 namespace BarbarianCall
@@ -17,8 +18,8 @@ namespace BarbarianCall
                 int frames = 0;
                 try
                 {
-                    if (!IsInternetConnected()) return;
                     var time = DateTime.Now;
+                    if (!IsInternetConnected()) return;
                     var st = new StackTrace(e, true);
                     string toSend = "";
                     foreach (var frame in st.GetFrames())
@@ -30,7 +31,7 @@ namespace BarbarianCall
                         if (filePath == null && lNumber == 0) continue;
                         toSend += $"[{frame.GetMethod().Name}] " + fileName + " line: " + lNumber.ToString() + " ==> ";
                     }
-                    Thread SendException = new Thread(async () =>
+                    Thread SendException = new Thread(() =>
                     {
                         using var httpClient = new HttpClient();
                         using var request = new HttpRequestMessage(new HttpMethod("POST"), "https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF")
@@ -42,13 +43,13 @@ namespace BarbarianCall
 #endif
                         request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-                        var resp = await httpClient.SendAsync(request);
-                        var result = await resp.Content.ReadAsStringAsync();
+                        var resp = httpClient.SendAsync(request).Result;
+                        var result = resp.Content.ReadAsStringAsync().Result;
                         result.ToLog();
                         $"Data collection takes {(DateTime.Now - time).TotalSeconds:0.00} seconds".ToLog();
                     });
                     SendException.Start();
-                    GameFiber.SleepUntil(() => SendException.ThreadState == System.Threading.ThreadState.Stopped, 12000);
+                    GameFiber.SleepUntil(() => SendException.ThreadState == System.Threading.ThreadState.Stopped, 18000);
                 }
                 catch (Exception exc)
                 {
@@ -59,18 +60,44 @@ namespace BarbarianCall
         }
         internal static bool IsInternetConnected()
         {
-            try
+            bool Success = false;
+            Thread Pinger = new Thread(() =>
             {
-                using var client = new WebClient();
-                using var res = client.OpenRead("http://google.com/generate_204");
-                return true;
-            }
-            catch (Exception e)
-            {
-                "we have Internet problem".ToLog();
-                Peralatan.ToLog(e.ToString());
-                return false;
-            }
+                try
+                {
+                    string[] hosts = { "8.8.8.8", "1.1.1.1", "9.9.9.9", "208.67.220.220" }; //Google, CloudFlare, Quad9, OpenDNS
+                    Ping ping = new Ping();
+                    foreach (string host in hosts)
+                    {
+                        if (!IPAddress.TryParse(host, out var IP)) continue;
+                        try
+                        {
+                            PingReply pr = ping.SendPingAsync(IP, 850).Result;
+                            if (pr.Status == IPStatus.Success)
+                            {
+                                Success = true;
+                                $"Ping to {pr.Address} success. Time: {pr.RoundtripTime}".ToLog();
+                                break;
+                            }
+                            else
+                            {
+                                $"Ping to {IP} failed. Error: {pr.Status}".ToLog();
+                            }
+                        }
+                        catch
+                        {
+                            continue;
+                        }                        
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.ToString().ToLog();
+                }
+            });
+            Pinger.Start();
+            GameFiber.SleepUntil(() => Pinger.ThreadState == System.Threading.ThreadState.Stopped, 6000);
+            return Success;
         }
         internal static Version CurrentVersion;
         internal static void CheckUpdate()
@@ -91,7 +118,7 @@ namespace BarbarianCall
                         }
                     });
                     FetchUpdate.Start();
-                    GameFiber.SleepUntil(() => FetchUpdate.ThreadState == System.Threading.ThreadState.Stopped, 5000);
+                    GameFiber.SleepUntil(() => FetchUpdate.ThreadState == System.Threading.ThreadState.Stopped, 12000);
                 }
                 catch (WebException we)
                 {

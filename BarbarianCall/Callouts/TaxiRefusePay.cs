@@ -458,7 +458,7 @@ namespace BarbarianCall.Callouts
                     if (StopThePedRunning) API.StopThePedFunc.InjectPedItem(Suspect, "~r~Pistol");
                     Witness = new Ped(SpawnPoint, SpawnHeading);
                     Witness.MakeMissionPed();
-                    WitnessCar = new Vehicle(m => m.IsCar && !m.IsBigVehicle && m.NumberOfSeats == 4 && !m.IsLawEnforcementVehicle && !m.IsEmergencyVehicle,
+                    WitnessCar = new Vehicle(CommonVariables.CarsToSelect.GetRandomElement(m=> m.IsValid, true),
                         Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
                     Witness.WarpIntoVehicle(WitnessCar, -1);
                     if (Peralatan.Random.Next() % 5 == 0)

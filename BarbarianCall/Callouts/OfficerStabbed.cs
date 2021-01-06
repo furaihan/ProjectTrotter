@@ -57,7 +57,8 @@ namespace BarbarianCall.Callouts
             }           
             ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 20f);
             AddMinimumDistanceCheck(30f, SpawnPoint);
-            susVehModel = Model.VehicleModels.Where(m => m.IsSuitableCar()).GetRandomElement();
+            if (Peralatan.Random.Next() % 10 == 0) susVehModel = CommonVariables.MotorBikesToSelect.GetRandomElement(m => m.IsValid && m.NumberOfSeats == 2, true);
+            else susVehModel = CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid, true);
             susVehModel.LoadAndWait();
             CalloutPosition = SpawnPoint;
             CalloutMessage = "Officer Stabbed";
@@ -109,7 +110,7 @@ namespace BarbarianCall.Callouts
             var tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
             if (tempSpawn != BarbarianCall.SpawnPoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
-            SuspectCar.PrimaryColor = CommonVariables.CommonUnderstandableColor.GetRandomColor(out susVehColor);
+            SuspectCar.PrimaryColor = CommonVariables.CommonUnderstandableColor.GetRandomElement();
             SuspectCar.RandomiseLicencePlate();
             Suspect = SuspectCar.CreateRandomDriver();
             Suspect.MakeMissionPed();
@@ -133,6 +134,7 @@ namespace BarbarianCall.Callouts
                     passengerWeapon = passenger.Inventory.GiveNewWeapon(0xDBBD7280, -1, false);
                 }
             }
+            susVehColor = SuspectCar.GetCarColor();
             SuspectState = ESuspectStates.InAction;
             PassengerState = ESuspectStates.InAction;
             Functions.AddPedContraband(Suspect, ContrabandType.Weapon, "Knife");

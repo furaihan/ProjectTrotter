@@ -24,6 +24,7 @@ namespace BarbarianCall.Callouts
         public Vehicle SuspectCar;
         public Types.Manusia Manusia;
         public Model CarModel;
+        public List<Model> GangModels;
         public Blip Blip;
         public bool CalloutRunning = false;
         public Vector3 SpawnPoint = Vector3.Zero;
@@ -74,7 +75,8 @@ namespace BarbarianCall.Callouts
             base.OnCalloutNotAccepted();
         }
         public override bool OnBeforeCalloutDisplayed()
-        {                 
+        {
+            GangModels = CommonVariables.GangPedModels.Values.GetRandomElement();
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
