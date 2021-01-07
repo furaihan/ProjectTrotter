@@ -53,6 +53,12 @@ namespace BarbarianCall
                 "Prepering to create pause menu".ToLog();               
                 Menus.PauseMenu.CreatePauseMenu();
             });
+            GameFiber.StartNew(delegate
+            {
+                GameFiber.Wait(7500);
+                "Starting fiber for ambient dispatch call event".ToLog();
+                EventHandler.AmbientDispatchCall();
+            }, "[BarbarianCall] Ambient Dispatch Call Event Fiber");
         }
         public static bool IsLSPDFRPluginRunning(string Plugin, Version minVersion = null)
         {

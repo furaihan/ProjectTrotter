@@ -149,13 +149,13 @@ namespace BarbarianCall.Callouts
         }
         protected void PlayScannerWithCallsign(string audio)
         {
-            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2))) Functions.PlayScannerAudio("DISP_ATTENTION_UNIT " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio);
+            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2))) Functions.PlayScannerAudio("DISPATCH_TO " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio);
             else Functions.PlayScannerAudio($"ATTENTION_ALL_UNITS {audio}");
         }
         protected void PlayScannerWithCallsign(string audio, Vector3 position)
         {
             if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2))) 
-                Functions.PlayScannerAudioUsingPosition("DISP_ATTENTION_UNIT " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio, position);
+                Functions.PlayScannerAudioUsingPosition("DISPATCH_TO " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio, position);
             else Functions.PlayScannerAudioUsingPosition($"ATTENTION_ALL_UNITS {audio}", position);
         }
         protected void CheckOtherPluginRunning()
@@ -168,6 +168,7 @@ namespace BarbarianCall.Callouts
             CalloutStates = ECalloutStates.UnAccepted;
             $"Callout Created From {CreationSource}".ToLog();
         }
+        protected void PlayRadioAnimation(int duration) => Functions.PlayPlayerRadioAction(Functions.GetPlayerRadioAction(), duration);
         public static UIMenuItem[] CreateMenu()
         {
             "Creating callout menu tab, menu items".ToLog();

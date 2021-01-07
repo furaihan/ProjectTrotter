@@ -403,7 +403,9 @@ namespace BarbarianCall
                 return default;
 
             if (shuffle) list.Shuffle();
+#if DEBUG
             $"Get random element type is {typeof(T).Name}".ToLog();
+#endif
             return list[Random.Next(list.Count)];
         }
 
