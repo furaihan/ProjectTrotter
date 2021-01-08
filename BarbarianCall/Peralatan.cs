@@ -103,7 +103,9 @@ namespace BarbarianCall
                 ToLog("Color match, converting to scanner audio");
                 selected = CommonVariables.AudibleColor[audibleArgb.ToList().IndexOf(color.ToArgb())];
                 var ret = "COLOR_" + selected.Name.AddSpacesToSentence().Replace(" ", "_").ToUpper();
-                ret.ToLog();
+#if DEBUG
+                ret.Print();
+#endif
                 return ret;
             }
             ToLog($"Color not match {color.ToArgb()}");
@@ -431,11 +433,6 @@ namespace BarbarianCall
             var sorted = items.ToList().FindAll(predicate);
             return sorted.GetRandomElement(shuffle);
         }
-        public static T GetRandomElement<T>(this IList<T> list, Predicate<T> predicate, bool shuffle = false)
-        {
-            var sorted = list.ToList().FindAll(predicate);
-            return sorted.GetRandomElement(shuffle);
-        }
 
         public static IList<T> GetRandomNumberOfElements<T>(this IList<T> list, int numOfElements, bool shuffle = false)
         {
@@ -502,7 +499,7 @@ namespace BarbarianCall
                 var cint = colour.Select(c => c.ToArgb()).ToList();
                 if (cint.Contains(vehicle.PrimaryColor.ToArgb()))
                 {
-                    return cname[cint.IndexOf(vehicle.PrimaryColor.ToArgb())].Name;
+                    return cname[cint.IndexOf(vehicle.PrimaryColor.ToArgb())].Name.AddSpacesToSentence();
                 }
             }
             catch (Exception e)

@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LSPD_First_Response.Mod.Callouts;
 using LSPD_First_Response.Mod.API;
 using Rage;
 using Rage.Native;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using RAGENativeUI.Elements;
+using BarbarianCall.Types;
 
 namespace BarbarianCall.Callouts
 {
-    public abstract class CalloutBase : Callout
+    public abstract class CalloutBase : LSPD_First_Response.Mod.Callouts.Callout
     {
         #region Fields
         public enum ESuspectStates { InAction, Arrested, Dead, Escaped };
@@ -29,7 +29,7 @@ namespace BarbarianCall.Callouts
         public bool CalloutRunning = false;
         public Vector3 SpawnPoint = Vector3.Zero;
         public float SpawnHeading = 0f;
-        public SpawnPoint Spawn = BarbarianCall.SpawnPoint.Zero;
+        public SpawnPoint Spawn = Types.SpawnPoint.Zero;
         public long Timer;
         public DateTime Time;
         public TimeSpan TimeSpan = new TimeSpan(0, 0, 15);

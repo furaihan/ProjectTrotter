@@ -37,6 +37,7 @@ namespace BarbarianCall.Callouts
             CarModel.LoadAndWait();
             SuspectCar = new Vehicle(CarModel, Spawn, Spawn);
             SuspectCar.MakePersistent();
+            SuspectCar.PlaceOnGroundProperly();
             ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 15f);
             AddMinimumDistanceCheck(30f, SpawnPoint);          
             CalloutPosition = SpawnPoint;
@@ -159,6 +160,8 @@ namespace BarbarianCall.Callouts
                     SuspectCar.Position = Spawn;
                     SuspectCar.Heading = Spawn;
                     SuspectCar.IsEngineStarting = true;
+                    Suspect.SetPedAsWanted();
+                    if (Passenger && Peralatan.Random.Next() % 3 == 0) Passenger.SetPedAsWanted();
                     if (Peralatan.Random.Next() % 7 == 0) SuspectCar.Mods.ApplyAllMods();
                     if (!Suspect.IsInVehicle(SuspectCar, false)) Suspect.WarpIntoVehicle(SuspectCar, -1);
                     if (Passenger && !Passenger.IsInVehicle(SuspectCar, false)) Passenger.WarpIntoVehicle(SuspectCar, 0);
@@ -169,7 +172,7 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     Manusia.DisplayNotif();
                     PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
-                    GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), 8000);
+                    GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), -1);
                     if (!CalloutRunning) return;
                     DisplayGPNotif();
                     GetClose();
@@ -183,19 +186,19 @@ namespace BarbarianCall.Callouts
                     Pursuit = Functions.CreatePursuit();
                     Functions.AddPedToPursuit(Pursuit, Suspect);
                     Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
-                    Functions.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.LocalUnit);
+                    API.LSPDFRFunc.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                     PursuitCreated = true;
                     if (Passenger) Functions.AddPedToPursuit(Pursuit, Passenger);
                     bool air = false;
                     Time = DateTime.Now + new TimeSpan(0, 0, Peralatan.Random.Next(6, 15));
-                    while (true)
+                    while (CalloutRunning)
                     {
                         GameFiber.Yield();
                         if (Passenger && PassengerState != ESuspectStates.InAction && SuspectState != ESuspectStates.InAction) break;
                         else if (!Passenger.Exists() && SuspectState != ESuspectStates.InAction) break;
                         if (!air && DateTime.Now.CompareTo(Time) > 0 && Functions.IsPursuitStillRunning(Pursuit))
                         {
-                            Functions.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.AirUnit);
+                            API.LSPDFRFunc.RequestAirUnit(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                             air = true;
                         }
                     }

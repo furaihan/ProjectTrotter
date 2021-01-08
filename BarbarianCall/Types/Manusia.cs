@@ -69,7 +69,7 @@ namespace BarbarianCall.Types
                 var cint = colour.Select(c => c.ToArgb()).ToList();
                 if (cint.Contains(Car.PrimaryColor.ToArgb()))
                 {
-                    return cname[cint.IndexOf(Car.PrimaryColor.ToArgb())].Name;
+                    return cname[cint.IndexOf(Car.PrimaryColor.ToArgb())].Name.AddSpacesToSentence();
                 }
             }
             catch (Exception e)

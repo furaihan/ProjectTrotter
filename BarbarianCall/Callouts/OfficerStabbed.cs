@@ -108,7 +108,7 @@ namespace BarbarianCall.Callouts
             Blip.Color = Color.Yellow;
             Blip.EnableRoute(Color.Yellow);
             var tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
-            if (tempSpawn != BarbarianCall.SpawnPoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
+            if (tempSpawn != Types.SpawnPoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
             SuspectCar.PrimaryColor = CommonVariables.CommonUnderstandableColor.GetRandomElement();
             SuspectCar.RandomiseLicencePlate();
@@ -679,15 +679,10 @@ namespace BarbarianCall.Callouts
                     GameFiber.WaitUntil(() => !Functions.GetIsAudioEngineBusy(), 5000);
                     if (Suspect.DistanceTo(PlayerPed) > 850f || Suspect.TravelDistanceTo(PlayerPed) > 1250f)
                     {
-                        for (int i = 0; i < 50; i++)
-                        {
-                            if (SpawnPoint.Around(350, 450).GetRoadSidePointWithHeading(out Vector3 tmpP, out float tmpH))
-                            {
-                                SuspectCar.Position = tmpP;
-                                SuspectCar.Heading = tmpH;
-                            }
-                            else SuspectCar.Position = World.GetNextPositionOnStreet(SpawnPoint.Around(350, 450));
-                        }
+                        SpawnPoint closer = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 350, 650);
+                        if (closer == Types.SpawnPoint.Zero) closer = new SpawnPoint(World.GetNextPositionOnStreet(SpawnPoint.Around(350, 650)), 0f);
+                        SuspectCar.Position = closer;
+                        SuspectCar.Heading = closer;
                     }
                     PlayScannerWithCallsign("SUSPECT_LAST_SEEN IN_OR_ON_POSITION", Suspect.Position);
                     var currSusPos = Suspect.Position;

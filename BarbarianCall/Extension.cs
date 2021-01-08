@@ -107,15 +107,9 @@ namespace BarbarianCall
 			var loro = Peralatan.Random.NextDouble();
 			return (float)((float)siji + loro);
         }
-		public static string GetLocalizedString(IntPtr stringPtr)
-		{
-			return NativeFunction.Natives.x7B5280EBA9840C72<string>(stringPtr); //_GET_LABEL_TEXT
-		}
+		public static string GetLocalizedString(IntPtr stringPtr) => NativeFunction.Natives.x7B5280EBA9840C72<string>(stringPtr); //_GET_LABEL_TEXT
 
-		public static unsafe bool IsStringEmpty(IntPtr stringPtr)
-		{
-			return *(byte*)stringPtr == 0;
-		}
+		public static unsafe bool IsStringEmpty(IntPtr stringPtr) => *(byte*)stringPtr == 0;
 
 		public enum VehicleWindowIndex
         {

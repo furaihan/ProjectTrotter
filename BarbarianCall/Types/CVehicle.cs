@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BarbarianCall.Types
+﻿namespace BarbarianCall.Types
 {
     using System;
-
     using Rage;
 
-    //Thanks to alexguirre for his open source plugin
+    //Thanks to Alexguirre for his open source plugin
     internal static unsafe class GameOffsets
     {
         public static int CVehicleModelInfo_VehicleMakeName { get; private set; }
@@ -43,7 +36,6 @@ namespace BarbarianCall.Types
     }
     internal unsafe struct CVehicle
     {
-
         public IntPtr GetMakeName()
         {
             fixed (CVehicle* v = &this)

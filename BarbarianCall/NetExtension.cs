@@ -63,10 +63,11 @@ namespace BarbarianCall
             bool Success = false;
             Thread Pinger = new Thread(() =>
             {
+                Ping ping = null;
                 try
                 {
                     string[] hosts = { "8.8.8.8", "1.1.1.1", "9.9.9.9", "208.67.220.220" }; //Google, CloudFlare, Quad9, OpenDNS
-                    Ping ping = new Ping();
+                    ping = new Ping();
                     foreach (string host in hosts)
                     {
                         if (!IPAddress.TryParse(host, out var IP)) continue;
@@ -93,6 +94,10 @@ namespace BarbarianCall
                 catch (Exception e)
                 {
                     e.ToString().ToLog();
+                }
+                finally
+                {
+                    if (ping != null) ping.Dispose();
                 }
             });
             Pinger.Start();

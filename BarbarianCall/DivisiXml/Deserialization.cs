@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Rage;
 using System.IO;
 using System.Xml.Serialization;
+using BarbarianCall.Types;
 
 namespace BarbarianCall.DivisiXml
 {

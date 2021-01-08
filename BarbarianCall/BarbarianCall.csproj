@@ -72,6 +72,7 @@
     <Compile Include="API\BetterEMSFunc.cs" />
     <Compile Include="API\Functions.cs" />
     <Compile Include="API\GrammarPoliceFunc.cs" />
+    <Compile Include="API\LSPDFRFunc.cs" />
     <Compile Include="API\StopThePedFunc.cs" />
     <Compile Include="API\UltimateBackupFunc.cs" />
     <Compile Include="Callouts\CalloutBase.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Types\CVehicle.cs" />
     <Compile Include="Types\HeadBlend.cs" />
     <Compile Include="Types\Manusia.cs" />
+    <Compile Include="Types\SpawnPoint.cs" />
     <Compile Include="Types\Speech.cs" />
   </ItemGroup>
   <ItemGroup>
