@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rage;
-
-namespace BarbarianCall.Types
+﻿namespace BarbarianCall.Types
 {
+    using System;
+    using System.Globalization;
+    using Rage;
     public class SpawnPoint : ISpatial, IEquatable<SpawnPoint>, IEquatable<Vector3>, IFormattable
     {
         public Vector3 Position { get; set; }
@@ -128,7 +123,7 @@ namespace BarbarianCall.Types
         public static bool operator ==(SpawnPoint left, SpawnPoint right) => left.Position == right.Position && left.Heading == right.Heading;
         public static bool operator !=(SpawnPoint left, SpawnPoint right) => !(left.Position == right.Position && left.Heading == right.Heading);
         public static implicit operator Vector3(SpawnPoint s) => s.Position;
-        public static implicit operator float[](SpawnPoint s) => new float[] { s.Position.X, s.Position.Y, s.Position.Z };
+        //public static implicit operator float[](SpawnPoint s) => new float[] { s.Position.X, s.Position.Y, s.Position.Z };
         public static implicit operator float(SpawnPoint s) => s.Heading;
     }
 }

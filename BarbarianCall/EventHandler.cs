@@ -22,12 +22,12 @@ namespace BarbarianCall
                 alphabet = string.Concat("ABCDEFGHIJKLMNOPQRSTUVWXYZ".Where(c => c != userCS));
             }
             else alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            DateTime ADTimer = DateTime.Now + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
+            DateTime ADTimer = DateTime.UtcNow + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
             "Starting ambient dispatch call Loop".ToLog();
             while (true)
             {
                 GameFiber.Yield();
-                if (DateTime.Now.CompareTo(ADTimer) > 0)
+                if (DateTime.UtcNow.CompareTo(ADTimer) > 0)
                 {
                     try
                     {
@@ -37,8 +37,8 @@ namespace BarbarianCall
                         if (Functions.GetIsAudioEngineBusy())
                         {
                             $"Audio engine is busy, cancelling event".ToLog();
-                            ADTimer = DateTime.Now + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
-                            $"Next ambient dispatch call should occured at {ADTimer.ToLongTimeString()}".ToLog();
+                            ADTimer = DateTime.UtcNow + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
+                            $"Next ambient dispatch call should occured at {ADTimer.ToLocalTime().ToLongTimeString()}".ToLog();
                             continue;
                         }
                         "Audio engine is free, continuing process".ToLog();
@@ -92,8 +92,8 @@ namespace BarbarianCall
                         e.ToString().ToLog();
                         NetExtension.SendError(e);
                     }
-                    ADTimer = DateTime.Now + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
-                    $"Next ambient dispatch call should occured at {ADTimer.ToLongTimeString()}".ToLog();
+                    ADTimer = DateTime.UtcNow + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
+                    $"Next ambient dispatch call should occured at {ADTimer.ToLocalTime().ToLongTimeString()}".ToLog();
                 }
             }
         }

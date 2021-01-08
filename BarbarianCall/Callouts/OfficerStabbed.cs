@@ -334,7 +334,7 @@ namespace BarbarianCall.Callouts
                     Blip.Color = Color.Yellow;
                     Blip.EnableRoute(Color.Yellow);
                     var currSusPos = Suspect.Position;
-                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     Manusia = new Manusia(Suspect, SuspectPersona, SuspectCar);
                     Manusia.DisplayNotif();
                     GameFiber.StartNew(() =>
@@ -355,9 +355,9 @@ namespace BarbarianCall.Callouts
                             Blip = new Blip(currSusPos.Around2D(20f), 80f);
                             Blip.Color = Color.Yellow;
                             Blip.EnableRoute(Color.Yellow);
-                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 15000L)
+                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 15000L)
                             {
-                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                                Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                                 Functions.PlayScannerAudioUsingPosition($"SUSPECT_HEADING {Suspect.GetCardinalDirectionLowDetailedAudio()} IN_OR_ON_POSITION", currSusPos);
                                 //Game.DisplayHelp($"Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to see the suspect details");
                                 //Suspect.DisplayNotificationsWithPedHeadshot("Suspect Details", $"~y~Name~s~: {DriverPersona.FullName}~n~Suspect is driving a ~y~{susVehColor} {SuspectCar.Model.Name.ToUpper()}~s~~n~" +
@@ -410,7 +410,7 @@ namespace BarbarianCall.Callouts
                     }
                     else
                     {
-                        Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                        Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                         while (CalloutRunning)
                         {
                             if (Functions.IsPlayerPerformingPullover())
@@ -419,9 +419,9 @@ namespace BarbarianCall.Callouts
                                 if (Functions.GetPulloverSuspect(PullOver) == Suspect)
                                     break;
                             }
-                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000L)
+                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 12000L)
                             {
-                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                                Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                                 Game.DisplayHelp("Suspect found. ~y~Perform pullover on a ~r~suspect ~s~and then~r~bring the suspect to jail~s~, ~g~please be careful~s~, suspect may armed with ~o~weapon", 8500);
                             }
                             GameFiber.Yield();
@@ -478,7 +478,7 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.PlayAnimation("amb@medic@standing@tendtodead@idle_a", tendToDeadIdles.GetRandomElement(), 2.0f, AnimationFlags.Loop);
                     Suspect.PlayAmbientSpeech(null, Speech.GENERIC_SHOCKED_HIGH, 0, SpeechModifier.ForceShouted);
                     Game.DisplayHelp($"~y~Approach the suspect and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
-                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     List<string> conv = new List<string>()
                     {
                         "~r~Suspect~s~: " + proses2Sorry.GetRandomElement(),
@@ -488,9 +488,9 @@ namespace BarbarianCall.Callouts
                     };
                     while (CalloutRunning)
                     {
-                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 10000L)
+                        if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 10000L)
                         {
-                            Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                             Game.DisplayHelp($"~y~Approach the suspect and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
                         }
                         if (Game.IsKeyDown(System.Windows.Forms.Keys.Y))
@@ -638,12 +638,12 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.CruiseWithVehicle(20f, VehicleDrivingFlags.Emergency);
                     
                     Game.DisplayHelp($"~y~Get ~o~closer~y~ to the ~g~paramedic~y~ and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ ~y~to talk");
-                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     while (CalloutRunning)
                     {
-                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 10000L)
+                        if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 10000L)
                         {
-                            Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                             Game.DisplayHelp($"~y~Get ~o~closer~y~ to the ~g~paramedic~y~ and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ ~y~to talk", false);
                         }
                         if (Game.IsKeyDown(System.Windows.Forms.Keys.Y))
@@ -686,7 +686,7 @@ namespace BarbarianCall.Callouts
                     }
                     PlayScannerWithCallsign("SUSPECT_LAST_SEEN IN_OR_ON_POSITION", Suspect.Position);
                     var currSusPos = Suspect.Position;
-                    Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     Manusia = new Manusia(Suspect, SuspectPersona, SuspectCar);
                     Manusia.DisplayNotif();
                     while (CalloutRunning)
@@ -700,9 +700,9 @@ namespace BarbarianCall.Callouts
                             Blip = new Blip(currSusPos.Around2D(10f), 80f);
                             Blip.Color = Color.Yellow;
                             Blip.EnableRoute(Color.Yellow);
-                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 15000L)
+                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 15000L)
                             {
-                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                                Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                                 Functions.PlayScannerAudioUsingPosition($"SUSPECT_HEADING {Suspect.GetCardinalDirectionLowDetailedAudio()} IN_OR_ON_POSITION", currSusPos);                               
                             }                         
                         }
@@ -746,7 +746,7 @@ namespace BarbarianCall.Callouts
                     }
                     else
                     {
-                        Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                        Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                         while (CalloutRunning)
                         {
                             if (Functions.IsPlayerPerformingPullover())
@@ -755,9 +755,9 @@ namespace BarbarianCall.Callouts
                                 if (Functions.GetPulloverSuspect(PullOver) == Suspect)
                                 break;
                             }
-                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - Timer > 12000L)
+                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 12000L)
                             {
-                                Timer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                                Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                                 Game.DisplayHelp("Suspect found. ~y~Perform a pullover on a ~r~suspect ~s~and then handcuff the suspect, ~g~please be careful~s~, suspect may armed with ~o~weapon", 8500);
                             }
                             GameFiber.Yield();

@@ -17,11 +17,7 @@ namespace BarbarianCall.API
             LF.PlayScannerAudio(audio);
             if (waitForCompletion)
             {
-                while (true)
-                {
-                    GameFiber.Yield();
-                    if (!LF.GetIsAudioEngineBusy()) break;
-                }
+                WaitAudioScannerCompletion();
             }
         }
         public static void PlayScannerAudioUsingPosition(string sound, Vector3 location, bool waitForCompletion = false)
@@ -29,11 +25,15 @@ namespace BarbarianCall.API
             LF.PlayScannerAudioUsingPosition(sound, location);
             if (waitForCompletion)
             {
-                while(true)
-                {
-                    GameFiber.Yield();
-                    if (!LF.GetIsAudioEngineBusy()) break;
-                }
+                WaitAudioScannerCompletion();
+            }
+        }
+        public static void WaitAudioScannerCompletion()
+        {
+            while (true)
+            {
+                GameFiber.Yield();
+                if (!LF.GetIsAudioEngineBusy()) break;
             }
         }
         public static void RequestBackup(Vector3 location, EBackupResponseType responseType)

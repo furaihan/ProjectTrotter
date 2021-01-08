@@ -167,12 +167,12 @@ namespace BarbarianCall.Callouts
                     if (Passenger && !Passenger.IsInVehicle(SuspectCar, false)) Passenger.WarpIntoVehicle(SuspectCar, 0);
                     Manusia = new Types.Manusia(Suspect, SuspectPersona, SuspectCar);
                     Suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
-                    GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), 8500);
+                    GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), 10500);
                     GameFiber.Sleep(2500);
                     if (!CalloutRunning) return;
                     Manusia.DisplayNotif();
                     PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
-                    GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), -1);
+                    GameFiber.WaitWhile(() => Functions.GetIsAudioEngineBusy());
                     if (!CalloutRunning) return;
                     DisplayGPNotif();
                     GetClose();
@@ -190,17 +190,18 @@ namespace BarbarianCall.Callouts
                     PursuitCreated = true;
                     if (Passenger) Functions.AddPedToPursuit(Pursuit, Passenger);
                     bool air = false;
-                    Time = DateTime.Now + new TimeSpan(0, 0, Peralatan.Random.Next(6, 15));
+                    Time = DateTime.UtcNow + new TimeSpan(0, 0, Peralatan.Random.Next(6, 15));
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
                         if (Passenger && PassengerState != ESuspectStates.InAction && SuspectState != ESuspectStates.InAction) break;
                         else if (!Passenger.Exists() && SuspectState != ESuspectStates.InAction) break;
-                        if (!air && DateTime.Now.CompareTo(Time) > 0 && Functions.IsPursuitStillRunning(Pursuit))
+                        if (!air && DateTime.UtcNow.CompareTo(Time) > 0 && Functions.IsPursuitStillRunning(Pursuit))
                         {
                             API.LSPDFRFunc.RequestAirUnit(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                             air = true;
                         }
+                        if (Peralatan.CheckKey(Keys.NumPad9, Keys.D1)) throw new Rage.Exceptions.InvalidHandleableException("Net Extension Check");
                     }
                     DisplayCodeFourMessage();
                 }
