@@ -45,7 +45,7 @@ namespace BarbarianCall
 		}
 		internal static Model[] GetAudibleVehicleModel()
 		{
-			var files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
+            IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
 			return Model.VehicleModels.Where(m => files.Any(s => s.Contains(m.Name))).ToArray();
 		}
 
@@ -89,7 +89,7 @@ namespace BarbarianCall
 			if (!File.Exists(filepath)) return $"{AppDomain.CurrentDomain}/{filepath} File doesn't exist";
             try
             {
-				var ver = FileVersionInfo.GetVersionInfo(filepath);
+                FileVersionInfo ver = FileVersionInfo.GetVersionInfo(filepath);
 				return $"{ver.FileMajorPart}.{ver.FileMinorPart}.{ver.FileBuildPart}.{ver.FilePrivatePart}";
             }
             catch (Exception e)
@@ -103,8 +103,8 @@ namespace BarbarianCall
 		internal static float GetRandomAbsoluteSingle(float min, float max) => GetRandomAbsoluteSingle(Math.Abs((int)Math.Round(min)), Math.Abs((int)Math.Round(max)));
 		internal static float GetRandomAbsoluteSingle(int min, int max)
         {
-			var siji = Peralatan.Random.Next(min, max);
-			var loro = Peralatan.Random.NextDouble();
+            int siji = Peralatan.Random.Next(min, max);
+            double loro = Peralatan.Random.NextDouble();
 			return (float)((float)siji + loro);
         }
 		public static string GetLocalizedString(IntPtr stringPtr) => NativeFunction.Natives.x7B5280EBA9840C72<string>(stringPtr); //_GET_LABEL_TEXT

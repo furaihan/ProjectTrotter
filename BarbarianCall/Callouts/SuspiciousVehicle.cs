@@ -23,7 +23,7 @@ namespace BarbarianCall.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             FilePath = @"Plugins/LSPDFR/BarbarianCall/StrangeLookingVehicle/";
-            var spawnPoints = DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "Locations.xml"));
+            List<Types.SpawnPoint> spawnPoints = DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "Locations.xml"));
             Spawn = Peralatan.SelectNearbySpawnpoint(spawnPoints);
             SpawnPoint = Spawn;
             SpawnHeading = Spawn;
@@ -167,14 +167,19 @@ namespace BarbarianCall.Callouts
                     if (Passenger && !Passenger.IsInVehicle(SuspectCar, false)) Passenger.WarpIntoVehicle(SuspectCar, 0);
                     Manusia = new Types.Manusia(Suspect, SuspectPersona, SuspectCar);
                     Suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
-                    GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), 10500);
-                    GameFiber.Sleep(2500);
+                    GameFiber.StartNew(() =>
+                    {
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
+                        GameFiber.Wait(2500);
+                        PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                        GameFiber.Sleep(1000);
+                        Manusia.DisplayNotif();
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
+                        GameFiber.Wait(1500);
+                        DisplayGPNotif();
+                    }, "[BarbarianCall] Scanner Audio Wait Fiber");
                     if (!CalloutRunning) return;
-                    Manusia.DisplayNotif();
-                    PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
-                    GameFiber.WaitWhile(() => Functions.GetIsAudioEngineBusy());
-                    if (!CalloutRunning) return;
-                    DisplayGPNotif();
+                    //DisplayGPNotif();
                     GetClose();
                     if (!CalloutRunning) return;
                     if (PlayerPed.CurrentVehicle && PlayerPed.CurrentVehicle.IsSirenOn)

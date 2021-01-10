@@ -86,7 +86,7 @@ namespace BarbarianCall.Callouts
             Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, TaxiRelation, Relationship.Neutral);
             Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, CriminalRelation, Relationship.Neutral);
             suspectManWoman = Suspect.IsMale ? "Man" : "Woman";
-            var calloutScenario = Peralatan.Random.Next(1, 300);
+            int calloutScenario = Peralatan.Random.Next(1, 300);
             $"Callout scenario {calloutScenario}".ToLog();
             if (Peralatan.Random.Next() % 2 == 0) SituationCommon();
             else if (calloutScenario < 100) SituationFight();
@@ -126,7 +126,7 @@ namespace BarbarianCall.Callouts
                 }
                 if (WitnessCar && WitnessCar.Driver == null)
                 {
-                    var pas = WitnessCar.GetPedOnSeat(0);
+                    Ped pas = WitnessCar.GetPedOnSeat(0);
                     if (pas) pas.WarpIntoVehicle(WitnessCar, -1);
                     if (pas) pas.Dismiss();
                 }
@@ -323,7 +323,7 @@ namespace BarbarianCall.Callouts
                     Blip = Suspect.AttachBlip();
                     Blip.Color = Color.Red;
                     Blip.Scale = 0.752145f;
-                    var victimBlip = TaxiDriver.AttachBlip();
+                    Blip victimBlip = TaxiDriver.AttachBlip();
                     victimBlip.Color = Color.Orange;
                     victimBlip.Scale = 0.75f;
                     CalloutBlips.Add(victimBlip);
@@ -497,7 +497,7 @@ namespace BarbarianCall.Callouts
                         }
                     }
                     if (!CalloutRunning) return;
-                    var spawnPoint = SpawnManager.GetPedSpawnPoint(SpawnPoint, 250, 350);
+                    SpawnPoint spawnPoint = SpawnManager.GetPedSpawnPoint(SpawnPoint, 250, 350);
                     if (spawnPoint.Position == Vector3.Zero) spawnPoint.Position = World.GetNextPositionOnStreet(SpawnPoint.Around(250, 650f));
                     Suspect.Position = spawnPoint;
                     Suspect.IsVisible = true;
@@ -615,8 +615,8 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.LeaveVehicle(Taxi, LeaveVehicleFlags.None);
                     if (StopThePedRunning)
                     {
-                        var rand1 = Peralatan.Random.Next();
-                        var rand2 = Peralatan.Random.Next(1, 1000);
+                        int rand1 = Peralatan.Random.Next();
+                        int rand2 = Peralatan.Random.Next(1, 1000);
                         if (rand1 % 2 == 0)
                         {
                             API.StopThePedFunc.SetPedAlcoholOverLimit(Suspect, true);

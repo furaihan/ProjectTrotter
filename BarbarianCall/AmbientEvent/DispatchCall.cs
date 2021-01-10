@@ -3,31 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Rage;
 using LSPD_First_Response;
 using LSPD_First_Response.Mod.API;
 using BarbarianCall.Types;
 
-namespace BarbarianCall
+namespace BarbarianCall.AmbientEvent
 {
     //TODO: Add some AmbientEvent
-    internal class EventHandler
+    internal class DispatchCall
     {
         internal static void AmbientDispatchCall()
         {
             string alphabet;
             if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2)))
             {
-                var userCS = API.GrammarPoliceFunc.GetCallsign().Split('-').Where(s => s.All(ss => !char.IsDigit(ss))).FirstOrDefault()[0];
+                char userCS = API.GrammarPoliceFunc.GetCallsign().Split('-').Where(s => s.All(ss => !char.IsDigit(ss))).FirstOrDefault()[0];
                 alphabet = string.Concat("ABCDEFGHIJKLMNOPQRSTUVWXYZ".Where(c => c != userCS));
             }
             else alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            DateTime ADTimer = DateTime.UtcNow + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
+            //Consider using stopwatch instead
+            Stopwatch sw = new Stopwatch();
+            TimeSpan timer = new TimeSpan(0, 0, 0, Peralatan.Random.Next(250, 850), Peralatan.Random.Next(100, 985));
             "Starting ambient dispatch call Loop".ToLog();
+            $"First ambient dispatch call should occuered at {(DateTime.Now + timer).ToLongTimeString()}".ToLog();
+            sw.Start();
             while (true)
             {
                 GameFiber.Yield();
-                if (DateTime.UtcNow.CompareTo(ADTimer) > 0)
+                if (sw.Elapsed.TotalMilliseconds > timer.TotalMilliseconds)
                 {
                     try
                     {
@@ -37,8 +42,9 @@ namespace BarbarianCall
                         if (Functions.GetIsAudioEngineBusy())
                         {
                             $"Audio engine is busy, cancelling event".ToLog();
-                            ADTimer = DateTime.UtcNow + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
-                            $"Next ambient dispatch call should occured at {ADTimer.ToLocalTime().ToLongTimeString()}".ToLog();
+                            timer = new TimeSpan(0, 0, 0, Peralatan.Random.Next(250, 850), Peralatan.Random.Next(100, 985));
+                            $"Next ambient dispatch call should occured at {(DateTime.Now + timer).ToLongTimeString()}".ToLog();
+                            sw.Restart();
                             continue;
                         }
                         "Audio engine is free, continuing process".ToLog();
@@ -62,7 +68,7 @@ namespace BarbarianCall
                             {"BAR_CRIME_STABBED" , EBackupResponseType.Code3 },
                             {"BAR_CRIME_CIVILIAN_NEEDING_ASSISTANCE", EBackupResponseType.Code2 },
                             {"CRIME_CRIMINAL_ACTIVITY" , EBackupResponseType.Code3 },
-                            {"CRIME_PED_STRUCT_BY_VEHICLE" , EBackupResponseType.Code2},
+                            {"CRIME_PED_STRUCK_BY_VEHICLE" , EBackupResponseType.Code2},
                             {"CRIME_CAR_ON_FIRE" , EBackupResponseType.Code3 },
                         };
 #if DEBUG
@@ -71,18 +77,18 @@ namespace BarbarianCall
 #endif
                         string crime = ambientCrimes.Keys.GetRandomElement();
                         Functions.PlayScannerAudioUsingPosition($"DISPATCH_TO {randomCallsign} {reporter} {crime} IN_OR_ON_POSITION", randomLocation);
-                        GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), -1);
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(2500);
-                        GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), -1);
-                        ambientCrimes.TryGetValue(crime, out var typ);
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
+                        ambientCrimes.TryGetValue(crime, out EBackupResponseType typ);
                         Functions.PlayScannerAudio("BAR_AI_RESPOND");
-                        GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), -1);
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(1500);
-                        GameFiber.SleepUntil(() => !Functions.GetIsAudioEngineBusy(), -1);
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
                         switch (typ)
                         {
-                            case EBackupResponseType.Code2: Functions.PlayScannerAudio("UNITS_RESPOND_CODE_2"); break;
-                            case EBackupResponseType.Code3: Functions.PlayScannerAudio("UNITS_RESPOND_CODE_3"); break;
+                            case EBackupResponseType.Code2: Functions.PlayScannerAudio("BAR_ACK BAR_DELAY_500MS UNITS_RESPOND_CODE_2"); break;
+                            case EBackupResponseType.Code3: Functions.PlayScannerAudio("BAR_ACK BAR_DELAY_500MS UNITS_RESPOND_CODE_3"); break;
                             default: GameFiber.Sleep(90); break;
                         }
                     }
@@ -92,8 +98,12 @@ namespace BarbarianCall
                         e.ToString().ToLog();
                         NetExtension.SendError(e);
                     }
-                    ADTimer = DateTime.UtcNow + new TimeSpan(0, 0, 0, Peralatan.Random.Next(300, 850), Peralatan.Random.Next(100, 985));
-                    $"Next ambient dispatch call should occured at {ADTimer.ToLocalTime().ToLongTimeString()}".ToLog();
+                    finally
+                    {
+                        timer = new TimeSpan(0, 0, 0, Peralatan.Random.Next(250, 850), Peralatan.Random.Next(100, 985));
+                        $"Next ambient dispatch call should occured at {(DateTime.Now + timer).ToLongTimeString()}".ToLog();
+                        sw.Restart();
+                    }                  
                 }
             }
         }

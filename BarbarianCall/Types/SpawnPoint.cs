@@ -74,8 +74,8 @@
         {
             unchecked
             {
-                var hashVector = Position.GetHashCode();
-                var hashHeading = Heading.GetHashCode();
+                int hashVector = Position.GetHashCode();
+                int hashHeading = Heading.GetHashCode();
                 return hashVector ^ hashHeading;
             }
         }

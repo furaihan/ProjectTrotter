@@ -17,12 +17,12 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new Random(unchecked(DateTime.Now.Ticks.GetHashCode() + 1453));
+        public static Random Random = new Random(unchecked(DateTime.UtcNow.Ticks.GetHashCode() + 1453));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         internal static SpawnPoint SelectNearbySpawnpoint(List<SpawnPoint> spawnPoints)
         {
-            SelectNearbyLocationsWithHeading(spawnPoints.Select(s => s.Position).ToList(), spawnPoints.Select(s => s.Heading).ToList(), out var vector3, out var heading);
+            SelectNearbyLocationsWithHeading(spawnPoints.Select(s => s.Position).ToList(), spawnPoints.Select(s => s.Heading).ToList(), out Vector3 vector3, out float heading);
             return new SpawnPoint(vector3, heading);
         }
         internal static void SelectNearbyLocationsWithHeading(List<Vector3> listLoc, List<float> listHead, out Vector3 sp, out float heading)
@@ -31,10 +31,10 @@ namespace BarbarianCall
             heading = 0f;
             try
             {
-                var playerPos = Game.LocalPlayer.Character.Position;
+                Vector3 playerPos = Game.LocalPlayer.Character.Position;
                 if (listLoc.Count != listHead.Count) return;
                 ToLog($"Calculating the best location for callout");
-                List<Vector3> locsToSelect = listLoc.Where(l => l.DistanceTo(playerPos) < 1000f && l.DistanceTo(playerPos) > 300f && l.TravelDistanceTo(playerPos) < 2000f).ToList();
+                List<Vector3> locsToSelect = listLoc.Where(l => l.DistanceTo(playerPos) < 750f && l.DistanceTo(playerPos) > 300f && l.TravelDistanceTo(playerPos) < 1300f).ToList();
                 if (locsToSelect.Count > 0)
                 {
                     sp = locsToSelect.GetRandomElement(true);
@@ -96,13 +96,13 @@ namespace BarbarianCall
         internal static string GetColorAudio(Color color)
         {
             ToLog("Trying to get color audio");
-            var audibleArgb = (from x in CommonVariables.AudibleColor select x.ToArgb()).ToList();
+            List<int> audibleArgb = (from x in CommonVariables.AudibleColor select x.ToArgb()).ToList();
             Color selected;
             if (audibleArgb.Contains(color.ToArgb()))
             {
                 ToLog("Color match, converting to scanner audio");
                 selected = CommonVariables.AudibleColor[audibleArgb.ToList().IndexOf(color.ToArgb())];
-                var ret = "COLOR_" + selected.Name.AddSpacesToSentence().Replace(" ", "_").ToUpper();
+                string ret = "COLOR_" + selected.Name.AddSpacesToSentence().Replace(" ", "_").ToUpper();
 #if DEBUG
                 ret.Print();
 #endif
@@ -156,9 +156,9 @@ namespace BarbarianCall
         {
             ToLog("Speech Started");
             Speaking = true;
-            var playerPed = Game.LocalPlayer.Character;
-            var playerPos = Game.LocalPlayer.Character.Position;
-            var playerHead = Game.LocalPlayer.Character.Heading;
+            Ped playerPed = Game.LocalPlayer.Character;
+            Vector3 playerPos = Game.LocalPlayer.Character.Position;
+            float playerHead = Game.LocalPlayer.Character.Heading;
             IDictionary<string, string> valuePairs = new Dictionary<string, string>()
             {
                 {"Officer:", "~b~Officer~s~:" },
@@ -176,7 +176,7 @@ namespace BarbarianCall
             List<string> modifiedDialogue = new List<string>();
             Dialogue.ForEach(cakap=>
             {
-                var modified = cakap;
+                string modified = cakap;
                 if (valuePairs.Any(st=> modified.StartsWith(st.Key)))
                 {
                     string key = valuePairs.Keys.Where(s => modified.StartsWith(s)).FirstOrDefault();
@@ -187,7 +187,7 @@ namespace BarbarianCall
                 modifiedDialogue.Add(modified);
             });
             (modifiedDialogue.Count == Dialogue.Count).ToString().ToLog();
-            var currentWeapon = playerPed.Inventory.EquippedWeapon;
+            WeaponDescriptor currentWeapon = playerPed.Inventory.EquippedWeapon;
             playerPed.Inventory.GiveNewWeapon("WEAPON_UNARMED", -1, true);
             NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, false);
             GameFiber.StartNew(delegate
@@ -322,8 +322,8 @@ namespace BarbarianCall
                 {
                     "Attempting to register ped headshot".ToLog();
                     uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
-                    DateTime endTime = DateTime.Now + new TimeSpan(0, 0, 10);
-                    var start = DateTime.Now;                   
+                    DateTime endTime = DateTime.UtcNow + new TimeSpan(0, 0, 10);
+                    DateTime start = DateTime.UtcNow;                   
                     while (true)
                     {
                         GameFiber.Yield();
@@ -332,14 +332,14 @@ namespace BarbarianCall
                             $"Ped Headshot found with handle {headshotHandle}".ToLog();
                             break;
                         }
-                        if (DateTime.Now >= endTime) break;
+                        if (DateTime.UtcNow >= endTime) break;
                     }
                     string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                     string txn = txd;                
                     Game.DisplayNotification(txn, txd, title, subtitle, text);
                     //GameFiber.Wait(200);
                     NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
-                    TimeSpan duration = DateTime.Now - start;
+                    TimeSpan duration = DateTime.UtcNow - start;
                     $"Register ped headshot transparent is took {duration.TotalMilliseconds} ms".ToLog();
                 }
                 catch (Exception e)
@@ -357,7 +357,7 @@ namespace BarbarianCall
             {
                 uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped); //RegisterPedHeadshotTransparent
                 int startTime = Environment.TickCount;
-                DateTime endTime = DateTime.Now + new TimeSpan(0, 0, 10);
+                DateTime endTime = DateTime.UtcNow + new TimeSpan(0, 0, 10);
                 while (true)
                 {
                     GameFiber.Yield();
@@ -366,7 +366,7 @@ namespace BarbarianCall
                         $"Ped Headshot found with handle {headshotHandle}".ToLog();
                         break;
                     }
-                    if (DateTime.Now >= endTime) break;
+                    if (DateTime.UtcNow >= endTime) break;
                 }
                 string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                 Handle = headshotHandle;
@@ -425,12 +425,12 @@ namespace BarbarianCall
             if (typeof(T).BaseType != typeof(Enum))
                 throw new InvalidCastException();
 
-            var types = Enum.GetValues(typeof(T));
+            Array types = Enum.GetValues(typeof(T));
             return GetRandomElement(types.Cast<T>());
         }
         public static T GetRandomElement<T>(this IEnumerable<T> items, Predicate<T> predicate, bool shuffle = false)
         {
-            var sorted = items.ToList().FindAll(predicate);
+            List<T> sorted = items.ToList().FindAll(predicate);
             return sorted.GetRandomElement(shuffle);
         }
 
@@ -474,7 +474,7 @@ namespace BarbarianCall
         }
         internal static void SetPedAsWanted(this Ped ped, out Persona newPersona)
         {
-            var a = CommonVariables.GangPedModels.Values.GetRandomElement(m => m.All(mm => mm.IsValid), true);
+            List<Model> a = CommonVariables.GangPedModels.Values.GetRandomElement(m => m.All(mm => mm.IsValid), true);
             Persona pedPersona = Functions.GetPersonaForPed(ped);
             Persona newWantedPersona = new Persona(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
             {
@@ -496,7 +496,7 @@ namespace BarbarianCall
             {
                 PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
                 List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
-                var cint = colour.Select(c => c.ToArgb()).ToList();
+                List<int> cint = colour.Select(c => c.ToArgb()).ToList();
                 if (cint.Contains(vehicle.PrimaryColor.ToArgb()))
                 {
                     return cname[cint.IndexOf(vehicle.PrimaryColor.ToArgb())].Name.AddSpacesToSentence();

@@ -26,7 +26,7 @@ namespace BarbarianCall.DivisiXml
             Peralatan.ToLog($"Reading XML file {filename}");
             locations = new List<Vector3>();
             headings = new List<float>();
-            var outVar = Deserialize(filename);
+            List<Coordinate> outVar = Deserialize(filename);
             int count = 0;
             foreach (Coordinate c in outVar)
             {
@@ -40,7 +40,7 @@ namespace BarbarianCall.DivisiXml
         }
         public static List<SpawnPoint> GetSpawnPointFromXml(string filename)
         {
-            GetDataFromXml(filename, out var vector3s, out var hs);
+            GetDataFromXml(filename, out List<Vector3> vector3s, out List<float> hs);
             List<SpawnPoint> spawnPoints = vector3s.Select(s => new SpawnPoint(s, hs[vector3s.IndexOf(s)])).ToList();
             return spawnPoints;
         }

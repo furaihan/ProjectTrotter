@@ -60,7 +60,7 @@ namespace BarbarianCall.Menus
             offStabCB = new UIMenuCheckboxItem("Officer Stabbed", true, "Enable or disable \"Officer Stabbed\" callout");
             taxiCB = new UIMenuCheckboxItem("Taxi Passenger Refuse To Pay", true, "Enable or disable \"Taxi Passenger Refuse To Pay\" callout");
             susVehCB = new UIMenuCheckboxItem("Strange Looking Vehicle", true, "Enable or disable \"Strange Looking Vehicle\" callout");
-            var gpSection = new UIMenuItem("Grammar Police Integration");
+            UIMenuItem gpSection = new UIMenuItem("Grammar Police Integration");
             SetUIMenuAsSection(gpSection);
             List<UIMenuItem> settings = new List<UIMenuItem>()
             {

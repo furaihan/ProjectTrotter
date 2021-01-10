@@ -66,7 +66,7 @@ namespace BarbarianCall.Types
             {
                 PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
                 List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
-                var cint = colour.Select(c => c.ToArgb()).ToList();
+                List<int> cint = colour.Select(c => c.ToArgb()).ToList();
                 if (cint.Contains(Car.PrimaryColor.ToArgb()))
                 {
                     return cname[cint.IndexOf(Car.PrimaryColor.ToArgb())].Name.AddSpacesToSentence();
@@ -82,8 +82,8 @@ namespace BarbarianCall.Types
         }
         private int GetAge()
         {
-            var today = DateTime.Today;
-            var age = today.Year - BirthDay.Year;
+            DateTime today = DateTime.Today;
+            int age = today.Year - BirthDay.Year;
             if (BirthDay.Date < today.AddYears(-age)) age--;
             return age;
         }

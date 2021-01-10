@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using BarbarianCall.AmbientEvent;
 
 namespace BarbarianCall
 {
@@ -57,7 +58,7 @@ namespace BarbarianCall
             {
                 GameFiber.Wait(7500);
                 "Starting fiber for ambient dispatch call event".ToLog();
-                EventHandler.AmbientDispatchCall();
+                DispatchCall.AmbientDispatchCall();
             }, "[BarbarianCall] Ambient Dispatch Call Event Fiber");
         }
         public static bool IsLSPDFRPluginRunning(string Plugin, Version minVersion = null)

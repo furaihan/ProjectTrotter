@@ -121,7 +121,7 @@
         public static Color GetHairColor(int colorId)
         {
             NativeFunction.Natives.x4852FC386E2E1BB5(colorId, out int r, out int g, out int b);
-            var color = Color.FromArgb(r, g, b);
+            Color color = Color.FromArgb(r, g, b);
 
             return color;
         }
@@ -129,7 +129,7 @@
         public static Color GetLipstickColor(int colorId)
         {
             NativeFunction.Natives.x013E5CFC38CD5387(colorId, out int r, out int g, out int b);
-            var color = Color.FromArgb(r, g, b);
+            Color color = Color.FromArgb(r, g, b);
 
             return color;
         }

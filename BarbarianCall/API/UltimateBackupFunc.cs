@@ -12,7 +12,7 @@ namespace BarbarianCall.API
     {
         public static Tuple<Vehicle, Ped> GetUnit(EUltimateBackupUnitType unitType, Vector3 location)
         {
-            var ub = GetUnit(unitType, location, 1);
+            Tuple<Vehicle, List<Ped>> ub = GetUnit(unitType, location, 1);
             Tuple<Vehicle, Ped> ret = new Tuple<Vehicle, Ped>(ub.Item1, ub.Item2[0]);
             return ret;
         }
@@ -41,8 +41,8 @@ namespace BarbarianCall.API
                 _ => throw new NotSupportedException("selected unit type is not supported"),
             };
         }
-        public static void CallUnit(EUltimateBackupCallType responseType) => CallUnit(responseType, false);
-        public static void CallUnit(EUltimateBackupCallType responseType, bool stateBackup)
+        public static void CallUnitBackup(EUltimateBackupCallType responseType) => CallUnitBackup(responseType, false);
+        public static void CallUnitBackup(EUltimateBackupCallType responseType, bool stateBackup)
         {
             switch (responseType)
             {

@@ -69,6 +69,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmbientEvent\EventBase.cs" />
+    <Compile Include="AmbientEvent\EventHandler.cs" />
+    <Compile Include="AmbientEvent\IAmbientEvent.cs" />
     <Compile Include="API\BetterEMSFunc.cs" />
     <Compile Include="API\Functions.cs" />
     <Compile Include="API\GrammarPoliceFunc.cs" />
@@ -83,7 +86,7 @@
     <Compile Include="CommonVariables.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />
-    <Compile Include="EventHandler.cs" />
+    <Compile Include="AmbientEvent\DispatchCall.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Initialization.cs" />
     <Compile Include="Main.cs" />
@@ -98,8 +101,6 @@
     <Compile Include="Types\SpawnPoint.cs" />
     <Compile Include="Types\Speech.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="AmbientEvent\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

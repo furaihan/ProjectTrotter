@@ -52,7 +52,7 @@ namespace BarbarianCall.API
         public static bool IsPedStoppedWithSTP(Rage.Ped ped) => StopThePed.API.Functions.isPedStopped(ped);
         public static void InjectPedDangerousItem(Rage.Ped ped)
         {
-            var items = CommonVariables.DangerousPedItem.GetRandomNumberOfElements(Peralatan.Random.Next(1, 3), true).ToList();
+            List<string> items = CommonVariables.DangerousPedItem.GetRandomNumberOfElements(Peralatan.Random.Next(1, 3), true).ToList();
             items.Shuffle();
             ped.Metadata.searchPed = "~r~" + items.GetRandomElement() + "~s~";
             StopThePed.API.Functions.injectPedSearchItems(ped);
@@ -69,7 +69,7 @@ namespace BarbarianCall.API
                 case EStopThePedVehicleSearch.SearchPassenger: vehicle.Metadata.searchPassenger = item; break;
                 case EStopThePedVehicleSearch.SearchTrunk: vehicle.Metadata.searchTrunk = item; break;
                 default:
-                    var rand = Peralatan.Random.Next(1, 4000);
+                    int rand = Peralatan.Random.Next(1, 4000);
                     if (rand < 2000) vehicle.Metadata.searchTrunk = item;
                     else if (rand < 3000) vehicle.Metadata.searchDriver = item;
                     else vehicle.Metadata.searchPassenger = item;

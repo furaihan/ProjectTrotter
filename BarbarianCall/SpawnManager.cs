@@ -9,7 +9,7 @@ namespace BarbarianCall
     {
         internal static SpawnPoint GetVehicleSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             for (int i = 0; i < 900; i++)
             {
                 Vector3 v = pos.Around(minimalDistance, maximumDistance + Extension.GetRandomAbsoluteSingle(1, 5));
@@ -21,7 +21,7 @@ namespace BarbarianCall
                     {
                         SpawnPoint ret = new SpawnPoint(nodeP, nodeH);
                         $"Vehicle Spawn found {ret}".ToLog();
-                        $"{i} Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
+                        $"{i} Process took {(DateTime.UtcNow - start).TotalMilliseconds} ms".ToLog();
                         return ret;
                     }
                 }
@@ -31,7 +31,7 @@ namespace BarbarianCall
         }
         internal static SpawnPoint GetPedSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             for (int i = 0; i < 600; i++)
             {
                 Vector3 v = pos.Around(minimalDistance, maximumDistance);
@@ -43,7 +43,7 @@ namespace BarbarianCall
                     {
                         SpawnPoint ret = new SpawnPoint(nodeP, Extension.GetRandomAbsoluteSingle(1, 360));
                         $"Ped Spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
-                        $"{i} Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
+                        $"{i} Process took {(DateTime.UtcNow - start).TotalMilliseconds} ms".ToLog();
                         return ret;
                     }
                 }
@@ -59,18 +59,18 @@ namespace BarbarianCall
                     {
                         SpawnPoint ret = new SpawnPoint(nodeP, Extension.GetRandomAbsoluteSingle(1, 360));
                         $"Ped safe spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
-                        $"{i + 600} Process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
+                        $"{i + 600} Process took {(DateTime.UtcNow - start).TotalMilliseconds} ms".ToLog();
                         return ret;
                     }
                 }
             }
             $"Safe coord not found".ToLog();
-            $"1200 process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
+            $"1200 process took {(DateTime.UtcNow - start).TotalMilliseconds} ms".ToLog();
             return SpawnPoint.Zero;
         }
         internal static SpawnPoint GetRoadSideSpawnPoint(Vector3 pos)
         {
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             for (int i = 0; i < 600; i++)
             {
                 Vector3 v = pos.Around(Peralatan.Random.Next(5, 15), Peralatan.Random.Next(20, 35));
@@ -82,7 +82,7 @@ namespace BarbarianCall
                         {
                             SpawnPoint ret = new SpawnPoint(rsPos, nodeHeading);
                             $"RoadSide with heading found {ret}".ToLog();
-                            $"{i} process took {(DateTime.Now - start).TotalMilliseconds:0.00} ms".ToLog();
+                            $"{i} process took {(DateTime.UtcNow - start).TotalMilliseconds:0.00} ms".ToLog();
                             return ret;
                         }
                     }
@@ -100,7 +100,7 @@ namespace BarbarianCall
                         {
                             SpawnPoint ret = new SpawnPoint(roadSide, heading);
                             $"RoadSide found without heading {ret}".ToLog();
-                            $"{i + 600} process took {(DateTime.Now - start).TotalMilliseconds:0.00} ms".ToLog();
+                            $"{i + 600} process took {(DateTime.UtcNow - start).TotalMilliseconds:0.00} ms".ToLog();
                             return ret;
                         }
                     }
@@ -108,7 +108,7 @@ namespace BarbarianCall
                 if (i % 40 == 0) GameFiber.Yield();
             }
             $"RoadSide coord not found".ToLog();
-            $"1200 process took {(DateTime.Now - start).TotalMilliseconds} ms".ToLog();
+            $"1200 process took {(DateTime.UtcNow - start).TotalMilliseconds} ms".ToLog();
             return SpawnPoint.Zero;
         }
     }

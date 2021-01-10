@@ -18,23 +18,23 @@ namespace BarbarianCall
                 int frames = 0;
                 try
                 {
-                    var time = DateTime.Now;
+                    DateTime time = DateTime.Now;
                     if (!IsInternetConnected()) return;
-                    var st = new StackTrace(e, true);
+                    StackTrace st = new StackTrace(e, true);
                     string toSend = "";
-                    foreach (var frame in st.GetFrames())
+                    foreach (StackFrame frame in st.GetFrames())
                     {
                         frames++;
-                        var filePath = frame.GetFileName();
-                        var fileName = filePath == null ? "NULL" : filePath.Substring(filePath.LastIndexOf('\\') + 1);
-                        var lNumber = frame.GetFileLineNumber();
+                        string filePath = frame.GetFileName();
+                        string fileName = filePath == null ? "NULL" : filePath.Substring(filePath.LastIndexOf('\\') + 1);
+                        int lNumber = frame.GetFileLineNumber();
                         if (filePath == null && lNumber == 0) continue;
                         toSend += $"[{frame.GetMethod().Name}] " + fileName + " line: " + lNumber.ToString() + " ==> ";
                     }
                     Thread SendException = new Thread(() =>
                     {
-                        using var httpClient = new HttpClient();
-                        using var request = new HttpRequestMessage(new HttpMethod("POST"), "https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF")
+                        using HttpClient httpClient = new HttpClient();
+                        using HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("POST"), "https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF")
                         {
                             Content = new StringContent($"{{\"value1\":\"{e.Message}\",\"value2\":\"{toSend}\",\"value3\":\"{Game.LocalPlayer.Name} - {e.Source}\"}}".Replace("\\", "\\\\"))
                         };
@@ -43,8 +43,8 @@ namespace BarbarianCall
 #endif
                         request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-                        var resp = httpClient.SendAsync(request).Result;
-                        var result = resp.Content.ReadAsStringAsync().Result;
+                        HttpResponseMessage resp = httpClient.SendAsync(request).Result;
+                        string result = resp.Content.ReadAsStringAsync().Result;
                         result.ToLog();
                         $"Data collection takes {(DateTime.Now - time).TotalSeconds:0.00} seconds".ToLog();
                     });
@@ -70,7 +70,7 @@ namespace BarbarianCall
                     ping = new Ping();
                     foreach (string host in hosts)
                     {
-                        if (!IPAddress.TryParse(host, out var IP)) continue;
+                        if (!IPAddress.TryParse(host, out IPAddress IP)) continue;
                         try
                         {
                             PingReply pr = ping.SendPingAsync(IP, 850).Result;
