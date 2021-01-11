@@ -11,7 +11,6 @@ using BarbarianCall.Types;
 
 namespace BarbarianCall.AmbientEvent
 {
-    //TODO: Add some AmbientEvent
     internal class DispatchCall
     {
         internal static void AmbientDispatchCall()
@@ -87,8 +86,8 @@ namespace BarbarianCall.AmbientEvent
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         switch (typ)
                         {
-                            case EBackupResponseType.Code2: Functions.PlayScannerAudio("BAR_ACK BAR_DELAY_500MS UNITS_RESPOND_CODE_2"); break;
-                            case EBackupResponseType.Code3: Functions.PlayScannerAudio("BAR_ACK BAR_DELAY_500MS UNITS_RESPOND_CODE_3"); break;
+                            case EBackupResponseType.Code2: Functions.PlayScannerAudio("BAR_ACK BAR_DELAY_500MS UNITS_RESPOND_CODE_02"); break;
+                            case EBackupResponseType.Code3: Functions.PlayScannerAudio("BAR_ACK BAR_DELAY_500MS UNITS_RESPOND_CODE_03"); break;
                             default: GameFiber.Sleep(90); break;
                         }
                     }

@@ -18,7 +18,7 @@ namespace BarbarianCall
                 int frames = 0;
                 try
                 {
-                    DateTime time = DateTime.Now;
+                    Stopwatch stopwatch = Stopwatch.StartNew();
                     if (!IsInternetConnected()) return;
                     StackTrace st = new StackTrace(e, true);
                     string toSend = "";
@@ -31,22 +31,23 @@ namespace BarbarianCall
                         if (filePath == null && lNumber == 0) continue;
                         toSend += $"[{frame.GetMethod().Name}] " + fileName + " line: " + lNumber.ToString() + " ==> ";
                     }
+                    Uri ifttt = new Uri("https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF");
                     Thread SendException = new Thread(() =>
                     {
                         using HttpClient httpClient = new HttpClient();
-                        using HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("POST"), "https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF")
+                        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ifttt)
                         {
-                            Content = new StringContent($"{{\"value1\":\"{e.Message}\",\"value2\":\"{toSend}\",\"value3\":\"{Game.LocalPlayer.Name} - {e.Source}\"}}".Replace("\\", "\\\\"))
+                            Content = new StringContent($"{{\"value1\":\"{e.GetType().Name} - {e.Message}\",\"value2\":\"{toSend}\",\"value3\":\"{Game.LocalPlayer.Name} - {e.Source}\"}}".Replace("\\", "\\\\"))
                         };
 #if DEBUG
-                        $"{{\"value1\":\"{e.Message}\",\"value2\":\"{toSend}\",\"value3\":\"{Game.LocalPlayer.Name} - {e.Source}\"}}".Replace("\\", "\\\\").ToLog();
+                        $"{{\"value1\":\"{e.GetType().Name} - {e.Message}\",\"value2\":\"{toSend}\",\"value3\":\"{Game.LocalPlayer.Name} - {e.Source}\"}}".Replace("\\", "\\\\").ToLog();
 #endif
                         request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
                         HttpResponseMessage resp = httpClient.SendAsync(request).Result;
                         string result = resp.Content.ReadAsStringAsync().Result;
                         result.ToLog();
-                        $"Data collection takes {(DateTime.Now - time).TotalSeconds:0.00} seconds".ToLog();
+                        $"Data collection takes {stopwatch.ElapsedMilliseconds:0.00} ms".ToLog();
                     });
                     SendException.Start();
                     GameFiber.SleepUntil(() => SendException.ThreadState == System.Threading.ThreadState.Stopped, 18000);

@@ -34,29 +34,24 @@ namespace BarbarianCall
                 Vector3 playerPos = Game.LocalPlayer.Character.Position;
                 if (listLoc.Count != listHead.Count) return;
                 ToLog($"Calculating the best location for callout");
-                List<Vector3> locsToSelect = listLoc.Where(l => l.DistanceTo(playerPos) < 750f && l.DistanceTo(playerPos) > 300f && l.TravelDistanceTo(playerPos) < 1300f).ToList();
+                List<Vector3> locsToSelect = listLoc.Where(l => l.DistanceTo(playerPos) < 750f && l.DistanceTo(playerPos) > 300f && l.TravelDistanceTo(playerPos) < 1300f 
+                && l.HeightDiff(playerPos) < 50f).ToList();
                 if (locsToSelect.Count > 0)
                 {
+                    $"Found {locsToSelect.Count} suitable location, choosing a random location from that list".ToLog();
                     sp = locsToSelect.GetRandomElement(true);
                 }
                 else
-                {                    
-                    foreach (Vector3 l in listLoc)
-                    {
-                        if (l.DistanceTo(playerPos) < 1200f && l.DistanceTo(playerPos) > 250f)
-                        {
-                            if (l.TravelDistanceTo(playerPos) > 3000) continue;
-                            sp = l;
-                            break;
-                        }
-                    }
+                {
+                    sp = listLoc.Where(l => l.DistanceTo(playerPos) < 1200f && l.DistanceTo(playerPos) > 250f 
+                    && l.TravelDistanceTo(playerPos) < 1800f && l.HeightDiff(playerPos) < 50f).FirstOrDefault();                   
                 }
                 if (listLoc.Contains(sp)) heading = listHead[listLoc.IndexOf(sp)];
                 else heading = 0f;
 
                 if (sp != Vector3.Zero && heading != 0f)
                 {
-                    ToLog($"Location found {sp} Heading: {heading}");
+                    ToLog($"Location selected {sp} Heading: {heading}");
                     ToLog($"Distance to player {sp.DistanceTo(playerPos):0.00}, Travel Distance: {sp.TravelDistanceTo(playerPos):0.00}");
                     //ToLog($"Location found in {GetZoneName(sp)} near {World.GetStreetName(sp)}");
                 }
@@ -208,6 +203,7 @@ namespace BarbarianCall
             if (talkers.All(p=> p && p.IsInAnyVehicle(false)))
             {
                 talkers.ToList().ForEach(p=> p.Tasks.AchieveHeading(p.GetHeadingTowards(playerPed)));
+                GameFiber.Wait(75);
                 talkers.ToList().ForEach(p => p.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 4f, AnimationFlags.Loop | AnimationFlags.SecondaryTask));
             }
             for (int i = 0; i < modifiedDialogue.Count; i++)
@@ -256,44 +252,6 @@ namespace BarbarianCall
             }
             return false;
         }
-        internal static void InjectRandomItemToVehicle(this Vehicle vehicle)
-        {
-            try
-            {
-                if (!Initialization.IsLSPDFRPluginRunning("StopThePed")) return;
-                if (vehicle.Exists())
-                {
-                    string selected;
-                    int rand1 = MathHelper.GetRandomInteger(1, 10);
-                    if (rand1 < 3)
-                    {
-                        selected = "~r~" + CommonVariables.DangerousVehicleItems.GetRandomElement();
-                    }
-                    else if (rand1 > 2 && rand1 < 6)
-                    {
-                        selected = "~y~" + CommonVariables.SuspiciousItems.GetRandomElement();
-                    }
-                    else
-                    {
-                        selected = "~g~" + CommonVariables.CommonItems.GetRandomElement();
-                    }
-                    vehicle.Metadata.searchTrunk = selected;
-                    if (Random.Next(1, 6800) % 2 == 0)
-                    {
-                        vehicle.Metadata.searchDriver = "~y~" + CommonVariables.SuspiciousItems.GetRandomElement();
-                    }
-                    else
-                    {
-                        vehicle.Metadata.searchDriver = "~g~" + CommonVariables.CommonItems.GetRandomElement();
-                    }
-                    vehicle.Metadata.searchPassenger = "~g~" + CommonVariables.CommonItems.GetRandomElement();
-                }
-            } catch (Exception e)
-            {
-                $"Failed to inject item to vehicle {vehicle.Model.Name}".ToLog();
-                e.Message.ToLog();
-            }          
-        }
         public static float GetHeadingTowards(this ISpatial spatial, ISpatial towards)
         {
             return GetHeadingTowards(spatial, towards.Position);
@@ -322,8 +280,8 @@ namespace BarbarianCall
                 {
                     "Attempting to register ped headshot".ToLog();
                     uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
-                    DateTime endTime = DateTime.UtcNow + new TimeSpan(0, 0, 10);
-                    DateTime start = DateTime.UtcNow;                   
+                    var timer = new TimeSpan(0, 0, 10);
+                    Stopwatch stopwatch = Stopwatch.StartNew();
                     while (true)
                     {
                         GameFiber.Yield();
@@ -332,15 +290,13 @@ namespace BarbarianCall
                             $"Ped Headshot found with handle {headshotHandle}".ToLog();
                             break;
                         }
-                        if (DateTime.UtcNow >= endTime) break;
+                        if (stopwatch.Elapsed > timer) break;
                     }
                     string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
-                    string txn = txd;                
-                    Game.DisplayNotification(txn, txd, title, subtitle, text);
+                    Game.DisplayNotification(txd, txd, title, subtitle, text);
                     //GameFiber.Wait(200);
                     NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
-                    TimeSpan duration = DateTime.UtcNow - start;
-                    $"Register ped headshot transparent is took {duration.TotalMilliseconds} ms".ToLog();
+                    $"Register ped headshot is took {stopwatch.ElapsedMilliseconds} ms".ToLog();
                 }
                 catch (Exception e)
                 {

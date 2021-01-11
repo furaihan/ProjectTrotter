@@ -33,6 +33,7 @@ namespace BarbarianCall.Callouts
         public long Timer;
         public DateTime Time;
         public TimeSpan TimeSpan = new TimeSpan(0, 0, 15);
+        public System.Diagnostics.Stopwatch Stopwatch;
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;
@@ -120,7 +121,7 @@ namespace BarbarianCall.Callouts
             "Starting EndHandler loop".ToLog();
             GameFiber.StartNew(() =>
             {
-                DateTime dateTime = DateTime.Now;
+                DateTime dateTime = DateTime.UtcNow;
                 while (CalloutRunning)
                 {
                     GameFiber.Yield();
@@ -135,7 +136,7 @@ namespace BarbarianCall.Callouts
                         else Game.DisplayHelp($"~y~To force end the callout, press and hold down {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ for 2 second");
                     }
                 }
-                $"Callout ended successfully, that callout took {(DateTime.Now - dateTime).TotalSeconds:0.00} seconds".ToLog();
+                $"Callout ended successfully, that callout took {(DateTime.UtcNow - dateTime).TotalSeconds:0.00} seconds".ToLog();
             }, "[BarbarianCall] Callout End Handler Fiber");
         }
         protected void DisplayGPNotif()

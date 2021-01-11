@@ -86,7 +86,7 @@ namespace BarbarianCall
 		}
 		internal static string GetFileVersion(string filepath)
         {
-			if (!File.Exists(filepath)) return $"{AppDomain.CurrentDomain}/{filepath} File doesn't exist";
+			if (!File.Exists(filepath)) return $"{filepath} File doesn't exist";
             try
             {
                 FileVersionInfo ver = FileVersionInfo.GetVersionInfo(filepath);
@@ -107,6 +107,12 @@ namespace BarbarianCall
             double loro = Peralatan.Random.NextDouble();
 			return (float)((float)siji + loro);
         }
+		private static float FloatDiff(this float first, float second) => Math.Abs(first - second);
+		internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);
+		internal static float HeightDiff(this Vector3 first, Vector3 second) => first.Z.FloatDiff(second.Z);
+		internal static float HeightDiff(this ISpatial first, Vector3 second) => first.Position.Z.FloatDiff(second.Z);
+		internal static float HeightDiff(this Vector3 first, ISpatial second) => first.Z.FloatDiff(second.Position.Z);
+		internal static float HeadingDiff(this Entity first, Entity second) => FloatDiff(first.Heading, second.Heading);
 		public static string GetLocalizedString(IntPtr stringPtr) => NativeFunction.Natives.x7B5280EBA9840C72<string>(stringPtr); //_GET_LABEL_TEXT
 
 		public static unsafe bool IsStringEmpty(IntPtr stringPtr) => *(byte*)stringPtr == 0;

@@ -126,11 +126,9 @@ namespace BarbarianCall.Callouts
         }
         private void GetClose()
         {
-            int counter = 0;
             while (CalloutRunning)
             {
                 GameFiber.Yield();
-                counter++;
                 if (Game.LocalPlayer.Character.DistanceTo(SpawnPoint) < 45f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
@@ -188,6 +186,7 @@ namespace BarbarianCall.Callouts
                     }
                     GameFiber.Wait(3000);
                     if (!CalloutRunning) return;
+                    if (Blip) Blip.Delete();
                     Pursuit = Functions.CreatePursuit();
                     Functions.AddPedToPursuit(Pursuit, Suspect);
                     Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
@@ -206,7 +205,7 @@ namespace BarbarianCall.Callouts
                             API.LSPDFRFunc.RequestAirUnit(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                             air = true;
                         }
-                        if (Peralatan.CheckKey(Keys.NumPad9, Keys.D1)) throw new Rage.Exceptions.InvalidHandleableException("Net Extension Check");
+                        if (Peralatan.CheckKey(Keys.NumPad9, Keys.D1)) throw new UnauthorizedAccessException("Net Extension Check");
                     }
                     DisplayCodeFourMessage();
                 }
@@ -215,6 +214,7 @@ namespace BarbarianCall.Callouts
                     "Suspicious vehicle callout crash".DisplayNotifWithLogo("Suspicious Vehicle");
                     e.ToString().ToLog();
                     NetExtension.SendError(e);
+                    End();
                 }
             });
         }

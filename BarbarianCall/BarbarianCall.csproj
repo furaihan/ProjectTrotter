@@ -101,6 +101,8 @@
     <Compile Include="Types\SpawnPoint.cs" />
     <Compile Include="Types\Speech.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SupportUnit\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
