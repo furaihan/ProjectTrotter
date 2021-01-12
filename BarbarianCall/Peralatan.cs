@@ -106,7 +106,7 @@ namespace BarbarianCall
             ToLog($"Color not match {color.ToArgb()}");
             return string.Empty;
         }
-        internal static void RandomiseLicencePlate(this Vehicle vehicle)
+        internal static void RandomiseLicensePlate(this Vehicle vehicle)
         {
             if (vehicle.Exists())
             {
@@ -221,6 +221,23 @@ namespace BarbarianCall
             NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, true);
             if (currentWeapon != null && playerPed.Inventory.Weapons.Contains(currentWeapon)) playerPed.Inventory.EquippedWeapon = currentWeapon;
             if (talkers.All(p => p)) talkers.ToList().ForEach(p => p.Tasks.Clear());
+        }
+        private static Rage.Object MobilePhone;
+        internal static void ToggleMobilePhone(this Ped ped)
+        {
+            if (MobilePhone.Exists()) { MobilePhone.Delete(); }
+            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, false);
+            ped.Inventory.GiveNewWeapon(new WeaponAsset("WEAPON_UNARMED"), -1, true);
+            MobilePhone = new Rage.Object(new Model("prop_police_phone"), new Vector3(0, 0, 0));
+            int boneIndex = ped.GetBoneIndex(PedBoneId.RightPhHand);
+            MobilePhone.AttachTo(ped, boneIndex, new Vector3(0f, 0f, 0f), new Rotator(0f, 0f, 0f));
+            ped.Tasks.PlayAnimation(new AnimationDictionary("cellphone@"), "cellphone_call_listen_base", 1.45f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.StayInEndFrame);
+            GameFiber.Sleep(3000);
+            ped.Tasks.PlayAnimation(new AnimationDictionary("cellphone@"), "cellphone_call_out", 1f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask);
+            GameFiber.Sleep(200);
+            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, true);
+            MobilePhone.Detach();
+            MobilePhone.Delete();
         }
         internal static void MakeMissionPed(this Ped ped, bool invincible = false)
         {

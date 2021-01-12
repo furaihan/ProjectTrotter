@@ -78,12 +78,12 @@ namespace BarbarianCall.Callouts
             {
                 if (Game.GetHashKey("city") == zoneHash)
                 {
-                    string copCarModel = CityCarModels[MathHelper.GetRandomInteger(0, CityCarModels.Length - 1)];
+                    string copCarModel = CityCarModels.GetRandomElement();
                     offVeh = new Vehicle(copCarModel, SpawnPoint, SpawnHeading);
                 }
                 else
                 {
-                    string copCarModel = CountrysideCarModels[MathHelper.GetRandomInteger(0, CountrysideCarModels.Length - 1)];
+                    string copCarModel = CountrysideCarModels.GetRandomElement();
                     offVeh = new Vehicle(copCarModel, SpawnPoint, SpawnHeading);
                 }
                 officer = offVeh.CreateRandomDriver();
@@ -101,7 +101,7 @@ namespace BarbarianCall.Callouts
             if (!officer.IsInVehicle(offVeh, false)) officer.WarpIntoVehicle(offVeh, -1);
             Functions.SetPedAsCop(officer);
             offVeh.MakePersistent();
-            offVeh.RandomiseLicencePlate();
+            offVeh.RandomiseLicensePlate();
             offVeh.IsVisible = true;
             officer.IsVisible = true;
             Blip = new Blip(SpawnPoint, 45f);
@@ -111,7 +111,7 @@ namespace BarbarianCall.Callouts
             if (tempSpawn != Types.SpawnPoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
             SuspectCar.PrimaryColor = CommonVariables.CommonUnderstandableColor.GetRandomElement();
-            SuspectCar.RandomiseLicencePlate();
+            SuspectCar.RandomiseLicensePlate();
             Suspect = SuspectCar.CreateRandomDriver();
             Suspect.MakeMissionPed();
             Suspect.RelationshipGroup = new RelationshipGroup("CRIMINAL");
@@ -119,7 +119,7 @@ namespace BarbarianCall.Callouts
             Suspect.MaxHealth = 500;
             Suspect.Inventory.GiveNewWeapon(WeaponHash.Knife, -1, false);
             SuspectPersona = Functions.GetPersonaForPed(Suspect);
-            if (MathHelper.GetRandomInteger(1, 10) > 7)
+            if (Peralatan.Random.Next(1, 10) > 7)
             {
                 GameFiber.Sleep(1);
                 passenger = new Ped(SpawnPoint, SpawnHeading);
@@ -604,7 +604,7 @@ namespace BarbarianCall.Callouts
                         IsPersistent = true,
                         LockStatus = VehicleLockStatus.Locked,
                     };
-                    Ambulance.RandomiseLicencePlate();
+                    Ambulance.RandomiseLicensePlate();
                     if (UltimateBackupRunning)
                     {
                         Paramedic1 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);

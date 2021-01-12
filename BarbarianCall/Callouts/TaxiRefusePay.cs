@@ -62,7 +62,7 @@ namespace BarbarianCall.Callouts
             Taxi = new Vehicle(TaxiModel, SpawnPoint, SpawnHeading);
             Taxi.MakePersistent();
             Taxi.Mods.ApplyAllMods();
-            Taxi.RandomiseLicencePlate();
+            Taxi.RandomiseLicensePlate();
             TaxiDriver = Taxi.CreateRandomDriver();
             TaxiDriver.MakeMissionPed();
             TaxiDriver.RelationshipGroup = TaxiRelation;

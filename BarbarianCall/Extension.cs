@@ -50,10 +50,21 @@ namespace BarbarianCall
 		}
 
 		internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
+		internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xE54E209C35FFA18D<bool>(position.X, position.Y, position.Z, 5.0f, 5.0f, 5.0f, 0); //IS_POINT_OBSCURED_BY_A_MISSION_ENTITY
 		internal static bool IsSuitableCar(this Model model) => model.IsCar && !model.IsBigVehicle && (model.NumberOfSeats == 2 || model.NumberOfSeats == 4) && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle;
 		internal static bool IsSuitableMotor(this Model model) => model.IsBike && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle && !model.IsCar && !model.IsBigVehicle && model.NumberOfSeats <= 2;
 		internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
 		internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
+		/// <summary>
+		/// Set blip sprite
+		/// </summary>
+		/// <param name="blip"></param>
+		/// <param name="spriteID">spriteID information: https://docs.fivem.net/docs/game-references/blips/</param>
+		internal static void SetBlipSprite(this Blip blip, int spriteID) => NativeFunction.Natives.SET_BLIP_SPRITE(blip, spriteID);
+
+
+
+
 		internal static string GetCardinalDirection(this Entity e, bool fullform) => GetCardinalDirection(e.Heading, fullform);
 		internal static string GetCardinalDirection(this Entity e) => GetCardinalDirection(e.Heading, false);
 		/// <summary>

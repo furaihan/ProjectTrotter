@@ -70,12 +70,12 @@ namespace BarbarianCall.AmbientEvent
                             {"CRIME_PED_STRUCK_BY_VEHICLE" , EBackupResponseType.Code2},
                             {"CRIME_CAR_ON_FIRE" , EBackupResponseType.Code3 },
                         };
-#if DEBUG
-                        $"DISPATCH_TO {randomCallsign} {reporter} {ambientCrimes.Values.GetRandomElement()} IN_OR_ON_POSITION {randomLocation.GetZoneName()}".Print();
-                        randomLocation.ToString().Print();
-#endif
                         string crime = ambientCrimes.Keys.GetRandomElement();
                         Functions.PlayScannerAudioUsingPosition($"DISPATCH_TO {randomCallsign} {reporter} {crime} IN_OR_ON_POSITION", randomLocation);
+#if DEBUG
+                        $"DISPATCH_TO {randomCallsign} {reporter} {crime} IN_OR_ON_POSITION {randomLocation.GetZoneName()}".Print();
+                        randomLocation.ToString().Print();
+#endif
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(2500);
                         API.LSPDFRFunc.WaitAudioScannerCompletion();

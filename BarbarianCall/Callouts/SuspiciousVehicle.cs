@@ -50,7 +50,7 @@ namespace BarbarianCall.Callouts
         {
             CalloutRunning = true;
             GangModels = CommonVariables.GangPedModels.Values.GetRandomElement();
-            SuspectCar.RandomiseLicencePlate();
+            SuspectCar.RandomiseLicensePlate();
             SuspectCar.PrimaryColor = CommonVariables.AudibleColor.GetRandomElement();
             Suspect = new Ped(GangModels.GetRandomElement(m=> m.IsValid), Spawn, SpawnHeading);
             Suspect.MakeMissionPed();

@@ -54,7 +54,12 @@ namespace BarbarianCall.Menus
             
             autoAvailable = new UIMenuCheckboxItem("Set Player Available After Finishing A Callout", true, "If you have GrammarPolice installed, enable this setting will set you " +
                 "available for calls after you have finished your callout");
-            //autoAvailable.Activated += (m, s) => Extension.GetAudibleVehicleModel().ToList().ForEach(m => m.Name.ToLog());
+            autoAvailable.Activated += (m, s) => 
+            { 
+                pauseMenu.Visible = false; 
+                GameFiber.Sleep(1000);
+                LSPD_First_Response.Mod.API.Functions.PlayPlayerRadioAction(LSPD_First_Response.Mod.Menus.EPoliceRadioAction.Handheld, 120); 
+            };
             otherUnitAudio = new UIMenuCheckboxItem("Play Other Unit Respond Audio", true, "If you did not accept a callout from this plugin, a sound from other unit taking a callout will be played");
             onSceneAudio = new UIMenuCheckboxItem("Play Officer On Scene Audio", true, "Play scanner audio when you arrived on scene");
             offStabCB = new UIMenuCheckboxItem("Officer Stabbed", true, "Enable or disable \"Officer Stabbed\" callout");
@@ -76,6 +81,7 @@ namespace BarbarianCall.Menus
             "Creating pause menu is nearly done".ToLog();
             pauseMenu.RefreshIndex();
             "Refreshing pause menu index".ToLog();
+            MainMenu.CreateMenu();
             ProcessMenus();
         }
         internal static List<UIMenuItem> sectionItem = new List<UIMenuItem>();
@@ -98,18 +104,10 @@ namespace BarbarianCall.Menus
             {
                 GameFiber.Yield();
                 pauseMenu.Update();
+                MainMenu.Pool.ProcessMenus();
                 if (!UIMenu.IsAnyMenuVisible && Peralatan.CheckKey(Keys.RControlKey, Keys.D0))
                 {
-                    "Opening pause menu".ToLog();
-                    DateTime start = DateTime.Now;
-                    string headshot = Game.LocalPlayer.Character.GetPedHeadshotTexture(out uint? pmh);
-                    "Requesting ped headshot for pause menu".ToLog();
-                    playerMugshotHandle = pmh;
-                    "Setting pause menu photo with player mugshot".ToLog();
-                    pauseMenu.Photo = new Sprite(headshot, headshot, Point.Empty, Size.Empty);
-                    $"Set photo took {(DateTime.Now - start).TotalMilliseconds} ms".Print();
-                    "Set pause menu to visible".ToLog();
-                    pauseMenu.Visible = !pauseMenu.Visible;
+                    MainMenu.BarbarianCallMenu.Visible = !MainMenu.BarbarianCallMenu.Visible;
                 }
             }
         }
