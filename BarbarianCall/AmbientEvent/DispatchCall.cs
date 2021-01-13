@@ -8,6 +8,7 @@ using Rage;
 using LSPD_First_Response;
 using LSPD_First_Response.Mod.API;
 using BarbarianCall.Types;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall.AmbientEvent
 {

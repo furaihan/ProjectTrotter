@@ -33,7 +33,7 @@ namespace BarbarianCall.Callouts
         public long Timer;
         public DateTime Time;
         public TimeSpan TimeSpan = new TimeSpan(0, 0, 15);
-        public System.Diagnostics.Stopwatch Stopwatch;
+        public System.Diagnostics.Stopwatch StopWatch;
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;

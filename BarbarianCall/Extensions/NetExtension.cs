@@ -7,7 +7,7 @@ using System.Threading;
 using System.Net.NetworkInformation;
 using Rage;
 
-namespace BarbarianCall
+namespace BarbarianCall.Extensions
 {
     internal static class NetExtension
     {
@@ -54,7 +54,7 @@ namespace BarbarianCall
                 }
                 catch (Exception exc)
                 {
-                    Peralatan.ToLog($"Fetch webhooks error. Loop: {frames}");
+                    $"Fetch webhooks error. Loop: {frames}".ToLog();
                     exc.ToString().ToLog();
                 }
             });
@@ -89,7 +89,7 @@ namespace BarbarianCall
                         catch
                         {
                             continue;
-                        }                        
+                        }
                     }
                 }
                 catch (Exception e)

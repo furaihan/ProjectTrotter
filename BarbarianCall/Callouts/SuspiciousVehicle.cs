@@ -9,6 +9,7 @@ using LSPD_First_Response.Mod.Callouts;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using System.Windows.Forms;
 using System.Drawing;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall.Callouts
 {
@@ -194,13 +195,14 @@ namespace BarbarianCall.Callouts
                     PursuitCreated = true;
                     if (Passenger) Functions.AddPedToPursuit(Pursuit, Passenger);
                     bool air = false;
-                    Time = DateTime.UtcNow + new TimeSpan(0, 0, Peralatan.Random.Next(6, 15));
+                    StopWatch = System.Diagnostics.Stopwatch.StartNew();
+                    int airTime = Peralatan.Random.Next(6000, 15000);
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
                         if (Passenger && PassengerState != ESuspectStates.InAction && SuspectState != ESuspectStates.InAction) break;
                         else if (!Passenger.Exists() && SuspectState != ESuspectStates.InAction) break;
-                        if (!air && DateTime.UtcNow.CompareTo(Time) > 0 && Functions.IsPursuitStillRunning(Pursuit))
+                        if (!air && StopWatch.ElapsedMilliseconds > airTime && Functions.IsPursuitStillRunning(Pursuit))
                         {
                             API.LSPDFRFunc.RequestAirUnit(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                             air = true;
@@ -214,6 +216,23 @@ namespace BarbarianCall.Callouts
                     "Suspicious vehicle callout crash".DisplayNotifWithLogo("Suspicious Vehicle");
                     e.ToString().ToLog();
                     NetExtension.SendError(e);
+                    End();
+                }
+            });
+        }
+        private void SituationOnFootPursuit()
+        {
+            GameFiber.StartNew(() =>
+            {
+                try
+                {
+
+                }
+                catch (Exception e)
+                {
+                    "Suspicious vehicle callout crash".DisplayNotifWithLogo("Suspicious Vehicle");
+                    e.ToString().ToLog();
+                    if (!(e is System.Threading.ThreadAbortException)) NetExtension.SendError(e);
                     End();
                 }
             });

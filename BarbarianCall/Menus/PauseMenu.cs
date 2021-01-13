@@ -56,9 +56,12 @@ namespace BarbarianCall.Menus
                 "available for calls after you have finished your callout");
             autoAvailable.Activated += (m, s) => 
             { 
-                pauseMenu.Visible = false; 
-                GameFiber.Sleep(1000);
-                LSPD_First_Response.Mod.API.Functions.PlayPlayerRadioAction(LSPD_First_Response.Mod.Menus.EPoliceRadioAction.Handheld, 120); 
+                pauseMenu.Visible = false;
+                GameFiber.StartNew(() =>
+                {
+                    GameFiber.Sleep(1000);
+                    LSPD_First_Response.Mod.API.Functions.PlayPlayerRadioAction(LSPD_First_Response.Mod.Menus.EPoliceRadioAction.Handheld, 120);
+                });                
             };
             otherUnitAudio = new UIMenuCheckboxItem("Play Other Unit Respond Audio", true, "If you did not accept a callout from this plugin, a sound from other unit taking a callout will be played");
             onSceneAudio = new UIMenuCheckboxItem("Play Officer On Scene Audio", true, "Play scanner audio when you arrived on scene");

@@ -10,6 +10,7 @@ using LSPD_First_Response.Mod.API;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using System.Drawing;
 using BarbarianCall.Types;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall.Callouts
 {
@@ -444,7 +445,7 @@ namespace BarbarianCall.Callouts
         }
         private void SituationDead()
         {
-            CalloutMainFiber = GameFiber.StartNew(() =>
+            CalloutMainFiber = GameFiber.StartNew((System.Threading.ThreadStart)(() =>
             {
                 try
                 {
@@ -479,7 +480,7 @@ namespace BarbarianCall.Callouts
                     CalloutBlips.Add(WitnessBlip);
                     Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
                     Functions.RequestBackup(TaxiDriver.Position, EBackupResponseType.Code3, EBackupUnitType.Ambulance);
-                    "Ambulance is en route to the scene".DisplayNotifWithLogo("~y~Taxi Passenger Refuse To Pay");                  
+                    "Ambulance is en route to the scene".DisplayNotifWithLogo("~y~Taxi Passenger Refuse To Pay");
                     Game.DisplayHelp($"~y~Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~y~ to speak with the witness");
                     Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     while (CalloutRunning)
@@ -557,7 +558,7 @@ namespace BarbarianCall.Callouts
                                 Blip.EnableRoute(Color.Yellow);
                                 curPos = Suspect.Position;
                             }
-                        }                       
+                        }
                         GameFiber.Yield();
                     }
                     if (!CalloutRunning) return;
@@ -602,7 +603,7 @@ namespace BarbarianCall.Callouts
                     NetExtension.SendError(e);
                     End();
                 }
-            });
+            }));
         }
         private void SituationCommon()
         {

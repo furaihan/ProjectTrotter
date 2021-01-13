@@ -10,6 +10,7 @@ using LSPD_First_Response.Engine.Scripting.Entities;
 using System.Drawing;
 using BarbarianCall.Types;
 using System.IO;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall.Callouts
 {

@@ -43,6 +43,7 @@ namespace BarbarianCall.Menus
                         if (Game.LocalPlayer.Character.LastVehicle)
                         {
                             Mechanic mechanic = new Mechanic(Game.LocalPlayer.Character.LastVehicle);
+                            mechanic.DismissFixedVehicle = false;
                             mechanic.RespondToLocation();
                         }
                         else "Your last vehicle is not found, please make sure you has been in any vehicle before".DisplayNotifWithLogo("~y~Mechanic Service");
@@ -55,7 +56,6 @@ namespace BarbarianCall.Menus
                         if (brokenVeh)
                         {
                             Mechanic mechanic = new Mechanic(brokenVeh);
-                            mechanic.AlwaysWork = true;
                             mechanic.RespondToLocation();
                         }
                         else Game.DisplayHelp("No nearby vehicle found to repair");

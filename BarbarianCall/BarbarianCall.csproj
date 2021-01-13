@@ -87,13 +87,14 @@
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />
     <Compile Include="AmbientEvent\DispatchCall.cs" />
-    <Compile Include="Extension.cs" />
+    <Compile Include="Extensions\Extension.cs" />
+    <Compile Include="Extensions\TaskExtension.cs" />
     <Compile Include="Initialization.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Menus\MainMenu.cs" />
     <Compile Include="Menus\MenuHandler.cs" />
     <Compile Include="Menus\PauseMenu.cs" />
-    <Compile Include="NetExtension.cs" />
+    <Compile Include="Extensions\NetExtension.cs" />
     <Compile Include="Peralatan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnManager.cs" />

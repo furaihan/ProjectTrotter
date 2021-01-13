@@ -10,6 +10,7 @@ using System.Threading;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using BarbarianCall.AmbientEvent;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall
 {
