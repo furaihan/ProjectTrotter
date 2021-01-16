@@ -23,8 +23,9 @@ namespace BarbarianCall.Callouts
         private bool SuperModel = false;
         public override bool OnBeforeCalloutDisplayed()
         {
-            FilePath = @"Plugins/LSPDFR/BarbarianCall/StrangeLookingVehicle/";
-            List<Types.SpawnPoint> spawnPoints = DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "Locations.xml"));
+            CheckOtherPluginRunning();
+            FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
+            List<Types.Spawnpoint> spawnPoints = DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "SuspiciousVehicle.xml"));
             Spawn = Peralatan.SelectNearbySpawnpoint(spawnPoints);
             SpawnPoint = Spawn;
             SpawnHeading = Spawn;
@@ -42,7 +43,7 @@ namespace BarbarianCall.Callouts
             ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 15f);
             AddMinimumDistanceCheck(30f, SpawnPoint);          
             CalloutPosition = SpawnPoint;
-            CalloutMessage = "A Strange Looking Vehicle";
+            CalloutMessage = "Suspicious Vehicle";
             CalloutAdvisory = $"Vehicle is {SuspectCar.GetVehicleDisplayName()}";
             PlayScannerWithCallsign($"CITIZENS_REPORT BAR_SUSPICIOUS_VEHICLE IN_OR_ON_POSITION", SpawnPoint);
             return base.OnBeforeCalloutDisplayed();
@@ -72,7 +73,7 @@ namespace BarbarianCall.Callouts
             Blip = new Blip(Spawn, 45f);
             Blip.Color = Color.Yellow;
             Blip.EnableRoute(Color.Yellow);
-            SituationRun();
+            SituationOnFootPursuit();
             return base.OnCalloutAccepted();
         }
         public override void Process()
@@ -226,7 +227,63 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-
+                    CalloutRunning = true;
+                    SuspectCar.Position = Spawn;
+                    SuspectCar.Heading = Spawn;
+                    Suspect.SetPedAsWanted();
+                    if (!Passenger)
+                    {
+                        Passenger = new Ped(GangModels.GetRandomElement(m => m.IsValid, true), Spawn, SpawnHeading);
+                        CalloutEntities.Add(Passenger);
+                        Passenger.WarpIntoVehicle(SuspectCar, 0);
+                        Passenger.MakeMissionPed();
+                        GameFiber.Wait(75);
+                        PassengerState = ESuspectStates.InAction;
+                    }
+                    Passenger.SetPedAsWanted();
+                    Manusia = new Types.Manusia(Suspect, SuspectPersona, SuspectCar);
+                    GameFiber.StartNew(() =>
+                    {
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
+                        GameFiber.Sleep(1500);
+                        Manusia.DisplayNotif();
+                        GameFiber.Wait(1000);
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
+                        PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ " +
+                            $"{Peralatan.GetVehicleDisplayAudio(SuspectCar)} {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                        API.LSPDFRFunc.WaitAudioScannerCompletion();
+                        GameFiber.Wait(2000);
+                        DisplayGPNotif();
+                    });
+                    GetClose();
+                    if (!CalloutRunning) return;
+                    if (Blip) Blip.Delete();
+                    Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.None);
+                    Passenger.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion();
+                    Suspect.Tasks.Flee(PlayerPed, 1000f, -1);
+                    Passenger.Tasks.Flee(PlayerPed, 1000f, -1);
+                    GameFiber.Wait(5000);
+                    if (!CalloutRunning) return;
+                    Pursuit = Functions.CreatePursuit();
+                    Functions.AddPedToPursuit(Pursuit, Suspect);
+                    Functions.AddPedToPursuit(Pursuit, Passenger);
+                    Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
+                    PursuitCreated = true;
+                    API.LSPDFRFunc.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
+                    StopWatch = System.Diagnostics.Stopwatch.StartNew();
+                    bool air = false;
+                    TimeSpan airtime = new TimeSpan(0, 0, 0, Peralatan.Random.Next(6, 15), Peralatan.Random.Next(2525));
+                    while (CalloutRunning)
+                    {
+                        GameFiber.Yield();
+                        if (StopWatch.ElapsedMilliseconds > airtime.TotalMilliseconds && !air)
+                        {
+                            if (Functions.IsPursuitStillRunning(Pursuit)) API.LSPDFRFunc.RequestAirUnit(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
+                            air = true;
+                        }
+                        if (PassengerState != ESuspectStates.InAction && SuspectState != ESuspectStates.InAction) break;
+                    }
+                    DisplayCodeFourMessage();
                 }
                 catch (Exception e)
                 {

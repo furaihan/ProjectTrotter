@@ -28,14 +28,18 @@ namespace BarbarianCall.API
                 WaitAudioScannerCompletion();
             }
         }
-        public static void WaitAudioScannerCompletion()
+        public static void WaitAudioScannerCompletion(TimeSpan timeout)
         {
+            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
             while (true)
             {
                 GameFiber.Yield();
                 if (!LF.GetIsAudioEngineBusy()) break;
+                if (stopwatch.ElapsedMilliseconds > timeout.TotalMilliseconds && timeout != System.Threading.Timeout.InfiniteTimeSpan) break;
             }
         }
+        public static void WaitAudioScannerCompletion() => WaitAudioScannerCompletion(System.Threading.Timeout.InfiniteTimeSpan);
+        public static void WaitAudioScannerCompletion(int timeoutMilliseconds) => WaitAudioScannerCompletion(TimeSpan.FromMilliseconds(timeoutMilliseconds));
         public static void RequestBackup(Vector3 location, EBackupResponseType responseType)
         {
             int rand = Peralatan.Random.Next(1, 1000);
@@ -49,5 +53,6 @@ namespace BarbarianCall.API
             if (rand < 800) LF.RequestBackup(location, responseType, EBackupUnitType.AirUnit);
             else LF.RequestBackup(location, responseType, EBackupUnitType.NooseAirUnit);
         }
+        public static Persona GetPedPersona(Ped ped) => LF.GetPersonaForPed(ped);
     }
 }

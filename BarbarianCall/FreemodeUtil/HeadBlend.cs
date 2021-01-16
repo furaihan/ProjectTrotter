@@ -1,15 +1,11 @@
-﻿namespace BarbarianCall.Types
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Linq;
-    using System.Runtime.InteropServices;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Rage;
-    using Rage.Native;
+﻿using BarbarianCall.Types;
 
+namespace BarbarianCall.FreemodeUtil
+{
+    using System.Drawing;
+    using System.Runtime.InteropServices;
+    using Rage.Native;
+    using Rage;
     [StructLayout(LayoutKind.Explicit, Size = 80)]
     public struct HeadBlendData
     {
@@ -53,7 +49,6 @@
             return $"Shape : ({shapeFirstID}, {shapeSecondID}, {shapeThirdID}). Skin : ({skinFirstID}, {skinSecondID}, {skinThirdID}). Mix : (Shape: {shapeMix}, Skin: {skinMix}, Third: {thirdMix}) Parent: {isParent}";
         }
     }
-
     public static class HeadBlend
     {
         public static HeadBlendData GetDataFromPed(Ped ped)
@@ -69,6 +64,7 @@
                 headBlendData.shapeThirdID, headBlendData.skinFirstID, headBlendData.skinSecondID,
                 headBlendData.skinThirdID, headBlendData.shapeMix, headBlendData.skinMix, headBlendData.thirdMix,
                 headBlendData.isParent);
+            GameFiber.SleepUntil(() => HasPedHeadBlendFinished(ped), 5000);
         }
 
         public static void UpdatePedHeadBlendData(Ped ped, float shapeMix, float skinMix, float thirdMix)
@@ -169,7 +165,6 @@
             return NativeFunction.Natives.x5EF37013A6539C9D<int>((int)pedType);
         }
     }
-
     public enum PedType
     {
         NonDlcMale,

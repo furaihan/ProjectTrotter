@@ -28,6 +28,7 @@ namespace BarbarianCall
             Functions.RegisterCallout(typeof(Callouts.SuspiciousVehicle));
             Functions.RegisterCallout(typeof(Callouts.OfficerStabbed));
             Functions.RegisterCallout(typeof(Callouts.TaxiRefusePay));
+            Functions.RegisterCallout(typeof(Callouts.WantedFelonOnTheLoose));
             Initialization.Initialize();
         }
     }

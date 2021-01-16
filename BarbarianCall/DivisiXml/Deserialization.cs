@@ -21,28 +21,12 @@ namespace BarbarianCall.DivisiXml
             reader.Close();
             return XmlData;
         }
-        public static void GetDataFromXml(string filename, out List<Vector3> locations, out List<float> headings)
+        public static List<Spawnpoint> GetSpawnPointFromXml(string filename)
         {
-            Peralatan.ToLog($"Reading XML file {filename}");
-            locations = new List<Vector3>();
-            headings = new List<float>();
-            List<Coordinate> outVar = Deserialize(filename);
-            int count = 0;
-            foreach (Coordinate c in outVar)
-            {
-                count++;
-                Vector3 location = new Vector3(c.AxisX, c.AxisY, c.AxisZ);
-                float heading = c.Heading;                
-                locations.Add(location);
-                headings.Add(heading);
-                if (count % 45 == 0) GameFiber.Yield();
-            }
-        }
-        public static List<SpawnPoint> GetSpawnPointFromXml(string filename)
-        {
-            GetDataFromXml(filename, out List<Vector3> vector3s, out List<float> hs);
-            List<SpawnPoint> spawnPoints = vector3s.Select(s => new SpawnPoint(s, hs[vector3s.IndexOf(s)])).ToList();
-            return spawnPoints;
+            Peralatan.ToLog("Reading XML file " + filename);
+            List<Coordinate> coordinates = Deserialize(filename);
+            List<Spawnpoint> ret = coordinates.Select(c => new Spawnpoint(c.AxisX, c.AxisY, c.AxisZ, c.Heading)).ToList();
+            return ret;
         }
     }
 }

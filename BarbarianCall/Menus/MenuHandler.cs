@@ -51,7 +51,7 @@ namespace BarbarianCall.Menus
                     else
                     {
                         Vehicle brokenVeh = Game.LocalPlayer.Character.GetNearbyVehicles(8).Where(v => v && !v.HasOccupants && v.IsOnScreen && (v.IsCar || v.IsBike) && !v.IsBig && 
-                        !Mechanic.VehicleQueue.Contains(v) && !v.IsInAir)
+                        !Mechanic.VehicleQueue.Contains(v) && !v.IsInAir && v.DistanceTo(Game.LocalPlayer.Character) < 15f)
                             .OrderBy(v => v.DistanceTo(Game.LocalPlayer.Character)).FirstOrDefault();
                         if (brokenVeh)
                         {

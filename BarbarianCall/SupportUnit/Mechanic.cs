@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using BarbarianCall.Types;
 using Rage;
 using BarbarianCall.Extensions;
+using RAGENativeUI;
 
 namespace BarbarianCall.SupportUnit
 {
@@ -33,7 +34,11 @@ namespace BarbarianCall.SupportUnit
         public Vehicle VehicleToFix { get; private set; }
         public Blip Blip { get; private set; }
         public Blip BrokenVehicleBlip { get; private set; }
-        public bool AlwaysWork { get; set; } = false;
+        /// <summary>
+        /// a floating-point between 0 to 1, set to 0 to force the mechanic will never success to repair the vehicle, 
+        /// set to 1 to make the vehicle always be repaired
+        /// </summary>
+        public float SuccessProbability { get; set; } = 0.825f;
         public bool DismissFixedVehicle { get; set; } = true;
         public float MinimumSpawnDistance { get; set; } = 150f;
         public float MaximumSpawnDistance { get; set; } = 350f;
@@ -42,10 +47,12 @@ namespace BarbarianCall.SupportUnit
         public EMechanicState State { get; private set; }
         public enum EMechanicStatus { Running, Error }
         public EMechanicStatus Status { get; private set; }
-        public enum ERepairStatus { Unrepaired, Perfect, Imperfect, Failed }
+        public enum ERepairStatus { Repairing, Perfect, Imperfect, Failed }
         public ERepairStatus RepairStatus { get; private set; }
-        public Model[] VehicleModels  = { "riata", "rebel", "bodhi2", "rebel2", "sadler" };
-        public Model[] PedModels  = { "s_m_y_armymech_01", "s_m_y_xmech_01", "s_m_y_xmech_02", "mp_m_waremech_01", "s_m_y_xmech_02_mp", "s_m_m_gaffer_01" };
+        private static List<Model> vehModels = new List<Model>() { "riata", "rebel", "bodhi2", "rebel2", "sadler" };
+        private static List<Model> pedModels = new List<Model>() { "s_m_y_armymech_01", "s_m_y_xmech_01", "s_m_y_xmech_02", "mp_m_waremech_01", "s_m_y_xmech_02_mp", "s_m_m_gaffer_01" };
+        public List<Model> VehicleModels { get { return vehModels; } set { vehModels = value; } }
+        public List<Model> PedModels { get { return pedModels; } set { pedModels = value; } }
         private enum EMethodPassed { Prepare, Respond, Repair, CleanUp }
         private EMethodPassed MethodPassed;
         private Rage.Object ToolBox1;
@@ -53,10 +60,11 @@ namespace BarbarianCall.SupportUnit
         private Rage.Object Wrench;
         private AnimationTask JerryCan;
         private readonly AnimationDictionary jc = new AnimationDictionary("move_weapon@jerrycan@generic");
+        private readonly RelationshipGroup MechanicRelationship;
         public Mechanic(Vehicle brokenVeh)
         {
             State = EMechanicState.Prepare;
-            RepairStatus = ERepairStatus.Unrepaired;
+            RepairStatus = ERepairStatus.Repairing;
             MethodPassed = EMethodPassed.Prepare;
             ReadIniFile();
 
@@ -67,59 +75,68 @@ namespace BarbarianCall.SupportUnit
             VehicleToFix.IsExplosionProof = true;
             VehicleToFix.LockStatus = VehicleLockStatus.Locked;
 
-            var Position = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, MinimumSpawnDistance, MaximumSpawnDistance);
-            var Heading = Position;
-
-            MechanicVehicle = new Vehicle(VehicleModels.GetRandomElement(), Position, Heading)
-            {
-                IsPersistent = true,
-                IsExplosionProof = true,
-                DirtLevel = 10f,
-                EngineHealth = 1000f,
-                CanTiresBurst = false,
-                TopSpeed = MaximumSpeed,
-                LicensePlateStyle = ((LicensePlateStyle[])Enum.GetValues(typeof(LicensePlateStyle))).GetRandomElement(),
-                IsStolen = false,
-                RadioStation = ((RadioStation[])Enum.GetValues(typeof(RadioStation))).GetRandomElement(),
-            };
-            MechanicVehicle.PlaceOnGroundProperly();
-            MechanicVehicle.RandomiseLicensePlate();
-
-            MechanicPed = new Ped(PedModels.GetRandomElement(), Position, Heading)
-            {
-                IsExplosionProof = true,
-                MaxHealth = 3000,
-                Health = 3000,
-                Armor = 2500,
-                CanBeTargetted = false,
-            };
-            MechanicPed.MakeMissionPed(true);
-            MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
-
-            Blip = MechanicPed.AttachBlip();
-            Blip.Color = Color.PaleVioletRed;
-            Blip.Scale = 0.8f;
-            Blip.SetBlipSprite(446);
-
-            BrokenVehicleBlip = VehicleToFix.AttachBlip();
-            BrokenVehicleBlip.Sprite = BlipSprite.GetawayCar;
-            BrokenVehicleBlip.Color = Color.LavenderBlush;
+            MechanicRelationship = new RelationshipGroup("MECHANIC");
+            MechanicRelationship.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Companion);
+            MechanicRelationship.SetRelationshipWith(RelationshipGroup.Medic, Relationship.Companion);
+            MechanicRelationship.SetRelationshipWith(RelationshipGroup.Fireman, Relationship.Companion);
+            MechanicRelationship.SetRelationshipWith(RelationshipGroup.Player, Relationship.Companion);
+            RelationshipGroup.Cop.SetRelationshipWith(MechanicRelationship, Relationship.Companion);
+            RelationshipGroup.Fireman.SetRelationshipWith(MechanicRelationship, Relationship.Companion);
+            RelationshipGroup.Medic.SetRelationshipWith(MechanicRelationship, Relationship.Companion);
         }
         public void RespondToLocation()
         {
             if (VehicleToFix)
-            {
-                MethodPassed = EMethodPassed.Respond;
-                MechanicPed.DisplayNotificationsWithPedHeadshot("~g~En Route",
-                    $"~h~Mechanic engineer~s~ is ~g~en route~s~ to ~y~repair~s~ ~c~{VehicleToFix.GetVehicleDisplayName()}~s~. Please be ~g~patient",
-                    "~g~Mechanic Engineer");
-                Status = EMechanicStatus.Running;
+            {              
                 GameFiber.StartNew(() =>
                 {
                     try
                     {
-                        SpawnPoint drivePosition = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.GetOffsetPosition(Vector3.RelativeFront * 15f), 5, 25);
-                        if (drivePosition == SpawnPoint.Zero) drivePosition.Position = World.GetNextPositionOnStreet(VehicleToFix.GetOffsetPosition(Vector3.RelativeFront * 15f).Around(5, 25));
+                        var Position = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, MinimumSpawnDistance, MaximumSpawnDistance);
+                        if (Position == Spawnpoint.Zero) Position.Position = World.GetNextPositionOnStreet(VehicleToFix.Position.Around(MinimumSpawnDistance, MaximumSpawnDistance));
+                        float Heading = Position;
+
+                        MechanicVehicle = new Vehicle(VehicleModels.GetRandomElement(), Position, Heading)
+                        {
+                            IsPersistent = true,
+                            IsExplosionProof = true,
+                            DirtLevel = 10f,
+                            EngineHealth = 1000f,
+                            CanTiresBurst = false,
+                            TopSpeed = MaximumSpeed,
+                            LicensePlateStyle = ((LicensePlateStyle[])Enum.GetValues(typeof(LicensePlateStyle))).GetRandomElement(),
+                            IsStolen = false,
+                            RadioStation = ((RadioStation[])Enum.GetValues(typeof(RadioStation))).GetRandomElement(),
+                        };
+                        MechanicVehicle.PlaceOnGroundProperly();
+                        MechanicVehicle.RandomiseLicensePlate();
+
+                        MechanicPed = new Ped(PedModels.GetRandomElement(), Position, Heading)
+                        {
+                            IsExplosionProof = true,
+                            MaxHealth = 3000,
+                            Health = 3000,
+                            Armor = 2500,
+                            CanBeTargetted = false,
+                            RelationshipGroup = MechanicRelationship,
+                        };
+                        MechanicPed.MakeMissionPed(true);
+                        MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
+
+                        Blip = MechanicPed.AttachBlip();
+                        Blip.SetBlipSprite(446);
+                        Blip.Color = HudColor.NetPlayer26.GetColor();
+
+                        BrokenVehicleBlip = VehicleToFix.AttachBlip();
+                        BrokenVehicleBlip.Sprite = BlipSprite.GetawayCar;
+                        BrokenVehicleBlip.Color = Color.LavenderBlush;
+                        MethodPassed = EMethodPassed.Respond;
+                        MechanicPed.DisplayNotificationsWithPedHeadshot("~g~En Route",
+                            $"~h~Mechanic engineer~h~~s~ is ~g~en route~s~ to ~y~repair~s~ ~c~{VehicleToFix.GetVehicleDisplayName()}~s~. Please be ~g~patient",
+                            "~y~Mechanic Engineer");
+                        Status = EMechanicStatus.Running;
+                        Spawnpoint drivePosition = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, 25, 35);
+                        if (drivePosition == Spawnpoint.Zero) drivePosition.Position = World.GetNextPositionOnStreet(VehicleToFix.GetOffsetPosition(Vector3.RelativeFront * 15f).Around(5, 25));
                         State = EMechanicState.Driving;
                         if (VehicleToFix)
                             VehicleToFix.LockStatus = VehicleLockStatus.Locked;
@@ -142,8 +159,8 @@ namespace BarbarianCall.SupportUnit
                             else if (MechanicVehicle && !MechanicVehicle.IsOnAllWheels) slow++;
                             if (slow == 80 && MechanicVehicle.DistanceTo(VehicleToFix) > 200f)
                             {
-                                SpawnPoint changePos = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, 150, 200);
-                                if (changePos == SpawnPoint.Zero) changePos.Position = World.GetNextPositionOnStreet(VehicleToFix.Position.Around(150, 250));
+                                Spawnpoint changePos = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, 150, 200);
+                                if (changePos == Spawnpoint.Zero) changePos.Position = World.GetNextPositionOnStreet(VehicleToFix.Position.Around(150, 250));
                                 if (MechanicVehicle)
                                     MechanicVehicle.Position = changePos;
                                 if (MechanicVehicle)
@@ -180,20 +197,20 @@ namespace BarbarianCall.SupportUnit
                             }
                             if (warped)
                             {
-                                SpawnPoint warpingCloser = SpawnManager.GetRoadSideSpawnPoint(VehicleToFix.Position);
-                                if (warpingCloser == SpawnPoint.Zero) warpingCloser = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, 5, 25);
-                                if (warpingCloser == SpawnPoint.Zero) warpingCloser.Position = World.GetNextPositionOnStreet(VehicleToFix.Position);
+                                Spawnpoint warpingCloser = SpawnManager.GetRoadSideSpawnPoint(VehicleToFix.Position);
+                                if (warpingCloser == Spawnpoint.Zero) warpingCloser = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, 5, 25);
+                                if (warpingCloser == Spawnpoint.Zero) warpingCloser.Position = World.GetNextPositionOnStreet(VehicleToFix.Position);
                                 if (MechanicVehicle) MechanicVehicle.Position = warpingCloser;
                                 if (MechanicVehicle) MechanicVehicle.Heading = warpingCloser;
                                 Game.DisplayHelp("~y~Warping~s~ ~g~Mechanic~s~ ~y~Closer...", 5000);
                                 break;
                             }
-                            if (MechanicVehicle && VehicleToFix && MechanicVehicle.DistanceTo(VehicleToFix) < 38f && !MechanicVehicle.IsStoppedAtTrafficLights && !findRoadSide)
+                            if (MechanicVehicle && VehicleToFix && MechanicVehicle.DistanceTo(VehicleToFix) < 40f && !MechanicVehicle.IsStoppedAtTrafficLights && !findRoadSide)
                             {
                                 findRoadSide = true;
                                 Vector3 front = MechanicVehicle.FrontPosition + MechanicVehicle.ForwardVector * 35f;
-                                SpawnPoint roadSide = SpawnManager.GetRoadSideSpawnPoint(front, MechanicVehicle.Heading);
-                                if (roadSide != SpawnPoint.Zero)
+                                Spawnpoint roadSide = SpawnManager.GetRoadSideSpawnPoint(front, MechanicVehicle.Heading);
+                                if (roadSide != Spawnpoint.Zero)
                                 {
                                     if (MechanicPed) MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(800);
                                     if (MechanicPed) MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.ReverseStraight).WaitForCompletion(1500);
@@ -291,7 +308,7 @@ namespace BarbarianCall.SupportUnit
                         if (MethodPassed == EMethodPassed.Respond)
                             CleanUp();
                     }
-                });
+                }, "[BarbarianCall] Mechanic Service Fiber");
             }
         }
         private void RepairVehicle()
@@ -340,27 +357,12 @@ namespace BarbarianCall.SupportUnit
                 }
                 MechanicPed.Tasks.ClearImmediately();
                 AnimationTask taskRepair = MechanicPed.Tasks.PlayAnimation("mini@repair", "fixing_a_ped", 3f, AnimationFlags.None);
-                GameFiber.StartNew(() =>
-                {
-                    AnimationDictionary repair = "mini@repair";
-                    if (VehicleToFix)
-                        VehicleToFix.PlayEntityAnim(repair, "fixing_a_car", true);
-                    while (taskRepair.IsActive)
-                    {
-                        GameFiber.Yield();
-                    }
-                    if (VehicleToFix)
-                        VehicleToFix.StopEntityAnimation(repair, "fixing_a_car");
-                });
                 while (taskRepair.IsActive)
                 {
                     GameFiber.Yield(); if (!VehicleToFix) throw new ArgumentException("Vehicle does not exist");
                 }
-                int num = Peralatan.Random.Next(1, 100);
-                if (AlwaysWork) num = Peralatan.Random.Next(1, 65);
                 string selectedTalk;
-                if (VehicleToFix.Health > VehicleToFix.MaxHealth - 30f && VehicleToFix.EngineHealth > 700f) num = 50;
-                if (num <= 70)
+                if (Peralatan.Random.NextDouble() < SuccessProbability)
                 {
                     VehicleToFix.Repair();
                     VehicleToFix.Health = VehicleToFix.MaxHealth;
@@ -374,35 +376,10 @@ namespace BarbarianCall.SupportUnit
                     selectedTalk = "~b~Mechanic~s~: " + perfectDialogue.GetRandomElement();
                     RepairStatus = ERepairStatus.Perfect;
                 }
-                else if (num <= 90)
-                {
-                    VehicleToFix.Repair();
-                    VehicleToFix.EngineHealth = Peralatan.Random.Next(350, 750);
-                    VehicleToFix.FuelTankHealth = Peralatan.Random.Next(700, 950);
-                    VehicleToFix.IsDriveable = true;
-                    VehicleToFix.IsExplosionProof = false;
-                    VehicleToFix.FuelTankHealth = Peralatan.Random.Next(710, 980);
-                    VehicleToFix.Wash();
-                    OpenHood(VehicleToFix, false);
-                    selectedTalk = "~b~Mechanic~s~: " + imperfectDialogue.GetRandomElement();
-                    RepairStatus = ERepairStatus.Imperfect;
-                }
                 else
-                {
-                    if (VehicleToFix.HasBone("bonnet") && VehicleToFix.Doors[4].IsValid()) VehicleToFix.Doors[4].BreakOff();
-                    VehicleToFix.IsDriveable = false;
-                    VehicleToFix.IsExplosionProof = false;
-                    VehicleToFix.EngineHealth = 250f;
-                    VehicleToFix.FuelTankHealth = Peralatan.Random.Next(150, 750);
+                {                   
                     selectedTalk = "~b~Mechanic~s~: " + failedDialogue.GetRandomElement();
-                    int num2 = Peralatan.Random.Next(1, 1000);
-                    if (num2 >= 650 && num2 <= 700)
-                    {
-                        if (VehicleToFix)
-                        {
-                            VehicleToFix.Explode(false);
-                        }
-                    }
+                    int num2 = Peralatan.Random.Next(1, 1000);                   
                     RepairStatus = ERepairStatus.Failed;
                 }
                 if (Wrench) Wrench.Delete();
@@ -410,7 +387,7 @@ namespace BarbarianCall.SupportUnit
                 if (ToolBox2) ToolBox2.Delete();
                 GameFiber.Wait(75);
                 ToolBox1.AttachTo(MechanicPed, MechanicPed.GetBoneIndex(PedBoneId.RightPhHand),
-                    new Vector3(0.25000003f, -0.0600000098f, -0.0399999879f), new Rotator(-90.0299988f, -79.9999924f, -9.99999905f));
+                    new Vector3(0.25f, -0.06f, -0.04f), new Rotator(-90.0299988f, -79.9999924f, -9.99999905f));
                 GameFiber.Wait(75);
                 if (Game.LocalPlayer.Character.Position.DistanceTo(MechanicPed.Position) < 60f)
                     MechanicPed.Tasks.FollowNavigationMeshToPosition(Game.LocalPlayer.Character.Position + Game.LocalPlayer.Character.ForwardVector * 1.1125f,
@@ -468,16 +445,16 @@ namespace BarbarianCall.SupportUnit
             {
                 if (VehicleToFix)
                 {
-                    fixedVehs.Add(VehicleToFix);
+                    if (RepairStatus == ERepairStatus.Perfect || RepairStatus == ERepairStatus.Imperfect) fixedVehs.Add(VehicleToFix);
                     VehicleToFix.IsExplosionProof = false;
                     if (DismissFixedVehicle) VehicleToFix.Dismiss();
                 }
                 if (MechanicVehicle && MechanicPed) { MechanicVehicle.Dismiss(); MechanicPed.Dismiss(); }
                 if (Blip) Blip.Delete();
                 if (BrokenVehicleBlip) BrokenVehicleBlip.Delete();
-                if (ToolBox1) ToolBox1.Dismiss();
-                if (ToolBox2) ToolBox2.Dismiss();
-                if (Wrench) Wrench.Dismiss();
+                if (ToolBox1) ToolBox1.Delete();
+                if (ToolBox2) ToolBox2.Delete();
+                if (Wrench) Wrench.Delete();
                 if (jc.IsLoaded) jc.Dismiss();
             }
         }
@@ -514,12 +491,6 @@ namespace BarbarianCall.SupportUnit
             "Perfectly Done!!, lucky you entrusted this to me",
             "The damage is pretty bad, but my mechanic skill can handle this perfectly"
         };
-        private readonly List<string> imperfectDialogue = new List<string>()
-        {
-            "This should be work now, but unfortunately i can't fix it perfectly",
-            "This vehicle is now working, however the engine health decreases",
-            "I can't promise this vehicle works as before, but at least the vehicle is drivable now"
-        };
         private readonly List<string> failedDialogue = new List<string>()
         {
             "Sorry, this vehicle is too hard to repair, i cant do anything",
@@ -537,25 +508,26 @@ namespace BarbarianCall.SupportUnit
                 var path = @"Plugins\LSPDFR\BarbarianCall\SupportUnit\Mechanic.ini";
                 InitializationFile mechanicIni = new InitializationFile(path, true);
                 var stringPeds = mechanicIni.ReadString("Mechanic", "PedModels", "s_m_y_armymech_01 s_m_y_xmech_01 s_m_y_xmech_02 mp_m_waremech_01 s_m_y_xmech_02_mp").ToLower();
-                var modelPeds = stringPeds.Split(' ').Select(s => new Model(s)).Where(m => m.IsValid).ToArray();
+                var modelPeds = stringPeds.Split(' ').Select(s => new Model(s)).Where(m => m.IsValid).ToList();
                 var stringVehs = mechanicIni.ReadString("Mechanic", "VehicleModels", "riata rebel bodhi2 rebel2 sadler").ToLower();
-                var modelVehs = stringVehs.Split(' ').Select(s => new Model(s)).Where(m => m.IsValid).ToArray();
+                var modelVehs = stringVehs.Split(' ').Select(s => new Model(s)).Where(m => m.IsValid).ToList();
                 float maxDis = mechanicIni.ReadSingle("Mechanic", "SpawnMaximumDistance", 350);
                 float minDis = mechanicIni.ReadSingle("Mechanic", "SpawnMinimumDistance", 150);
                 float speed = mechanicIni.ReadSingle("Mechanic", "MaximumSpeed", 20);
-                bool neverFail = mechanicIni.ReadBoolean("Mechanic", "NeverFail", false);
+                float prob = mechanicIni.ReadSingle("Mechanic", "SuccessProbability", 0.825f);
 #if DEBUG
                 stringPeds.ToLog();
                  stringVehs.ToLog();
-                $"MaximumDistance: {maxDis}. MinimumDistance: {minDis}. Speed: {speed}. NeverFail: {neverFail}".ToLog();
-                $"PL: {modelPeds.Length}. VL:{modelVehs.Length}".ToLog();
+                $"MaximumDistance: {maxDis}. MinimumDistance: {minDis}. Speed: {speed}. Probability: {prob}".ToLog();
+                $"PL: {modelPeds.Count}. VL:{modelVehs.Count}".ToLog();
 #endif
-                if (modelPeds.Length > 0) PedModels = modelPeds;
-                if (modelVehs.Length > 0) VehicleModels = modelVehs;
+                if (modelPeds.Count > 0) PedModels = modelPeds;
+                if (modelVehs.Count > 0) VehicleModels = modelVehs;
                 MaximumSpawnDistance = maxDis;
                 MinimumSpawnDistance = minDis;
                 MaximumSpeed = speed;
-                AlwaysWork = neverFail;
+                SuccessProbability = prob;
+                //AlwaysWork = neverFail;
             }           
             catch (Exception e)
             {

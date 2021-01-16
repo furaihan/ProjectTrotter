@@ -25,9 +25,11 @@ namespace BarbarianCall.Menus
                 TitleStyle = title,
                 AllowCameraMovement = true,
                 MouseControlsEnabled = false,
-                WidthOffset = 175
+                WidthOffset = 160,
+                DescriptionSeparatorColor = HudColor.NetPlayer23.GetColor(),
             };
-            BarbarianCallMenu.SetBannerType(HudColor.NetPlayer16Dark.GetColor());
+            Sprite des = new Sprite("hei_dlc_orntbankb_txd", "gz_v_bkwood1", Point.Empty, Size.Empty);
+            BarbarianCallMenu.SetBannerType(des);
             Pool.Add(BarbarianCallMenu);
             setting = new UIMenuItem("Settings", "Open BarbarianCall Pause Menu Setting");
             mechanic = new UIMenuListScrollerItem<string>("Call Mechanic", "Call mechanic to repair ~y~My Vehicle", new[] { "My Vehicle", "Nearby Vehicle" });

@@ -3,7 +3,7 @@
     using System;
     using System.Globalization;
     using Rage;
-    public class SpawnPoint : ISpatial, IEquatable<SpawnPoint>, IEquatable<Vector3>, IFormattable
+    public class Spawnpoint : ISpatial, IEquatable<Spawnpoint>, IEquatable<Vector3>, IFormattable
     {
         public Vector3 Position { get; set; }
         public float Heading { get; set; }
@@ -12,51 +12,41 @@
         /// Gets a spawnpoint with position = <see cref="Vector3.Zero"/> and heading = 0f
         /// </summary>
         /// <value>Gets a spawnpoint with position = <see cref="Vector3.Zero"/> and heading = 0f</value>
-        public static SpawnPoint Zero
+        public static Spawnpoint Zero
         {
             get
             {
-                return new SpawnPoint();
+                return new Spawnpoint();
             }
         }
-        public SpawnPoint GroundPosition
+        public Spawnpoint GroundPosition
         {
             get
             {
                 float? zpos = World.GetGroundZ(Position, true, true);
                 Vector3 ground = Position;
                 ground.Z = zpos ?? Position.Z;
-                return new SpawnPoint(ground, Heading);
+                return new Spawnpoint(ground, Heading);
             }
         }
-        public SpawnPoint()
+        public Spawnpoint()
         {
             Position = Vector3.Zero;
             Heading = 0f;
         }
-        public SpawnPoint(Vector3 position, float heading)
+        public Spawnpoint(Vector3 position, float heading)
         {
             Position = position;
             Heading = heading;
         }
-        public SpawnPoint(Vector2 vector2, float z, float heading)
-        {
-            Position = new Vector3(vector2, z);
-            Heading = heading;
-        }
-        public SpawnPoint(float[] values, float heading)
+        public Spawnpoint(params float[] values) 
         {
             if (values == null)
                 throw new ArgumentNullException("values");
-            if (values.Length != 3)
-                throw new ArgumentOutOfRangeException("values", "There must be three and only three input values for Vector3.");
+            if (values.Length != 4)
+                throw new ArgumentOutOfRangeException("values", "first three value must be representing a new Vector3 and the last value is the heading");
             Position = new Vector3(values[0], values[1], values[2]);
-            Heading = heading;
-        }
-        public SpawnPoint(float value, float heading)
-        {
-            Position = new Vector3(value);
-            Heading = heading;
+            Heading = values[3];
         }
 
         public float DistanceTo(Vector3 position) => Position.DistanceTo(position);
@@ -89,9 +79,9 @@
             {
                 return Equals((Vector3)obj);
             }
-            return Equals((SpawnPoint)obj);
+            return Equals((Spawnpoint)obj);
         }
-        public bool Equals(SpawnPoint other) => Position == other.Position && Heading == other.Heading;
+        public bool Equals(Spawnpoint other) => Position == other.Position && Heading == other.Heading;
 
         public bool Equals(Vector3 other) => Position == other;
 
@@ -120,10 +110,10 @@
                 Position.Y.ToString(format, formatProvider), Position.Z.ToString(format, formatProvider), Heading.ToString(format, formatProvider));
         }
 
-        public static bool operator ==(SpawnPoint left, SpawnPoint right) => left.Position == right.Position && left.Heading == right.Heading;
-        public static bool operator !=(SpawnPoint left, SpawnPoint right) => !(left.Position == right.Position && left.Heading == right.Heading);
-        public static implicit operator Vector3(SpawnPoint s) => s.Position;
+        public static bool operator ==(Spawnpoint left, Spawnpoint right) => left.Position == right.Position && left.Heading == right.Heading;
+        public static bool operator !=(Spawnpoint left, Spawnpoint right) => !(left.Position == right.Position && left.Heading == right.Heading);
+        public static implicit operator Vector3(Spawnpoint s) => s.Position;
         //public static implicit operator float[](SpawnPoint s) => new float[] { s.Position.X, s.Position.Y, s.Position.Z };
-        public static implicit operator float(SpawnPoint s) => s.Heading;
+        public static implicit operator float(Spawnpoint s) => s.Heading;
     }
 }

@@ -9,7 +9,7 @@
         bool EventRunning { get; set; }
         List<Entity> Entities { get; set; }
         List<Blip> Blips { get; set; }
-        SpawnPoint SpawnPoint { get; set; }
+        Spawnpoint SpawnPoint { get; set; }
         bool Create();
         void Run();
         void End();

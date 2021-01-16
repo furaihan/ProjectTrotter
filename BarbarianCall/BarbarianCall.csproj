@@ -35,6 +35,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AmbientAICallouts">
+      <HintPath>..\..\Dependencies\AmbientAICallouts.dll</HintPath>
+    </Reference>
     <Reference Include="BetterEMS">
       <HintPath>..\..\Dependencies\BetterEMS.dll</HintPath>
     </Reference>
@@ -83,12 +86,16 @@
     <Compile Include="Callouts\SuspiciousVehicle.cs" />
     <Compile Include="Callouts\TaxiRefusePay.cs" />
     <Compile Include="Callouts\Trespassing.cs" />
+    <Compile Include="Callouts\WantedFelonOnTheLoose.cs" />
     <Compile Include="CommonVariables.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />
     <Compile Include="AmbientEvent\DispatchCall.cs" />
+    <Compile Include="Extensions\ColorExtension.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\TaskExtension.cs" />
+    <Compile Include="FreemodeUtil\FreemodePed.cs" />
+    <Compile Include="FreemodeUtil\PedComponent.cs" />
     <Compile Include="Initialization.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Menus\MainMenu.cs" />
@@ -100,9 +107,9 @@
     <Compile Include="SpawnManager.cs" />
     <Compile Include="SupportUnit\Mechanic.cs" />
     <Compile Include="Types\CVehicle.cs" />
-    <Compile Include="Types\HeadBlend.cs" />
+    <Compile Include="FreemodeUtil\HeadBlend.cs" />
     <Compile Include="Types\Manusia.cs" />
-    <Compile Include="Types\SpawnPoint.cs" />
+    <Compile Include="Types\Spawnpoint.cs" />
     <Compile Include="Types\Speech.cs" />
   </ItemGroup>
   <ItemGroup />

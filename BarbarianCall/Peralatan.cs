@@ -21,52 +21,21 @@ namespace BarbarianCall
         public static Random Random = new Random(unchecked(DateTime.UtcNow.Ticks.GetHashCode() + 1453));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
-        internal static SpawnPoint SelectNearbySpawnpoint(List<SpawnPoint> spawnPoints)
+        internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
         {
-            SelectNearbyLocationsWithHeading(spawnPoints.Select(s => s.Position).ToList(), spawnPoints.Select(s => s.Heading).ToList(), out Vector3 vector3, out float heading);
-            return new SpawnPoint(vector3, heading);
-        }
-        internal static void SelectNearbyLocationsWithHeading(List<Vector3> listLoc, List<float> listHead, out Vector3 sp, out float heading)
-        {
-            sp = Vector3.Zero;
-            heading = 0f;
-            try
+            ToLog(string.Format("Found {0} total locations", spawnPoints.Count));
+            ToLog("Calculating the best location for callout");
+            List<Spawnpoint> suitable = spawnPoints.Where(sp => sp.DistanceTo(Game.LocalPlayer.Character) < maxDistance && sp.DistanceTo(Game.LocalPlayer.Character) > minDistance
+            && sp.TravelDistanceTo(Game.LocalPlayer.Character) < maxDistance * 2 && sp.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
+            if (suitable.Count > 0)
             {
-                Vector3 playerPos = Game.LocalPlayer.Character.Position;
-                if (listLoc.Count != listHead.Count) return;
-                ToLog($"Calculating the best location for callout");
-                List<Vector3> locsToSelect = listLoc.Where(l => l.DistanceTo(playerPos) < 750f && l.DistanceTo(playerPos) > 300f && l.TravelDistanceTo(playerPos) < 1300f 
-                && l.HeightDiff(playerPos) < 50f).ToList();
-                if (locsToSelect.Count > 0)
-                {
-                    $"Found {locsToSelect.Count} suitable location, choosing a random location from that list".ToLog();
-                    sp = locsToSelect.GetRandomElement(true);
-                }
-                else
-                {
-                    sp = listLoc.Where(l => l.DistanceTo(playerPos) < 1200f && l.DistanceTo(playerPos) > 250f 
-                    && l.TravelDistanceTo(playerPos) < 1800f && l.HeightDiff(playerPos) < 50f).FirstOrDefault();                   
-                }
-                if (listLoc.Contains(sp)) heading = listHead[listLoc.IndexOf(sp)];
-                else heading = 0f;
-
-                if (sp != Vector3.Zero && heading != 0f)
-                {
-                    ToLog($"Location selected {sp} Heading: {heading}");
-                    ToLog($"Distance to player {sp.DistanceTo(playerPos):0.00}, Travel Distance: {sp.TravelDistanceTo(playerPos):0.00}");
-                    //ToLog($"Location found in {GetZoneName(sp)} near {World.GetStreetName(sp)}");
-                }
+                ToLog($"Found {suitable.Count} suitable location, choosing a random location from that list");
+                Spawnpoint selected = suitable.GetRandomElement(true);
+                ToLog(string.Format("Location selected is {0} in {1}", selected, GetZoneName(selected.Position)));
+                return selected;
             }
-            catch (Exception e)
-            {
-                sp = Vector3.Zero;
-                heading = 0f;
-                "Failed when try to select nearby locations".ToLog();
-                e.Message.ToLog();
-                NetExtension.SendError(e);
-            }
-            return;
-        }
+            return Spawnpoint.Zero;
+        }       
         internal static void Print(this string msg) => Game.Console.Print(msg);
         internal static void ToLog(this string micin) => ToLog(micin, false);
         internal static void ToLog(this string micin, bool makeUppercase)
@@ -89,6 +58,7 @@ namespace BarbarianCall
             Game.Console.Print(audio);
             return audio;
         }
+        internal static string GetColorAudio(this Vehicle vehicle) => GetColorAudio(vehicle.PrimaryColor);
         internal static string GetColorAudio(Color color)
         {
             ToLog("Trying to get color audio");
@@ -133,6 +103,18 @@ namespace BarbarianCall
                 string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
                 string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
                 return makeName == null ? gameName : $"{makeName} {gameName}";
+            }
+        }
+        internal static String GetVehicleDisplayAudio(Vehicle vehicle)
+        {
+            unsafe
+            {
+                CVehicle* vehPtr = (CVehicle*)vehicle.MemoryAddress;
+                IntPtr makeNamePtr = vehPtr->GetMakeName();
+                IntPtr gameNamePtr = vehPtr->GetGameName();
+                string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
+                string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
+                return makeName == null ? vehicle.Model.Name.ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {vehicle.Model.Name.ToUpper()}";
             }
         }
         internal static string GetZoneName(this ISpatial spatial) => GetZoneName(spatial.Position);
@@ -394,11 +376,10 @@ namespace BarbarianCall
             return GetRandomElement(array, shuffle);
         }
 
-        public static T GetRandomElement<T>(this Enum items) where T : Enum
+        public static T GetRandomElement<T>(this Enum items)
         {
             if (typeof(T).BaseType != typeof(Enum))
                 throw new InvalidCastException();
-
             Array types = Enum.GetValues(typeof(T));
             return GetRandomElement(types.Cast<T>());
         }

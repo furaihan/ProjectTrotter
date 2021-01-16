@@ -59,8 +59,7 @@ namespace BarbarianCall.Menus
                 pauseMenu.Visible = false;
                 GameFiber.StartNew(() =>
                 {
-                    GameFiber.Sleep(1000);
-                    LSPD_First_Response.Mod.API.Functions.PlayPlayerRadioAction(LSPD_First_Response.Mod.Menus.EPoliceRadioAction.Handheld, 120);
+                    SpawnManager.GetNthClosestVehicleNodeIdWithHeading(Game.LocalPlayer.Character.Position).ToString().ToLog();
                 });                
             };
             otherUnitAudio = new UIMenuCheckboxItem("Play Other Unit Respond Audio", true, "If you did not accept a callout from this plugin, a sound from other unit taking a callout will be played");

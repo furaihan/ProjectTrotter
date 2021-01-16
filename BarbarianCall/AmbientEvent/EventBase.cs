@@ -13,10 +13,10 @@ namespace BarbarianCall.AmbientEvent
         public bool EventRunning { get; set; }
         public List<Entity> Entities { get; set; }
         public List<Blip> Blips { get; set; }
-        public SpawnPoint SpawnPoint { get; set; }
+        public Spawnpoint SpawnPoint { get; set; }
         public GameFiber EventProcessFiber { get; set; }
 
-        public EventBase(SpawnPoint spawnPoint)
+        public EventBase(Spawnpoint spawnPoint)
         {
             EventRunning = true;
             SpawnPoint = spawnPoint;

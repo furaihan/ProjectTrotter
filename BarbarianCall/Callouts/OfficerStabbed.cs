@@ -43,20 +43,21 @@ namespace BarbarianCall.Callouts
 
         public override bool OnBeforeCalloutDisplayed()
         {
-            FilePath = @"Plugins/LSPDFR/BarbarianCall/OfficerStabbed/";
+            FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
             PursuitCreated = false;
             CalloutRunning = false;
             CheckOtherPluginRunning();
             
-            DivisiXml.Deserialization.GetDataFromXml(Path.Combine(FilePath,"Locations.xml"), out List<Vector3> locationToSelect, out List<float> headingToSelect);
-            Peralatan.SelectNearbyLocationsWithHeading(locationToSelect, headingToSelect, out SpawnPoint, out SpawnHeading);
+            Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(Path.Combine(FilePath, "TrafficStop.xml")));
+            SpawnPoint = Spawn;
+            SpawnHeading = Spawn;
             if (SpawnPoint == Vector3.Zero || SpawnHeading == 0f)
             {
                 Peralatan.ToLog("Officer Stabbed callout aborted");
                 Peralatan.ToLog("No nearby location found");
                 return false;
             }           
-            ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 20f);
+            ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 40f);
             AddMinimumDistanceCheck(30f, SpawnPoint);
             if (Peralatan.Random.Next() % 10 == 0) susVehModel = CommonVariables.MotorBikesToSelect.GetRandomElement(m => m.IsValid && m.NumberOfSeats == 2, true);
             else susVehModel = CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid, true);
@@ -108,8 +109,8 @@ namespace BarbarianCall.Callouts
             Blip = new Blip(SpawnPoint, 45f);
             Blip.Color = Color.Yellow;
             Blip.EnableRoute(Color.Yellow);
-            SpawnPoint tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
-            if (tempSpawn != Types.SpawnPoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
+            Spawnpoint tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
+            if (tempSpawn != Types.Spawnpoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
             SuspectCar.PrimaryColor = CommonVariables.CommonUnderstandableColor.GetRandomElement();
             SuspectCar.RandomiseLicensePlate();
@@ -680,8 +681,8 @@ namespace BarbarianCall.Callouts
                     GameFiber.WaitUntil(() => !Functions.GetIsAudioEngineBusy(), 5000);
                     if (Suspect.DistanceTo(PlayerPed) > 850f || Suspect.TravelDistanceTo(PlayerPed) > 1250f)
                     {
-                        SpawnPoint closer = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 350, 650);
-                        if (closer == Types.SpawnPoint.Zero) closer = new SpawnPoint(World.GetNextPositionOnStreet(SpawnPoint.Around(350, 650)), 0f);
+                        Spawnpoint closer = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 350, 650);
+                        if (closer == Types.Spawnpoint.Zero) closer = new Spawnpoint(World.GetNextPositionOnStreet(SpawnPoint.Around(350, 650)), 0f);
                         SuspectCar.Position = closer;
                         SuspectCar.Heading = closer;
                     }

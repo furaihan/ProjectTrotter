@@ -22,14 +22,14 @@ namespace BarbarianCall.Callouts
         public ECalloutStates CalloutStates;
         public Ped Suspect;
         public Vehicle SuspectCar;
-        public Types.Manusia Manusia;
+        public Manusia Manusia;
         public Model CarModel;
         public List<Model> GangModels;
         public Blip Blip;
         public bool CalloutRunning = false;
         public Vector3 SpawnPoint = Vector3.Zero;
         public float SpawnHeading = 0f;
-        public SpawnPoint Spawn = Types.SpawnPoint.Zero;
+        public Spawnpoint Spawn = Types.Spawnpoint.Zero;
         public long Timer;
         public DateTime Time;
         public TimeSpan TimeSpan = new TimeSpan(0, 0, 15);
@@ -71,7 +71,7 @@ namespace BarbarianCall.Callouts
 
             });
             CalloutMainFiber?.Abort();
-            Types.Manusia.CurrentManusia = null;
+            Manusia.CurrentManusia = null;
             Functions.PlayScannerAudio("BAR_AI_RESPOND");
             base.OnCalloutNotAccepted();
         }
@@ -83,6 +83,7 @@ namespace BarbarianCall.Callouts
         public override bool OnCalloutAccepted()
         {
             CalloutStates = ECalloutStates.EnRoute;
+            StopWatch = new System.Diagnostics.Stopwatch();
             HandleEnd();
             GameFiber.Sleep(75);
             return base.OnCalloutAccepted();
@@ -95,12 +96,13 @@ namespace BarbarianCall.Callouts
         {
             CalloutRunning = false;
             Peralatan.Speaking = false;
+            //StopWatch = null;
             if (Suspect && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
             if (SuspectCar) SuspectCar.Dismiss();
             if (Blip) Blip.Delete();
             if (GrammarPoliceRunning && Menus.PauseMenu.autoAvailable.Checked) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.Available);
             if (Pursuit != null && Functions.IsPursuitStillRunning(Pursuit)) Functions.ForceEndPursuit(Pursuit);
-            Types.Manusia.CurrentManusia = null;
+            Manusia.CurrentManusia = null;
             CalloutBlips.ForEach(b => { if (b) b.Delete(); });
             CalloutEntities.ForEach(e =>
             {

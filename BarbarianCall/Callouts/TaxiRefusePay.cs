@@ -15,12 +15,11 @@ using BarbarianCall.Extensions;
 namespace BarbarianCall.Callouts
 {
     [CalloutInfo("Taxi Passenger Refuse Pay", CalloutProbability.High)]
-    public class TaxiRefusePay: CalloutBase
+    public class TaxiRefusePay : CalloutBase
     {
         private Ped TaxiDriver;
         private Vehicle Taxi;
         private readonly Model TaxiModel = new Model(0xC703DB5F);
-        private readonly string path = @"Plugins/LSPDFR/BarbarianCall/TaxiRefusePay/";
         private RelationshipGroup TaxiRelation;
         private RelationshipGroup CriminalRelation;
         private ESuspectStates SuspectState;
@@ -36,9 +35,13 @@ namespace BarbarianCall.Callouts
         
         public override bool OnBeforeCalloutDisplayed()
         {
+            FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
+            PursuitCreated = false;
+            CalloutRunning = false;
             CheckOtherPluginRunning();
-            DivisiXml.Deserialization.GetDataFromXml(path + "Locations.xml", out List<Vector3> locationToSelect, out List<float> headingToSelect);
-            Peralatan.SelectNearbyLocationsWithHeading(locationToSelect, headingToSelect, out SpawnPoint, out SpawnHeading);
+            Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "TrafficStop.xml")));
+            SpawnPoint = Spawn;
+            SpawnHeading = Spawn;
             if (SpawnPoint == Vector3.Zero || SpawnHeading == 0f)
             {
                 Peralatan.ToLog("Officer Stabbed callout aborted");
@@ -82,8 +85,8 @@ namespace BarbarianCall.Callouts
             Game.SetRelationshipBetweenRelationshipGroups(TaxiRelation, RelationshipGroup.Cop, Relationship.Respect);
             TaxiRelation.SetRelationshipWith(RelationshipGroup.Player, Relationship.Respect);
             Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, TaxiRelation, Relationship.Hate);
-            Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Cop, Relationship.Hate);
-            Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Player, Relationship.Hate);
+           //Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Cop, Relationship.Hate);
+           //Game.SetRelationshipBetweenRelationshipGroups(CriminalRelation, RelationshipGroup.Player, Relationship.Hate);
             Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, TaxiRelation, Relationship.Neutral);
             Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, CriminalRelation, Relationship.Neutral);
             suspectManWoman = Suspect.IsMale ? "Man" : "Woman";
@@ -445,7 +448,7 @@ namespace BarbarianCall.Callouts
         }
         private void SituationDead()
         {
-            CalloutMainFiber = GameFiber.StartNew((System.Threading.ThreadStart)(() =>
+            CalloutMainFiber = GameFiber.StartNew(() =>
             {
                 try
                 {
@@ -459,7 +462,7 @@ namespace BarbarianCall.Callouts
                     if (StopThePedRunning) API.StopThePedFunc.InjectPedItem(Suspect, "~r~Pistol");
                     Witness = new Ped(SpawnPoint, SpawnHeading);
                     Witness.MakeMissionPed();
-                    WitnessCar = new Vehicle(CommonVariables.CarsToSelect.GetRandomElement(m=> m.IsValid, true),
+                    WitnessCar = new Vehicle(CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid, true),
                         Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
                     Witness.WarpIntoVehicle(WitnessCar, -1);
                     if (Peralatan.Random.Next() % 5 == 0)
@@ -498,7 +501,7 @@ namespace BarbarianCall.Callouts
                         }
                     }
                     if (!CalloutRunning) return;
-                    SpawnPoint spawnPoint = SpawnManager.GetPedSpawnPoint(SpawnPoint, 250, 350);
+                    Spawnpoint spawnPoint = SpawnManager.GetPedSpawnPoint(SpawnPoint, 250, 350);
                     if (spawnPoint.Position == Vector3.Zero) spawnPoint.Position = World.GetNextPositionOnStreet(SpawnPoint.Around(250, 650f));
                     Suspect.Position = spawnPoint;
                     Suspect.IsVisible = true;
@@ -519,6 +522,12 @@ namespace BarbarianCall.Callouts
                     Witness.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
                     Time = DateTime.UtcNow;
                     Peralatan.HandleSpeech(witnessFlow, Witness);
+                    GameFiber.StartNew(() =>
+                    {
+                        GameFiber.Wait(8000);
+                        Witness.Tasks.EnterVehicle(WitnessCar, -1).WaitForCompletion();
+                        Witness.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
+                    });
                     Game.DisplayHelp("~y~Dispatch is trying to find ~o~suspect~y~ information, please wait...", 10000);
                     $"Conversation is took {(DateTime.UtcNow - Time).TotalSeconds} seconds".ToLog();
                     GameFiber.Wait(Peralatan.Random.Next(7500, 10000));
@@ -532,7 +541,8 @@ namespace BarbarianCall.Callouts
                     Blip = new Blip(Suspect.Position.Around(10f), 70f);
                     Blip.Color = Color.Yellow;
                     Blip.EnableRoute(Color.Yellow);
-                    Time = DateTime.UtcNow + new TimeSpan(0, 0, 20);
+                    TimeSpan timeSpan = new TimeSpan(0, 0, 20);
+                    StopWatch.Restart();
                     Vector3 curPos = Suspect.Position;
                     GameFiber.StartNew(() =>
                     {
@@ -603,7 +613,7 @@ namespace BarbarianCall.Callouts
                     NetExtension.SendError(e);
                     End();
                 }
-            }));
+            });
         }
         private void SituationCommon()
         {
