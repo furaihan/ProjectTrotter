@@ -53,8 +53,8 @@ namespace BarbarianCall.AmbientEvent
                         randomCallsign = Peralatan.Random.Next() % 4 == 0 ?
                             $"BAR_{alphabet.GetRandomElement(true)} BAR_{Peralatan.Random.Next(1, 28)}" :
                             $"BAR_{Peralatan.Random.Next(1, 10)} BAR_{alphabet.GetRandomElement(true)} BAR_{Peralatan.Random.Next(1, 28)}";
-                        Vector3 randomLocation = SpawnManager.GetVehicleSpawnPoint(PlayerPos.Around(500, 650), Peralatan.Random.Next(1000, 2000), Peralatan.Random.Next(3000, 5000));
-                        if (randomLocation == Spawnpoint.Zero) randomLocation = World.GetNextPositionOnStreet(PlayerPos.Around(Peralatan.Random.Next(1000, 2000), Peralatan.Random.Next(3000, 5000)));
+                        Spawnpoint randomLocation = SpawnManager.GetVehicleSpawnPoint(PlayerPos.Around(500, 650), Peralatan.Random.Next(1000, 2000), Peralatan.Random.Next(3000, 5000));
+                        if (randomLocation == Spawnpoint.Zero) randomLocation.Position = World.GetNextPositionOnStreet(PlayerPos.Around(Peralatan.Random.Next(1000, 2000), Peralatan.Random.Next(3000, 5000)));
                         string reporter = Peralatan.Random.Next() % 2 == 0 ? "WE_HAVE" : Peralatan.Random.Next() % 2 == 0 ? "CITIZENS_REPORT" : "OFFICERS_REPORT";
                         IDictionary<string, EBackupResponseType> ambientCrimes = new Dictionary<string, EBackupResponseType>()
                         {

@@ -50,7 +50,7 @@ namespace BarbarianCall.Types
         }
         public void DisplayNotif()
         {
-            if (CurrentManusia == null) return;
+            if (CurrentManusia == null || this == null) return;
             Pedestrian.DisplayNotificationsWithPedHeadshot("Ped Database", $"~y~Name~s~: {Fullname}~n~~y~DOB~s~: {BirthDay.ToShortDateString()} ({GetAge()} Y.O)~n~~y~Last Seen~s~: {Pedestrian.GetZoneName()}, " +
                 $"{World.GetStreetName(Pedestrian.Position)}");
             if (Car && WithVehicle)

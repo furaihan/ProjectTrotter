@@ -54,14 +54,6 @@ namespace BarbarianCall.Menus
             
             autoAvailable = new UIMenuCheckboxItem("Set Player Available After Finishing A Callout", true, "If you have GrammarPolice installed, enable this setting will set you " +
                 "available for calls after you have finished your callout");
-            autoAvailable.Activated += (m, s) => 
-            { 
-                pauseMenu.Visible = false;
-                GameFiber.StartNew(() =>
-                {
-                    SpawnManager.GetNthClosestVehicleNodeIdWithHeading(Game.LocalPlayer.Character.Position).ToString().ToLog();
-                });                
-            };
             otherUnitAudio = new UIMenuCheckboxItem("Play Other Unit Respond Audio", true, "If you did not accept a callout from this plugin, a sound from other unit taking a callout will be played");
             onSceneAudio = new UIMenuCheckboxItem("Play Officer On Scene Audio", true, "Play scanner audio when you arrived on scene");
             offStabCB = new UIMenuCheckboxItem("Officer Stabbed", true, "Enable or disable \"Officer Stabbed\" callout");

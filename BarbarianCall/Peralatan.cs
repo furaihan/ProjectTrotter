@@ -18,7 +18,7 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new Random(unchecked(DateTime.UtcNow.Ticks.GetHashCode() + 1453));
+        public static Random Random = new Random();
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
@@ -35,28 +35,29 @@ namespace BarbarianCall
                 return selected;
             }
             return Spawnpoint.Zero;
-        }       
+        }
         internal static void Print(this string msg) => Game.Console.Print(msg);
         internal static void ToLog(this string micin) => ToLog(micin, false);
         internal static void ToLog(this string micin, bool makeUppercase)
         {
             string text = makeUppercase ? micin.ToUpper() : micin;
-            Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " + text: "[BarbarianCall]: " + text);
+            Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " + text : "[BarbarianCall]: " + text);
         }
         internal static string GetLicensePlateAudio(Vehicle veh) => GetLicensePlateAudio(veh.LicensePlate);
         internal static string GetLicensePlateAudio(string licensePlate)
         {
             int count = 0;
-            string audio = string.Empty;
+
+            StringBuilder lpAudio = new StringBuilder(56, 100);
             foreach (char c in licensePlate)
             {
                 count++;
-                if (count == 1) audio = audio + "BAR_" + c.ToString().ToUpper() + "_HIGH ";
-                else if (count == licensePlate.Length) audio = audio + "BAR_" + c.ToString().ToUpper() + "_LOW";
-                else audio = audio + "BAR_" + c.ToString().ToUpper() + " ";
+                if (count == 1) lpAudio.Append("BAR_" + c.ToString().ToUpper() + "_HIGH ");
+                else if (count == licensePlate.Length) lpAudio.Append("BAR_" + c.ToString().ToUpper() + "_LOW");
+                else lpAudio.Append("BAR_" + c.ToString().ToUpper() + " ");
             }
-            Game.Console.Print(audio);
-            return audio;
+            //Game.Console.Print(audio);
+            return lpAudio.ToString();
         }
         internal static string GetColorAudio(this Vehicle vehicle) => GetColorAudio(vehicle.PrimaryColor);
         internal static string GetColorAudio(Color color)
@@ -79,19 +80,18 @@ namespace BarbarianCall
         }
         internal static void RandomiseLicensePlate(this Vehicle vehicle)
         {
-            if (vehicle.Exists())
+            if (vehicle)
             {
-                vehicle.LicensePlate = 
-                                    Random.Next(9).ToString() +
-                                    Random.Next(9).ToString() +
-                                    Convert.ToChar(Random.Next(0, 25) + 65) +
-                                    Convert.ToChar(Random.Next(0, 25) + 65) +
-                                    Convert.ToChar(Random.Next(0, 25) + 65) +
-                                    Random.Next(9).ToString() +
-                                    Random.Next(9).ToString() +
-                                    Random.Next(9).ToString();
-                ToLog($"{vehicle.GetVehicleDisplayName()} license plate changed to {vehicle.LicensePlate}");
-            }
+                string plate =  Random.Next(10).ToString() +
+                                Random.Next(10).ToString() +
+                                (char)Random.Next(65, 91)  +
+                                (char)Random.Next(65, 91)  +
+                                (char)Random.Next(65, 91)  +
+                                Random.Next(10).ToString() +
+                                Random.Next(10).ToString() +
+                                Random.Next(10).ToString();
+                vehicle.LicensePlate = plate;
+            }           
         }
         internal static string GetVehicleDisplayName(this Vehicle vehicle)
         {
@@ -107,15 +107,27 @@ namespace BarbarianCall
         }
         internal static String GetVehicleDisplayAudio(Vehicle vehicle)
         {
-            unsafe
+            try
             {
-                CVehicle* vehPtr = (CVehicle*)vehicle.MemoryAddress;
-                IntPtr makeNamePtr = vehPtr->GetMakeName();
-                IntPtr gameNamePtr = vehPtr->GetGameName();
-                string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
-                string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
-                return makeName == null ? vehicle.Model.Name.ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {vehicle.Model.Name.ToUpper()}";
+                unsafe
+                {
+                    CVehicle* vehPtr = (CVehicle*)vehicle.MemoryAddress;
+                    IntPtr makeNamePtr = vehPtr->GetMakeName();
+                    IntPtr gameNamePtr = vehPtr->GetGameName();
+                    string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
+                    string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
+                    string modelName = vehicle.Model.Name;
+                    var audibles = CommonVariables.AudibleCarModel.Select(m => m.Name);
+                    if (!audibles.Any(st => st.Equals(modelName, StringComparison.OrdinalIgnoreCase)) && char.IsDigit(modelName.Last()) && !modelName.StartsWith("0X", StringComparison.OrdinalIgnoreCase))
+                        modelName = modelName.Remove(modelName.Length - 1);
+                    return makeName == null ? vehicle.Model.Name.ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {modelName.ToUpper()}";
+                }
             }
+            catch (Exception e)
+            {
+                string.Format("Get vehicle display audio error: {0}", e.Message).ToLog();
+            }
+            return string.Empty;
         }
         internal static string GetZoneName(this ISpatial spatial) => GetZoneName(spatial.Position);
         internal static string GetZoneName(this Vector3 pos)
@@ -152,10 +164,10 @@ namespace BarbarianCall
                 {"Citizen:", "~o~Citizen~s~:" },
             };
             List<string> modifiedDialogue = new List<string>();
-            Dialogue.ForEach(cakap=>
+            Dialogue.ForEach(cakap =>
             {
                 string modified = cakap;
-                if (valuePairs.Any(st=> modified.StartsWith(st.Key)))
+                if (valuePairs.Any(st => modified.StartsWith(st.Key)))
                 {
                     string key = valuePairs.Keys.Where(s => modified.StartsWith(s)).FirstOrDefault();
                     if (valuePairs.TryGetValue(key, out string val)) modified = modified.Replace(key, val);
@@ -183,9 +195,9 @@ namespace BarbarianCall
                     }
                 }
             }, "[BarbarianCall] Player Position Handler Fiber");
-            if (talkers.All(p=> p && p.IsInAnyVehicle(false)))
+            if (talkers.All(p => p && p.IsInAnyVehicle(false)))
             {
-                talkers.ToList().ForEach(p=> p.Tasks.AchieveHeading(p.GetHeadingTowards(playerPed)));
+                talkers.ToList().ForEach(p => p.Tasks.AchieveHeading(p.GetHeadingTowards(playerPed)));
                 GameFiber.Wait(75);
                 talkers.ToList().ForEach(p => p.Tasks.PlayAnimation("special_ped@jessie@monologue_1@monologue_1f", "jessie_ig_1_p1_heydudes555_773", 4f, AnimationFlags.Loop | AnimationFlags.SecondaryTask));
             }
@@ -208,19 +220,21 @@ namespace BarbarianCall
         private static Rage.Object MobilePhone;
         internal static void ToggleMobilePhone(this Ped ped)
         {
-            if (MobilePhone.Exists()) { MobilePhone.Delete(); }
+            if (MobilePhone) MobilePhone.Delete();
+            var currentWeapon = ped.Inventory.EquippedWeapon;
             NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, false);
             ped.Inventory.GiveNewWeapon(new WeaponAsset("WEAPON_UNARMED"), -1, true);
             MobilePhone = new Rage.Object(new Model("prop_police_phone"), new Vector3(0, 0, 0));
             int boneIndex = ped.GetBoneIndex(PedBoneId.RightPhHand);
-            MobilePhone.AttachTo(ped, boneIndex, new Vector3(0f, 0f, 0f), new Rotator(0f, 0f, 0f));
+            if (MobilePhone) MobilePhone.AttachTo(ped, boneIndex, new Vector3(0f, 0f, 0f), new Rotator(0f, 0f, 0f));
             ped.Tasks.PlayAnimation(new AnimationDictionary("cellphone@"), "cellphone_call_listen_base", 1.45f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.StayInEndFrame);
             GameFiber.Sleep(3000);
             ped.Tasks.PlayAnimation(new AnimationDictionary("cellphone@"), "cellphone_call_out", 1f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask);
             GameFiber.Sleep(200);
             NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, true);
-            MobilePhone.Detach();
-            MobilePhone.Delete();
+            if (currentWeapon != null) ped.Inventory.EquippedWeapon = currentWeapon;
+            if (MobilePhone) MobilePhone.Detach();
+            if (MobilePhone) MobilePhone.Delete();
         }
         internal static void MakeMissionPed(this Ped ped, bool invincible = false)
         {
@@ -235,7 +249,7 @@ namespace BarbarianCall
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
-        internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT") => 
+        internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT") =>
             Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static void DisplayNotifWithLogo(this string msg, out uint notifId, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") =>
             notifId = Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
@@ -444,7 +458,7 @@ namespace BarbarianCall
             $"Setting ped {ped.Model.Name} {newWantedPersona.FullName} as wanted".ToLog();
             return;
         }
-        internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);  
+        internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);
         internal static string GetCarColor(this Vehicle vehicle)
         {
             try

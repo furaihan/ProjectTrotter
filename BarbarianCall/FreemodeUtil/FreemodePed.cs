@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using System.Drawing;
     using Rage;
     using LSPD_First_Response;
     public class FreemodePed : Ped
@@ -17,7 +18,12 @@
                 HeadBlend.SetPedHeadBlendData(this, value);
             }
         }
-        public Gender Gender { get; }
+        public Gender Gender { 
+            get 
+            {
+                return Model.Hash == 0x705E61F2 ? Gender.Male : Gender.Female;
+            } 
+        }
         #region COMPONENT
         public PedComponent Torso
         {
@@ -202,14 +208,13 @@
         #endregion
         public FreemodePed(Vector3 position, float heading, Gender gender) : base(gender == Gender.Male ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, heading)
         {
-            Gender = gender;
-            this.MakeMissionPed();
+            MakePersistent();
             GameFiber.Wait(75);
             RandomizeFaceShape();
         }
         public void RandomizeFaceShape()
         {
-            Random random = new Random(Guid.NewGuid().GetHashCode());
+            Random random = new Random(Math.Abs(Guid.NewGuid().GetHashCode()));
             int[] maleSkinSecondID = { 0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 20, 3, 4, 42, 43, 44, 5, 6, 7, 8, 9 };
             int[] femaleSecondID = { 0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 3, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 4, 40, 41, 45, 5, 6, 7, 8, 9 };
             int[] maleHairModel = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 30, 31, 35,
@@ -232,21 +237,22 @@
                 {
                     int index = olay switch
                     {
-                        OverlayId.Blemishes => random.Next(23),
-                        OverlayId.FacialHair => random.Next(28),
-                        OverlayId.Eyebrows => random.Next(33),
-                        OverlayId.Ageing => random.Next(14),
+                        OverlayId.Blemishes => random.Next(24),
+                        OverlayId.FacialHair => random.Next(29),
+                        OverlayId.Eyebrows => random.Next(34),
+                        OverlayId.Ageing => random.Next(15),
                         //OverlayId.Makeup => 255,
                         //OverlayId.Blush => 255,
-                        OverlayId.Complexion => random.Next(11),
-                        OverlayId.SunDamage => random.Next(10),
+                        OverlayId.Complexion => random.Next(12),
+                        OverlayId.SunDamage => random.Next(11),
                         //OverlayId.Lipstick => 255,
-                        OverlayId.Freckles => random.Next(17),
-                        OverlayId.ChestHair => random.Next(16),
-                        OverlayId.BodyBlemishes => random.Next(11),
-                        OverlayId.AddBodyBlemishes => random.Next(1),
+                        OverlayId.Freckles => random.Next(18),
+                        OverlayId.ChestHair => random.Next(17),
+                        OverlayId.BodyBlemishes => random.Next(12),
+                        OverlayId.AddBodyBlemishes => random.Next(2),
                         _ => 255
                     };
+                    index = random.NextDouble() > 0.958475 ? 255 : index;
                     HeadBlend.SetPedHeadOverlay(this, olay, index, (float)Math.Round(random.NextDouble(), 1));
                     switch (olay)
                     {
@@ -269,19 +275,19 @@
                 {
                     int index = olay switch
                     {
-                        OverlayId.Blemishes => random.Next(23),
+                        OverlayId.Blemishes => random.Next(24),
                         //OverlayId.FacialHair => random.Next(28),
-                        OverlayId.Eyebrows => random.Next(33),
-                        OverlayId.Ageing => random.Next(14),
+                        OverlayId.Eyebrows => random.Next(34),
+                        OverlayId.Ageing => random.Next(15),
                         //OverlayId.Makeup => random.Next(74),
-                        OverlayId.Blush => random.Next(6),
-                        OverlayId.Complexion => random.Next(11),
-                        OverlayId.SunDamage => random.Next() % 2 == 0 ? 255 : random.Next(10),
-                        OverlayId.Lipstick => random.Next(9),
-                        OverlayId.Freckles => random.Next(17),
+                        OverlayId.Blush => random.Next(7),
+                        OverlayId.Complexion => random.Next(12),
+                        OverlayId.SunDamage => random.Next() % 2 == 0 ? 255 : random.Next(11),
+                        OverlayId.Lipstick => random.Next(10),
+                        OverlayId.Freckles => random.Next(18),
                         //OverlayId.ChestHair => 255,
-                        OverlayId.BodyBlemishes => random.Next(11),
-                        OverlayId.AddBodyBlemishes => random.Next(1),
+                        OverlayId.BodyBlemishes => random.Next(12),
+                        OverlayId.AddBodyBlemishes => random.Next(2),
                         _ => 255
                     };
                     HeadBlend.SetPedHeadOverlay(this, olay, index, (float)Math.Round(random.NextDouble(), 1));

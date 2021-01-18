@@ -208,8 +208,9 @@ namespace BarbarianCall.SupportUnit
                             if (MechanicVehicle && VehicleToFix && MechanicVehicle.DistanceTo(VehicleToFix) < 40f && !MechanicVehicle.IsStoppedAtTrafficLights && !findRoadSide)
                             {
                                 findRoadSide = true;
-                                Vector3 front = MechanicVehicle.FrontPosition + MechanicVehicle.ForwardVector * 35f;
+                                Vector3 front = MechanicVehicle.GetOffsetPositionFront(35f);
                                 Spawnpoint roadSide = SpawnManager.GetRoadSideSpawnPoint(front, MechanicVehicle.Heading);
+                                if (roadSide == Spawnpoint.Zero) roadSide = SpawnManager.GetRoadSideSpawnPointFavored(MechanicVehicle, 35);
                                 if (roadSide != Spawnpoint.Zero)
                                 {
                                     if (MechanicPed) MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(800);
