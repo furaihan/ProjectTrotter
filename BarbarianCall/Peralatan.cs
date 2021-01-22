@@ -23,17 +23,26 @@ namespace BarbarianCall
 
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
         {
-            ToLog(string.Format("Found {0} total locations", spawnPoints.Count));
-            ToLog("Calculating the best location for callout");
-            List<Spawnpoint> suitable = spawnPoints.Where(sp => sp.DistanceTo(Game.LocalPlayer.Character) < maxDistance && sp.DistanceTo(Game.LocalPlayer.Character) > minDistance
-            && sp.TravelDistanceTo(Game.LocalPlayer.Character) < maxDistance * 2 && sp.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
-            if (suitable.Count > 0)
+            try
             {
-                ToLog($"Found {suitable.Count} suitable location, choosing a random location from that list");
-                Spawnpoint selected = suitable.GetRandomElement(true);
-                ToLog(string.Format("Location selected is {0} in {1}", selected, GetZoneName(selected.Position)));
-                return selected;
+                ToLog(string.Format("Found {0} total locations", spawnPoints.Count));
+                ToLog("Calculating the best location for callout");
+                List<Spawnpoint> suitable = spawnPoints.Where(sp => sp.DistanceTo(Game.LocalPlayer.Character) < maxDistance && sp.DistanceTo(Game.LocalPlayer.Character) > minDistance
+                && sp.TravelDistanceTo(Game.LocalPlayer.Character) < maxDistance * 2 && sp.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
+                if (suitable.Count > 0)
+                {
+                    ToLog($"Found {suitable.Count} suitable location, choosing a random location from that list");
+                    Spawnpoint selected = suitable.GetRandomElement(true);
+                    ToLog(string.Format("Location selected is {0} in {1}", selected, GetZoneName(selected.Position)));
+                    return selected;
+                }
             }
+            catch (Exception e)
+            {
+                ToLog(string.Format("We have problem when selecting a spawnpoint | {0}", e.Message));
+                ToLog(e.ToString());
+                NetExtension.SendError(e);
+            }         
             return Spawnpoint.Zero;
         }
         internal static void Print(this string msg) => Game.Console.Print(msg);

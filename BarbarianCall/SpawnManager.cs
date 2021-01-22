@@ -31,9 +31,16 @@ namespace BarbarianCall
                 e.ToString().ToLog();
             }
             return false;
+        } 
+        internal static float GetRoadHeading(Vector3 pos)
+        {
+            NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 _, out float heading, 12, 0x40400000, 0);
+            return heading;
+
         }
-        internal static Spawnpoint GetVehicleSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance) => GetVehicleSpawnPoint(spatial.Position, minimalDistance, maximumDistance);
-        internal static Spawnpoint GetVehicleSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
+        internal static Spawnpoint GetVehicleSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance, bool considerDirection = false) => 
+            GetVehicleSpawnPoint(spatial.Position, minimalDistance, maximumDistance, considerDirection);
+        internal static Spawnpoint GetVehicleSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
         {
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 1; i < 900; i++)
@@ -45,14 +52,37 @@ namespace BarbarianCall
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance + 5f) continue;
                     if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP))
                     {
+                        if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
+                        {
+                            Spawnpoint ret = new Spawnpoint(nodeP, nodeH);
+                            $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
+                            $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                            return ret;
+                        }                        
+                    }
+                }
+            }
+            "Vehicle spawn point is not found".ToLog();
+            return Spawnpoint.Zero;
+        }
+        internal static Spawnpoint GetVehicleSpawnPoint2(Vector3 pos, float minimalDistance, float maximumDistance)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            for (int i = 1; i < 600; i++)
+            {
+                if (i % 40 == 0) GameFiber.Yield();
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)Math.Abs(minimalDistance), (int)Math.Abs(maximumDistance)));
+                if (NativeFunction.Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, i % 5 + 1, out Vector3 nodeP, out float nodeH, out dynamic unk1, 1, 0x40400000, 0))
+                {
+                    if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP))
+                    {
                         Spawnpoint ret = new Spawnpoint(nodeP, nodeH);
-                        $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
+                        $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}. {unk1}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                         return ret;
                     }
                 }
             }
-            "Vehicle spawn point is not found".ToLog();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetPedSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance) => GetPedSpawnPoint(spatial.Position, minimalDistance, maximumDistance);
@@ -101,13 +131,13 @@ namespace BarbarianCall
             Vector3 fav = entity.GetOffsetPositionFront(favoredDistance - 5);
             for (int i = 1; i < 600; i++)
             {
-                Vector3 pos = entity.GetOffsetPositionFront(Peralatan.Random.Next(1, 6));
+                Vector3 pos = entity.GetOffsetPositionFront(Peralatan.Random.Next(1, 6)+ favoredDistance - 10);
                 if (NativeFunction.Natives.x45905BE8654AE067<bool>(pos.X, pos.Y, pos.Z, fav.X, fav.Y, fav.Z, i % 2 + 1, out Vector3 nodeP, out float nodeH, 0, 0x40400000, 0))
                 //GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION
                 {
                     if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodeP.X, nodeP.Y, nodeP.Z, nodeH, out Vector3 roadSide))
                     {
-                        if (roadSide.DistanceTo(entity) < 25 + favoredDistance && !roadSide.IsOccupied())
+                        if (roadSide.DistanceTo(entity) < 35 + favoredDistance && !roadSide.IsOccupied())
                         {
                             Spawnpoint ret = new Spawnpoint(roadSide, nodeH);
                             string.Format("Favored RoadSide Spawnpoint found {0}", ret).ToLog();
@@ -118,6 +148,7 @@ namespace BarbarianCall
                 }
                 if (i % 30 == 0) GameFiber.Yield();
             }
+            string.Format("RoadSide favored Spawnpoint is not found after 600 process").ToLog();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetRoadSideSpawnPoint(Entity entity) => GetRoadSideSpawnPoint(entity.Position, entity.Heading);

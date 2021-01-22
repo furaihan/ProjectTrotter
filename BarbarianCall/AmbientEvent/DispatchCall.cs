@@ -23,7 +23,6 @@ namespace BarbarianCall.AmbientEvent
                 alphabet = string.Concat("ABCDEFGHIJKLMNOPQRSTUVWXYZ".Where(c => c != userCS));
             }
             else alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            //Consider using stopwatch instead
             Stopwatch sw = new Stopwatch();
             TimeSpan timer = new TimeSpan(0, 0, 0, Peralatan.Random.Next(250, 850), Peralatan.Random.Next(100, 985));
             "Starting ambient dispatch call Loop".ToLog();
@@ -32,7 +31,7 @@ namespace BarbarianCall.AmbientEvent
             while (true)
             {
                 GameFiber.Yield();
-                if (sw.Elapsed.TotalMilliseconds > timer.TotalMilliseconds)
+                if (sw.Elapsed.Milliseconds > timer.TotalMilliseconds)
                 {
                     try
                     {

@@ -45,7 +45,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\GrammarPolice.dll</HintPath>
     </Reference>
-    <Reference Include="LSPD First Response">
+    <Reference Include="LSPD First Response, Version=0.4.7575.29892, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\LSPD First Response.dll</HintPath>
     </Reference>
     <Reference Include="RAGENativeUI">
@@ -109,6 +110,7 @@
     <Compile Include="Types\CVehicle.cs" />
     <Compile Include="FreemodeUtil\HeadBlend.cs" />
     <Compile Include="Types\Manusia.cs" />
+    <Compile Include="Types\PedGroup.cs" />
     <Compile Include="Types\Spawnpoint.cs" />
     <Compile Include="Types\Speech.cs" />
   </ItemGroup>

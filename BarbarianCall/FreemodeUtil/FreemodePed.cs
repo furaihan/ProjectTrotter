@@ -209,8 +209,16 @@
         public FreemodePed(Vector3 position, float heading, Gender gender) : base(gender == Gender.Male ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, heading)
         {
             MakePersistent();
-            GameFiber.Wait(75);
+            GameFiber.Wait(25);
             RandomizeFaceShape();
+            Metadata.BAR_FreemodePed = true;
+        }
+        public FreemodePed(Vector3 position, Gender gender) : base(gender == Gender.Male ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, 0f)
+        {
+            MakePersistent();
+            GameFiber.Wait(25);
+            RandomizeFaceShape();
+            Metadata.BAR_FreemodePed = true;
         }
         public void RandomizeFaceShape()
         {

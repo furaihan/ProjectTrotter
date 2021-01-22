@@ -122,6 +122,7 @@ namespace BarbarianCall.SupportUnit
                         };
                         MechanicPed.MakeMissionPed(true);
                         MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
+                        LSPD_First_Response.Mod.API.Functions.SetPedCantBeArrestedByPlayer(MechanicPed, true);
 
                         Blip = MechanicPed.AttachBlip();
                         Blip.SetBlipSprite(446);

@@ -37,7 +37,7 @@ namespace BarbarianCall.Callouts
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;
-        public bool GrammarPoliceRunning  = false;
+        public bool GrammarPoliceRunning = false;
         public bool StopThePedRunning = false;
         public bool UltimateBackupRunning = false;
         public Persona SuspectPersona;
@@ -47,6 +47,7 @@ namespace BarbarianCall.Callouts
         public string FilePath;
         public static readonly uint[] WeaponHashes = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A, 0xBD248B55, 0x13532244, 0x624FE830 };
         #endregion
+        private GameFiber EndHandlerFiber;
 
         public override void OnCalloutNotAccepted()
         {
@@ -70,7 +71,7 @@ namespace BarbarianCall.Callouts
 
 
             });
-            CalloutMainFiber?.Abort();
+            //CalloutMainFiber?.Abort();
             Manusia.CurrentManusia = null;
             Functions.PlayScannerAudio("BAR_AI_RESPOND");
             base.OnCalloutNotAccepted();
@@ -83,8 +84,14 @@ namespace BarbarianCall.Callouts
         public override bool OnCalloutAccepted()
         {
             CalloutStates = ECalloutStates.EnRoute;
+            CalloutRunning = true;
+            if (EndHandlerFiber == null)
+            {
+                HandleEnd();
+                EndHandlerFiber.Start();
+            }
+            else if (EndHandlerFiber.IsHibernating) EndHandlerFiber.Wake();
             StopWatch = new System.Diagnostics.Stopwatch();
-            HandleEnd();
             GameFiber.Sleep(75);
             return base.OnCalloutAccepted();
         }
@@ -96,6 +103,7 @@ namespace BarbarianCall.Callouts
         {
             CalloutRunning = false;
             Peralatan.Speaking = false;
+            "~g~We Are CODE 4".DisplayNotifWithLogo(CalloutMessage);
             //StopWatch = null;
             if (Suspect && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
             if (SuspectCar) SuspectCar.Dismiss();
@@ -115,14 +123,15 @@ namespace BarbarianCall.Callouts
                     else e.Dismiss();
                 }
             });
+            if (CarModel.IsLoaded) CarModel.Dismiss();
             //CalloutMainFiber?.Abort();
-            base.End();              
+            base.End();
         }
         protected void HandleEnd()
         {
-            "Starting EndHandler loop".ToLog();
-            GameFiber.StartNew(() =>
+            EndHandlerFiber = new GameFiber(() =>
             {
+                "Starting EndHandler Loop".ToLog();
                 DateTime dateTime = DateTime.UtcNow;
                 while (CalloutRunning)
                 {
@@ -139,7 +148,8 @@ namespace BarbarianCall.Callouts
                     }
                 }
                 $"Callout ended successfully, that callout took {(DateTime.UtcNow - dateTime).TotalSeconds:0.00} seconds".ToLog();
-            }, "[BarbarianCall] Callout End Handler Fiber");
+                GameFiber.Hibernate();
+            }, "[BarbarianCall] Callout End Listener");
         }
         protected void DisplayGPNotif()
         {
@@ -157,7 +167,7 @@ namespace BarbarianCall.Callouts
         }
         protected void PlayScannerWithCallsign(string audio, Vector3 position)
         {
-            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2))) 
+            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2)))
                 Functions.PlayScannerAudioUsingPosition("DISPATCH_TO " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio, position);
             else Functions.PlayScannerAudioUsingPosition($"ATTENTION_ALL_UNITS {audio}", position);
         }

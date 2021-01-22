@@ -20,6 +20,7 @@ namespace BarbarianCall.Extensions
                 {
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     if (!IsInternetConnected()) return;
+                    System.Text.StringBuilder @string = new System.Text.StringBuilder();
                     StackTrace st = new StackTrace(e, true);
                     string toSend = "";
                     foreach (StackFrame frame in st.GetFrames())
@@ -29,8 +30,9 @@ namespace BarbarianCall.Extensions
                         string fileName = filePath == null ? "NULL" : filePath.Substring(filePath.LastIndexOf('\\') + 1);
                         int lNumber = frame.GetFileLineNumber();
                         if (filePath == null && lNumber == 0) continue;
-                        toSend += $"[{frame.GetMethod().Name}] " + fileName + " line: " + lNumber.ToString() + " ==> ";
+                        @string.Append($"[{frame.GetMethod().Name}] " + fileName + " line: " + lNumber.ToString() + " ==> ");
                     }
+                    toSend = @string.ToString();
                     Uri ifttt = new Uri("https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF");
                     Thread SendException = new Thread(() =>
                     {
@@ -122,6 +124,7 @@ namespace BarbarianCall.Extensions
                         {
                             CurrentVersion = version;
                         }
+                        Client.Dispose();
                     });
                     FetchUpdate.Start();
                     GameFiber.SleepUntil(() => FetchUpdate.ThreadState == System.Threading.ThreadState.Stopped, 12000);
