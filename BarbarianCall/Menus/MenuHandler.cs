@@ -44,6 +44,7 @@ namespace BarbarianCall.Menus
                         {
                             Mechanic mechanic = new Mechanic(Game.LocalPlayer.Character.LastVehicle);
                             mechanic.DismissFixedVehicle = false;
+                            mechanic.SuccessProbability = 1f;
                             mechanic.RespondToLocation();
                         }
                         else "Your last vehicle is not found, please make sure you has been in any vehicle before".DisplayNotifWithLogo("~y~Mechanic Service");

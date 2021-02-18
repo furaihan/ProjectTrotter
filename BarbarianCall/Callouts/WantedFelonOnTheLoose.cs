@@ -71,10 +71,10 @@ namespace BarbarianCall.Callouts
             Passenger2 = new FreemodePed(SpawnPoint, SpawnHeading, LSPD_First_Response.Gender.Male);
             Passenger3 = new FreemodePed(SpawnPoint, SpawnHeading, LSPD_First_Response.Gender.Male);
             GameFiber.SleepUntil(() => Driver && Passenger1 && Passenger2 && Passenger3, 3000);
-            Driver.MakeMissionPed();
-            Passenger1.MakeMissionPed();
-            Passenger2.MakeMissionPed();
-            Passenger3.MakeMissionPed();
+            Driver.MakePersistent();
+            Passenger1.MakePersistent();
+            Passenger2.MakePersistent();
+            Passenger3.MakePersistent();
             Driver.SetRobberComponent();
             Passenger1.SetRobberComponent();
             Passenger2.SetRobberComponent();
@@ -93,7 +93,19 @@ namespace BarbarianCall.Callouts
             Passenger3State = ESuspectStates.InAction;
             Driver.Tasks.CruiseWithVehicle(30f, VehicleDrivingFlags.Normal);
             SuspectCar.TopSpeed = 35f;
-            SituationTrafficStopWar();
+            int num = Peralatan.Random.Next(3);
+            switch (num)
+            {
+                case 0:
+                    SituationGetOutAndRun();
+                    break;
+                case 1:
+                    SituationWar();
+                    break;
+                default:
+                    SituationTrafficStopWar();
+                    break;
+            }
             CalloutMainFiber.Start();
             return base.OnCalloutAccepted();
         }
@@ -452,6 +464,7 @@ namespace BarbarianCall.Callouts
                                 {
                                     Peralatan.ToLog("Player has leave his vehicle, breaking the loop");
                                     LSPDFR.ForceEndCurrentPullover();
+                                    Suspects.ForEach(s => s.MakeMissionPed());
                                     break;
                                 }
                             }
@@ -505,13 +518,86 @@ namespace BarbarianCall.Callouts
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (!PursuitCreated && Suspects.Any(s => s && s.Tasks.CurrentTaskStatus == TaskStatus.Interrupted && s.IsAlive)) Suspects.ForEach(s => s.Tasks.FightAgainst(PlayerPed));
                         if (CanEnd) break;
                         if (PursuitCreated && StopWatch.ElapsedMilliseconds > waitTime)
                         {
                             LSPDFRFunc.RequestAirUnit(SuspectCar.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                             StopWatch.Reset();
                         }
+                    }
+                    DisplayCodeFourMessage();
+                }
+                catch (Exception e)
+                {
+                    $"{GetType().Name} callout crashes".ToLog();
+                    e.ToString().ToLog();
+                    NetExtension.SendError(e);
+                    $"{GetType().Name} callout crashed, please send your log".DisplayNotifWithLogo("Officer Stabbed");
+                    End();
+                }
+            });
+        }
+        private void SituationPursuit()
+        {
+            CalloutMainFiber = new GameFiber(() =>
+            {
+                try
+                {
+                    List<FreemodePed> Suspects = new List<FreemodePed>() { Driver, Passenger1, Passenger2, Passenger3 };
+                    FreemodePed wanted = Suspects.GetRandomElement(fp => fp);
+                    if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
+                    GameFiber.StartNew(() =>
+                    {
+                        LSPDFRFunc.WaitAudioScannerCompletion();
+                        GameFiber.Sleep(1000);
+                        if (Manusia != null) Manusia.DisplayNotif();
+                        GameFiber.Wait(1500);
+                        LSPDFRFunc.WaitAudioScannerCompletion();
+                        LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
+                            SuspectCar.GetColorAudio(), Peralatan.GetVehicleDisplayAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
+                        GameFiber.Wait(2500);
+                        DisplayGPNotif();
+                    });
+                    if (Suspects.All(s => s)) Suspects.ForEach(s => s.RelationshipGroup = "CRIMINAL");
+                    GameFiber.Wait(75);
+                    SetRelationship();
+                    if (Suspects.All(s => s)) Suspects.ForEach(s => s.SetPedAsWanted());
+                    GameFiber.Wait(75);
+                    if (Suspects.All(s => s)) Suspects.ForEach(s => s.MakeMissionPed());
+                    GameFiber.Wait(75);
+                    GetClose();
+                    if (!CalloutRunning) return;
+                    if (Blip) Blip.Delete();
+                    Pursuit = LSPDFR.CreatePursuit();
+                    Suspects.ForEach(s =>
+                    {
+                        if (s)
+                        {
+                            LSPDFR.AddPedToPursuit(Pursuit, s);
+                            var att = LSPDFR.GetPedPursuitAttributes(s);
+                            att.AverageFightTime = 15;
+                            if (s == Driver)
+                            {
+                                att.SurrenderChancePittedAndCrashed = 10f;
+                                att.SurrenderChancePittedAndSlowedDown = 10f;
+                                att.SurrenderChanceTireBurst = 10f;
+                            }
+                        }
+                    });
+                    PursuitCreated = true;
+                    LSPDFR.SetPursuitIsActiveForPlayer(Pursuit, true);
+                    LSPDFR.SetPursuitLethalForceForced(Pursuit, true);
+                    LSPDFRFunc.RequestBackup(SuspectCar.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
+                    StopWatch = Stopwatch.StartNew();
+                    while (CalloutRunning)
+                    {
+                        GameFiber.Yield();
+                        if (StopWatch.ElapsedMilliseconds > 8500 && LSPDFR.IsPursuitStillRunning(Pursuit))
+                        {
+                            LSPDFRFunc.RequestAirUnit(SuspectCar.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
+                            StopWatch.Reset();
+                        }
+                        if (CanEnd) break;
                     }
                     DisplayCodeFourMessage();
                 }

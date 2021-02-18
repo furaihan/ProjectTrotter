@@ -43,6 +43,12 @@ namespace BarbarianCall.Extensions
                     scale.Y, scale.Z, color.R, color.G, color.B, color.A, bobUpAndDown, faceCamera, 2, rotateY, null, null, drawOnEntity);
             }
         }
+        internal static void SetBlipNmae(this Blip blip, string name)
+        {
+            NativeFunction.Natives.BEGIN_TEXT_COMMAND_SET_BLIP_NAME("STRING");
+            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(name);
+            NativeFunction.Natives.END_TEXT_COMMAND_SET_BLIP_NAME(blip);
+        }
         internal static Model[] GetAudibleVehicleModel()
         {
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
@@ -50,9 +56,12 @@ namespace BarbarianCall.Extensions
         }
 
         internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
-        internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xE54E209C35FFA18D<bool>(position.X, position.Y, position.Z, 5.0f, 5.0f, 5.0f, 0); //IS_POINT_OBSCURED_BY_A_MISSION_ENTITY
+        internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xADCDE75E1C60F32D<bool>(position.X, position.Y, position.Z, 3f, false, true, true, false, false, 0, false); //IS_POSITION_OCCUPIED
         internal static bool IsSuitableCar(this Model model) => model.IsCar && !model.IsBigVehicle && (model.NumberOfSeats == 2 || model.NumberOfSeats == 4) && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle;
         internal static bool IsSuitableMotor(this Model model) => model.IsBike && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle && !model.IsCar && !model.IsBigVehicle && model.NumberOfSeats <= 2;
+        internal static bool IsEntityAPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
+        internal static bool IsEntityAVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
+        internal static bool IsEntityAnObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);
         internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
         internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
         /// <summary>
@@ -113,6 +122,14 @@ namespace BarbarianCall.Extensions
             int siji = Peralatan.Random.Next(min, max);
             double loro = Peralatan.Random.NextDouble();
             return (float)((float)siji + loro);
+        }
+        internal static Vector3 ToGround(this Vector3 position)
+        {
+            if (NativeFunction.Natives.x9E82F0F362881B29<bool>(position.X, position.Y, 1250.0125f, out float groundPosition, 0,0)) //_GET_GROUND_Z_FOR_3D_COORD_2
+            {
+                return new Vector3(position.X, position.Y, groundPosition);
+            }
+            return position;
         }
         internal static float FloatDiff(this float first, float second) => Math.Abs(Math.Abs(first) - Math.Abs(second));
         internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);

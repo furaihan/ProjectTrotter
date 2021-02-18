@@ -68,8 +68,6 @@ namespace BarbarianCall.Callouts
                     else if (e is Rage.Object) e.Delete();
                     else e.Dismiss();
                 }
-
-
             });
             //CalloutMainFiber?.Abort();
             Manusia.CurrentManusia = null;

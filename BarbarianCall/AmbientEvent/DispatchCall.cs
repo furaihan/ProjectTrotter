@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using Rage;
 using LSPD_First_Response;
@@ -15,14 +13,7 @@ namespace BarbarianCall.AmbientEvent
     internal class DispatchCall
     {
         internal static void AmbientDispatchCall()
-        {
-            string alphabet;
-            if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2)))
-            {
-                char userCS = API.GrammarPoliceFunc.GetCallsign().Split('-').Where(s => s.All(ss => !char.IsDigit(ss))).FirstOrDefault()[0];
-                alphabet = string.Concat("ABCDEFGHIJKLMNOPQRSTUVWXYZ".Where(c => c != userCS));
-            }
-            else alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        {          
             Stopwatch sw = new Stopwatch();
             TimeSpan timer = new TimeSpan(0, 0, 0, Peralatan.Random.Next(250, 850), Peralatan.Random.Next(100, 985));
             "Starting ambient dispatch call Loop".ToLog();
@@ -31,7 +22,7 @@ namespace BarbarianCall.AmbientEvent
             while (true)
             {
                 GameFiber.Yield();
-                if (sw.Elapsed.Milliseconds > timer.TotalMilliseconds)
+                if (sw.ElapsedMilliseconds > timer.TotalMilliseconds)
                 {
                     try
                     {
@@ -47,13 +38,20 @@ namespace BarbarianCall.AmbientEvent
                             continue;
                         }
                         "Audio engine is free, continuing process".ToLog();
+                        string alphabet;
+                        if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2)))
+                        {
+                            char userCS = API.GrammarPoliceFunc.GetCallsign().Split('-').Where(s => s.All(ss => !char.IsDigit(ss))).FirstOrDefault()[0];
+                            alphabet = string.Concat("ABCDEFGHIJKLMNOPQRSTUVWXYZ".Where(c => c != userCS));
+                        }
+                        else alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                         Vector3 PlayerPos = Game.LocalPlayer.Character.Position;
                         string randomCallsign;
                         randomCallsign = Peralatan.Random.Next() % 4 == 0 ?
                             $"BAR_{alphabet.GetRandomElement(true)} BAR_{Peralatan.Random.Next(1, 28)}" :
-                            $"BAR_{Peralatan.Random.Next(1, 10)} BAR_{alphabet.GetRandomElement(true)} BAR_{Peralatan.Random.Next(1, 28)}";
+                            $"BAR_{Peralatan.Random.Next(1, 10)} BAR_{alphabet.GetRandomElement(true)} BAR_{Peralatan.Random.Next(1, 29)}";
                         Spawnpoint randomLocation = SpawnManager.GetVehicleSpawnPoint(PlayerPos.Around(500, 650), Peralatan.Random.Next(1000, 2000), Peralatan.Random.Next(3000, 5000));
-                        if (randomLocation == Spawnpoint.Zero) randomLocation.Position = World.GetNextPositionOnStreet(PlayerPos.Around(Peralatan.Random.Next(1000, 2000), Peralatan.Random.Next(3000, 5000)));
+                        if (randomLocation == Spawnpoint.Zero) randomLocation.Position = World.GetRandomPositionOnStreet();
                         string reporter = Peralatan.Random.Next() % 2 == 0 ? "WE_HAVE" : Peralatan.Random.Next() % 2 == 0 ? "CITIZENS_REPORT" : "OFFICERS_REPORT";
                         IDictionary<string, EBackupResponseType> ambientCrimes = new Dictionary<string, EBackupResponseType>()
                         {

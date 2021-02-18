@@ -37,6 +37,16 @@ namespace BarbarianCall.Extensions
             NativeFunction.Natives.TASK_VEHICLE_PARK(ped, vehicle, position.X, position.Y, position.Z, heading, mode, radius, keepEngineOn);
             return Task.GetTask(ped, "TASK_VEHICLE_PARK");
         }
+        public static Task FollowToOfsettOfEntity(this Ped ped, Entity target, Vector3 offset, float speed, float stoppingRange = 10.0f, bool persistFollowing = true)
+        {
+            NativeFunction.Natives.TASK_FOLLOW_TO_OFFSET_OF_ENTITY(ped, target, offset.X, offset.Y, offset.Z, speed, -1, stoppingRange, persistFollowing);
+            return Task.GetTask(ped, "TASK_FOLLOW_TO_OFFSET_OF_ENTITY");
+        }
+        public static Task HeliChase(this Ped ped, Entity target, Vector3 offset)
+        {
+            NativeFunction.Natives.TASK_HELI_CHASE(ped, target, offset.X, offset.Y, offset.Z);
+            return Task.GetTask(ped, "TASK_HELI_CHASE");
+        }
         public static void PlayVehicleAnimation(this Vehicle vehicle, string animDict, string animName) => NativeFunction.Natives.TASK_VEHICLE_PLAY_ANIM(vehicle, animDict, animName);
         public static void PlayEntityAnim(this Entity entity, AnimationDictionary animDict, string animName, bool loop = false, bool stayInAnim = false)
         {

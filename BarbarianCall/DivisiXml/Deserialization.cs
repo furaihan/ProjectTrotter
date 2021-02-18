@@ -33,6 +33,7 @@ namespace BarbarianCall.DivisiXml
         {
             try
             {
+                Peralatan.ToLog(string.Format("Reading XML File {0}", Path.GetFullPath(filename)));
                 Stopwatch sw = Stopwatch.StartNew();
                 List<Spawnpoint> ret = new List<Spawnpoint>();
                 XmlDocument xmlDocument = new XmlDocument();
@@ -45,7 +46,10 @@ namespace BarbarianCall.DivisiXml
                         coordinate.Attributes["Z"] != null ? Convert.ToSingle(coordinate.Attributes["Z"].Value) : Spawnpoint.Zero.Position.Z,
                         Convert.ToSingle(coordinate.ChildNodes[0].InnerText));
                     ret.Add(spawnpoint);
-                }             
+                }
+                Peralatan.ToLog(string.Format("Found total {0} locations from {1}", ret.Count, Path.GetFileName(filename)));
+                Peralatan.ToLog(string.Format("Reading this XML file took {0} ms", sw.ElapsedMilliseconds));
+                return ret;
             }
             catch (Exception e)
             {

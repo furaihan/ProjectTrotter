@@ -230,8 +230,13 @@ namespace BarbarianCall.SupportUnit
                                 }
                                 else
                                 {
-                                    if (MechanicPed) MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(250);
-                                    if (MechanicVehicle) MechanicVehicle.TopSpeed = 12f;
+                                    if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.PerformDrivingManeuver(MechanicVehicle ,VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(250);
+                                    if (MechanicPed && MechanicVehicle) LSPD_First_Response.Mod.API.Functions.StartTaskParkVehicle(MechanicPed, 20000);
+                                    if (MechanicPed && MechanicVehicle)
+                                    {
+                                        GameFiber.WaitWhile(()=> MechanicVehicle.Speed > 2f, 20000);
+                                        break;
+                                    }
                                 }
                             }
                             if (driveSW.ElapsedMilliseconds > allowWarpTimer.TotalMilliseconds) slow = 160;
@@ -242,9 +247,10 @@ namespace BarbarianCall.SupportUnit
                         }
                         if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
                         State = EMechanicState.Arrive;
-                        if (MechanicPed) MechanicPed.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion(2000);
+                        if (MechanicPed) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.None).WaitForCompletion(5000);
+                        if (MechanicPed && !MechanicPed.IsOnFoot) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.WarpOut);
                         if (MechanicPed) MechanicPed.PlayAmbientSpeech(Speech.GENERIC_HI);
-                        if (MechanicPed) MechanicPed.Tasks.FollowNavigationMeshToPosition(MechanicVehicle.RearPosition, MechanicVehicle.Heading, 1.2f).WaitForCompletion(12000);
+                        if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.FollowNavigationMeshToPosition(MechanicVehicle.RearPosition, MechanicVehicle.Heading, 1.2f).WaitForCompletion(12000);
                         if (MechanicPed) MechanicPed.Tasks.PlayAnimation("rcmepsilonism8", "bag_handler_close_trunk_walk_left", 4f, AnimationFlags.UpperBodyOnly | AnimationFlags.NoSound1 | AnimationFlags.SecondaryTask);
                         ToolBox1 = new Rage.Object("ch_prop_toolbox_01a", Vector3.Zero);
                         if (ToolBox1) ToolBox1.MakePersistent();
@@ -256,47 +262,18 @@ namespace BarbarianCall.SupportUnit
                         if (MechanicPed) MechanicPed.Tasks.ClearImmediately();
                         if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
                         State = EMechanicState.GetCloseWithVehicle;
-                        if (VehicleToFix)
-                            VehicleToFix.Model.GetDimensions(out Vector3 backBottomLeft, out Vector3 frontTopRight);
-                        //$"Dimension: {backBottomLeft} ==> {frontTopRight}".ToLog();
                         Vector3 repairPos = VehicleToFix.FrontPosition + (VehicleToFix.ForwardVector * 0.25f);
                         jc.LoadAndWait();
-                        if (MechanicPed)
-                            JerryCan = MechanicPed.Tasks.PlayAnimation(jc, "run", 4.0f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.Loop);
-                        Task task2 = MechanicPed.Tasks.FollowNavigationMeshToPosition(repairPos, VehicleToFix.Heading - 180f, 2.5f);
-                        int runCount = 0;
-                        var allowWarp = DateTime.UtcNow + new TimeSpan(0, 0, 20);
-                        bool warpToVtf = false;
-                        while (true)
+                        VehicleToFix.IsPositionFrozen = true;
+                        var runtask = MechanicPed.Tasks.FollowNavigationMeshToPosition(repairPos, repairPos.GetHeadingTowards(VehicleToFix), 10f);
+                        runtask.WaitForCompletion(100000);
+                        if (MechanicPed.DistanceTo(repairPos) > 15f || runtask.Status == TaskStatus.Interrupted)
                         {
-                            GameFiber.Yield(); if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
-                            runCount++;
-                            if (task2.Status == TaskStatus.Interrupted)
-                                task2 = MechanicPed.Tasks.FollowNavigationMeshToPosition(repairPos, VehicleToFix.Heading - 180f, 10f);
-                            if (!task2.IsActive) break;
-                            if (runCount > 1000)
-                            {
-                                if (MechanicPed) MechanicPed.Tasks.ClearImmediately();
-                                if (MechanicPed) MechanicPed.Position = repairPos;
-                                if (MechanicPed && VehicleToFix) MechanicPed.Heading = VehicleToFix.Heading - 180f;
-                                break;
-                            }
-                            if (DateTime.UtcNow >= allowWarp && Game.IsKeyDown(Keys.Back))
-                            {
-                                GameFiber.StartNew(() =>
-                                {
-                                    GameFiber.Wait(300);
-                                    if (Game.IsKeyDownRightNow(Keys.Back))
-                                    {
-                                        GameFiber.Wait(1700);
-                                        if (Game.IsKeyDownRightNow(Keys.Back)) warpToVtf = true;
-                                    }
-                                    else Game.DisplayHelp($"~y~Hold down {Peralatan.FormatKeyBinding(Keys.None, Keys.Back)}~y~ ~o~(BackSpace)~y~ key to warp the mechanic closer");
-                                });
-                            }
-                            if (warpToVtf) runCount = 980;
-                            //task2 = MechanicPed.Tasks.FollowNavigationMeshToPosition(repairPos, VehicleToFix.Heading - 180f, 2.5f);
-                        }
+                            MechanicPed.Position = repairPos;
+                            MechanicPed.Heading = MechanicPed.GetHeadingTowards(VehicleToFix);
+                        }                      
+                        if (MechanicPed)
+                            JerryCan = MechanicPed.Tasks.PlayAnimation(jc, "run", 4.0f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.Loop);                                                
                         if (VehicleToFix)
                             RepairVehicle();
                         else throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
@@ -379,11 +356,12 @@ namespace BarbarianCall.SupportUnit
                     RepairStatus = ERepairStatus.Perfect;
                 }
                 else
-                {                   
-                    selectedTalk = "~b~Mechanic~s~: " + failedDialogue.GetRandomElement();
-                    int num2 = Peralatan.Random.Next(1, 1000);                   
+                {
+                    OpenHood(VehicleToFix, false);
+                    selectedTalk = "~b~Mechanic~s~: " + failedDialogue.GetRandomElement();             
                     RepairStatus = ERepairStatus.Failed;
                 }
+                VehicleToFix.IsPositionFrozen = false;
                 if (Wrench) Wrench.Delete();
                 GameFiber.Wait(75);
                 if (ToolBox2) ToolBox2.Delete();

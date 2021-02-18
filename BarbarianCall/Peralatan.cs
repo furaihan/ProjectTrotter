@@ -25,7 +25,6 @@ namespace BarbarianCall
         {
             try
             {
-                ToLog(string.Format("Found {0} total locations", spawnPoints.Count));
                 ToLog("Calculating the best location for callout");
                 List<Spawnpoint> suitable = spawnPoints.Where(sp => sp.DistanceTo(Game.LocalPlayer.Character) < maxDistance && sp.DistanceTo(Game.LocalPlayer.Character) > minDistance
                 && sp.TravelDistanceTo(Game.LocalPlayer.Character) < maxDistance * 2 && sp.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();

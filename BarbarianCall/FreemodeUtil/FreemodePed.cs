@@ -272,7 +272,7 @@
                         default: break;
                     }
                 }
-                randomizedFaces.ToList().ForEach(f => HeadBlend.SetPedFaceFeature(this, f, (float)Math.Round(random.NextDouble(), 1)));
+                randomizedFaces.ToList().ForEach(f => HeadBlend.SetPedFaceFeature(this, f, (float)Math.Round(Peralatan.Random.Next() % 2 == 0 ? random.NextDouble() * -1 : random.NextDouble(), 1)));
             }
             else
             {
@@ -308,11 +308,10 @@
                         default: break;
                     }
                 }
-                randomizedFaces.ToList().ForEach(f => HeadBlend.SetPedFaceFeature(this, f, (float)Math.Round(random.NextDouble(), 1)));
+                randomizedFaces.ToList().ForEach(f => HeadBlend.SetPedFaceFeature(this, f, (float)Math.Round(Peralatan.Random.Next() % 2 == 0 ? random.NextDouble() * -1 : random.NextDouble(), 1)));
             }
             HeadBlendData.ToString().ToLog();
         }
-        public int GetOverlayValue(OverlayId overlayId) => HeadBlend.GetPedHeadOverlayValue(this, overlayId);
         public void SetRobberComponent()
         {
             Torso = new PedComponent(PedComponent.EComponentID.Torso, 0, 0, 0);
