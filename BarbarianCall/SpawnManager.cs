@@ -31,7 +31,8 @@ namespace BarbarianCall
                 e.ToString().ToLog();
             }
             return false;
-        } 
+        }
+        private static bool IsCoordOnScreen(Vector3 pos) => NativeFunction.Natives.xF9904D11F1ACBEC3<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); //GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION
         internal static float GetRoadHeading(Vector3 pos)
         {
             NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 _, out float heading, 12, 0x40400000, 0);
@@ -45,12 +46,12 @@ namespace BarbarianCall
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 1; i < 900; i++)
             {
-                Vector3 v = pos.Around(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 35 == 0) GameFiber.Yield();
                 if (NativeFunction.Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
                 {
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance + 5f) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP))
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsCoordOnScreen(nodeP))
                     {
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
                         {
@@ -74,7 +75,7 @@ namespace BarbarianCall
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)Math.Abs(minimalDistance), (int)Math.Abs(maximumDistance)));
                 if (NativeFunction.Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, i % 5 + 1, out Vector3 nodeP, out float nodeH, out dynamic unk1, 1, 0x40400000, 0))
                 {
-                    if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP))
+                    if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsCoordOnScreen(nodeP))
                     {
                         Spawnpoint ret = new Spawnpoint(nodeP, nodeH);
                         $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}. {unk1}".ToLog();
@@ -96,7 +97,7 @@ namespace BarbarianCall
                 if (NativeFunction.Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, true, out Vector3 nodeP, 0))
                 {
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f)
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsCoordOnScreen(nodeP))
                     {
                         Spawnpoint ret = new Spawnpoint(nodeP, Extension.GetRandomAbsoluteSingle(1, 359));
                         $"Ped sidewalk spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
@@ -112,7 +113,7 @@ namespace BarbarianCall
                 if (NativeFunction.Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, false, out Vector3 nodeP, 0))
                 {
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f)
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsCoordOnScreen(nodeP))
                     {
                         Spawnpoint ret = new Spawnpoint(nodeP, Extension.GetRandomAbsoluteSingle(1, 359));
                         $"Ped safe spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
@@ -137,7 +138,7 @@ namespace BarbarianCall
                 {
                     if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodeP.X, nodeP.Y, nodeP.Z, nodeH, out Vector3 roadSide))
                     {
-                        if (roadSide.DistanceTo(entity) < 35 + favoredDistance && !roadSide.IsOccupied())
+                        if (roadSide.DistanceTo(entity) < 35 + favoredDistance && !roadSide.IsOccupied() && !IsCoordOnScreen(roadSide))
                         {
                             Spawnpoint ret = new Spawnpoint(roadSide, nodeH);
                             string.Format("Favored RoadSide Spawnpoint found {0}", ret).ToLog();

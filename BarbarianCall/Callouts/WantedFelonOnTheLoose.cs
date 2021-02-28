@@ -28,6 +28,7 @@ namespace BarbarianCall.Callouts
         private int ArrestedCount = 0;
         private int DeadCount = 0;
         private int EscapedCount = 0;
+        private bool speedChanged = false;
         public override bool OnBeforeCalloutDisplayed()
         {
             CheckOtherPluginRunning();
@@ -197,6 +198,11 @@ namespace BarbarianCall.Callouts
                     Passenger2State != ESuspectStates.InAction &&
                     Passenger3State != ESuspectStates.InAction)
                     CanEnd = true;
+                if (PursuitCreated && !speedChanged)
+                {
+                    SuspectCar.TopSpeed = 125f;
+                    speedChanged = true;
+                }
             }
         }
         public override void End()
