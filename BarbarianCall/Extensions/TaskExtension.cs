@@ -47,6 +47,19 @@ namespace BarbarianCall.Extensions
             NativeFunction.Natives.TASK_HELI_CHASE(ped, target, offset.X, offset.Y, offset.Z);
             return Task.GetTask(ped, "TASK_HELI_CHASE");
         }
+        public static Task WanderWithVehicle(this Ped ped, float speed, VehicleDrivingFlags drivingStyle) => WanderWithVehicle(ped, ped.CurrentVehicle, speed, drivingStyle);
+        public static Task WanderWithVehicle(this Ped ped, Vehicle vehicle, float speed, VehicleDrivingFlags drivingStyle)
+        {
+            NativeFunction.Natives.TASK_VEHICLE_DRIVE_WANDER(ped, vehicle, speed, (int)drivingStyle);
+            return Task.GetTask(ped, "TASK_VEHICLE_DRIVE_WANDER");
+        }
+        public static Task GotoCoordAndAimAtHatedEntitiesNearCoord(this Ped ped, Vector3 destination, Vector3 aimAt, float speed, FiringPattern firingPattern, bool shoot, 
+            float distanceStop = 0.0f, float noRoadsDistance = 0.0f)
+        {
+            NativeFunction.Natives.TASK_GO_TO_COORD_AND_AIM_AT_HATED_ENTITIES_NEAR_COORD(ped, destination.X, destination.Y, destination.Z, aimAt.X, aimAt.Y, aimAt.Z, speed, shoot,
+                distanceStop, noRoadsDistance, true, 0, -957453492, (uint)firingPattern);
+            return Task.GetTask(ped, "TASK_GO_TO_COORD_AND_AIM_AT_HATED_ENTITIES_NEAR_COORD");
+        }
         public static void PlayVehicleAnimation(this Vehicle vehicle, string animDict, string animName) => NativeFunction.Natives.TASK_VEHICLE_PLAY_ANIM(vehicle, animDict, animName);
         public static void PlayEntityAnim(this Entity entity, AnimationDictionary animDict, string animName, bool loop = false, bool stayInAnim = false)
         {

@@ -5,17 +5,18 @@
     using System.Drawing;
     using Rage;
     using LSPD_First_Response;
+    using HB = HeadBlend;
     public class FreemodePed : Ped
     {
         public HeadBlendData HeadBlendData
         {
             get
             {
-                return HeadBlend.GetDataFromPed(this);
+                return HB.GetDataFromPed(this);
             }
             set
             {
-                HeadBlend.SetPedHeadBlendData(this, value);
+                HB.SetPedHeadBlendData(this, value);
             }
         }
         public Gender Gender { 
@@ -212,6 +213,7 @@
             GameFiber.Wait(25);
             RandomizeFaceShape();
             Metadata.BAR_FreemodePed = true;
+            Metadata.BAR_Entity = true;
         }
         public FreemodePed(Vector3 position, Gender gender) : base(gender == Gender.Male ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, 0f)
         {
@@ -219,6 +221,7 @@
             GameFiber.Wait(25);
             RandomizeFaceShape();
             Metadata.BAR_FreemodePed = true;
+            Metadata.BAR_Entity = true;
         }
         public void RandomizeFaceShape()
         {
@@ -240,75 +243,75 @@
             {
                 HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, maleHairModel.GetRandomElement(true), 0, 0);
                 int hairColor = random.Next() % 2 == 0 ? 0 : random.Next(1, 68);
-                HeadBlend.SetPedHairColor(this, hairColor, hairColor);
+                HB.SetPedHairColor(this, hairColor, hairColor);
                 foreach (var olay in randomizedOIds)
                 {
                     int index = olay switch
                     {
-                        OverlayId.Blemishes => random.Next(24),
-                        OverlayId.FacialHair => random.Next(29),
-                        OverlayId.Eyebrows => random.Next(34),
-                        OverlayId.Ageing => random.Next(15),
+                        OverlayId.Blemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blemishes) + 1),
+                        OverlayId.FacialHair => random.Next(HB.GetNumHeadOverlayValues(OverlayId.FacialHair) + 1),
+                        OverlayId.Eyebrows => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Eyebrows) + 1),
+                        OverlayId.Ageing => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Ageing) + 1),
                         //OverlayId.Makeup => 255,
                         //OverlayId.Blush => 255,
-                        OverlayId.Complexion => random.Next(12),
-                        OverlayId.SunDamage => random.Next(11),
+                        OverlayId.Complexion => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Complexion) + 1),
+                        OverlayId.SunDamage => random.Next(HB.GetNumHeadOverlayValues(OverlayId.SunDamage) + 1),
                         //OverlayId.Lipstick => 255,
-                        OverlayId.Freckles => random.Next(18),
-                        OverlayId.ChestHair => random.Next(17),
-                        OverlayId.BodyBlemishes => random.Next(12),
-                        OverlayId.AddBodyBlemishes => random.Next(2),
+                        OverlayId.Freckles => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Freckles) + 1),
+                        OverlayId.ChestHair => random.Next(HB.GetNumHeadOverlayValues(OverlayId.ChestHair) + 1),
+                        OverlayId.BodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.BodyBlemishes) + 1),
+                        OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes) + 1),
                         _ => 255
                     };
                     index = random.NextDouble() > 0.958475 ? 255 : index;
-                    HeadBlend.SetPedHeadOverlay(this, olay, index, (float)Math.Round(random.NextDouble(), 1));
+                    HB.SetPedHeadOverlay(this, olay, index, (float)Math.Round(random.NextDouble(), 1));
                     switch (olay)
                     {
                         case OverlayId.FacialHair:
                         case OverlayId.Eyebrows:
                         case OverlayId.ChestHair:
-                            HeadBlend.SetPedHeadOverlayColor(this, olay, ColorType.EyebrowBeardChestHair, 0, 0);
+                            HB.SetPedHeadOverlayColor(this, olay, ColorType.EyebrowBeardChestHair, 0, 0);
                             break;
                         default: break;
                     }
                 }
-                randomizedFaces.ToList().ForEach(f => HeadBlend.SetPedFaceFeature(this, f, (float)Math.Round(Peralatan.Random.Next() % 2 == 0 ? random.NextDouble() * -1 : random.NextDouble(), 1)));
+                randomizedFaces.ToList().ForEach(f => HB.SetPedFaceFeature(this, f, (float)Math.Round(Peralatan.Random.Next() % 2 == 0 ? random.NextDouble() * -1 : random.NextDouble(), 1)));
             }
             else
             {
                 HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, femaleHairModel.GetRandomElement(true), 0, 0);
                 int hairColor = random.Next() % 2 == 0 ? 0 : random.Next(1, 68);
-                HeadBlend.SetPedHairColor(this, hairColor, hairColor);
+                HB.SetPedHairColor(this, hairColor, hairColor);
                 foreach (var olay in randomizedOIds)
                 {
                     int index = olay switch
                     {
-                        OverlayId.Blemishes => random.Next(24),
+                        OverlayId.Blemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blemishes) + 1),
                         //OverlayId.FacialHair => random.Next(28),
-                        OverlayId.Eyebrows => random.Next(34),
-                        OverlayId.Ageing => random.Next(15),
+                        OverlayId.Eyebrows => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Eyebrows) + 1),
+                        OverlayId.Ageing => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Ageing) + 1),
                         //OverlayId.Makeup => random.Next(74),
-                        OverlayId.Blush => random.Next(7),
-                        OverlayId.Complexion => random.Next(12),
-                        OverlayId.SunDamage => random.Next() % 2 == 0 ? 255 : random.Next(11),
-                        OverlayId.Lipstick => random.Next(10),
-                        OverlayId.Freckles => random.Next(18),
+                        OverlayId.Blush => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blush) + 1),
+                        OverlayId.Complexion => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Complexion) + 1),
+                        OverlayId.SunDamage => random.Next() % 2 == 0 ? 255 : random.Next(HB.GetNumHeadOverlayValues(OverlayId.SunDamage) + 1),
+                        OverlayId.Lipstick => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Lipstick) + 1),
+                        OverlayId.Freckles => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Freckles) + 1),
                         //OverlayId.ChestHair => 255,
-                        OverlayId.BodyBlemishes => random.Next(12),
-                        OverlayId.AddBodyBlemishes => random.Next(2),
+                        OverlayId.BodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.BodyBlemishes) + 1),
+                        OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes) + 1),
                         _ => 255
                     };
-                    HeadBlend.SetPedHeadOverlay(this, olay, index, (float)Math.Round(random.NextDouble(), 1));
+                    HB.SetPedHeadOverlay(this, olay, index, (float)Math.Round(random.NextDouble(), 1));
                     switch (olay)
                     {
                         case OverlayId.Blush:
                         case OverlayId.Lipstick:
-                            HeadBlend.SetPedHeadOverlayColor(this, olay, ColorType.BlushLipstick, index % 2 == 0 ? 0 : random.Next(1, 68), 0);
+                            HB.SetPedHeadOverlayColor(this, olay, ColorType.BlushLipstick, index % 2 == 0 ? 0 : random.Next(1, 68), 0);
                             break;
                         default: break;
                     }
                 }
-                randomizedFaces.ToList().ForEach(f => HeadBlend.SetPedFaceFeature(this, f, (float)Math.Round(Peralatan.Random.Next() % 2 == 0 ? random.NextDouble() * -1 : random.NextDouble(), 1)));
+                randomizedFaces.ToList().ForEach(f => HB.SetPedFaceFeature(this, f, (float)Math.Round(Peralatan.Random.Next() % 2 == 0 ? random.NextDouble() * -1 : random.NextDouble(), 1)));
             }
             HeadBlendData.ToString().ToLog();
         }

@@ -100,6 +100,7 @@ namespace BarbarianCall.Callouts
             CalloutStates = ECalloutStates.EnRoute;
             officer.MakeMissionPed();
             officer.CanRagdoll = true;
+            officer.Metadata.BAR_Entity = true;
             if (!officer.IsInVehicle(offVeh, false)) officer.WarpIntoVehicle(offVeh, -1);
             Functions.SetPedAsCop(officer);
             offVeh.MakePersistent();
@@ -114,8 +115,10 @@ namespace BarbarianCall.Callouts
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
             SuspectCar.PrimaryColor = CommonVariables.CommonUnderstandableColor.GetRandomElement();
             SuspectCar.RandomiseLicensePlate();
+            SuspectCar.Metadata.BAR_Entity = true;
             Suspect = SuspectCar.CreateRandomDriver();
             Suspect.MakeMissionPed();
+            Suspect.Metadata.BAR_Entity = true;
             Suspect.RelationshipGroup = new RelationshipGroup("CRIMINAL");
             Suspect.SetPedAsWanted();
             Suspect.MaxHealth = 500;
@@ -127,6 +130,7 @@ namespace BarbarianCall.Callouts
                 passenger = new Ped(SpawnPoint, SpawnHeading);
                 passenger.WarpIntoVehicle(SuspectCar, 0);
                 passenger.MakeMissionPed();
+                passenger.Metadata.BAR_Entity = true;
                 passenger.RelationshipGroup = Suspect.RelationshipGroup;
                 passenger.MaxHealth = 2500;
                 passenger.SetPedAsWanted();

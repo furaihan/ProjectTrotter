@@ -63,6 +63,7 @@ namespace BarbarianCall.Callouts
         {
             CalloutRunning = true;
             SuspectCar.RandomiseLicensePlate();
+            SuspectCar.Metadata.BAR_Entity = true;
             Blip = new Blip(Spawn, 150);
             Blip.Color = Yellow;
             Blip.EnableRoute(Yellow);
@@ -92,8 +93,8 @@ namespace BarbarianCall.Callouts
             Passenger1State = ESuspectStates.InAction;
             Passenger2State = ESuspectStates.InAction;
             Passenger3State = ESuspectStates.InAction;
-            Driver.Tasks.CruiseWithVehicle(30f, VehicleDrivingFlags.Normal);
-            SuspectCar.TopSpeed = 35f;
+            Driver.WanderWithVehicle(35, VehicleDrivingFlags.Normal);
+            SuspectCar.TopSpeed = 45f;
             int num = Peralatan.Random.Next(3);
             switch (num)
             {

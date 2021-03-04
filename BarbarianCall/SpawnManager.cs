@@ -92,7 +92,7 @@ namespace BarbarianCall
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 1; i < 600; i++)
             {
-                Vector3 v = pos.Around(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 15 == 0) GameFiber.Yield();
                 if (NativeFunction.Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, true, out Vector3 nodeP, 0))
                 {
@@ -108,7 +108,7 @@ namespace BarbarianCall
             }
             for (int i = 1; i < 600; i++)
             {
-                Vector3 v = pos.Around(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 30 == 0) GameFiber.Yield();
                 if (NativeFunction.Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, false, out Vector3 nodeP, 0))
                 {
@@ -161,7 +161,7 @@ namespace BarbarianCall
             {
                 for (int i = 1; i < 600; i++)
                 {
-                    Vector3 v = pos.Around(Peralatan.Random.Next(1, 6));
+                    Vector3 v = pos.Around2D(Peralatan.Random.Next(1, 6));
                     if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(v.X, v.Y, v.Z, heading.Value, out Vector3 rsPos)) //_GET_ROAD_SIDE_POINT_WITH_HEADING
                     {
                         if (NativeFunction.Natives.xFF071FB798B803B0<bool>(rsPos.X, rsPos.Y, rsPos.Z, out Vector3 _, out float nodeHeading, 5, 3.0f, 0))
@@ -182,7 +182,7 @@ namespace BarbarianCall
             {
                 for (int i = 1; i < 600; i++)
                 {
-                    Vector3 v = pos.Around(Peralatan.Random.Next(5, 15), Peralatan.Random.Next(20, 35));
+                    Vector3 v = pos.Around2D(Peralatan.Random.Next(5, 15), Peralatan.Random.Next(20, 35));
                     if (NativeFunction.Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodePos, out float nodeHeading, 5, 3.0f, 0))
                     {
                         if (NativeFunction.Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //_GET_ROAD_SIDE_POINT_WITH_HEADING
@@ -201,7 +201,7 @@ namespace BarbarianCall
             }
             for (int i = 1; i < 600; i++)
             {
-                Vector3 v = pos.Around(Peralatan.Random.Next(25));
+                Vector3 v = pos.Around2D(Peralatan.Random.Next(25));
                 if (NativeFunction.Natives.x16F46FB18C8009E4<bool>(v.X, v.Y, v.Z, 0, out Vector3 roadSide)) //_GET_POINT_ON_ROAD_SIDE
                 {
                     if (NativeFunction.Natives.xFF071FB798B803B0<bool>(roadSide.X, roadSide.Y, roadSide.Z, out Vector3 nodePos, out float nodeHeading, 12, 0x40400000, 0))
