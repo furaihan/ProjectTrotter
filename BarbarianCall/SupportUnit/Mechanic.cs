@@ -108,6 +108,7 @@ namespace BarbarianCall.SupportUnit
                             IsStolen = false,
                             RadioStation = ((RadioStation[])Enum.GetValues(typeof(RadioStation))).GetRandomElement(),
                         };
+                        MechanicVehicle.Metadata.BAR_Entity = true;
                         MechanicVehicle.PlaceOnGroundProperly();
                         MechanicVehicle.RandomiseLicensePlate();
 
@@ -120,6 +121,7 @@ namespace BarbarianCall.SupportUnit
                             CanBeTargetted = false,
                             RelationshipGroup = MechanicRelationship,
                         };
+                        MechanicPed.Metadata.BAR_Entity = true;
                         MechanicPed.MakeMissionPed(true);
                         MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
                         LSPD_First_Response.Mod.API.Functions.SetPedCantBeArrestedByPlayer(MechanicPed, true);
@@ -253,6 +255,7 @@ namespace BarbarianCall.SupportUnit
                         if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.FollowNavigationMeshToPosition(MechanicVehicle.RearPosition, MechanicVehicle.Heading, 1.2f).WaitForCompletion(12000);
                         if (MechanicPed) MechanicPed.Tasks.PlayAnimation("rcmepsilonism8", "bag_handler_close_trunk_walk_left", 4f, AnimationFlags.UpperBodyOnly | AnimationFlags.NoSound1 | AnimationFlags.SecondaryTask);
                         ToolBox1 = new Rage.Object("ch_prop_toolbox_01a", Vector3.Zero);
+                        ToolBox1.Metadata.BAR_Entity = true;
                         if (ToolBox1) ToolBox1.MakePersistent();
                         if (ToolBox1) ToolBox1.IsCollisionEnabled = true;
                         int bone = MechanicPed.GetBoneIndex(PedBoneId.RightPhHand);
@@ -313,6 +316,7 @@ namespace BarbarianCall.SupportUnit
                     IsPositionFrozen = true,
                     IsCollisionEnabled = false
                 };
+                ToolBox2.Metadata.BAR_Entity = true;
                 ToolBox2.Heading = ToolBox2.GetHeadingTowards(MechanicPed);
                 //"after make tob2".ToLog();
                 float? zPosBox = World.GetGroundZ(ToolBox2.Position, true, true);
@@ -323,6 +327,7 @@ namespace BarbarianCall.SupportUnit
                 MechanicPed.Tasks.PlayAnimation("pickup_object", "pickup_low", 4.0f, AnimationFlags.SecondaryTask);
                 GameFiber.Wait(1250);
                 Wrench = new Rage.Object("prop_tool_wrench", Vector3.Zero);
+                Wrench.Metadata.BAR_Entity = true;
                 Wrench.AttachTo(MechanicPed, MechanicPed.GetBoneIndex(PedBoneId.RightPhHand), Vector3.Zero, Rotator.Zero);
                 GameFiber.Wait(2000);
                 MechanicPed.Tasks.ClearImmediately();

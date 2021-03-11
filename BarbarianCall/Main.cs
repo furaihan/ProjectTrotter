@@ -13,6 +13,21 @@ namespace BarbarianCall
     {
         public override void Finally()
         {
+            foreach (Entity entity in World.GetAllEntities())
+            {
+                if (entity && entity.CreatedByTheCallingPlugin)
+                {
+                    if (entity.Metadata.BAR.Entity != null && entity.Metadata.BAR_Entity)
+                    {
+                        Blip[] blips = entity.GetAttachedBlips();
+                        foreach (Blip blip in blips)
+                        {
+                            if (blip) blip.Delete();
+                        }
+                        if (entity) entity.Delete();
+                    }
+                }
+            }
             "Unloaded successfully".ToLog();
         }
 

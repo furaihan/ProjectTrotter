@@ -253,7 +253,7 @@ namespace BarbarianCall
             ped.MaxHealth = 500;
             ped.Armor = 50;
             ped.Opacity = 1.0f;
-            ped.IsVisible = true;
+            ped.Metadata.BAR_Entity = ped.IsVisible = true;
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
@@ -469,23 +469,28 @@ namespace BarbarianCall
         internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);
         internal static string GetCarColor(this Vehicle vehicle)
         {
-            try
+            if (vehicle)
             {
-                PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
-                List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
-                List<int> cint = colour.Select(c => c.ToArgb()).ToList();
-                if (cint.Contains(vehicle.PrimaryColor.ToArgb()))
+                try
                 {
-                    return cname[cint.IndexOf(vehicle.PrimaryColor.ToArgb())].Name.AddSpacesToSentence();
+                    vehicle.Metadata.BAR_Entity = true;
+                    PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
+                    List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
+                    List<int> cint = colour.Select(c => c.ToArgb()).ToList();
+                    if (cint.Contains(vehicle.PrimaryColor.ToArgb()))
+                    {
+                        return cname[cint.IndexOf(vehicle.PrimaryColor.ToArgb())].Name.AddSpacesToSentence();
+                    }
                 }
+                catch (Exception e)
+                {
+                    "Get car color error".ToLog();
+                    e.ToString().ToLog();
+                }
+                $"{vehicle.GetVehicleDisplayName()} color is unknown, Argb: {vehicle.PrimaryColor.ToArgb()}".ToLog();
+                return "Weirdly colored";
             }
-            catch (Exception e)
-            {
-                "Get car color error".ToLog();
-                e.ToString().ToLog();
-            }
-            $"{vehicle.GetVehicleDisplayName()} color is unknown, Argb: {vehicle.PrimaryColor.ToArgb()}".ToLog();
-            return "Weirdly colored";
+            return string.Empty;            
         }
     }
 }
