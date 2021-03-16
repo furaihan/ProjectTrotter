@@ -17,7 +17,7 @@ namespace BarbarianCall
             {
                 if (entity && entity.CreatedByTheCallingPlugin)
                 {
-                    if (entity.Metadata.BAR.Entity != null && entity.Metadata.BAR_Entity)
+                    if (entity.Metadata.BAR_Entity != null && entity.Metadata.BAR_Entity)
                     {
                         Blip[] blips = entity.GetAttachedBlips();
                         foreach (Blip blip in blips)

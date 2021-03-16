@@ -1,4 +1,4 @@
-﻿namespace BarbarianCall.FreemodeUtil
+﻿namespace BarbarianCall.Freemode
 {
     using System;
     using System.Linq;
@@ -233,8 +233,8 @@
             int[] femaleHairModel = {1, 2,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,28,30,31,32,36,37,38,39,40,
                 41,42,45,46,47,48,49,50,52,53,54,55,56,57,58,59,60,61,65,73,78,74,77,76 };
             HeadBlendData = Gender == Gender.Male ?
-                new HeadBlendData(random.Next(44), random.Next(44), 0, random.Next(44), maleSkinSecondID.GetRandomElement(), 0, (float)Math.Round(random.NextDouble(), 2), (float)Math.Round(random.NextDouble(), 2), 0.0f, false) :
-                new HeadBlendData(random.Next(21, 45), femaleSecondID.GetRandomElement(), 0, random.Next(21, 45), femaleSecondID.GetRandomElement(), 0, (float)Math.Round(random.NextDouble(), 2), (float)Math.Round(random.NextDouble(), 2), 0.0f, false);
+                new HeadBlendData(random.Next(44), random.Next(44), 0, random.Next(44), maleSkinSecondID.GetRandomElement(), 0, (float)Math.Round(random.NextDouble(), 5), (float)Math.Round(random.NextDouble(), 5), 0.0f, false) :
+                new HeadBlendData(random.Next(21, 45), femaleSecondID.GetRandomElement(), 0, random.Next(21, 45), femaleSecondID.GetRandomElement(), 0, (float)Math.Round(random.NextDouble(), 5), (float)Math.Round(random.NextDouble(), 5), 0.0f, false);
             OverlayId[] oIds = (OverlayId[])Enum.GetValues(typeof(OverlayId));
             var randomizedOIds = oIds.GetRandomNumberOfElements(random.Next(2, oIds.Length));
             FaceFeature[] faces = (FaceFeature[])Enum.GetValues(typeof(FaceFeature));

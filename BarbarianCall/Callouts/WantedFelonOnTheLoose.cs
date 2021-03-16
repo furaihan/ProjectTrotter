@@ -1,6 +1,6 @@
 ﻿using BarbarianCall.API;
 using BarbarianCall.Extensions;
-using BarbarianCall.FreemodeUtil;
+using BarbarianCall.Freemode;
 using BarbarianCall.Types;
 using LSPD_First_Response.Mod.Callouts;
 using LSPDFR = LSPD_First_Response.Mod.API.Functions;

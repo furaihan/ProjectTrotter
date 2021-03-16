@@ -83,6 +83,7 @@
     <Compile Include="API\StopThePedFunc.cs" />
     <Compile Include="API\UltimateBackupFunc.cs" />
     <Compile Include="Callouts\CalloutBase.cs" />
+    <Compile Include="Callouts\MassStreetFighting.cs" />
     <Compile Include="Callouts\OfficerStabbed.cs" />
     <Compile Include="Callouts\SuspiciousVehicle.cs" />
     <Compile Include="Callouts\TaxiRefusePay.cs" />
@@ -95,8 +96,8 @@
     <Compile Include="Extensions\ColorExtension.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\TaskExtension.cs" />
-    <Compile Include="FreemodeUtil\FreemodePed.cs" />
-    <Compile Include="FreemodeUtil\PedComponent.cs" />
+    <Compile Include="Freemode\FreemodePed.cs" />
+    <Compile Include="Freemode\PedComponent.cs" />
     <Compile Include="Initialization.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Menus\MainMenu.cs" />
@@ -108,7 +109,7 @@
     <Compile Include="SpawnManager.cs" />
     <Compile Include="SupportUnit\Mechanic.cs" />
     <Compile Include="Types\CVehicle.cs" />
-    <Compile Include="FreemodeUtil\HeadBlend.cs" />
+    <Compile Include="Freemode\HeadBlend.cs" />
     <Compile Include="Types\Manusia.cs" />
     <Compile Include="Types\PedGroup.cs" />
     <Compile Include="Types\Spawnpoint.cs" />

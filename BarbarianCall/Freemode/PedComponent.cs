@@ -1,4 +1,4 @@
-﻿namespace BarbarianCall.FreemodeUtil
+﻿namespace BarbarianCall.Freemode
 {
     using System;
     using Rage;
