@@ -60,6 +60,17 @@ namespace BarbarianCall.Extensions
                 distanceStop, noRoadsDistance, true, 0, -957453492, (uint)firingPattern);
             return Task.GetTask(ped, "TASK_GO_TO_COORD_AND_AIM_AT_HATED_ENTITIES_NEAR_COORD");
         }
+        public static Task CombatAgainstHatedTargetAroundPed(this Ped ped, float radius)
+        {
+            NativeFunction.Natives.TASK_COMBAT_HATED_TARGETS_AROUND_PED(ped, radius);
+            return Task.GetTask(ped, "TASK_COMBAT_HATED_TARGETS_AROUND_PED");
+        }
+        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vehicle vehicle, Vector3 destination, float speed = 30.0f)
+        {
+            NativeFunction.Natives.TASK_VEHICLE_GOTO_NAVMESH(ped, vehicle, destination.X, destination.Y, destination.Z, speed, 156f, 5.0f);
+            return Task.GetTask(ped, "TASK_VEHICLE_GOTO_NAVMESH");
+        }
+        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vector3 destination, float speed = 30.0f) => DriveVehicleWithNavigationMesh(ped, ped.CurrentVehicle, destination, speed);
         public static void PlayVehicleAnimation(this Vehicle vehicle, string animDict, string animName) => NativeFunction.Natives.TASK_VEHICLE_PLAY_ANIM(vehicle, animDict, animName);
         public static void PlayEntityAnim(this Entity entity, AnimationDictionary animDict, string animName, bool loop = false, bool stayInAnim = false)
         {

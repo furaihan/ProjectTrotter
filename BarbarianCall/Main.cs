@@ -1,11 +1,7 @@
 ﻿using LSPD_First_Response.Mod.API;
 using Rage;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BarbarianCall
 {
@@ -13,11 +9,11 @@ namespace BarbarianCall
     {
         public override void Finally()
         {
-            foreach (Entity entity in World.GetAllEntities())
+            foreach (Entity entity in World.GetAllEntities().Where(e=> e.CreatedByTheCallingPlugin))
             {
                 if (entity && entity.CreatedByTheCallingPlugin)
                 {
-                    if (entity.Metadata.BAR_Entity != null && entity.Metadata.BAR_Entity)
+                    if (entity.Metadata.BAR_Entity != null && entity.Metadata.BAR_Entity == true)
                     {
                         Blip[] blips = entity.GetAttachedBlips();
                         foreach (Blip blip in blips)
@@ -40,10 +36,13 @@ namespace BarbarianCall
         private void Functions_OnOnDutyStateChanged(bool onDuty)
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(Initialization.LSPDFRResolveEventHandler);
-            Functions.RegisterCallout(typeof(Callouts.SuspiciousVehicle));
-            Functions.RegisterCallout(typeof(Callouts.OfficerStabbed));
-            Functions.RegisterCallout(typeof(Callouts.TaxiRefusePay));
-            Functions.RegisterCallout(typeof(Callouts.WantedFelonOnTheLoose));
+            Type[] callouts = { typeof(Callouts.SuspiciousVehicle), typeof(Callouts.OfficerStabbed), typeof(Callouts.TaxiRefusePay), typeof(Callouts.WantedFelonOnTheLoose), typeof(Callouts.MassStreetFighting) };
+            foreach (Type callout in callouts)
+            {
+                Peralatan.ToLog(string.Format("Loading {0} callout", callout.Name));
+                Functions.RegisterCallout(callout);
+                Peralatan.ToLog(string.Format("{0} has been loaded successfully", callout.Name));
+            }
             Initialization.Initialize();
         }
     }
