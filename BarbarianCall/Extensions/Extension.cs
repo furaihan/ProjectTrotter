@@ -123,6 +123,7 @@ namespace BarbarianCall.Extensions
             double loro = Peralatan.Random.NextDouble();
             return (float)((float)siji + loro);
         }
+        internal static bool CanSee(this Ped ped, Ped target) => NativeFunction.Natives.x6CD5A433374D4CFB<bool>(ped, target);
         internal static Vector3 ToGround(this Vector3 position)
         {
             if (NativeFunction.Natives.x9E82F0F362881B29<bool>(position.X, position.Y, 1250.0125f, out float groundPosition, 0,0)) //_GET_GROUND_Z_FOR_3D_COORD_2
