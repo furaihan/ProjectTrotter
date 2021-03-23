@@ -132,6 +132,12 @@ namespace BarbarianCall.Extensions
             }
             return position;
         }
+        internal static void DeleteRelationshipGroup(RelationshipGroup relationshipGroup)
+        {
+            bool exist = false;
+            exist = NativeFunction.Natives.xCC6E3B6BB69501F1<bool>(relationshipGroup.Hash); //_DOES_RELATIONSHIP_GROUP_EXIST
+            if (exist) NativeFunction.Natives.REMOVE_RELATIONSHIP_GROUP(relationshipGroup.Hash);
+        }
         internal static float FloatDiff(this float first, float second) => Math.Abs(Math.Abs(first) - Math.Abs(second));
         internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);
         internal static float HeightDiff(this Vector3 first, Vector3 second) => first.Z.FloatDiff(second.Z);

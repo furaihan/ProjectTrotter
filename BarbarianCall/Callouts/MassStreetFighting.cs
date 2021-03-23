@@ -18,15 +18,15 @@ namespace BarbarianCall.Callouts
         private bool CanEnd = false;
         private List<Model> Gang1Model;
         private List<Model> Gang2Model;
-        private Dictionary<Ped, ESuspectStates> PedStopped = new Dictionary<Ped, ESuspectStates>();
+        private Dictionary<Ped, ESuspectStates> SuspectCondition;
         int gangMemberCount;
         private int deadCount = 0;
         private int arrestedCount = 0;
         private int escapedCount = 0;
         private static readonly uint[] meleeWeapon = { 0x92A27487, 0x958A4A8F, 0xF9E6AA4B, 0x84BD7BFD, 0x4E875F73, 0xF9DCBF2D, 0xD8DF3C3C, 0x99B507EA, 0xDD5DF8D9, 0xDFE37640, 0x19044EE0, 0xCD274149, 0x3813FC08, 
             0x24B17070/*MOLOTOV*/ };
-        RelationshipGroup gang1Relationship = new RelationshipGroup("SIJI");
-        RelationshipGroup gang2Relationship = new RelationshipGroup("LORO");
+        private RelationshipGroup gang1Relationship;
+        private RelationshipGroup gang2Relationship;
         public override bool OnBeforeCalloutDisplayed()
         {
             CalloutRunning = false;
@@ -35,8 +35,11 @@ namespace BarbarianCall.Callouts
             arrestedCount = 0;
             escapedCount = 0;
             Participant = new List<Ped>();
+            SuspectCondition = new Dictionary<Ped, ESuspectStates>();
             Gang1 = new List<Ped>();
             Gang2 = new List<Ped>();
+            gang1Relationship = new RelationshipGroup("SIJI");
+            gang2Relationship = new RelationshipGroup("LORO");
             Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 425, 725, true);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 350, 850);
             if (Spawn == Spawnpoint.Zero)
@@ -67,7 +70,7 @@ namespace BarbarianCall.Callouts
                 gangMember.Inventory.GiveNewWeapon(meleeWeapon.GetRandomElement(), -1, true);
                 gangMember.RelationshipGroup = gang1Relationship;
                 gangMember.Metadata.BAR_Entity = true;
-                PedStopped.Add(gangMember, ESuspectStates.InAction);
+                SuspectCondition.Add(gangMember, ESuspectStates.InAction);
             }
             Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 60, 100);
             if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(60, 100));
@@ -81,7 +84,7 @@ namespace BarbarianCall.Callouts
                 gangMember.Inventory.GiveNewWeapon(meleeWeapon.GetRandomElement(), -1, true);
                 gangMember.RelationshipGroup = gang2Relationship;
                 gangMember.Metadata.BAR_Entity = true;
-                PedStopped.Add(gangMember, ESuspectStates.InAction);
+                SuspectCondition.Add(gangMember, ESuspectStates.InAction);
             }
             Participant.ForEach(p => p.SetPedAsWanted());
             gang1Relationship.SetRelationshipWith(gang2Relationship, Relationship.Hate);
@@ -106,35 +109,36 @@ namespace BarbarianCall.Callouts
                         }
                     });
                 }
-                PedStopped.Keys.ToList().ForEach(p =>
+                SuspectCondition.Keys.ToList().ForEach(p =>
                 {
-                    if (PedStopped.ContainsKey(p))
+                    if (SuspectCondition.ContainsKey(p))
                     {
-                        if (PedStopped[p] == ESuspectStates.InAction && p && p.IsDead)
+                        if (SuspectCondition[p] == ESuspectStates.InAction && p && p.IsDead)
                         {
-                            PedStopped[p] = ESuspectStates.Dead;
+                            SuspectCondition[p] = ESuspectStates.Dead;
                             Blip blip = p ? p.GetAttachedBlips().Where(b => CalloutBlips.Contains(b)).FirstOrDefault() : null;
                             if (blip) blip.Delete();
                             deadCount++;
                         }
-                        else if (PedStopped[p] == ESuspectStates.InAction && p && LSPDFR.IsPedArrested(p))
+                        else if (SuspectCondition[p] == ESuspectStates.InAction && p && LSPDFR.IsPedArrested(p))
                         {
-                            PedStopped[p] = ESuspectStates.Arrested;
+                            SuspectCondition[p] = ESuspectStates.Arrested;
                             Blip blip = p ? p.GetAttachedBlips().Where(b => CalloutBlips.Contains(b)).FirstOrDefault() : null;
                             if (blip) blip.Delete();
                             arrestedCount++;
                         }
-                        else if (PedStopped[p] == ESuspectStates.InAction && !p)
+                        else if (SuspectCondition[p] == ESuspectStates.InAction && !p)
                         {
-                            PedStopped[p] = ESuspectStates.Escaped;
+                            SuspectCondition[p] = ESuspectStates.Escaped;
                             Blip blip = p ? p.GetAttachedBlips().Where(b => CalloutBlips.Contains(b)).FirstOrDefault() : null;
                             if (blip) blip.Delete();
                             escapedCount++;
                         }
                     }
-                    else Peralatan.ToLog(string.Format("Dictionary Key doesn't exist: {0} - {1}", PedStopped.Count, (uint)p.Handle));
+                    else if (p) Peralatan.ToLog(string.Format("Dictionary Key doesn't exist: {0} - {1} - {2}", SuspectCondition.Count, (uint)p.Handle, p.Model.Name));
+                    else Peralatan.ToLog("SOMETHING WENT WRONG, IF YOU SEE THIS, YOU CAN SEND ME YOUR LOG PLS!!");
                 });
-                if (PedStopped.Values.All(x => x != ESuspectStates.InAction)) CanEnd = true;
+                if (SuspectCondition.Values.All(x => x != ESuspectStates.InAction)) CanEnd = true;
                 if (CanEnd) End();
             }
             base.Process();
@@ -149,6 +153,8 @@ namespace BarbarianCall.Callouts
                     if (p) p.Dismiss();
                 }
             });
+            Extension.DeleteRelationshipGroup(gang1Relationship);
+            Extension.DeleteRelationshipGroup(gang2Relationship);
             base.End();
         }
         private void GetClose()
@@ -163,7 +169,11 @@ namespace BarbarianCall.Callouts
         }
         private void SituationTawuran()
         {
-
+            if (CalloutRunning)
+            {
+                Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(150f));
+                GameFiber.SleepUntil(() => CanEnd, 3600 * 60);
+            }
         }
     }
 }
