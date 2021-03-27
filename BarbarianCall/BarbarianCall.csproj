@@ -110,6 +110,7 @@
     <Compile Include="SupportUnit\Mechanic.cs" />
     <Compile Include="Types\CVehicle.cs" />
     <Compile Include="Freemode\HeadBlend.cs" />
+    <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Manusia.cs" />
     <Compile Include="Types\PedGroup.cs" />
     <Compile Include="Types\Spawnpoint.cs" />
