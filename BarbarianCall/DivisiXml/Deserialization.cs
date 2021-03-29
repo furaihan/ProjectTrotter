@@ -58,5 +58,37 @@ namespace BarbarianCall.DivisiXml
             }
             return new List<Spawnpoint>();
         }
+        internal static List<Spawnpoint> LoadPoliceStationLocations()
+        {
+            int nodeCount = 0;
+            try
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+                if (File.Exists(@"lspdfr\data\stations.xml"))
+                {
+                    Peralatan.ToLog(string.Format("Attempting to read stations.xml file located in {0}", Path.GetFullPath(@"lspdfr\data\stations.xml")));
+                    List<Spawnpoint> stations = new List<Spawnpoint>();
+                    XmlDocument xml = new XmlDocument();
+                    xml.Load(@"lspdfr\data\stations.xml");
+                    foreach (XmlNode station in xml.SelectNodes("/PoliceStations/Station"))
+                    {
+                        string vectorString = station.ChildNodes[3].InnerText.Replace('f', ' ');
+                        var v = vectorString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(s => Convert.ToSingle(s)).ToList();
+                        float heading = Convert.ToSingle(station.ChildNodes[4].InnerText);
+                        Spawnpoint sp = new Spawnpoint(new Rage.Vector3(v[0], v[1], v[2]), heading);
+                        Peralatan.ToLog($"Found a station location {sp} with name {station.ChildNodes[0].InnerText}");
+                        stations.Add(sp);
+                        nodeCount++;
+                    }
+                }
+                else Peralatan.ToLog("File stations.xml doesn't exist, make sure you have installed LSPDFR correctly");
+            }
+            catch (Exception e)
+            {
+                Peralatan.ToLog(string.Format("Cannot read stations.xml file {0}. Num: {1}", e.Message, nodeCount));
+                e.ToString().ToLog();
+            }           
+            return new List<Spawnpoint>();
+        }
     }
 }
