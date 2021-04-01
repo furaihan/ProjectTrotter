@@ -7,7 +7,6 @@ using Rage.Native;
 using System.Diagnostics;
 using System.IO;
 using BarbarianCall.Types;
-using System.Xml;
 
 namespace BarbarianCall.Extensions
 {
@@ -54,12 +53,14 @@ namespace BarbarianCall.Extensions
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
             return Model.VehicleModels.Where(m => files.Any(s => s.Contains(m.Name))).ToArray();
         }
-        internal static string GetPedModelName(Model model)
+        internal static string GetPedModelName(Ped ped) => GetPedModelName(ped.Model);
+        private static string GetPedModelName(Model model)
         {
             try
             {
                 PedModelName name = (PedModelName)model.Hash;
-                return name.ToString();
+                string pmn = name.ToString();
+                return pmn.Substring(pmn.IndexOf('_')).AddSpacesToSentence();
             }        
             catch (Exception e)
             {

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using Rage;
+using LSPD_First_Response.Mod.Callouts;
 using LSPDFR = LSPD_First_Response.Mod.API.Functions;
 using BarbarianCall.Extensions;
 using BarbarianCall.Types;
 
 namespace BarbarianCall.Callouts
 {
+    [CalloutInfo("Mass Street Fighting", CalloutProbability.High)]
     class MassStreetFighting : CalloutBase
     {
         private List<Ped> Participant;
@@ -54,7 +55,9 @@ namespace BarbarianCall.Callouts
             Gang1Model.ForEach(m => m.LoadAndWait());
             Gang2Model.ForEach(m => m.LoadAndWait());
             CalloutPosition = Spawn;
-            CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2 + 2);
+            CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
+            ShowCalloutAreaBlipBeforeAccepting(Spawn, 80f);
+            PlayScannerWithCallsign("WE_HAVE BAR_CRIME_GANG_RELATED IN_OR_ON_POSITION", Spawn);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -72,11 +75,11 @@ namespace BarbarianCall.Callouts
                 gangMember.Metadata.BAR_Entity = true;
                 SuspectCondition.Add(gangMember, ESuspectStates.InAction);
             }
-            Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 60, 100);
+            Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 40, 80);
             if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(60, 100));
             for (int i = 0; i < gangMemberCount; i++)
             {
-                Ped gangMember = new Ped(Gang2Model.GetRandomElement(), sp2.Around2D(50f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
+                Ped gangMember = new Ped(Gang2Model.GetRandomElement(), sp2.Around2D(30f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -93,6 +96,11 @@ namespace BarbarianCall.Callouts
             gang2Relationship.SetRelationshipWith(gang1Relationship, Relationship.Hate);
             gang2Relationship.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
             gang2Relationship.SetRelationshipWith(RelationshipGroup.Player, Relationship.Hate);
+            Blip = new Blip(Spawn, 50f);
+            Blip.Color = Yellow;
+            Blip.EnableRoute(Yellow);
+            SituationTawuran();
+            CalloutMainFiber.Start();
             return base.OnCalloutAccepted();
         }
         public override void Process()
@@ -136,7 +144,7 @@ namespace BarbarianCall.Callouts
                         }
                     }
                     else if (p) Peralatan.ToLog(string.Format("Dictionary Key doesn't exist: {0} - {1} - {2}", SuspectCondition.Count, (uint)p.Handle, p.Model.Name));
-                    else Peralatan.ToLog("SOMETHING WENT WRONG, IF YOU SEE THIS, YOU CAN SEND ME YOUR LOG PLS!!");
+                    else Peralatan.ToLog("SOMETHING WENT WRONG, SEND YOUR LOG PLS!!");
                 });
                 if (SuspectCondition.Values.All(x => x != ESuspectStates.InAction)) CanEnd = true;
                 if (CanEnd) End();
@@ -166,14 +174,29 @@ namespace BarbarianCall.Callouts
                 if (ran) ran.Tasks.AchieveHeading(ran.GetHeadingTowards(PlayerPed));
                 GameFiber.Yield();
             }
+            if (Blip) Blip.Delete();
+            foreach (Ped part in Participant)
+            {
+                if (part)
+                {
+                    Blip gangblp = part.AttachBlip();
+                    gangblp.Color = Color.Red;
+                    gangblp.Scale = 0.754585f;
+                    CalloutBlips.Add(gangblp);
+                }
+            }
         }
         private void SituationTawuran()
         {
-            if (CalloutRunning)
+            CalloutMainFiber = new GameFiber(() =>
             {
-                Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(150f));
-                GameFiber.SleepUntil(() => CanEnd, 3600 * 60);
-            }
+                GetClose();
+                if (CalloutRunning)
+                {
+                    Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(150f));
+                    GameFiber.SleepUntil(() => CanEnd, 3600 * 60);
+                }
+            });          
         }
     }
 }

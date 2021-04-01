@@ -72,14 +72,16 @@ namespace BarbarianCall.DivisiXml
                     xml.Load(@"lspdfr\data\stations.xml");
                     foreach (XmlNode station in xml.SelectNodes("/PoliceStations/Station"))
                     {
-                        string vectorString = station.ChildNodes[3].InnerText.Replace('f', ' ');
+                        string vectorString = station.ChildNodes[3].InnerText.Replace("f", string.Empty);
                         var v = vectorString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(s => Convert.ToSingle(s)).ToList();
                         float heading = Convert.ToSingle(station.ChildNodes[4].InnerText);
-                        Spawnpoint sp = new Spawnpoint(new Rage.Vector3(v[0], v[1], v[2]), heading);
+                        Spawnpoint sp = new Spawnpoint(v[0], v[1], v[2], heading);
                         Peralatan.ToLog($"Found a station location {sp} with name {station.ChildNodes[0].InnerText}");
                         stations.Add(sp);
                         nodeCount++;
                     }
+                    $"Reading stations.xml is took {sw.ElapsedMilliseconds} ms".ToLog();
+                    return stations;
                 }
                 else Peralatan.ToLog("File stations.xml doesn't exist, make sure you have installed LSPDFR correctly");
             }
