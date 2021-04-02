@@ -24,8 +24,7 @@ namespace BarbarianCall.Callouts
         private int deadCount = 0;
         private int arrestedCount = 0;
         private int escapedCount = 0;
-        private static readonly uint[] meleeWeapon = { 0x92A27487, 0x958A4A8F, 0xF9E6AA4B, 0x84BD7BFD, 0x4E875F73, 0xF9DCBF2D, 0xD8DF3C3C, 0x99B507EA, 0xDD5DF8D9, 0xDFE37640, 0x19044EE0, 0xCD274149, 0x3813FC08, 
-            0x24B17070/*MOLOTOV*/ };
+        private static readonly uint[] meleeWeapon = { 0x92A27487, 0x958A4A8F, 0xF9E6AA4B, 0x84BD7BFD, 0x4E875F73, 0xF9DCBF2D, 0xD8DF3C3C, 0x99B507EA, 0xDD5DF8D9, 0xDFE37640, 0x19044EE0, 0xCD274149, 0x3813FC08 };
         private RelationshipGroup gang1Relationship;
         private RelationshipGroup gang2Relationship;
         public override bool OnBeforeCalloutDisplayed()
@@ -43,6 +42,7 @@ namespace BarbarianCall.Callouts
             gang2Relationship = new RelationshipGroup("LORO");
             Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 425, 725, true);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 350, 850);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 350, 850);
             if (Spawn == Spawnpoint.Zero)
             {
                 Spawn.Position = World.GetNextPositionOnStreet(PlayerPed.Position.Around2D(425, 725));

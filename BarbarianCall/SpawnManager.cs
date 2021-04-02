@@ -33,6 +33,7 @@ namespace BarbarianCall
             return false;
         }
         private static bool IsCoordOnScreen(Vector3 pos) => NativeFunction.Natives.xF9904D11F1ACBEC3<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); //GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION
+        private static bool IsSlowRoad(Vector3 position) => (bool)NativeFunction.CallByHash<bool>(0b10_0010_1101_0111_0010_0111_0101_1010_0111_1001_1111_1110_1000_0010_0001_0101, position.X, position.Y, position.Z, 1, 5, 1077936128, 0f);
         internal static float GetRoadHeading(Vector3 pos)
         {
             NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 _, out float heading, 12, 0x40400000, 0);
@@ -219,6 +220,34 @@ namespace BarbarianCall
             }
             $"RoadSide position not found".ToLog();
             $"1200 process took {sw.ElapsedMilliseconds} ms".ToLog();
+            return Spawnpoint.Zero;
+        }
+        internal static Spawnpoint GetSlowRoadSpawnPoint(Vector3 pos, float minimumDistance, float maximumDistance)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            for (int i = 0; i < 0b1110000100; i++)
+            {
+                if (i % 40 == 0) GameFiber.Yield();
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimumDistance, (int)(maximumDistance + 1)));
+                if (NativeFunction.Natives.x93E0DB8440B73A7D<bool>(v.X, v.Y, v.Z, 80f, false, false, false, out Vector3 randomNode, out int nodeId))
+                {
+                    if (NativeFunction.Natives.x1EAF30FCFBF5AF74<bool>(nodeId))
+                    {
+                        if (NativeFunction.Natives.x4F5070AA58F69279<bool>(nodeId))
+                        {
+                            if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsCoordOnScreen(randomNode))
+                            {
+                                if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(randomNode.X, randomNode.Y, randomNode.Z, out Vector3 _, out float heading, 0b1001, 3.0f, 0f))
+                                {
+                                    Spawnpoint ret = new Spawnpoint(randomNode, heading);
+                                    $"Slow road found at {i + 1} tries, that process took {sw.ElapsedMilliseconds} ms".ToLog();
+                                    return ret;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             return Spawnpoint.Zero;
         }
     }
