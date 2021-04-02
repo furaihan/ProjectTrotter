@@ -55,17 +55,17 @@ namespace BarbarianCall.Callouts
             Gang1Model.ForEach(m => m.LoadAndWait());
             Gang2Model.ForEach(m => m.LoadAndWait());
             CalloutPosition = Spawn;
+            gangMemberCount = Peralatan.Random.Next(3, 9);
             CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
             ShowCalloutAreaBlipBeforeAccepting(Spawn, 80f);
             PlayScannerWithCallsign("WE_HAVE BAR_CRIME_GANG_RELATED IN_OR_ON_POSITION", Spawn);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
-        {
-            gangMemberCount = Peralatan.Random.Next(3, 9);
+        {            
             for (int i = 0; i < gangMemberCount; i++)
             {
-                Ped gangMember = new Ped(Gang1Model.GetRandomElement(), SpawnPoint.Around2D(30f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : SpawnPoint.GetHeadingTowards(PlayerPed));
+                Ped gangMember = new Ped(Gang1Model.GetRandomElement(), SpawnPoint.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : SpawnPoint.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -75,11 +75,11 @@ namespace BarbarianCall.Callouts
                 gangMember.Metadata.BAR_Entity = true;
                 SuspectCondition.Add(gangMember, ESuspectStates.InAction);
             }
-            Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 40, 80);
-            if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(60, 100));
+            Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 30, 50);
+            if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(30, 50));
             for (int i = 0; i < gangMemberCount; i++)
             {
-                Ped gangMember = new Ped(Gang2Model.GetRandomElement(), sp2.Around2D(30f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
+                Ped gangMember = new Ped(Gang2Model.GetRandomElement(), sp2.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -169,7 +169,20 @@ namespace BarbarianCall.Callouts
         {
             while (CalloutRunning)
             {
-                if (Participant.Any(p => p && (PlayerPed.CanSee(p) || p.IsOnScreen || p.CanSee(PlayerPed))) || PlayerPed.DistanceTo(SpawnPoint) < 100f) break;
+                if (Participant.Any(p => (p && (p.IsOnScreen || p.CanSee(PlayerPed) || PlayerPed.CanSee(p))) || PlayerPed.DistanceTo(SpawnPoint) < 100f))
+                {
+#if DEBUG
+                    string[] log =
+                    {
+                        $"Distance: {PlayerPed.DistanceTo(SpawnPoint)}",
+                        $"Player see suspect: {Participant.Any(p=> PlayerPed.CanSee(p))}",
+                        $"Suspect see player: {Participant.Any(p=> p.CanSee(PlayerPed))}",
+                        $"Suspect is on screen: {Participant.Any(predicate => predicate.IsOnScreen)}"
+                    };
+                    log.ToList().ForEach(Peralatan.ToLog);
+#endif
+                    break;
+                }
                 Ped ran = Participant.GetRandomElement();
                 if (ran) ran.Tasks.AchieveHeading(ran.GetHeadingTowards(PlayerPed));
                 GameFiber.Yield();
@@ -193,8 +206,16 @@ namespace BarbarianCall.Callouts
                 GetClose();
                 if (CalloutRunning)
                 {
-                    Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(150f));
-                    GameFiber.SleepUntil(() => CanEnd, 3600 * 60);
+                    Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(250f));
+                    while (CalloutRunning)
+                    {
+                        if (CanEnd) break;
+                        if (Participant.Any(p=> p && p.IsAlive && !LSPDFR.IsPedArrested(p) && p.Tasks.CurrentTaskStatus != TaskStatus.InProgress))
+                        {
+                            Participant.Where(p => p && p.IsAlive && !LSPDFR.IsPedArrested(p) && p.Tasks.CurrentTaskStatus != TaskStatus.InProgress).FirstOrDefault().CombatAgainstHatedTargetAroundPed(250f);
+                        }
+                        GameFiber.Yield();
+                    }
                 }
             });          
         }
