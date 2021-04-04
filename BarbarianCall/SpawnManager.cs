@@ -248,6 +248,7 @@ namespace BarbarianCall
                     }
                 }
             }
+            $"Slow road is not found".ToLog();
             return Spawnpoint.Zero;
         }
     }

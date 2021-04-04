@@ -306,11 +306,11 @@ namespace BarbarianCall.Callouts
                     GameFiber.Wait(75);
                     if (Suspects.All(s => s)) Suspects.ForEach(s => s.Inventory.GiveNewWeapon(WeaponHashes.GetRandomElement(true), -1, true));
                     GameFiber.Wait(75);
-                    if (Suspects.All(s => s)) Suspects.ForEach(s => s.Tasks.FightAgainst(PlayerPed));
+                    if (Suspects.All(s => s)) Suspects.ForEach(s => s.CombatAgainstHatedTargetAroundPed(250f));
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (Suspects.Any(s => s && s.Tasks.CurrentTaskStatus == TaskStatus.Interrupted && s.IsAlive)) Suspects.ForEach(s => s.Tasks.FightAgainst(PlayerPed));
+                        if (Suspects.Any(s => s && s.Tasks.CurrentTaskStatus == TaskStatus.Interrupted && s.IsAlive)) Suspects.ForEach(s => s.CombatAgainstHatedTargetAroundPed(250f));
                         if (CanEnd) break;
                     }
                     DisplayCodeFourMessage();
@@ -516,7 +516,7 @@ namespace BarbarianCall.Callouts
                                 }
                                 s.Inventory.GiveNewWeapon(WeaponHashes.GetRandomElement(true), -1, true);
                                 s.PlayAmbientSpeech(Speech.GENERIC_FUCK_YOU);
-                                s.Tasks.FightAgainst(PlayerPed);
+                                s.CombatAgainstHatedTargetAroundPed(250f);
                             }
                         });
                     }

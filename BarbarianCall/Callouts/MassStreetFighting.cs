@@ -16,6 +16,7 @@ namespace BarbarianCall.Callouts
         private List<Ped> Participant;
         private List<Ped> Gang1;
         private List<Ped> Gang2;
+        private List<Ped> pursuitPeds;
         private bool CanEnd = false;
         private List<Model> Gang1Model;
         private List<Model> Gang2Model;
@@ -38,6 +39,7 @@ namespace BarbarianCall.Callouts
             SuspectCondition = new Dictionary<Ped, ESuspectStates>();
             Gang1 = new List<Ped>();
             Gang2 = new List<Ped>();
+            pursuitPeds = new List<Ped>();
             gang1Relationship = new RelationshipGroup("SIJI");
             gang2Relationship = new RelationshipGroup("LORO");
             Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 425, 725, true);
@@ -48,6 +50,22 @@ namespace BarbarianCall.Callouts
                 Spawn.Position = World.GetNextPositionOnStreet(PlayerPed.Position.Around2D(425, 725));
                 Spawn.Heading = SpawnManager.GetRoadHeading(Spawn.Position);
             }
+            try
+            {
+                CommonVariables.GangPedModels.ToList().ForEach(kvp =>
+                {
+                    if (!kvp.Value.All(m=> m.IsValid))
+                    {
+                        $"{kvp.Key} is invalid at {kvp.Value.IndexOf(kvp.Value.Where(m=> !m.IsValid).FirstOrDefault())}".ToLog();
+                    }
+                });
+                $"SlowRoad: {SpawnManager.GetSlowRoadSpawnPoint(PlayerPed.Position, 425, 725)}".ToLog();
+            }
+            catch (Exception e)
+            {
+                "get slow road sp is error".ToLog();
+                e.ToString().ToLog();
+            }
             SpawnPoint = Spawn;
             SpawnHeading = Spawn;
             Gang1Model = CommonVariables.GangPedModels.Values.ToList().GetRandomElement();
@@ -55,15 +73,16 @@ namespace BarbarianCall.Callouts
             Gang1Model.ForEach(m => m.LoadAndWait());
             Gang2Model.ForEach(m => m.LoadAndWait());
             CalloutPosition = Spawn;
-            gangMemberCount = Peralatan.Random.Next(3, 9);
+            gangMemberCount = Peralatan.Random.Next(3, 8);
             CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
+            CalloutMessage = "Mass Street Fighting";
             ShowCalloutAreaBlipBeforeAccepting(Spawn, 80f);
             PlayScannerWithCallsign("WE_HAVE BAR_CRIME_GANG_RELATED IN_OR_ON_POSITION", Spawn);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
         {            
-            for (int i = 0; i < gangMemberCount; i++)
+            for (int i = 1; i <= gangMemberCount; i++)
             {
                 Ped gangMember = new Ped(Gang1Model.GetRandomElement(), SpawnPoint.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : SpawnPoint.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
@@ -77,7 +96,7 @@ namespace BarbarianCall.Callouts
             }
             Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 30, 50);
             if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(30, 50));
-            for (int i = 0; i < gangMemberCount; i++)
+            for (int i = 1; i <= gangMemberCount; i++)
             {
                 Ped gangMember = new Ped(Gang2Model.GetRandomElement(), sp2.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
@@ -124,22 +143,25 @@ namespace BarbarianCall.Callouts
                         if (SuspectCondition[p] == ESuspectStates.InAction && p && p.IsDead)
                         {
                             SuspectCondition[p] = ESuspectStates.Dead;
-                            Blip blip = p ? p.GetAttachedBlips().Where(b => CalloutBlips.Contains(b)).FirstOrDefault() : null;
-                            if (blip) blip.Delete();
+                            p.DisplayNotificationsWithPedHeadshot(GetType().Name, $"~b~{LSPDFR.GetPersonaForPed(p).FullName}~s~ is ~r~dead");
+                            List<Blip> blips = CalloutBlips.Where(b => b && b.Entity == p).ToList();
+                            blips.ForEach(b => { if (b) b.Delete(); });
                             deadCount++;
                         }
                         else if (SuspectCondition[p] == ESuspectStates.InAction && p && LSPDFR.IsPedArrested(p))
                         {
                             SuspectCondition[p] = ESuspectStates.Arrested;
-                            Blip blip = p ? p.GetAttachedBlips().Where(b => CalloutBlips.Contains(b)).FirstOrDefault() : null;
-                            if (blip) blip.Delete();
+                            p.DisplayNotificationsWithPedHeadshot(GetType().Name, $"~b~{LSPDFR.GetPersonaForPed(p).FullName}~s~ is ~g~arrested");
+                            List<Blip> blips = CalloutBlips.Where(b => b && b.Entity == p).ToList();
+                            blips.ForEach(b => { if (b) b.Delete(); });
                             arrestedCount++;
                         }
                         else if (SuspectCondition[p] == ESuspectStates.InAction && !p)
                         {
                             SuspectCondition[p] = ESuspectStates.Escaped;
-                            Blip blip = p ? p.GetAttachedBlips().Where(b => CalloutBlips.Contains(b)).FirstOrDefault() : null;
-                            if (blip) blip.Delete();
+                            p.DisplayNotificationsWithPedHeadshot(GetType().Name, $"~b~{LSPDFR.GetPersonaForPed(p).FullName}~s~ is ~o~escaped");
+                            List<Blip> blips = CalloutBlips.Where(b => b && b.Entity == p).ToList();
+                            blips.ForEach(b => { if (b) b.Delete(); });
                             escapedCount++;
                         }
                     }
@@ -147,7 +169,7 @@ namespace BarbarianCall.Callouts
                     else Peralatan.ToLog("SOMETHING WENT WRONG, SEND YOUR LOG PLS!!");
                 });
                 if (SuspectCondition.Values.All(x => x != ESuspectStates.InAction)) CanEnd = true;
-                if (CanEnd) End();
+                if (CanEnd) DisplaySummary();
             }
             base.Process();
         }
@@ -165,11 +187,16 @@ namespace BarbarianCall.Callouts
             Extension.DeleteRelationshipGroup(gang2Relationship);
             base.End();
         }
+        private void DisplaySummary()
+        {
+            $"Suspect Count: {gangMemberCount * 2}~n~Suspect Summary:~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".DisplayNotifWithLogo("Mass Street Fighting");
+            End();
+        }
         private void GetClose()
         {
             while (CalloutRunning)
             {
-                if (Participant.Any(p => (p && (p.IsOnScreen || p.CanSee(PlayerPed) || PlayerPed.CanSee(p))) || PlayerPed.DistanceTo(SpawnPoint) < 100f))
+                if (Participant.Any(p => p && (p.CanSee(PlayerPed) || PlayerPed.CanSee(p))) || PlayerPed.DistanceTo(SpawnPoint) < 100f)
                 {
 #if DEBUG
                     string[] log =
@@ -203,21 +230,56 @@ namespace BarbarianCall.Callouts
         {
             CalloutMainFiber = new GameFiber(() =>
             {
-                GetClose();
-                if (CalloutRunning)
+                try
                 {
-                    Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(250f));
-                    while (CalloutRunning)
+                    GetClose();
+                    if (CalloutRunning)
                     {
-                        if (CanEnd) break;
-                        if (Participant.Any(p=> p && p.IsAlive && !LSPDFR.IsPedArrested(p) && p.Tasks.CurrentTaskStatus != TaskStatus.InProgress))
+                        Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(250f));
+                        Pursuit = LSPDFR.CreatePursuit();
+                        bool pursuitCalled = false;
+                        while (CalloutRunning)
                         {
-                            Participant.Where(p => p && p.IsAlive && !LSPDFR.IsPedArrested(p) && p.Tasks.CurrentTaskStatus != TaskStatus.InProgress).FirstOrDefault().CombatAgainstHatedTargetAroundPed(250f);
+                            if (CanEnd) break;
+                            if (Participant.Any(p => p && p.IsAlive && !LSPDFR.IsPedArrested(p) && p.Tasks.CurrentTaskStatus != TaskStatus.InProgress && IsPedOnAction(p)))
+                            {
+                                var st = Participant.Where(p => p && p.IsAlive && !LSPDFR.IsPedArrested(p) && p.Tasks.CurrentTaskStatus != TaskStatus.InProgress && IsPedOnAction(p)).GetRandomElement();
+#if DEBUG
+                                $"{LSPDFR.GetPersonaForPed(st).FullName} - {st.Model.Name} is stuck and {st.Tasks.CurrentTaskStatus}, reassign".ToLog();
+#endif
+                                if (st) st.CombatAgainstHatedTargetAroundPed(250f);
+                            }
+                            Participant.ForEach(p =>
+                            {
+                                if (p)
+                                {
+                                    if (!pursuitPeds.Contains(p) && p.DistanceTo(SpawnPoint) > 200f)
+                                    {
+                                        LSPDFR.AddPedToPursuit(Pursuit, p);
+                                        pursuitPeds.Add(p);
+                                        if (!pursuitCalled)
+                                        {
+                                            LSPDFR.SetPursuitIsActiveForPlayer(Pursuit, true);
+                                            pursuitCalled = true;
+                                        }
+                                    }
+                                }
+                            });
+                            GameFiber.Yield();
                         }
-                        GameFiber.Yield();
                     }
                 }
+                catch (Exception e)
+                {
+                    $"{GetType().Name} callout crashes".ToLog();
+                    e.ToString().ToLog();
+                    NetExtension.SendError(e);
+                    $"{GetType().Name} callout crashed, please send your log".DisplayNotifWithLogo("Mass Street Fighting");
+                    End();
+                }              
             });          
         }
+        private bool IsPedOnAction(Ped ped) => !LSPDFR.IsPedBeingCuffed(ped) && !LSPDFR.IsPedBeingGrabbed(ped) && !LSPDFR.IsPedBeingFrisked(ped) && !LSPDFR.IsPedInPursuit(ped) 
+            && !LSPDFR.IsPedGettingArrested(ped) && !pursuitPeds.Contains(ped);
     }
 }
