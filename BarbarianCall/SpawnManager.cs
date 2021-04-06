@@ -229,15 +229,17 @@ namespace BarbarianCall
             {
                 if (i % 40 == 0) GameFiber.Yield();
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimumDistance, (int)(maximumDistance + 1)));
-                if (NativeFunction.Natives.x93E0DB8440B73A7D<bool>(v.X, v.Y, v.Z, 80f, false, false, false, out Vector3 randomNode, out int nodeId))
+                if (NativeFunction.Natives.xE50E52416CCF948B<bool>(v.X, v.Y, v.Z, i % 5, out Vector3 randomNode,true, 0f, 0f))
                 {
+                    int nodeId = NativeFunction.Natives.x22D7275A79FE8215<int>(randomNode.X, randomNode.Y, randomNode.Z, 1, 11077936128f, 0f);
+                    $"Node Id: {nodeId}".ToLog();
                     if (NativeFunction.Natives.x1EAF30FCFBF5AF74<bool>(nodeId))
                     {
                         if (NativeFunction.Natives.x4F5070AA58F69279<bool>(nodeId))
                         {
                             if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsCoordOnScreen(randomNode))
                             {
-                                if (NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(randomNode.X, randomNode.Y, randomNode.Z, out Vector3 _, out float heading, 0b1001, 3.0f, 0f))
+                                if (NativeFunction.Natives.GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(randomNode.X, randomNode.Y, randomNode.Z, 1, out Vector3 _, out float heading, out int _, 1, 3f, 0f))
                                 {
                                     Spawnpoint ret = new Spawnpoint(randomNode, heading);
                                     $"Slow road found at {i + 1} tries, that process took {sw.ElapsedMilliseconds} ms".ToLog();

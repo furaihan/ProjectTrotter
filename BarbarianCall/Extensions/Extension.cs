@@ -41,13 +41,7 @@ namespace BarbarianCall.Extensions
                 NativeFunction.Natives.DRAW_MARKER((int)type, pos.X, pos.Y, pos.Z, dir.X, dir.Y, dir.Z, rot.X, rot.Y, rot.Z, scale.X,
                     scale.Y, scale.Z, color.R, color.G, color.B, color.A, bobUpAndDown, faceCamera, 2, rotateY, null, null, drawOnEntity);
             }
-        }
-        internal static void SetBlipNmae(this Blip blip, string name)
-        {
-            NativeFunction.Natives.BEGIN_TEXT_COMMAND_SET_BLIP_NAME("STRING");
-            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(name);
-            NativeFunction.Natives.END_TEXT_COMMAND_SET_BLIP_NAME(blip);
-        }
+        }       
         internal static Model[] GetAudibleVehicleModel()
         {
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
@@ -76,13 +70,7 @@ namespace BarbarianCall.Extensions
         internal static bool IsEntityAVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
         internal static bool IsEntityAnObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);
         internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
-        internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
-        /// <summary>
-        /// Set blip sprite
-        /// </summary>
-        /// <param name="blip"></param>
-        /// <param name="spriteID">spriteID information: https://docs.fivem.net/docs/game-references/blips/</param>
-        internal static void SetBlipSprite(this Blip blip, int spriteID) => NativeFunction.Natives.SET_BLIP_SPRITE(blip, spriteID);
+        internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);  
         internal static string GetCardinalDirection(this Entity e, bool fullform) => GetCardinalDirection(e.Heading, fullform);
         internal static string GetCardinalDirection(this Entity e) => GetCardinalDirection(e.Heading, false);
         /// <summary>

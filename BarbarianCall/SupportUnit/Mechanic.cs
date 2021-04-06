@@ -5,6 +5,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Windows.Forms;
 using BarbarianCall.Types;
+using BarbarianCall.Freemode;
 using Rage;
 using BarbarianCall.Extensions;
 using RAGENativeUI;
@@ -128,6 +129,7 @@ namespace BarbarianCall.SupportUnit
 
                         Blip = MechanicPed.AttachBlip();
                         Blip.SetBlipSprite(446);
+                        BlipExtension.SetBlipHighDetail(Blip, true);
                         Blip.Color = HudColor.NetPlayer26.GetColor();
 
                         BrokenVehicleBlip = VehicleToFix.AttachBlip();
@@ -151,6 +153,9 @@ namespace BarbarianCall.SupportUnit
                         int slow = 0;
                         bool warped = false;
                         bool findRoadSide = false;
+                        FreemodePed fped = new FreemodePed(VehicleToFix.GetOffsetPositionFront(15f), LSPD_First_Response.Gender.Male);
+                        fped.SetMechanicComponent();
+                        fped.Dismiss();
                         TimeSpan allowWarpTimer = new TimeSpan(0, 0, 120);
                         Stopwatch driveSW = Stopwatch.StartNew();
                         while (task.IsActive)

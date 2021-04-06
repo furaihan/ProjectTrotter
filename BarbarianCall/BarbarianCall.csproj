@@ -45,14 +45,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\GrammarPolice.dll</HintPath>
     </Reference>
-    <Reference Include="LSPD First Response, Version=0.4.7575.29892, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="LSPD First Response, Version=0.4.7688.2267, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\LSPD First Response.dll</HintPath>
     </Reference>
     <Reference Include="RAGENativeUI">
       <HintPath>..\..\Dependencies\RAGENativeUI.dll</HintPath>
     </Reference>
-    <Reference Include="RagePluginHookSDK">
+    <Reference Include="RagePluginHookSDK, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\RagePluginHookSDK.dll</HintPath>
     </Reference>
     <Reference Include="StopThePed">
@@ -93,6 +94,7 @@
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />
     <Compile Include="AmbientEvent\DispatchCall.cs" />
+    <Compile Include="Extensions\BlipExtension.cs" />
     <Compile Include="Extensions\ColorExtension.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\TaskExtension.cs" />

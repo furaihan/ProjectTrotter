@@ -301,7 +301,7 @@ namespace BarbarianCall
                 try
                 {
                     "Attempting to register ped headshot".ToLog();
-                    uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
+                    uint headshotHandle = NativeFunction.Natives.xBA8805A1108A2515<uint>(ped);
                     var timer = new TimeSpan(0, 0, 10);
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     while (true)

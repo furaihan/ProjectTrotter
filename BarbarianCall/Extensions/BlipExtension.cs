@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Drawing;
+using Rage;
+using Rage.Native;
+
+namespace BarbarianCall.Extensions
+{
+    public static class BlipExtension
+    {
+        public static bool DoesBlipExist(Blip blip) => NativeFunction.Natives.DOES_BLIP_EXIST<bool>(blip);
+        public static void SetBlipDisplayType(Blip blip, BlipDisplayType displayType) => NativeFunction.Natives.SET_BLIP_DISPLAY(blip, (int)displayType);
+        public static void SetBlipHighDetail(Blip blip, bool highDetail) => NativeFunction.Natives.SET_BLIP_HIGH_DETAIL(blip, highDetail);
+        public static void SetBlipHiddenOnLegend(Blip blip, bool hidden) => NativeFunction.Natives.SET_BLIP_HIDDEN_ON_LEGEND(blip, hidden);
+        /// <summary>
+        /// Set blip sprite
+        /// </summary>
+        /// <param name="blip"></param>
+        /// <param name="spriteID">spriteID information: https://docs.fivem.net/docs/game-references/blips/</param>
+        public static void SetBlipSprite(this Blip blip, int spriteID) => NativeFunction.Natives.SET_BLIP_SPRITE(blip, spriteID);
+        public static void SetBlipName(this Blip blip, string name)
+        {
+            NativeFunction.Natives.BEGIN_TEXT_COMMAND_SET_BLIP_NAME("STRING");
+            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(name);
+            NativeFunction.Natives.END_TEXT_COMMAND_SET_BLIP_NAME(blip);
+        }
+        public static void ShowOutlineColor(Blip blip, Color color)
+        {
+            NativeFunction.Natives.SHOW_OUTLINE_INDICATOR_ON_BLIP(blip, true);
+            NativeFunction.Natives.SET_BLIP_SECONDARY_COLOUR(blip, color.R, color.G, color.B);
+        }
+        public static void HideOutlineColor(Blip blip) => NativeFunction.Natives.SHOW_OUTLINE_INDICATOR_ON_BLIP(blip, false);
+        public static void SetBlipShrink(Blip blip, bool shrink) => NativeFunction.Natives.x2B6D467DAB714E8D(blip, shrink);
+        public enum BlipDisplayType : int
+        {
+            Minimap = 5,
+            MainmapSelectable = 3,
+            BothMapUnselectable = 8,
+            BothMapSelectable = 2,
+            NoDisplay = 0
+        }
+    }
+}
