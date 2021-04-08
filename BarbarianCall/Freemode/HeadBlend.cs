@@ -77,7 +77,12 @@ namespace BarbarianCall.Freemode
         {
             NativeFunction.Natives.x50B56988B170AFDF(ped, index);
         }
-
+        public static EyeColor GetPedEyeColor(Ped ped)
+        {
+            int eyeColor = NativeFunction.Natives.x76BBA2CEE66D47E9<int>(ped);
+            return (EyeColor)eyeColor;
+        
+        }       
         public static void SetPedHeadOverlay(Ped ped, OverlayId overlayId, int index, float opacity)
         {
             NativeFunction.Natives.SetPedHeadOverlay(ped, (int)overlayId, index, opacity);

@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Drawing;
     using Rage;
+    using Rage.Native;
     using LSPD_First_Response;
     using HB = HeadBlend;
     public class FreemodePed : Ped
@@ -17,6 +18,16 @@
             set
             {
                 HB.SetPedHeadBlendData(this, value);
+            }
+        }
+        public EyeColor EyeColor { 
+            get
+            {
+                return HB.GetPedEyeColor(this);
+            } 
+            set
+            {
+                HB.SetPedEyeColor(this, value);
             }
         }
         public Gender Gender { 
@@ -331,7 +342,7 @@
             Leg = new PedComponent(PedComponent.EComponentID.Leg, 15, Peralatan.Random.Next(1, 16));
             Tops = new PedComponent(PedComponent.EComponentID.Tops, 69, Peralatan.Random.Next(1, 5));
             Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 25, 0, 0);
-            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, -1, 0);
+            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 80, Peralatan.Random.Next(5));
             //Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 45, 0, 0);
         }
     }

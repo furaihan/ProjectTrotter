@@ -280,8 +280,9 @@ namespace BarbarianCall.Callouts
             if (!ped) return false;
             if (ped.Tasks.CurrentTaskStatus == TaskStatus.Preparing) return false;
             if (ped.Tasks.CurrentTaskStatus == TaskStatus.InProgress) return false;
-            if (LSPDFR.IsPedBeingCuffed(ped) || LSPDFR.IsPedBeingFrisked(ped) || LSPDFR.IsPedBeingGrabbed(ped) || LSPDFR.IsPedInPursuit(ped) 
-                || LSPDFR.IsPedGettingArrested(ped) || pursuitPeds.Contains(ped) || LSPDFR.IsPedArrested(ped) || ped.IsDead) return false;
+            if (ped && (LSPDFR.IsPedBeingCuffed(ped) || LSPDFR.IsPedBeingFrisked(ped) || LSPDFR.IsPedBeingGrabbed(ped) || LSPDFR.IsPedInPursuit(ped) 
+                || LSPDFR.IsPedGettingArrested(ped) || pursuitPeds.Contains(ped) || LSPDFR.IsPedArrested(ped) || ped.IsDead || LSPDFR.IsPedStoppedByPlayer(ped)
+                || LSPDFR.IsPedBeingCuffedByPlayer(ped) || LSPDFR.IsPedBeingFriskedByPlayer(ped) || LSPDFR.IsPedBeingGrabbedByPlayer(ped))) return false;
             return true;
         }
 

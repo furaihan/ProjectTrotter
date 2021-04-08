@@ -30,7 +30,7 @@ namespace BarbarianCall.SupportUnit
                 return fixQueue;
             }
         }
-        public Ped MechanicPed { get; private set; }
+        public FreemodePed MechanicPed { get; private set; }
         public Vehicle MechanicVehicle { get; private set; }
         public Vehicle VehicleToFix { get; private set; }
         public Blip Blip { get; private set; }
@@ -113,7 +113,7 @@ namespace BarbarianCall.SupportUnit
                         MechanicVehicle.PlaceOnGroundProperly();
                         MechanicVehicle.RandomiseLicensePlate();
 
-                        MechanicPed = new Ped(PedModels.GetRandomElement(), Position, Heading)
+                        MechanicPed = new FreemodePed(Position, Heading, LSPD_First_Response.Gender.Male)
                         {
                             IsExplosionProof = true,
                             MaxHealth = 3000,
@@ -122,6 +122,7 @@ namespace BarbarianCall.SupportUnit
                             CanBeTargetted = false,
                             RelationshipGroup = MechanicRelationship,
                         };
+                        MechanicPed.SetMechanicComponent();
                         MechanicPed.Metadata.BAR_Entity = true;
                         MechanicPed.MakeMissionPed(true);
                         MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
@@ -130,6 +131,7 @@ namespace BarbarianCall.SupportUnit
                         Blip = MechanicPed.AttachBlip();
                         Blip.SetBlipSprite(446);
                         BlipExtension.SetBlipHighDetail(Blip, true);
+                        BlipExtension.ShowOutlineColor(Blip, Color.Snow);
                         Blip.Color = HudColor.NetPlayer26.GetColor();
 
                         BrokenVehicleBlip = VehicleToFix.AttachBlip();
@@ -152,10 +154,7 @@ namespace BarbarianCall.SupportUnit
                             | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowMedianCrossing | VehicleDrivingFlags.YieldToCrossingPedestrians);
                         int slow = 0;
                         bool warped = false;
-                        bool findRoadSide = false;
-                        FreemodePed fped = new FreemodePed(VehicleToFix.GetOffsetPositionFront(15f), LSPD_First_Response.Gender.Male);
-                        fped.SetMechanicComponent();
-                        fped.Dismiss();
+                        bool findRoadSide = false;                      
                         TimeSpan allowWarpTimer = new TimeSpan(0, 0, 120);
                         Stopwatch driveSW = Stopwatch.StartNew();
                         while (task.IsActive)
