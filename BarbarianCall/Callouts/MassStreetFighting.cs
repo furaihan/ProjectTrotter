@@ -185,7 +185,7 @@ namespace BarbarianCall.Callouts
         }
         private void DisplaySummary()
         {
-            $"Suspect Count: {gangMemberCount * 2}~n~Suspect Summary:~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".DisplayNotifWithLogo("Mass Street Fighting");
+            $"~b~Suspect Count~s~: {gangMemberCount * 2}~n~~b~Suspect Summary~s~:~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".DisplayNotifWithLogo("Mass Street Fighting");
             End();
         }
         private void GetClose()
@@ -234,6 +234,7 @@ namespace BarbarianCall.Callouts
                         Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(250f));
                         Pursuit = LSPDFR.CreatePursuit();
                         bool pursuitCalled = false;
+                        bool heliPursuitBackup = false;
                         while (CalloutRunning)
                         {
                             if (CanEnd) break;
@@ -249,18 +250,37 @@ namespace BarbarianCall.Callouts
                             {
                                 if (p)
                                 {
-                                    if (!pursuitPeds.Contains(p) && p.DistanceTo(SpawnPoint) > 200f)
+                                    if (!pursuitPeds.Contains(p) && (p.DistanceTo(SpawnPoint) > 200f || p.IsFleeing))
                                     {
+                                        if (p)
+                                        {
+                                            string log = string.Format("{0} - {1} is fleeing or too far away, setting up a pursuit for {2}. {3}, {4}", LSPDFR.GetPersonaForPed(p).FullName, p.Model.Name, 
+                                                p.IsMale ? "him" : "her", p.IsFleeing, p.DistanceTo(SpawnPoint));
+                                            log.ToLog();
+                                        }
                                         LSPDFR.AddPedToPursuit(Pursuit, p);
                                         pursuitPeds.Add(p);
                                         if (!pursuitCalled)
                                         {
                                             LSPDFR.SetPursuitIsActiveForPlayer(Pursuit, true);
                                             pursuitCalled = true;
+                                            PursuitCreated = true;
                                         }
                                     }
                                 }
                             });
+                            if (PursuitCreated && !heliPursuitBackup)
+                            {
+                                GameFiber.StartNew(() =>
+                                {
+                                    GameFiber.Wait(Peralatan.Random.Next(7500, 15000));
+                                    if (CalloutRunning && LSPDFR.IsPursuitStillRunning(Pursuit))
+                                    {
+                                        API.LSPDFRFunc.RequestAirUnit(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
+                                        heliPursuitBackup = true;
+                                    }
+                                });
+                            }
                             GameFiber.Yield();
                         }
                     }
@@ -274,6 +294,30 @@ namespace BarbarianCall.Callouts
                     End();
                 }              
             });          
+        }
+        private void SituationTrapped()
+        {
+            CalloutMainFiber = new GameFiber(() =>
+            {
+                try
+                {
+                    Spawnpoint roadSide1 = SpawnManager.GetRoadSideSpawnPoint(SpawnPoint, SpawnHeading);
+                    if (roadSide1 != Spawnpoint.Zero) Participant.ForEach(p => p.Tasks.FollowNavigationMeshToPosition(roadSide1.Position, roadSide1.Heading, 1f, 2f));
+                    GetClose();
+                    if (CalloutRunning)
+                    {
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    $"{GetType().Name} callout crashes".ToLog();
+                    e.ToString().ToLog();
+                    NetExtension.SendError(e);
+                    $"{GetType().Name} callout crashed, please send your log".DisplayNotifWithLogo("Mass Street Fighting");
+                    End();
+                }
+            });
         }
         private bool IsPedOnAction(Ped ped)
         {

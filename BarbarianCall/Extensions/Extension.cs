@@ -61,7 +61,7 @@ namespace BarbarianCall.Extensions
                 string.Format("error when trying to get ped model name Hash: {0}, Rage Name: {1}, Exc: {2}", model.Hash, model.Name, e.Message).ToLog();
             }
             return string.Empty;
-        }       
+        }
         internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
         internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xADCDE75E1C60F32D<bool>(position.X, position.Y, position.Z, 3f, false, true, true, false, false, 0, false); //IS_POSITION_OCCUPIED
         internal static bool IsSuitableCar(this Model model) => model.IsCar && !model.IsBigVehicle && (model.NumberOfSeats == 2 || model.NumberOfSeats == 4) && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle;
@@ -116,6 +116,7 @@ namespace BarbarianCall.Extensions
             }
             return "Unknown version";
         }
+        internal static float GetRandomFloatInRange(float startRange, float endRange) => NativeFunction.Natives.GET_RANDOM_FLOAT_IN_RANGE<float>(startRange, endRange);
         internal static float GetRandomAbsoluteSingle() => GetRandomAbsoluteSingle(Peralatan.Random.Next(), Peralatan.Random.Next());
         internal static float GetRandomAbsoluteSingle(float min, float max) => GetRandomAbsoluteSingle(Math.Abs((int)Math.Round(min)), Math.Abs((int)Math.Round(max)));
         internal static float GetRandomAbsoluteSingle(int min, int max)
@@ -133,6 +134,14 @@ namespace BarbarianCall.Extensions
             }
             return position;
         }
+        internal static Vector3 GetEntryPositionOfVehicleDoor(Vehicle vehicle, int doorIndex) => NativeFunction.Natives.xC0572928C0ABFDA3<Vector3>(vehicle, doorIndex);
+        internal static Vector3 GetEntryPositionOfVehicleDoor(Vehicle vehicle, VehicleDoorIndex doorIndex)
+        {
+            Vector3 ret = GetEntryPositionOfVehicleDoor(vehicle, (int)doorIndex);
+            ret.ToString().ToLog();
+            return ret;
+        }
+        internal static void SetPedVehicleForcedSeatUsage(Ped ped, Vehicle vehicle, int seatIndex) => NativeFunction.Natives.SET_PED_VEHICLE_FORCED_SEAT_USAGE(ped, vehicle, seatIndex, 2, -2);
         internal static void DeleteRelationshipGroup(RelationshipGroup relationshipGroup)
         {
             bool exist = false;

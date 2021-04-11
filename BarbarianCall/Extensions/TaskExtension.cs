@@ -70,6 +70,13 @@ namespace BarbarianCall.Extensions
             NativeFunction.Natives.TASK_VEHICLE_GOTO_NAVMESH(ped, vehicle, destination.X, destination.Y, destination.Z, speed, 156f, 5.0f);
             return Task.GetTask(ped, "TASK_VEHICLE_GOTO_NAVMESH");
         }
+        public static Task EscortVehicle(this Ped ped, Vehicle targetVehicle, EscortVehicleMode mode, float speed, VehicleDrivingFlags drivingFlags, float minDistance, float noRoadDistance)
+            => EscortVehicle(ped, ped.CurrentVehicle, targetVehicle, mode, speed, drivingFlags, minDistance, noRoadDistance);
+        public static Task EscortVehicle(this Ped ped, Vehicle vehicleUsedbyPed, Vehicle vehicleToEscort, EscortVehicleMode mode, float speed, VehicleDrivingFlags drivingFlags, float minDistance, float noRoadDistance)
+        {
+            NativeFunction.Natives.TASK_VEHICLE_ESCORT(ped, vehicleUsedbyPed, vehicleToEscort, (int)mode, speed, (int)drivingFlags, minDistance, -1, noRoadDistance);
+            return Task.GetTask(ped, "TASK_VEHICLE_ESCORT");
+        }
         public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vector3 destination, float speed = 30.0f) => DriveVehicleWithNavigationMesh(ped, ped.CurrentVehicle, destination, speed);
         public static void PlayVehicleAnimation(this Vehicle vehicle, string animDict, string animName) => NativeFunction.Natives.TASK_VEHICLE_PLAY_ANIM(vehicle, animDict, animName);
         public static void PlayEntityAnim(this Entity entity, AnimationDictionary animDict, string animName, bool loop = false, bool stayInAnim = false)
@@ -79,5 +86,14 @@ namespace BarbarianCall.Extensions
         }
         public static void StopEntityAnimation(this Entity entity, AnimationDictionary animDict, string animName) => NativeFunction.Natives.STOP_ENTITY_ANIM(entity, animName, animDict.Name, 0);
         public static bool IsEntityPlayingAnim(this Entity entity, string animDict, string animName) => NativeFunction.Natives.x1F0B79228E461EC9<bool>(entity, animDict, animName, 3); //IS_ENTITY_PLAYING_ANIM
+        public enum EscortVehicleMode : int
+        {
+            Behind = -1,
+            Ahead,
+            Left,
+            Right,
+            BackLeft,
+            BackRight
+        }
     }
 }

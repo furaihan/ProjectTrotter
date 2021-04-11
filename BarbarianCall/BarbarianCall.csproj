@@ -49,12 +49,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\LSPD First Response.dll</HintPath>
     </Reference>
-    <Reference Include="RAGENativeUI">
+    <Reference Include="RAGENativeUI, Version=1.7.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\RAGENativeUI.dll</HintPath>
     </Reference>
-    <Reference Include="RagePluginHookSDK, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dependencies\RagePluginHookSDK.dll</HintPath>
+    <Reference Include="RagePluginHook, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\RagePluginHook.1.86.1\lib\net472\RagePluginHook.dll</HintPath>
     </Reference>
     <Reference Include="StopThePed">
       <HintPath>..\..\Dependencies\StopThePed.dll</HintPath>
@@ -118,6 +118,8 @@
     <Compile Include="Types\Spawnpoint.cs" />
     <Compile Include="Types\Speech.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

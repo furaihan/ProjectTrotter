@@ -1,12 +1,11 @@
-﻿namespace BarbarianCall.Freemode
+﻿using System;
+using System.Linq;
+using Rage;
+using LSPD_First_Response;
+using HB = BarbarianCall.Freemode.HeadBlend;
+
+namespace BarbarianCall.Freemode
 {
-    using System;
-    using System.Linq;
-    using System.Drawing;
-    using Rage;
-    using Rage.Native;
-    using LSPD_First_Response;
-    using HB = HeadBlend;
     public class FreemodePed : Ped
     {
         public HeadBlendData HeadBlendData
@@ -342,7 +341,7 @@
             Leg = new PedComponent(PedComponent.EComponentID.Leg, 15, Peralatan.Random.Next(1, 16));
             Tops = new PedComponent(PedComponent.EComponentID.Tops, 69, Peralatan.Random.Next(1, 5));
             Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 25, 0, 0);
-            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 80, Peralatan.Random.Next(5));
+            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 136, Peralatan.Random.Next(21));
             //Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 45, 0, 0);
         }
     }
