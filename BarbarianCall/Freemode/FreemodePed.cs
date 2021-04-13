@@ -19,7 +19,8 @@ namespace BarbarianCall.Freemode
                 HB.SetPedHeadBlendData(this, value);
             }
         }
-        public EyeColor EyeColor { 
+        public EyeColor EyeColor 
+        { 
             get
             {
                 return HB.GetPedEyeColor(this);
@@ -29,7 +30,8 @@ namespace BarbarianCall.Freemode
                 HB.SetPedEyeColor(this, value);
             }
         }
-        public Gender Gender { 
+        public Gender Gender 
+        { 
             get 
             {
                 return Model.Hash == 0x705E61F2 ? Gender.Male : Gender.Female;
@@ -325,8 +327,13 @@ namespace BarbarianCall.Freemode
             }
             HeadBlendData.ToString().ToLog();
         }
+        public void RandomizeTextureFromCurrentDrawable()
+        {
+
+        }
         public void SetRobberComponent()
         {
+            if (Gender == Gender.Female) return;
             Torso = new PedComponent(PedComponent.EComponentID.Torso, 0, 0, 0);
             Leg = new PedComponent(PedComponent.EComponentID.Leg, 34, 0, 0);
             Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 45, 0, 0);
@@ -337,6 +344,7 @@ namespace BarbarianCall.Freemode
         }
         public void SetMechanicComponent()
         {
+            if (Gender == Gender.Female) return;
             Torso = new PedComponent(PedComponent.EComponentID.Torso, 194, Peralatan.Random.Next(1, 8));
             Leg = new PedComponent(PedComponent.EComponentID.Leg, 15, Peralatan.Random.Next(1, 16));
             Tops = new PedComponent(PedComponent.EComponentID.Tops, 69, Peralatan.Random.Next(1, 5));

@@ -40,7 +40,7 @@ namespace BarbarianCall.SupportUnit
         /// set to 1 to make the vehicle always be repaired
         /// </summary>
         public float SuccessProbability { get; set; } = 0.825f;
-        public bool DismissFixedVehicle { get; set; } = true;
+        public bool DismissFixedVehicle { get; set; } = false;
         public float MinimumSpawnDistance { get; set; } = 150f;
         public float MaximumSpawnDistance { get; set; } = 350f;
         public float MaximumSpeed { get; set; } = 20f;
@@ -51,9 +51,7 @@ namespace BarbarianCall.SupportUnit
         public enum ERepairStatus { Repairing, Perfect, Imperfect, Failed }
         public ERepairStatus RepairStatus { get; private set; }
         private static List<Model> vehModels = new List<Model>() { "riata", "rebel", "bodhi2", "rebel2", "sadler" };
-        private static List<Model> pedModels = new List<Model>() { "s_m_y_armymech_01", "s_m_y_xmech_01", "s_m_y_xmech_02", "mp_m_waremech_01", "s_m_y_xmech_02_mp", "s_m_m_gaffer_01" };
         public List<Model> VehicleModels { get { return vehModels; } set { vehModels = value; } }
-        public List<Model> PedModels { get { return pedModels; } set { pedModels = value; } }
         private enum EMethodPassed { Prepare, Respond, Repair, CleanUp }
         private EMethodPassed MethodPassed;
         private Rage.Object ToolBox1;
@@ -127,6 +125,8 @@ namespace BarbarianCall.SupportUnit
                         MechanicPed.MakeMissionPed(true);
                         MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
                         LSPD_First_Response.Mod.API.Functions.SetPedCantBeArrestedByPlayer(MechanicPed, true);
+                        var skin = LSPD_First_Response.Engine.Scripting.Entities.VehicleSkin.FromVehicle(MechanicVehicle);
+                        skin.Model.ToLog();
 
                         Blip = MechanicPed.AttachBlip();
                         Blip.SetBlipSprite(446);
@@ -496,8 +496,6 @@ namespace BarbarianCall.SupportUnit
             {
                 var path = @"Plugins\LSPDFR\BarbarianCall\SupportUnit\Mechanic.ini";
                 InitializationFile mechanicIni = new InitializationFile(path, true);
-                var stringPeds = mechanicIni.ReadString("Mechanic", "PedModels", "s_m_y_armymech_01 s_m_y_xmech_01 s_m_y_xmech_02 mp_m_waremech_01 s_m_y_xmech_02_mp").ToLower();
-                var modelPeds = stringPeds.Split(' ').Select(s => new Model(s)).Where(m => m.IsValid).ToList();
                 var stringVehs = mechanicIni.ReadString("Mechanic", "VehicleModels", "riata rebel bodhi2 rebel2 sadler").ToLower();
                 var modelVehs = stringVehs.Split(' ').Select(s => new Model(s)).Where(m => m.IsValid).ToList();
                 float maxDis = mechanicIni.ReadSingle("Mechanic", "SpawnMaximumDistance", 350);
@@ -505,12 +503,10 @@ namespace BarbarianCall.SupportUnit
                 float speed = mechanicIni.ReadSingle("Mechanic", "MaximumSpeed", 20);
                 float prob = mechanicIni.ReadSingle("Mechanic", "SuccessProbability", 0.825f);
 #if DEBUG
-                stringPeds.ToLog();
                  stringVehs.ToLog();
                 $"MaximumDistance: {maxDis}. MinimumDistance: {minDis}. Speed: {speed}. Probability: {prob}".ToLog();
-                $"PL: {modelPeds.Count}. VL:{modelVehs.Count}".ToLog();
+                $"VL:{modelVehs.Count}".ToLog();
 #endif
-                if (modelPeds.Count > 0) PedModels = modelPeds;
                 if (modelVehs.Count > 0) VehicleModels = modelVehs;
                 MaximumSpawnDistance = maxDis;
                 MinimumSpawnDistance = minDis;

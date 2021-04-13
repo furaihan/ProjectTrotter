@@ -30,6 +30,7 @@ namespace BarbarianCall.Callouts
         private static readonly uint[] meleeWeapon = { 0x92A27487, 0x958A4A8F, 0xF9E6AA4B, 0x84BD7BFD, 0x4E875F73, 0xF9DCBF2D, 0xD8DF3C3C, 0x99B507EA, 0xDD5DF8D9, 0xDFE37640, 0x19044EE0, 0xCD274149, 0x3813FC08 };
         private RelationshipGroup gang1Relationship;
         private RelationshipGroup gang2Relationship;
+        private Checkpoint checkpoint;
         public override bool OnBeforeCalloutDisplayed()
         {
             CalloutRunning = false;
@@ -185,6 +186,7 @@ namespace BarbarianCall.Callouts
         }
         private void DisplaySummary()
         {
+            if (checkpoint) checkpoint.Delete();
             $"~b~Suspect Count~s~: {gangMemberCount * 2}~n~~b~Suspect Summary~s~:~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".DisplayNotifWithLogo("Mass Street Fighting");
             End();
         }
@@ -233,6 +235,12 @@ namespace BarbarianCall.Callouts
                     {
                         Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(250f));
                         Pursuit = LSPDFR.CreatePursuit();
+                        try
+                        {
+                            Spawnpoint slowR = SpawnManager.GetSlowRoadSpawnPoint(PlayerPed.Position, 50, 100);
+                            if (slowR != Spawnpoint.Zero) checkpoint = new Checkpoint(Checkpoint.CheckpointIcon.Cyclinder, slowR, 5f, 80, Color.HotPink, Color.Gold);
+                        }
+                        catch { }                     
                         bool pursuitCalled = false;
                         bool heliPursuitBackup = false;
                         while (CalloutRunning)
@@ -271,13 +279,13 @@ namespace BarbarianCall.Callouts
                             });
                             if (PursuitCreated && !heliPursuitBackup)
                             {
+                                heliPursuitBackup = true;
                                 GameFiber.StartNew(() =>
                                 {
                                     GameFiber.Wait(Peralatan.Random.Next(7500, 15000));
                                     if (CalloutRunning && LSPDFR.IsPursuitStillRunning(Pursuit))
                                     {
                                         API.LSPDFRFunc.RequestAirUnit(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
-                                        heliPursuitBackup = true;
                                     }
                                 });
                             }

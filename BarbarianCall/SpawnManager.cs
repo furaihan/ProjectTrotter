@@ -74,12 +74,12 @@ namespace BarbarianCall
             {
                 if (i % 40 == 0) GameFiber.Yield();
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)Math.Abs(minimalDistance), (int)Math.Abs(maximumDistance)));
-                if (NativeFunction.Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, i % 5 + 1, out Vector3 nodeP, out float nodeH, out dynamic unk1, 1, 0x40400000, 0))
+                if (NativeFunction.Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, (i % 5) + 1, out Vector3 nodeP, out float nodeH, out NativeArgument _, 9, 3.0f, 2.5f))
                 {
                     if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsCoordOnScreen(nodeP))
                     {
                         Spawnpoint ret = new Spawnpoint(nodeP, nodeH);
-                        $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}. {unk1}".ToLog();
+                        $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                         return ret;
                     }

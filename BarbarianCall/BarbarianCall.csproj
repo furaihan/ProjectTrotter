@@ -109,7 +109,9 @@
     <Compile Include="Peralatan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnManager.cs" />
+    <Compile Include="SupportUnit\HeliSupport.cs" />
     <Compile Include="SupportUnit\Mechanic.cs" />
+    <Compile Include="Types\Checkpoint.cs" />
     <Compile Include="Types\CVehicle.cs" />
     <Compile Include="Freemode\HeadBlend.cs" />
     <Compile Include="Types\Enums.cs" />
