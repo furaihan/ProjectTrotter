@@ -22,7 +22,7 @@ namespace BarbarianCall.Callouts
         private List<Model> Gang2Model;
         private Dictionary<Ped, ESuspectStates> SuspectCondition;
         private Dictionary<Ped, string> PedNames;
-        private Dictionary<Ped, Tuple<ESuspectStates, string, uint>> SuspectParameters; /*TODO: Use this instead 2 dictionary above*/
+        private Dictionary<Ped, Tuple<ESuspectStates, string, uint?, string>> SuspectParameters; /*TODO: Use this instead 2 dictionary above*/
         int gangMemberCount;
         private int deadCount = 0;
         private int arrestedCount = 0;
@@ -41,6 +41,7 @@ namespace BarbarianCall.Callouts
             Participant = new List<Ped>();
             SuspectCondition = new Dictionary<Ped, ESuspectStates>();
             PedNames = new Dictionary<Ped, string>();
+            SuspectParameters = new Dictionary<Ped, Tuple<ESuspectStates, string, uint?, string>>();
             Gang1 = new List<Ped>();
             Gang2 = new List<Ped>();
             pursuitPeds = new List<Ped>();
@@ -72,7 +73,7 @@ namespace BarbarianCall.Callouts
         {            
             for (int i = 1; i <= gangMemberCount; i++)
             {
-                Ped gangMember = new Ped(Gang1Model.GetRandomElement(), SpawnPoint.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : SpawnPoint.GetHeadingTowards(PlayerPed));
+                Ped gangMember = new(Gang1Model.GetRandomElement(), SpawnPoint.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : SpawnPoint.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -82,13 +83,15 @@ namespace BarbarianCall.Callouts
                 gangMember.Metadata.BAR_Entity = true;
                 SuspectCondition.Add(gangMember, ESuspectStates.InAction);
                 PedNames.Add(gangMember, LSPDFR.GetPersonaForPed(gangMember).FullName);
+                string mugshot = gangMember.GetPedHeadshotTexture(out uint? handle);
+                SuspectParameters.Add(gangMember, new Tuple<ESuspectStates, string, uint?, string>(ESuspectStates.InAction, LSPDFR.GetPersonaForPed(gangMember).FullName, handle, mugshot));
             }
             Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 30, 50);
             if (sp2 == Vector3.Zero) SpawnManager.GetVehicleSpawnPoint2(Spawn.Position, 30, 50);
             if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(30, 50));
             for (int i = 1; i <= gangMemberCount; i++)
             {
-                Ped gangMember = new Ped(Gang2Model.GetRandomElement(), sp2.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
+                Ped gangMember = new(Gang2Model.GetRandomElement(), sp2.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -98,6 +101,8 @@ namespace BarbarianCall.Callouts
                 gangMember.Metadata.BAR_Entity = true;
                 SuspectCondition.Add(gangMember, ESuspectStates.InAction);
                 PedNames.Add(gangMember, LSPDFR.GetPersonaForPed(gangMember).FullName);
+                string mugshot = gangMember.GetPedHeadshotTexture(out uint? handle);
+                SuspectParameters.Add(gangMember, new Tuple<ESuspectStates, string, uint?, string>(ESuspectStates.InAction, LSPDFR.GetPersonaForPed(gangMember).FullName, handle, mugshot));
             }
             Participant.ForEach(p => p.SetPedAsWanted());
             gang1Relationship.SetRelationshipWith(gang2Relationship, Relationship.Hate);
@@ -163,7 +168,10 @@ namespace BarbarianCall.Callouts
                         }
                     }
                     else if (p) Peralatan.ToLog(string.Format("Dictionary Key doesn't exist: {0} - {1} - {2}", SuspectCondition.Count, (uint)p.Handle, p.Model.Name));
-                    else Peralatan.ToLog("SOMETHING WENT WRONG, SEND YOUR LOG PLS!!");
+                    else
+                    {
+                        Peralatan.ToLog("SOMETHING WENT WRONG, SEND YOUR LOG PLS!!"); //should never happen
+                    }
                 });
                 if (SuspectCondition.Values.All(x => x != ESuspectStates.InAction)) CanEnd = true;
                 if (CanEnd) DisplaySummary();
@@ -180,6 +188,7 @@ namespace BarbarianCall.Callouts
                     if (p) p.Dismiss();
                 }
             });
+            if (checkpoint) checkpoint.Delete();
             Extension.DeleteRelationshipGroup(gang1Relationship);
             Extension.DeleteRelationshipGroup(gang2Relationship);
             base.End();

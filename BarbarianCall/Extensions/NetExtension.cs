@@ -20,8 +20,8 @@ namespace BarbarianCall.Extensions
                 {
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     if (!IsInternetConnected()) return;
-                    System.Text.StringBuilder @string = new System.Text.StringBuilder();
-                    StackTrace st = new StackTrace(e, true);
+                    System.Text.StringBuilder @string = new();
+                    StackTrace st = new(e, true);
                     string toSend = "";
                     foreach (StackFrame frame in st.GetFrames())
                     {
@@ -33,11 +33,11 @@ namespace BarbarianCall.Extensions
                         @string.Append($"[{frame.GetMethod().Name}] " + fileName + " line: " + lNumber.ToString() + " ==> ");
                     }
                     toSend = @string.ToString();
-                    Uri ifttt = new Uri("https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF");
-                    Thread SendException = new Thread(() =>
+                    Uri ifttt = new("https://maker.ifttt.com/trigger/logReport/with/key/cWTXitSTdZE0TAGgM6ZgEF");
+                    Thread SendException = new(() =>
                     {
-                        using HttpClient httpClient = new HttpClient();
-                        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, ifttt)
+                        using HttpClient httpClient = new();
+                        using HttpRequestMessage request = new(HttpMethod.Post, ifttt)
                         {
                             Content = new StringContent($"{{\"value1\":\"{e.GetType().Name} - {e.Message}\",\"value2\":\"{toSend}\",\"value3\":\"{Game.LocalPlayer.Name} - {e.Source}\"}}".Replace("\\", "\\\\"))
                         };
@@ -64,7 +64,7 @@ namespace BarbarianCall.Extensions
         internal static bool IsInternetConnected()
         {
             bool Success = false;
-            Thread Pinger = new Thread(() =>
+            Thread Pinger = new(() =>
             {
                 Ping ping = null;
                 try
@@ -115,10 +115,10 @@ namespace BarbarianCall.Extensions
                 try
                 {
                     if (!IsInternetConnected()) return;
-                    Thread FetchUpdate = new Thread(() =>
+                    Thread FetchUpdate = new(() =>
                     {
-                        Uri UpdateAPI = new Uri("");
-                        WebClient Client = new WebClient();
+                        Uri UpdateAPI = new("");
+                        WebClient Client = new();
                         string WebVersion = Client.DownloadString(UpdateAPI);
                         if (Version.TryParse(WebVersion, out Version version))
                         {

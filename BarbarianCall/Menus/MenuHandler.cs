@@ -42,7 +42,7 @@ namespace BarbarianCall.Menus
                         }
                         if (Game.LocalPlayer.Character.LastVehicle)
                         {
-                            Mechanic mechanic = new Mechanic(Game.LocalPlayer.Character.LastVehicle);
+                            Mechanic mechanic = new(Game.LocalPlayer.Character.LastVehicle);
                             mechanic.DismissFixedVehicle = false;
                             mechanic.SuccessProbability = 1f;
                             mechanic.RespondToLocation();
@@ -56,7 +56,7 @@ namespace BarbarianCall.Menus
                             .OrderBy(v => v.DistanceTo(Game.LocalPlayer.Character)).FirstOrDefault();
                         if (brokenVeh)
                         {
-                            Mechanic mechanic = new Mechanic(brokenVeh);
+                            Mechanic mechanic = new(brokenVeh);
                             mechanic.RespondToLocation();
                         }
                         else Game.DisplayHelp("No nearby vehicle found to repair");

@@ -272,7 +272,7 @@ namespace BarbarianCall.Callouts
                     API.LSPDFRFunc.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                     StopWatch = System.Diagnostics.Stopwatch.StartNew();
                     bool air = false;
-                    TimeSpan airtime = new TimeSpan(0, 0, 0, Peralatan.Random.Next(6, 15), Peralatan.Random.Next(2525));
+                    TimeSpan airtime = new(0, 0, 0, Peralatan.Random.Next(6, 15), Peralatan.Random.Next(2525));
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();

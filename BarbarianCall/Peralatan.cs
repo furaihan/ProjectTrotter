@@ -18,7 +18,7 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new Random();
+        public static Random Random = new();
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
@@ -56,7 +56,7 @@ namespace BarbarianCall
         {
             int count = 0;
 
-            StringBuilder lpAudio = new StringBuilder(56, 100);
+            StringBuilder lpAudio = new(56, 100);
             foreach (char c in licensePlate)
             {
                 count++;
@@ -171,7 +171,7 @@ namespace BarbarianCall
                 {"Hostage:", "~o~Hostage~s~:" },
                 {"Citizen:", "~o~Citizen~s~:" },
             };
-            List<string> modifiedDialogue = new List<string>();
+            List<string> modifiedDialogue = new();
             Dialogue.ForEach(cakap =>
             {
                 string modified = cakap;
@@ -301,7 +301,7 @@ namespace BarbarianCall
                 try
                 {
                     "Attempting to register ped headshot".ToLog();
-                    uint headshotHandle = NativeFunction.Natives.xBA8805A1108A2515<uint>(ped);
+                    uint headshotHandle = NativeFunction.Natives.RegisterPedheadshotTransparent<uint>(ped);
                     var timer = new TimeSpan(0, 0, 10);
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     while (true)
@@ -333,18 +333,18 @@ namespace BarbarianCall
         {
             try
             {
-                uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped); //RegisterPedHeadshotTransparent
+                uint headshotHandle = NativeFunction.Natives.RegisterPedheadshotTransparent<uint>(ped);
                 int startTime = Environment.TickCount;
-                DateTime endTime = DateTime.UtcNow + new TimeSpan(0, 0, 10);
+                Stopwatch sw = Stopwatch.StartNew();
                 while (true)
                 {
                     GameFiber.Yield();
                     if (NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle))
                     {
-                        $"Ped Headshot found with handle {headshotHandle}".ToLog();
+                        $"Ped Headshot found with handle {headshotHandle}, took {sw.ElapsedMilliseconds} ms".ToLog();
                         break;
                     }
-                    if (DateTime.UtcNow >= endTime) break;
+                    if (sw.ElapsedMilliseconds > TimeSpan.FromSeconds(5).TotalMilliseconds) break;
                 }
                 string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                 Handle = headshotHandle;
@@ -410,8 +410,8 @@ namespace BarbarianCall
 
         public static IList<T> GetRandomNumberOfElements<T>(this IList<T> list, int numOfElements, bool shuffle = false)
         {
-            List<T> givenList = new List<T>(list);
-            List<T> l = new List<T>();
+            List<T> givenList = new(list);
+            List<T> l = new();
             for (int i = 0; i < numOfElements; i++)
             {
                 T t = givenList.GetRandomElement(shuffle);
@@ -423,8 +423,8 @@ namespace BarbarianCall
 
         public static IEnumerable<T> GetRandomNumberOfElements<T>(this IEnumerable<T> enumarable, int numOfElements, bool shuffle = false)
         {
-            List<T> givenList = new List<T>(enumarable);
-            List<T> l = new List<T>();
+            List<T> givenList = new(enumarable);
+            List<T> l = new();
             for (int i = 0; i < numOfElements; i++)
             {
                 T t = givenList.Except(l).GetRandomElement(shuffle);
@@ -436,7 +436,7 @@ namespace BarbarianCall
         {
             if (string.IsNullOrWhiteSpace(text))
                 return "";
-            StringBuilder newText = new StringBuilder(text.Length * 2);
+            StringBuilder newText = new(text.Length * 2);
             newText.Append(text[0]);
             for (int i = 1; i < text.Length; i++)
             {
@@ -450,7 +450,7 @@ namespace BarbarianCall
         {
             List<Model> a = CommonVariables.GangPedModels.Values.GetRandomElement(m => m.All(mm => mm.IsValid), true);
             Persona pedPersona = Functions.GetPersonaForPed(ped);
-            Persona newWantedPersona = new Persona(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
+            Persona newWantedPersona = new(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
             {
                 Wanted = true,
                 Citations = pedPersona.Citations,

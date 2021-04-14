@@ -33,9 +33,9 @@ namespace BarbarianCall.Callouts
         private Ped Paramedic1;
         private Ped Paramedic2;
         private Vehicle Ambulance;
-        private readonly Model AmbulanceModel = new Model("AMBULANCE");
-        private readonly Model AmbulancePedModel = new Model(0xB353629E);
-        private readonly Model NotepadModel = new Model("prop_notepad_02");
+        private readonly Model AmbulanceModel = new("AMBULANCE");
+        private readonly Model AmbulancePedModel = new(0xB353629E);
+        private readonly Model NotepadModel = new("prop_notepad_02");
         private Rage.Object Notepad;
 
         private static readonly string[] tendToDeadIdles = { "idle_a", "idle_b", "idle_c" };
@@ -485,7 +485,7 @@ namespace BarbarianCall.Callouts
                     Suspect.PlayAmbientSpeech(null, Speech.GENERIC_SHOCKED_HIGH, 0, SpeechModifier.ForceShouted);
                     Game.DisplayHelp($"~y~Approach the suspect and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
                     Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    List<string> conv = new List<string>()
+                    List<string> conv = new()
                     {
                         "~r~Suspect~s~: " + proses2Sorry.GetRandomElement(),
                         "~b~Officer~s~: there is must be a reason this officer doing that",
@@ -572,7 +572,7 @@ namespace BarbarianCall.Callouts
                 }
             });
         }
-        private List<string> proses2Sorry = new List<string>()
+        private List<string> proses2Sorry = new()
         {
             "I'm sorry, I had to do this, this officer was pointed his gun at me",
             "I'm sorry, I was blackmailed by the officer, I had to stab him",
@@ -664,7 +664,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Yield();
                     }
                     if (!CalloutRunning) return;
-                    List<string> ambulanceConversation = new List<string>()
+                    List<string> ambulanceConversation = new()
                      {           
                         "~g~Paramedic~s~: Calm down officer, We can handle this, now you can search for the suspect",           
                         $"~g~Paramedic~s~: All i know he is driving a ~y~{susVehColor}-colored {SuspectCar.GetVehicleDisplayName()}~s~ with license plate ~g~{SuspectCar.LicensePlate}~s~",

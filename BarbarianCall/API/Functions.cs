@@ -41,7 +41,7 @@ namespace BarbarianCall.API
             $"Executing CallMechanic. Request From {Assembly.GetCallingAssembly().GetName().Name}".ToLog();
             if (vehicle)
             {
-                SupportUnit.Mechanic mechanic = new SupportUnit.Mechanic(vehicle);
+                SupportUnit.Mechanic mechanic = new(vehicle);
                 mechanic.RespondToLocation();
             }
             else "Vehicle is null".ToLog();
@@ -55,7 +55,7 @@ namespace BarbarianCall.API
             }
             if (Game.LocalPlayer.Character.LastVehicle)
             {
-                SupportUnit.Mechanic mechanic = new SupportUnit.Mechanic(Game.LocalPlayer.Character.LastVehicle)
+                SupportUnit.Mechanic mechanic = new(Game.LocalPlayer.Character.LastVehicle)
                 {
                     DismissFixedVehicle = false,
                     SuccessProbability = 1f

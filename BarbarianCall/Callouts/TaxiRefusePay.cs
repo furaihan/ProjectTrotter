@@ -19,7 +19,7 @@ namespace BarbarianCall.Callouts
     {
         private Ped TaxiDriver;
         private Vehicle Taxi;
-        private readonly Model TaxiModel = new Model(0xC703DB5F);
+        private readonly Model TaxiModel = new(0xC703DB5F);
         private RelationshipGroup TaxiRelation;
         private RelationshipGroup CriminalRelation;
         private ESuspectStates SuspectState;
@@ -467,7 +467,7 @@ namespace BarbarianCall.Callouts
                     Witness.WarpIntoVehicle(WitnessCar, -1);
                     if (Peralatan.Random.Next() % 5 == 0)
                     {
-                        Ped witnPass = new Ped(SpawnPoint, SpawnHeading);
+                        Ped witnPass = new(SpawnPoint, SpawnHeading);
                         witnPass.MakeMissionPed();
                         witnPass.WarpIntoVehicle(WitnessCar, 0);
                         CalloutEntities.Add(witnPass);
@@ -506,7 +506,7 @@ namespace BarbarianCall.Callouts
                     Suspect.Position = spawnPoint;
                     Suspect.IsVisible = true;
                     Suspect.Tasks.Wander();
-                    List<string> witnessFlow = new List<string>()
+                    List<string> witnessFlow = new()
                      {
                         "Officer: Hello are you the caller?",
                         "Witness: Yes, i was wandering around and then this incident happen",
@@ -541,7 +541,7 @@ namespace BarbarianCall.Callouts
                     Blip = new Blip(Suspect.Position.Around(10f), 70f);
                     Blip.Color = Color.Yellow;
                     Blip.EnableRoute(Color.Yellow);
-                    TimeSpan timeSpan = new TimeSpan(0, 0, 20);
+                    TimeSpan timeSpan = new(0, 0, 20);
                     StopWatch.Restart();
                     Vector3 curPos = Suspect.Position;
                     GameFiber.StartNew(() =>
@@ -737,7 +737,7 @@ namespace BarbarianCall.Callouts
                 }
             });
         }
-        private static readonly List<List<string>> commond = new List<List<string>>()
+        private static readonly List<List<string>> commond = new()
         {
             new List<string>()
             {

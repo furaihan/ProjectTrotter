@@ -15,8 +15,8 @@ namespace BarbarianCall.AmbientEvent
         {
             GameFiber.StartNew(delegate
             {
-                Stopwatch sw = new Stopwatch();
-                TimeSpan timer = new TimeSpan(0, 0, Peralatan.Random.Next(250, 850));
+                Stopwatch sw = new();
+                TimeSpan timer = new(0, 0, Peralatan.Random.Next(250, 850));
                 $"Starting event loop".ToLog();
                 $"First ambient event will start at {(DateTime.Now + timer).ToLongTimeString()}".ToLog();
                 sw.Start();

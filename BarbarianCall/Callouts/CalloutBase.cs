@@ -32,7 +32,7 @@ namespace BarbarianCall.Callouts
         public Spawnpoint Spawn = Types.Spawnpoint.Zero;
         public long Timer;
         public DateTime Time;
-        public TimeSpan TimeSpan = new TimeSpan(0, 0, 15);
+        public TimeSpan TimeSpan = new(0, 0, 15);
         public System.Diagnostics.Stopwatch StopWatch;
         public LHandle Pursuit;
         public LHandle PullOver;

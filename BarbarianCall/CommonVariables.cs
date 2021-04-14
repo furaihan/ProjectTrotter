@@ -29,19 +29,19 @@ namespace BarbarianCall
             Color.Aqua, Color.Beige, Color.Black, Color.Blue, Color.Brown, Color.DarkBlue, Color.DarkGreen, Color.DarkOrange, Color.DarkRed, Color.Gold, Color.Green,
             Color.LightBlue, Color.LightGreen, Color.LightYellow, Color.Maroon, Color.Orange, Color.Pink, Color.Purple, Color.Red, Color.Silver, Color.White, Color.Yellow
         };
-        public static List<string> DangerousVehicleItems = new List<string>
+        public static List<string> DangerousVehicleItems = new()
         {
             "a small cardboard filled with crystal methamphetamine", "an automatic rifle", "a small bag with 250 grams of cocain inside", "a bottle crates with full of molotov cocktail",
             "an USB with several hacking software", "an USB that contains a collection of child pornography videos", "a withcraft doll", "a withcraft doll and a photo of the mayor of Los Santos",
             "a heavvy sniper mk2", "a dismantled combat mg mk2", "50kg of unmarked powder", "several fake ID Card", "several stolen driver license", "several stolen vehicle registration"
         };
-        public static List<string> DangerousPedItem = new List<string>
+        public static List<string> DangerousPedItem = new()
         {
             "a plastic of ectasy", "a plastic of MDMA", "a plastic of cocaine", "a plastic of marijuana", "a plastic of cannibis", "a plastic of LSD", "a plastic of morphine", "a plastic of fentanyl",
             "a plastic of methamphetamine", "a plastic of tramadol", "a plastic of ketamine", "a plastic of PCP", "a plastic of opium", "a revolver", "a knife", "suppressor sniper",
             "molotov cocktail", "chains", "a sickle", "a folded money containing an unknown white powder"
         };
-        public static List<string> SuspiciousItems = new List<string>
+        public static List<string> SuspiciousItems = new()
         {
             "an underwear", "a pair of socks and an underwear", "suppressor sniper", "machete", "a stun gun", "survival knife", "an airsoft gun", "a hacking book",
             "a bag with several photos of different people", "a note with several phone numbers", "a pirated music album", "an USB with several pirated software",
@@ -49,7 +49,7 @@ namespace BarbarianCall
             "a map of vangelico jewelry store with some suspicious mark", "several surgical tools", "several bag of blood", "some mystical stuff", "several nails wrapped with newspaper",
             "several medicine"
         };
-        public static List<string> CommonItems = new List<string>
+        public static List<string> CommonItems = new()
         {
             "speaker", "religion-related book", "a portable fan", "a nail clipper", "a car key", "a remote", "a barbie doll", "an eraser", "a ballpoint", "a pencil",
             "several pencil", "several ballpoint", "a bandage", "several bandage", "first aid kit", "a sunglasses", "several sunglasses", "a pair of socks", "a pair of shoes",
@@ -63,7 +63,7 @@ namespace BarbarianCall
         public static Model[] MaleModel = Model.PedModels.Where(m => m.Name.ToLower().Substring(1, 3) == "_m_").ToArray();
         public static Model[] FemaleModel = Model.PedModels.Where(m => m.Name.ToLower().Substring(1, 3) == "_f_").ToArray();
         public static Model[] AudibleCarModel = Extension.GetAudibleVehicleModel().Where(m => m.IsSuitableCar()).ToArray();
-        public static Dictionary<string, List<Model>> GangPedModels = new Dictionary<string, List<Model>>()
+        public static Dictionary<string, List<Model>> GangPedModels = new()
         {
             {"Mexican", new List<Model>(){ "g_m_y_mexgang_01", "g_m_y_mexgoon_01", "g_m_y_mexgoon_02", "g_m_y_mexgoon_03", "g_m_y_mexgoon_03", "g_m_m_mexboss_01", "g_m_m_mexboss_02" } },
             {"Ballas", new List<Model>() { "g_m_y_ballasout_01", "g_m_y_ballaeast_01", "g_m_y_ballaorig_01", "ig_ballasog"} },
@@ -74,7 +74,7 @@ namespace BarbarianCall
             {"Armenian", new List<Model>(){ "g_m_m_armboss_01", "g_m_m_armgoon_01", "g_m_y_armgoon_02", "g_m_m_armlieut_01" } },
             {"The Lost MC", new List<Model>(){ "g_m_y_lost_01", "g_m_y_lost_02", "g_m_y_lost_03" } },
         };
-        public static Dictionary<string, int> RoadSpeedLimit = new Dictionary<string, int>()
+        public static Dictionary<string, int> RoadSpeedLimit = new()
         {
             { "Joshua Rd", 50 },
             { "East Joshua Road", 50 },

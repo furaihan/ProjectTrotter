@@ -37,7 +37,7 @@ namespace BarbarianCall.Menus
             };          
             pauseMenu.OnMenuClose += (s, e) => playerMugshotHandle.UnregisterPedHeadshot();
 
-            List<TabItem> CalloutList = new List<TabItem>();
+            List<TabItem> CalloutList = new();
 
             TabItem officerStabbedCall = new TabInteractiveListItem("Officer Stabbed", Callouts.CalloutBase.CreateMenu());
             CalloutList.Add(officerStabbedCall);
@@ -59,9 +59,9 @@ namespace BarbarianCall.Menus
             offStabCB = new UIMenuCheckboxItem("Officer Stabbed", true, "Enable or disable \"Officer Stabbed\" callout");
             taxiCB = new UIMenuCheckboxItem("Taxi Passenger Refuse To Pay", true, "Enable or disable \"Taxi Passenger Refuse To Pay\" callout");
             susVehCB = new UIMenuCheckboxItem("Strange Looking Vehicle", true, "Enable or disable \"Strange Looking Vehicle\" callout");
-            UIMenuItem gpSection = new UIMenuItem("Grammar Police Integration");
+            UIMenuItem gpSection = new("Grammar Police Integration");
             SetUIMenuAsSection(gpSection);
-            List<UIMenuItem> settings = new List<UIMenuItem>()
+            List<UIMenuItem> settings = new()
             {
                 gpSection, autoAvailable, otherUnitAudio, onSceneAudio, offStabCB, taxiCB, susVehCB
             };
@@ -78,7 +78,7 @@ namespace BarbarianCall.Menus
             MainMenu.CreateMenu();
             ProcessMenus();
         }
-        internal static List<UIMenuItem> sectionItem = new List<UIMenuItem>();
+        internal static List<UIMenuItem> sectionItem = new();
         private static void SetUIMenuAsSection(UIMenuItem menuItem)
         {
             menuItem.TextStyle = new TextStyle(TextFont.HouseScript, menuItem.ForeColor, 0.45f);

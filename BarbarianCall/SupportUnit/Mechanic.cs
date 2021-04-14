@@ -14,7 +14,7 @@ namespace BarbarianCall.SupportUnit
 {
     public class Mechanic
     {
-        private static readonly List<Vehicle> fixedVehs = new List<Vehicle>();
+        private static readonly List<Vehicle> fixedVehs = new();
         public static List<Vehicle> VehicleFixed
         {
             get
@@ -22,7 +22,7 @@ namespace BarbarianCall.SupportUnit
                 return fixedVehs;
             }
         }
-        private static readonly List<Vehicle> fixQueue = new List<Vehicle>();
+        private static readonly List<Vehicle> fixQueue = new();
         public static List<Vehicle> VehicleQueue
         {
             get
@@ -50,7 +50,7 @@ namespace BarbarianCall.SupportUnit
         public EMechanicStatus Status { get; private set; }
         public enum ERepairStatus { Repairing, Perfect, Imperfect, Failed }
         public ERepairStatus RepairStatus { get; private set; }
-        private static List<Model> vehModels = new List<Model>() { "riata", "rebel", "bodhi2", "rebel2", "sadler" };
+        private static List<Model> vehModels = new() { "riata", "rebel", "bodhi2", "rebel2", "sadler" };
         public List<Model> VehicleModels { get { return vehModels; } set { vehModels = value; } }
         private enum EMethodPassed { Prepare, Respond, Repair, CleanUp }
         private EMethodPassed MethodPassed;
@@ -58,7 +58,7 @@ namespace BarbarianCall.SupportUnit
         private Rage.Object ToolBox2;
         private Rage.Object Wrench;
         private AnimationTask JerryCan;
-        private readonly AnimationDictionary jc = new AnimationDictionary("move_weapon@jerrycan@generic");
+        private readonly AnimationDictionary jc = new("move_weapon@jerrycan@generic");
         private readonly RelationshipGroup MechanicRelationship;
         public Mechanic(Vehicle brokenVeh)
         {
@@ -155,7 +155,7 @@ namespace BarbarianCall.SupportUnit
                         int slow = 0;
                         bool warped = false;
                         bool findRoadSide = false;                      
-                        TimeSpan allowWarpTimer = new TimeSpan(0, 0, 120);
+                        TimeSpan allowWarpTimer = new(0, 0, 120);
                         Stopwatch driveSW = Stopwatch.StartNew();
                         while (task.IsActive)
                         {
@@ -459,7 +459,7 @@ namespace BarbarianCall.SupportUnit
                 else { hood.Close(instantly); }
             }
         }
-        private readonly List<string> handleDialogue = new List<string>()
+        private readonly List<string> handleDialogue = new()
         {
             "Hello, we will handle this vehicle",
             "Hello, thanks for calling, we will attempt to repair this vehicle",
@@ -469,7 +469,7 @@ namespace BarbarianCall.SupportUnit
             "Hello, it seems this vehicle is damaged very bad, we will attempting to repair it carefully",
             "Hello, let see what we got here"
         };
-        private readonly List<string> perfectDialogue = new List<string>()
+        private readonly List<string> perfectDialogue = new()
         {
             "This vehicle has been repaired successfully",
             "Sir, luckily the damage is not too bad, this vehicle is perfectly fine right now",
@@ -480,7 +480,7 @@ namespace BarbarianCall.SupportUnit
             "Perfectly Done!!, lucky you entrusted this to me",
             "The damage is pretty bad, but my mechanic skill can handle this perfectly"
         };
-        private readonly List<string> failedDialogue = new List<string>()
+        private readonly List<string> failedDialogue = new()
         {
             "Sorry, this vehicle is too hard to repair, i cant do anything",
             "I'm sorry, i tried my best but this vehicle is badly damaged",
@@ -495,7 +495,7 @@ namespace BarbarianCall.SupportUnit
             try
             {
                 var path = @"Plugins\LSPDFR\BarbarianCall\SupportUnit\Mechanic.ini";
-                InitializationFile mechanicIni = new InitializationFile(path, true);
+                InitializationFile mechanicIni = new(path, true);
                 var stringVehs = mechanicIni.ReadString("Mechanic", "VehicleModels", "riata rebel bodhi2 rebel2 sadler").ToLower();
                 var modelVehs = stringVehs.Split(' ').Select(s => new Model(s)).Where(m => m.IsValid).ToList();
                 float maxDis = mechanicIni.ReadSingle("Mechanic", "SpawnMaximumDistance", 350);

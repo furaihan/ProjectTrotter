@@ -13,7 +13,7 @@ namespace BarbarianCall.DivisiXml
     {
         public static List<Coordinate> Deserialize(string filename)
         {
-            XmlSerializer xml = new XmlSerializer(typeof(List<Coordinate>));
+            XmlSerializer xml = new(typeof(List<Coordinate>));
             TextReader reader = new StreamReader(filename);
             object obj = xml.Deserialize(reader);
             List<Coordinate> XmlData = (List<Coordinate>)obj;
@@ -35,12 +35,12 @@ namespace BarbarianCall.DivisiXml
             {
                 Peralatan.ToLog(string.Format("Reading XML File {0}", Path.GetFullPath(filename)));
                 Stopwatch sw = Stopwatch.StartNew();
-                List<Spawnpoint> ret = new List<Spawnpoint>();
-                XmlDocument xmlDocument = new XmlDocument();
+                List<Spawnpoint> ret = new();
+                XmlDocument xmlDocument = new();
                 xmlDocument.Load(filename);
                 foreach (XmlNode coordinate in xmlDocument.DocumentElement.SelectNodes("/BarbarianCall/Coordinate"))
                 {
-                    Spawnpoint spawnpoint = new Spawnpoint(
+                    Spawnpoint spawnpoint = new(
                         coordinate.Attributes["X"] != null ? Convert.ToSingle(coordinate.Attributes["X"].Value) : Spawnpoint.Zero.Position.X,
                         coordinate.Attributes["Y"] != null ? Convert.ToSingle(coordinate.Attributes["Y"].Value) : Spawnpoint.Zero.Position.Y,
                         coordinate.Attributes["Z"] != null ? Convert.ToSingle(coordinate.Attributes["Z"].Value) : Spawnpoint.Zero.Position.Z,
@@ -67,15 +67,15 @@ namespace BarbarianCall.DivisiXml
                 if (File.Exists(@"lspdfr\data\stations.xml"))
                 {
                     Peralatan.ToLog(string.Format("Attempting to read stations.xml file located in {0}", Path.GetFullPath(@"lspdfr\data\stations.xml")));
-                    List<Spawnpoint> stations = new List<Spawnpoint>();
-                    XmlDocument xml = new XmlDocument();
+                    List<Spawnpoint> stations = new();
+                    XmlDocument xml = new();
                     xml.Load(@"lspdfr\data\stations.xml");
                     foreach (XmlNode station in xml.SelectNodes("/PoliceStations/Station"))
                     {
                         string vectorString = station.ChildNodes[3].InnerText.Replace("f", string.Empty);
                         var v = vectorString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(s => Convert.ToSingle(s)).ToList();
                         float heading = Convert.ToSingle(station.ChildNodes[4].InnerText);
-                        Spawnpoint sp = new Spawnpoint(v[0], v[1], v[2], heading);
+                        Spawnpoint sp = new(v[0], v[1], v[2], heading);
                         Peralatan.ToLog($"Found a station location {sp} with name {station.ChildNodes[0].InnerText}");
                         stations.Add(sp);
                         nodeCount++;

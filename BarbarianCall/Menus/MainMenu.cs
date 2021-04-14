@@ -19,7 +19,7 @@ namespace BarbarianCall.Menus
         internal static void CreateMenu()
         {
             Pool = new MenuPool();
-            TextStyle title = new TextStyle(TextFont.ChaletComprimeCologne, Color.Ivory, 1.125f, TextJustification.Center);
+            TextStyle title = new(TextFont.ChaletComprimeCologne, Color.Ivory, 1.125f, TextJustification.Center);
             BarbarianCallMenu = new UIMenu("BarbarianCall", "")
             {
                 TitleStyle = title,
@@ -28,7 +28,7 @@ namespace BarbarianCall.Menus
                 WidthOffset = 160,
                 DescriptionSeparatorColor = HudColor.NetPlayer23.GetColor(),
             };
-            Sprite des = new Sprite("hei_dlc_orntbankb_txd", "gz_v_bkwood1", Point.Empty, Size.Empty);
+            Sprite des = new("hei_dlc_orntbankb_txd", "gz_v_bkwood1", Point.Empty, Size.Empty);
             BarbarianCallMenu.SetBannerType(des);
             Pool.Add(BarbarianCallMenu);
             setting = new UIMenuItem("Settings", "Open BarbarianCall Pause Menu Setting");

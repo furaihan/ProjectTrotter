@@ -171,7 +171,7 @@
 
         public static List<string> GetAllSpeeches()
         {
-            List<string> list = new List<string>();
+            List<string> list = new();
             foreach (FieldInfo item in typeof(Speech).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).Where(fi => fi.IsLiteral && !fi.IsInitOnly))
             {
                 list.Add((string)item.GetRawConstantValue());

@@ -9,7 +9,7 @@ namespace BarbarianCall.Types
     {
         private static bool _valid = false;
         public PoolHandle Handle { get; protected set; }
-        private static List<Ped> _groupMember = new List<Ped>();
+        private static List<Ped> _groupMember = new();
         public List<Ped> GroupMember => _groupMember;
         public Ped GroupLeader { get; private set; }
         public int MemberCount 
@@ -36,7 +36,7 @@ namespace BarbarianCall.Types
                 _valid = false;
                 return null;
             }
-            PedGroup pedGroup = new PedGroup
+            PedGroup pedGroup = new()
             {
                 Handle = handle,
                 GroupLeader = leader,

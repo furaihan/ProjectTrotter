@@ -14,8 +14,8 @@ namespace BarbarianCall.AmbientEvent
     {
         internal static void AmbientDispatchCall()
         {          
-            Stopwatch sw = new Stopwatch();
-            TimeSpan timer = new TimeSpan(0, 0, 0, Peralatan.Random.Next(250, 850), Peralatan.Random.Next(100, 985));
+            Stopwatch sw = new();
+            TimeSpan timer = new(0, 0, 0, Peralatan.Random.Next(250, 850), Peralatan.Random.Next(100, 985));
             "Starting ambient dispatch call Loop".ToLog();
             $"First ambient dispatch call should occuered at {(DateTime.Now + timer).ToLongTimeString()}".ToLog();
             sw.Start();

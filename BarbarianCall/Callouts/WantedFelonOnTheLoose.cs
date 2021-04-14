@@ -265,7 +265,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new List<FreemodePed>() { Driver, Passenger1, Passenger2, Passenger3 };
+                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
                     FreemodePed wanted = Suspects.GetRandomElement(fp => fp);
                     if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
                     GameFiber.StartNew(() =>
@@ -331,7 +331,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new List<FreemodePed>() { Driver, Passenger1, Passenger2, Passenger3 };
+                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
                     FreemodePed wanted = Suspects.GetRandomElement(fp => fp);
                     if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
                     GameFiber.StartNew(() =>
@@ -422,7 +422,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new List<FreemodePed>() { Driver, Passenger1, Passenger2, Passenger3 };
+                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
                     FreemodePed wanted = Suspects.GetRandomElement(fp => fp);                  
                     if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
                     GameFiber.StartNew(() =>
@@ -550,7 +550,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new List<FreemodePed>() { Driver, Passenger1, Passenger2, Passenger3 };
+                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
                     FreemodePed wanted = Suspects.GetRandomElement(fp => fp);
                     if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
                     GameFiber.StartNew(() =>

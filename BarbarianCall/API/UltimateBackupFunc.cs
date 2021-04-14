@@ -13,7 +13,7 @@ namespace BarbarianCall.API
         public static Tuple<Vehicle, Ped> GetUnit(EUltimateBackupUnitType unitType, Vector3 location)
         {
             Tuple<Vehicle, List<Ped>> ub = GetUnit(unitType, location, 1);
-            Tuple<Vehicle, Ped> ret = new Tuple<Vehicle, Ped>(ub.Item1, ub.Item2[0]);
+            Tuple<Vehicle, Ped> ret = new(ub.Item1, ub.Item2[0]);
             return ret;
         }
         public static Tuple<Vehicle, List<Ped>> GetUnit(EUltimateBackupUnitType backupType , Vector3 location, int numPeds)
