@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LSPD_First_Response.Mod.API;
 using Rage;
-using Rage.Native;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using RAGENativeUI.Elements;
 using BarbarianCall.Types;
@@ -76,7 +72,7 @@ namespace BarbarianCall.Callouts
         }
         public override bool OnBeforeCalloutDisplayed()
         {
-            GangModels = CommonVariables.GangPedModels.Values.GetRandomElement();
+            GangModels = Globals.GangPedModels.Values.GetRandomElement();
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -188,6 +184,20 @@ namespace BarbarianCall.Callouts
                 new UIMenuNumericScrollerItem<float>("Minimum Distance", "Set the callout minimum distance", 100f, 500f, 20f),
                 new UIMenuNumericScrollerItem<float>("Maximum Distance", "Set the callout maximum distance", 500f, 2000f, 50f)
             };
+        }
+        protected class SuspectProperty
+        {
+            public ESuspectStates SuspectState { get; set; }
+            public string FullName { get; set; }
+            public uint? MugshotHandle { get; set; }
+            public string MugshotTexture { get; set; }
+            public SuspectProperty(ESuspectStates suspectState, string name, uint? mugshotHandle, string mugshotTexture)
+            {
+                SuspectState = suspectState;
+                FullName = name;
+                MugshotHandle = mugshotHandle;
+                MugshotTexture = mugshotTexture;
+            }
         }
     }
 }

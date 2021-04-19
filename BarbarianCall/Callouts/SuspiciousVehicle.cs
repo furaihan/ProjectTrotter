@@ -35,7 +35,7 @@ namespace BarbarianCall.Callouts
                 Peralatan.ToLog("No nearby location found");
                 return false;
             }
-            CarModel = CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid, true);
+            CarModel = Globals.CarsToSelect.GetRandomElement(m => m.IsValid, true);
             CarModel.LoadAndWait();
             SuspectCar = new Vehicle(CarModel, Spawn, Spawn);
             SuspectCar.MakePersistent();
@@ -51,9 +51,9 @@ namespace BarbarianCall.Callouts
         public override bool OnCalloutAccepted()
         {
             CalloutRunning = true;
-            GangModels = CommonVariables.GangPedModels.Values.GetRandomElement();
+            GangModels = Globals.GangPedModels.Values.GetRandomElement();
             SuspectCar.RandomiseLicensePlate();
-            SuspectCar.PrimaryColor = CommonVariables.AudibleColor.GetRandomElement();
+            SuspectCar.PrimaryColor = Globals.AudibleColor.GetRandomElement();
             Suspect = new Ped(GangModels.GetRandomElement(m=> m.IsValid), Spawn, SpawnHeading);
             Suspect.MakeMissionPed();
             Suspect.WarpIntoVehicle(SuspectCar, -1);

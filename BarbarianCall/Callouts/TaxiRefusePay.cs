@@ -195,7 +195,7 @@ namespace BarbarianCall.Callouts
                 {
                     CalloutRunning = true;
                     if (Suspect) Suspect.Delete();
-                    Suspect = new Ped(CommonVariables.MaleModel.GetRandomElement(), SpawnPoint, SpawnHeading);
+                    Suspect = new Ped(Globals.MaleModel.GetRandomElement(), SpawnPoint, SpawnHeading);
                     Suspect.WarpIntoVehicle(Taxi, 2);
                     SuspectPersona = Functions.GetPersonaForPed(Suspect);
                     GameFiber.Wait(200);
@@ -462,7 +462,7 @@ namespace BarbarianCall.Callouts
                     if (StopThePedRunning) API.StopThePedFunc.InjectPedItem(Suspect, "~r~Pistol");
                     Witness = new Ped(SpawnPoint, SpawnHeading);
                     Witness.MakeMissionPed();
-                    WitnessCar = new Vehicle(CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid, true),
+                    WitnessCar = new Vehicle(Globals.CarsToSelect.GetRandomElement(m => m.IsValid, true),
                         Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
                     Witness.WarpIntoVehicle(WitnessCar, -1);
                     if (Peralatan.Random.Next() % 5 == 0)

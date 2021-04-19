@@ -59,8 +59,8 @@ namespace BarbarianCall.Callouts
             }           
             ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 40f);
             AddMinimumDistanceCheck(30f, SpawnPoint);
-            if (Peralatan.Random.Next() % 10 == 0) susVehModel = CommonVariables.MotorBikesToSelect.GetRandomElement(m => m.IsValid && m.NumberOfSeats == 2, true);
-            else susVehModel = CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid, true);
+            if (Peralatan.Random.Next() % 10 == 0) susVehModel = Globals.MotorBikesToSelect.GetRandomElement(m => m.IsValid && m.NumberOfSeats == 2, true);
+            else susVehModel = Globals.CarsToSelect.GetRandomElement(m => m.IsValid, true);
             susVehModel.LoadAndWait();
             CalloutPosition = SpawnPoint;
             CalloutMessage = "Officer Stabbed";
@@ -113,7 +113,7 @@ namespace BarbarianCall.Callouts
             Spawnpoint tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
             if (tempSpawn != Types.Spawnpoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
-            SuspectCar.PrimaryColor = CommonVariables.CommonUnderstandableColor.GetRandomElement();
+            SuspectCar.PrimaryColor = Globals.CommonUnderstandableColor.GetRandomElement();
             SuspectCar.RandomiseLicensePlate();
             SuspectCar.Metadata.BAR_Entity = true;
             Suspect = SuspectCar.CreateRandomDriver();

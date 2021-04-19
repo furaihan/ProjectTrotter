@@ -59,6 +59,10 @@ namespace BarbarianCall
                             Spawnpoint ret = new(nodeP, nodeH);
                             $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                            if (NativeFunction.Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(ret.Position.X, ret.Position.Y, ret.Position.Z, out int dens, out int flags))
+                            {
+                                string.Format("Density: {0}, Flags: {1}", dens, flags).ToLog();
+                            }
                             return ret;
                         }                        
                     }
@@ -79,7 +83,7 @@ namespace BarbarianCall
                     if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsCoordOnScreen(nodeP))
                     {
                         Spawnpoint ret = new(nodeP, nodeH);
-                        $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
+                        $"Vehicle Spawn 2 found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                         return ret;
                     }
@@ -232,12 +236,11 @@ namespace BarbarianCall
                 if (NativeFunction.Natives.xE50E52416CCF948B<bool>(v.X, v.Y, v.Z, i % 5, out Vector3 randomNode,true, 0f, 0f))
                 {
                     int nodeId = NativeFunction.Natives.x22D7275A79FE8215<int>(randomNode.X, randomNode.Y, randomNode.Z, 1, 11077936128f, 0f);
-                    $"Node Id: {nodeId}".ToLog();
                     if (NativeFunction.Natives.x1EAF30FCFBF5AF74<bool>(nodeId))
                     {
                         if (NativeFunction.Natives.x4F5070AA58F69279<bool>(nodeId))
                         {
-                            if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsCoordOnScreen(randomNode))
+                            if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsCoordOnScreen(randomNode) && pos.HeightDiff(randomNode) < 18f)
                             {
                                 if (NativeFunction.Natives.GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(randomNode.X, randomNode.Y, randomNode.Z, 1, out Vector3 _, out float heading, out int _, 1, 3f, 0f))
                                 {

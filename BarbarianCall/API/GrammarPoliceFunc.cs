@@ -1,4 +1,5 @@
 ﻿using GrammarPolice.Actions;
+using Func = GrammarPolice.API.Functions;
 
 namespace BarbarianCall.API
 {
@@ -10,42 +11,42 @@ namespace BarbarianCall.API
             switch (statusType)
             {
                 case EGrammarPoliceStatusType.Available:
-                    GrammarPolice.API.Functions.Available(playSound, displayNotification);
+                    Func.Available(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.StartPatrol:
-                    GrammarPolice.API.Functions.StartPatrol(playSound, displayNotification);
+                    Func.StartPatrol(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.Busy:
-                    GrammarPolice.API.Functions.Busy(playSound, displayNotification);
+                    Func.Busy(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.EnRoute:
                     Callout.Accept();
                     break;
                 case EGrammarPoliceStatusType.OnScene:
-                    GrammarPolice.API.Functions.Scene(playSound, displayNotification);
+                    Func.Scene(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.Investigation:
-                    GrammarPolice.API.Functions.Investigating(playSound, displayNotification);
+                    Func.Investigating(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.Emergency: case EGrammarPoliceStatusType.Panic:
-                    GrammarPolice.API.Functions.SetPanicStatus(playSound, displayNotification);
+                    Func.SetPanicStatus(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.InPursuit:
-                    GrammarPolice.API.Functions.InPursit(playSound, displayNotification);
+                    Func.InPursit(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.TrafficStop:
-                    GrammarPolice.API.Functions.TrafficStop(playSound, displayNotification);
+                    Func.TrafficStop(playSound, displayNotification);
                     break;
                 case EGrammarPoliceStatusType.ReturnToStation:
-                    GrammarPolice.API.Functions.ReturnToStation(playSound, displayNotification);
+                    Func.ReturnToStation(playSound, displayNotification);
                     break;
                 default:
-                    GrammarPolice.API.Functions.Busy(playSound, displayNotification);
+                    Func.Busy(playSound, displayNotification);
                     break;
             }
         }
-        public static string GetCallsign() => GrammarPolice.API.Functions.GetCallsign();
-        public static string GetCallsignAudio() => string.Join(" ", GrammarPolice.API.Functions.GetCallsignAudioParts());
+        public static string GetCallsign() => Func.GetCallsign();
+        public static string GetCallsignAudio() => string.Join(" ", Func.GetCallsignAudioParts());
         public enum EGrammarPoliceStatusType
         {
             Available,

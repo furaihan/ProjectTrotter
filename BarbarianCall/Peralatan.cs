@@ -71,12 +71,12 @@ namespace BarbarianCall
         internal static string GetColorAudio(Color color)
         {
             ToLog("Trying to get color audio");
-            List<int> audibleArgb = (from x in CommonVariables.AudibleColor select x.ToArgb()).ToList();
+            List<int> audibleArgb = (from x in Globals.AudibleColor select x.ToArgb()).ToList();
             Color selected;
             if (audibleArgb.Contains(color.ToArgb()))
             {
                 ToLog("Color match, converting to scanner audio");
-                selected = CommonVariables.AudibleColor[audibleArgb.ToList().IndexOf(color.ToArgb())];
+                selected = Globals.AudibleColor[audibleArgb.ToList().IndexOf(color.ToArgb())];
                 string ret = "COLOR_" + selected.Name.AddSpacesToSentence().Replace(" ", "_").ToUpper();
 #if DEBUG
                 ret.Print();
@@ -88,16 +88,20 @@ namespace BarbarianCall
         }
         internal static void RandomiseLicensePlate(this Vehicle vehicle)
         {
+            System.Security.Cryptography.RNGCryptoServiceProvider provider = new();
+            byte[] box = new byte[4];
+            provider.GetBytes(box);
+            Random plateRandomizerHandler = new(BitConverter.ToInt32(box, 0));
             if (vehicle)
             {
-                string plate =  Random.Next(10).ToString() +
-                                Random.Next(10).ToString() +
-                                (char)Random.Next(65, 91)  +
-                                (char)Random.Next(65, 91)  +
-                                (char)Random.Next(65, 91)  +
-                                Random.Next(10).ToString() +
-                                Random.Next(10).ToString() +
-                                Random.Next(10).ToString();
+                string plate =  plateRandomizerHandler.Next(10).ToString() +
+                                plateRandomizerHandler.Next(10).ToString() +
+                                (char)plateRandomizerHandler.Next(65, 91)  +
+                                (char)plateRandomizerHandler.Next(65, 91)  +
+                                (char)plateRandomizerHandler.Next(65, 91)  +
+                                plateRandomizerHandler.Next(10).ToString() +
+                                plateRandomizerHandler.Next(10).ToString() +
+                                plateRandomizerHandler.Next(10).ToString();
                 vehicle.LicensePlate = plate;
             }           
         }
@@ -113,7 +117,7 @@ namespace BarbarianCall
                 return makeName == null ? gameName : $"{makeName} {gameName}";
             }
         }
-        internal static String GetVehicleDisplayAudio(Vehicle vehicle)
+        internal static string GetVehicleDisplayAudio(Vehicle vehicle)
         {
             try
             {
@@ -125,7 +129,7 @@ namespace BarbarianCall
                     string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
                     string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
                     string modelName = vehicle.Model.Name;
-                    var audibles = CommonVariables.AudibleCarModel.Select(m => m.Name);
+                    var audibles = Globals.AudibleCarModel.Select(m => m.Name);
                     if (!audibles.Any(st => st.Equals(modelName, StringComparison.OrdinalIgnoreCase)) && char.IsDigit(modelName.Last()) && !modelName.StartsWith("0X", StringComparison.OrdinalIgnoreCase))
                         modelName = modelName.Remove(modelName.Length - 1);
                     return makeName == null ? vehicle.Model.Name.ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {modelName.ToUpper()}";
@@ -258,7 +262,7 @@ namespace BarbarianCall
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
         internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT") =>
-            Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
+            Game.DisplayNotification(textureDict, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static void DisplayNotifWithLogo(this string msg, out uint notifId, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") =>
             notifId = Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static string FormatKeyBinding(Keys modifierKey, Keys key)
@@ -301,13 +305,13 @@ namespace BarbarianCall
                 try
                 {
                     "Attempting to register ped headshot".ToLog();
-                    uint headshotHandle = NativeFunction.Natives.RegisterPedheadshotTransparent<uint>(ped);
+                    uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
                     var timer = new TimeSpan(0, 0, 10);
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     while (true)
                     {
                         GameFiber.Yield();
-                        if (NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle))
+                        if (NativeFunction.Natives.x7085228842B13A67<bool>(headshotHandle))
                         {
                             $"Ped Headshot found with handle {headshotHandle}".ToLog();
                             break;
@@ -317,6 +321,7 @@ namespace BarbarianCall
                     string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                     Game.DisplayNotification(txd, txd, title, subtitle, text);
                     //GameFiber.Wait(200);
+                    Globals.RegisteredPedHeadshot.Add(headshotHandle);
                     NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
                     $"Register ped headshot is took {stopwatch.ElapsedMilliseconds} ms".ToLog();
                 }
@@ -331,37 +336,45 @@ namespace BarbarianCall
         }
         internal static string GetPedHeadshotTexture(this Ped ped, out uint? Handle, string failedReturn = "WEB_LOSSANTOSPOLICEDEPT")
         {
+            Handle = null;
             try
             {
-                uint headshotHandle = NativeFunction.Natives.RegisterPedheadshotTransparent<uint>(ped);
+                if (!ped) throw new Rage.Exceptions.InvalidHandleableException(ped);
+                uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
                 int startTime = Environment.TickCount;
                 Stopwatch sw = Stopwatch.StartNew();
                 while (true)
                 {
                     GameFiber.Yield();
-                    if (NativeFunction.Natives.IsPedheadshotReady<bool>(headshotHandle))
+                    if (NativeFunction.Natives.x7085228842B13A67<bool>(headshotHandle))
                     {
                         $"Ped Headshot found with handle {headshotHandle}, took {sw.ElapsedMilliseconds} ms".ToLog();
                         break;
                     }
-                    if (sw.ElapsedMilliseconds > TimeSpan.FromSeconds(5).TotalMilliseconds) break;
+                    if (sw.ElapsedMilliseconds > TimeSpan.FromSeconds(5).TotalMilliseconds)
+                    {
+                        ToLog(string.Format("failed to get headshot because of timeout. {0}, {1}", Functions.GetPersonaForPed(ped).FullName, ped.Model.Name));
+                        return failedReturn;
+                    }
                 }
                 string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                 Handle = headshotHandle;
+                Globals.RegisteredPedHeadshot.Add(headshotHandle);
                 return txd;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 "Get ped headshot failed".ToLog();
+                e.ToString().ToLog();
             }
-            Handle = null;
             return failedReturn;
         }
         internal static void UnregisterPedHeadshot(this uint? handle)
         {
             if (handle.HasValue)
             {
-                NativeFunction.Natives.UnregisterPedheadshot<uint>(handle.Value);
+                if (NativeFunction.Natives.IS_PEDHEADSHOT_VALID<bool>(handle.Value)) NativeFunction.Natives.UnregisterPedheadshot<uint>(handle.Value);
+                else ToLog($"headshot with handle {handle.Value} is invalid");
             }
         }
 
@@ -448,7 +461,7 @@ namespace BarbarianCall
         }
         internal static void SetPedAsWanted(this Ped ped, out Persona newPersona)
         {
-            List<Model> a = CommonVariables.GangPedModels.Values.GetRandomElement(m => m.All(mm => mm.IsValid), true);
+            List<Model> a = Globals.GangPedModels.Values.GetRandomElement(m => m.All(mm => mm.IsValid), true);
             Persona pedPersona = Functions.GetPersonaForPed(ped);
             Persona newWantedPersona = new(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
             {

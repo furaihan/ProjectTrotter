@@ -43,10 +43,12 @@ namespace BarbarianCall.Callouts
             }
             SpawnPoint = Spawn;
             SpawnHeading = Spawn;
-            CarModel = CommonVariables.CarsToSelect.GetRandomElement(m => m.IsValid && CommonVariables.AudibleCarModel.Contains(m) && m.NumberOfSeats >= 4, true);
+            CarModel = Globals.CarsToSelect.GetRandomElement(m => m.IsValid && Globals.AudibleCarModel.Contains(m) && m.NumberOfSeats >= 4, true);
             CarModel.LoadAndWait();
-            SuspectCar = new Vehicle(CarModel, SpawnPoint, SpawnHeading);
-            SuspectCar.PrimaryColor = CommonVariables.AudibleColor.GetRandomElement();
+            SuspectCar = new(CarModel, SpawnPoint, SpawnHeading)
+            {
+                PrimaryColor = Globals.AudibleColor.GetRandomElement()
+            };
             SuspectCar.MakePersistent();
             SuspectCar.PlaceOnGroundProperly();
             CalloutAdvisory = string.Format("Vehicle Is: {0} {1}", SuspectCar.GetCarColor(), SuspectCar.GetVehicleDisplayName());
@@ -64,8 +66,10 @@ namespace BarbarianCall.Callouts
             CalloutRunning = true;
             SuspectCar.RandomiseLicensePlate();
             SuspectCar.Metadata.BAR_Entity = true;
-            Blip = new Blip(Spawn, 150);
-            Blip.Color = Yellow;
+            Blip = new Blip(Spawn, 150)
+            {
+                Color = Yellow
+            };
             Blip.EnableRoute(Yellow);
             Peralatan.ToLog($"{GetType().Name} | Preparing suspect...");
             Driver = new FreemodePed(Spawn, SpawnHeading, LSPD_First_Response.Gender.Male);
@@ -93,9 +97,9 @@ namespace BarbarianCall.Callouts
             Passenger1State = ESuspectStates.InAction;
             Passenger2State = ESuspectStates.InAction;
             Passenger3State = ESuspectStates.InAction;
-            Driver.WanderWithVehicle(35, VehicleDrivingFlags.Normal);
+            Driver.WanderWithVehicle(35, VehicleDrivingFlags.Emergency);
             SuspectCar.TopSpeed = 45f;
-            int num = Peralatan.Random.Next(3);
+            int num = Peralatan.Random.Next(4);
             switch (num)
             {
                 case 0:
@@ -103,6 +107,9 @@ namespace BarbarianCall.Callouts
                     break;
                 case 1:
                     SituationWar();
+                    break;
+                case 2:
+                    SituationPursuit();
                     break;
                 default:
                     SituationTrafficStopWar();
@@ -228,8 +235,10 @@ namespace BarbarianCall.Callouts
                     StopWatch.Restart();
                     curPos = SuspectCar.Position;
                     if (Blip) Blip.Delete();
-                    Blip = new Blip(SuspectCar.Position.Around2D(20f), 150f);
-                    Blip.Color = Yellow;
+                    Blip = new Blip(SuspectCar.Position.Around2D(20f), 150f)
+                    {
+                        Color = Yellow
+                    };
                     Blip.EnableRoute(Yellow);
                     LSPDFRFunc.PlayScannerAudioUsingPosition(string.Format("SUSPECT_HEADING {0} IN_OR_ON_POSITION", SuspectCar.GetCardinalDirectionLowDetailedAudio()), SuspectCar.Position);
                 }
@@ -380,12 +389,12 @@ namespace BarbarianCall.Callouts
                         {
                             p.Inventory.GiveNewWeapon(WeaponHashes.GetRandomElement(), -1, false);
                             LSPDFR.AddPedToPursuit(Pursuit, p);
-                            var item = "~r~" + CommonVariables.DangerousPedItem.GetRandomElement();
+                            var item = "~r~" + Globals.DangerousPedItem.GetRandomElement();
                             if (StopThePedRunning) StopThePedFunc.InjectPedItem(p, item);
                             LSPDFR.AddPedContraband(p, LSPD_First_Response.Engine.Scripting.Entities.ContrabandType.Misc, item);
                         }
                     });
-                    if (StopThePedRunning) StopThePedFunc.InjectVehicleItem(SuspectCar, "~r~" + CommonVariables.DangerousVehicleItems.GetRandomElement(), StopThePedFunc.EStopThePedVehicleSearch.SearchTrunk);
+                    if (StopThePedRunning) StopThePedFunc.InjectVehicleItem(SuspectCar, "~r~" + Globals.DangerousVehicleItems.GetRandomElement(), StopThePedFunc.EStopThePedVehicleSearch.SearchTrunk);
                     SuspectCar.TopSpeed = 125f;
                     GameFiber.Wait(3500);
                     PursuitCreated = true;
@@ -596,13 +605,15 @@ namespace BarbarianCall.Callouts
                     LSPDFR.SetPursuitLethalForceForced(Pursuit, true);
                     LSPDFRFunc.RequestBackup(SuspectCar.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                     StopWatch = Stopwatch.StartNew();
+                    bool heliRequested = false;
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (StopWatch.ElapsedMilliseconds > 8500 && LSPDFR.IsPursuitStillRunning(Pursuit))
+                        if (StopWatch.ElapsedMilliseconds > 8500 && LSPDFR.IsPursuitStillRunning(Pursuit) && !heliRequested)
                         {
                             LSPDFRFunc.RequestAirUnit(SuspectCar.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
-                            StopWatch.Reset();
+                            StopWatch.Stop();
+                            heliRequested = true;
                         }
                         if (CanEnd) break;
                     }

@@ -3,6 +3,8 @@ using System.Linq;
 using Rage;
 using LSPD_First_Response;
 using HB = BarbarianCall.Freemode.HeadBlend;
+using N = Rage.Native.NativeFunction;
+using System.Collections.Generic;
 
 namespace BarbarianCall.Freemode
 {
@@ -235,6 +237,19 @@ namespace BarbarianCall.Freemode
             Metadata.BAR_FreemodePed = true;
             Metadata.BAR_Entity = true;
         }
+        /// <summary>
+        /// Get freemode ped from regular ped, only work if the ped model is equal to <c>mp_m_freemode_01</c> or <c>mp_f_freemode_01</c>
+        /// </summary>
+        /// <param name="ped"></param>
+        /// <returns>return the ped instance as freemode ped, if it failed, then will return <c>null</c></returns>
+        public static FreemodePed FromRegularPed(Ped ped)
+        {
+            if (ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8)
+            {
+                return ped as FreemodePed;
+            }
+            return null;
+        }
         public void RandomizeFaceShape()
         {
             Random random = new((int)Game.GetHashKey(Guid.NewGuid().ToString("X")));
@@ -260,19 +275,19 @@ namespace BarbarianCall.Freemode
                 {
                     int index = olay switch
                     {
-                        OverlayId.Blemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blemishes) + 1),
-                        OverlayId.FacialHair => random.Next(HB.GetNumHeadOverlayValues(OverlayId.FacialHair) + 1),
-                        OverlayId.Eyebrows => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Eyebrows) + 1),
-                        OverlayId.Ageing => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Ageing) + 1),
+                        OverlayId.Blemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blemishes)),
+                        OverlayId.FacialHair => random.Next(HB.GetNumHeadOverlayValues(OverlayId.FacialHair)),
+                        OverlayId.Eyebrows => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Eyebrows)),
+                        OverlayId.Ageing => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Ageing)),
                         //OverlayId.Makeup => 255,
                         //OverlayId.Blush => 255,
-                        OverlayId.Complexion => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Complexion) + 1),
-                        OverlayId.SunDamage => random.Next(HB.GetNumHeadOverlayValues(OverlayId.SunDamage) + 1),
+                        OverlayId.Complexion => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Complexion)),
+                        OverlayId.SunDamage => random.Next(HB.GetNumHeadOverlayValues(OverlayId.SunDamage)),
                         //OverlayId.Lipstick => 255,
-                        OverlayId.Freckles => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Freckles) + 1),
-                        OverlayId.ChestHair => random.Next(HB.GetNumHeadOverlayValues(OverlayId.ChestHair) + 1),
-                        OverlayId.BodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.BodyBlemishes) + 1),
-                        OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes) + 1),
+                        OverlayId.Freckles => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Freckles)),
+                        OverlayId.ChestHair => random.Next(HB.GetNumHeadOverlayValues(OverlayId.ChestHair)),
+                        OverlayId.BodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.BodyBlemishes)),
+                        OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes)),
                         _ => 255
                     };
                     index = random.NextDouble() > 0.958475 ? 255 : index;
@@ -298,25 +313,24 @@ namespace BarbarianCall.Freemode
                 {
                     int index = olay switch
                     {
-                        OverlayId.Blemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blemishes) + 1),
+                        OverlayId.Blemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blemishes)),
                         //OverlayId.FacialHair => random.Next(28),
-                        OverlayId.Eyebrows => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Eyebrows) + 1),
-                        OverlayId.Ageing => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Ageing) + 1),
+                        OverlayId.Eyebrows => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Eyebrows)),
+                        OverlayId.Ageing => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Ageing)),
                         //OverlayId.Makeup => random.Next(74),
-                        OverlayId.Blush => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blush) + 1),
-                        OverlayId.Complexion => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Complexion) + 1),
-                        OverlayId.SunDamage => random.Next() % 2 == 0 ? 255 : random.Next(HB.GetNumHeadOverlayValues(OverlayId.SunDamage) + 1),
-                        OverlayId.Lipstick => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Lipstick) + 1),
-                        OverlayId.Freckles => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Freckles) + 1),
+                        OverlayId.Blush => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blush)),
+                        OverlayId.Complexion => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Complexion)),
+                        OverlayId.SunDamage => random.Next() % 2 == 0 ? 255 : random.Next(HB.GetNumHeadOverlayValues(OverlayId.SunDamage)),
+                        OverlayId.Lipstick => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Lipstick)),
+                        OverlayId.Freckles => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Freckles)),
                         //OverlayId.ChestHair => 255,
-                        OverlayId.BodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.BodyBlemishes) + 1),
-                        OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes) + 1),
+                        OverlayId.BodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.BodyBlemishes)),
+                        OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes)),
                         _ => 255
                     };
                     HB.SetPedHeadOverlay(this, olay, index, (float)Math.Round(random.NextDouble(), 1));
                     switch (olay)
                     {
-                        case OverlayId.Blush:
                         case OverlayId.Lipstick:
                             HB.SetPedHeadOverlayColor(this, olay, ColorType.BlushLipstick, index % 2 == 0 ? 0 : random.Next(1, 68), 0);
                             break;
@@ -329,7 +343,24 @@ namespace BarbarianCall.Freemode
         }
         public void RandomizeTextureFromCurrentDrawable()
         {
-
+            List<PedComponent> components = new List<PedComponent>()
+            {
+                Torso,
+                Leg,
+                Parachute,
+                Shoes,
+                Accessories,
+                UnderShirt,
+                BodyArmor,
+                Decal,
+                Tops
+            };
+            components.ForEach(c =>
+            {
+                int textureMax = N.Natives.GET_NUMBER_OF_PED_TEXTURE_VARIATIONS<int>(this, (int)c.ComponentID, c.DrawableID);
+                PedComponent dump = new(c.ComponentID, c.DrawableID, Peralatan.Random.Next(textureMax));
+                PedComponent.SetPedComponent(this, dump);
+            });
         }
         public void SetRobberComponent()
         {

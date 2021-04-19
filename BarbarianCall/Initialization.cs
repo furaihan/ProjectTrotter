@@ -5,10 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using BarbarianCall.AmbientEvent;
 using BarbarianCall.Extensions;
 
@@ -18,6 +14,7 @@ namespace BarbarianCall
     {
         public static void Main()
         {
+            GameFiber.Wait(8000);
             Game.DisplayNotification("~r~BARBARIANCALL FAILED TO LOAD, PLEASE PUT THE DLL FILES INSIDE ~g~\"Plugins/LSPDFR\"~r~ FOLDER");
             return;
         }
@@ -49,7 +46,7 @@ namespace BarbarianCall
                 }
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
-                $"Found male model: {CommonVariables.MaleModel.Length}".ToLog();
+                $"Found male model: {Globals.MaleModel.Length}".ToLog();
                 $"Found common weapon {Callouts.CalloutBase.WeaponHashes.Where(h => new Model(h).Name != null).ToList().Count}".ToLog();
                 $"RAGENativeUi in installed: {IsRageNativeUIInstalled()}".ToLog();
                 "Prepering to create pause menu".ToLog();               
@@ -62,6 +59,8 @@ namespace BarbarianCall
                 DispatchCall.AmbientDispatchCall();
             }, "[BarbarianCall] Ambient Dispatch Call Event Fiber");
         }
+
+
         public static bool IsLSPDFRPluginRunning(string Plugin, Version minVersion = null)
         {
             try
@@ -75,34 +74,37 @@ namespace BarbarianCall
                     }
                 }
                 $"{Plugin} is not running or outdated".ToLog();
-                return false;
             }
             catch (Exception e)
             {
                 e.ToString().ToLog();
                 "IsLSPDFRPluginRunning error".ToLog();
-                return false;
             }
+            return false;
         }
         private static void CheckPluginRunning()
         {
-            System.Globalization.CultureInfo.CurrentCulture.ToString().ToLog();
-            TimeZoneInfo.Local.StandardName.ToLog();
-            "=========================================================================================================".ToLog();
-            "".ToLog();
-            "".ToLog();
-            "VERSION INFO".ToLog();
-            $"LSPD First Response : {Extension.GetFileVersion(@"Plugins/LSPD First Response.dll")}".ToLog();
-            $"RAGENativeUI : {Extension.GetFileVersion("RAGENativeUI.dll")}".ToLog();
-            $"RAGEPluginHook : {Extension.GetFileVersion("RAGEPluginHook.exe")}".ToLog();
-            $"ScriptHookV : {Extension.GetFileVersion("ScriptHookV.dll")}".ToLog();
-            $"StopThePed : {Extension.GetFileVersion(@"Plugins/LSPDFR/StopThePed.dll")}".ToLog();
-            $"UltimateBackup : {Extension.GetFileVersion(@"Plugins/LSPDFR/UltimateBackup.dll")}".ToLog();
-            $"GrammarPolice : {Extension.GetFileVersion(@"Plugins/LSPDFR/GrammarPolice.dll")}".ToLog();
-            "".ToLog();
-            "".ToLog();
-            "=========================================================================================================".ToLog();
+            List<string> log = new()
+            {
+                System.Globalization.CultureInfo.CurrentCulture.ToString(),
+                TimeZoneInfo.Local.StandardName,
+                "=========================================================================================================",
+                "",
+                "",
+                "VERSION INFO",
+                $"LSPD First Response : {Extension.GetFileVersion(@"Plugins/LSPD First Response.dll")}",
+                $"RAGENativeUI : {Extension.GetFileVersion("RAGENativeUI.dll")}",
+                $"RAGEPluginHook : {Extension.GetFileVersion("RAGEPluginHook.exe")}",
+                $"ScriptHookV : {Extension.GetFileVersion("ScriptHookV.dll")}",
+                $"StopThePed : {Extension.GetFileVersion(@"Plugins/LSPDFR/StopThePed.dll")}",
+                $"UltimateBackup : {Extension.GetFileVersion(@"Plugins/LSPDFR/UltimateBackup.dll")}",
+                $"GrammarPolice : {Extension.GetFileVersion(@"Plugins/LSPDFR/GrammarPolice.dll")}",
+                "",
+                "",
+                "=========================================================================================================",
+            };
+            log.ForEach(Peralatan.ToLog);
         }
-        internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");       
+        internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");      
     }
 }

@@ -2,6 +2,7 @@
 using System.Drawing;
 using Rage;
 using N = Rage.Native.NativeFunction;
+using System;
 
 namespace BarbarianCall.Types
 {
@@ -183,11 +184,21 @@ namespace BarbarianCall.Types
         }
         private void Create()
         {
-            uint handle = N.Natives.CREATE_CHECKPOINT((int)Icon, Position.X, Position.Y, Position.Z, NextPosition.X, NextPosition.Y, NextPosition.Z, Radius, Color.R, Color.G, Color.B, Color.A, 0);
-            Handle = new PoolHandle(handle);
-            N.Natives.SET_CHECKPOINT_RGBA2(handle, IconColor.R, IconColor.G, IconColor.B, IconColor.A);
-            N.Natives.SET_CHECKPOINT_CYLINDER_HEIGHT(handle, Height, Height, Radius);
-            _valid = true;
+            try
+            {
+                uint handle = (uint)N.Natives.CREATE_CHECKPOINT<int>((int)Icon, Position.X, Position.Y, Position.Z, NextPosition.X, NextPosition.Y, NextPosition.Z, Radius, Color.R, Color.G, Color.B, Color.A, 0);
+                Handle = new PoolHandle(handle);
+                Game.LogTrivialDebug("After assigning handle");
+                N.Natives.SET_CHECKPOINT_RGBA2(handle, IconColor.R, IconColor.G, IconColor.B, IconColor.A);
+                Game.LogTrivialDebug("After set checkpoint icon color");
+                N.Natives.SET_CHECKPOINT_CYLINDER_HEIGHT(handle, Height, Height, Radius);
+                _valid = true;
+            }
+            catch (Exception e)
+            {
+                Peralatan.ToLog("Failed to create checkpoint");
+                e.ToString().ToLog();
+            }          
         }
 		void ReCreate()
         {
@@ -204,14 +215,8 @@ namespace BarbarianCall.Types
 
         public bool Equals(IHandleable other)
         {
-            try
-            {
-                uint handle = other.Handle;
-                bool? isEntity = N.Natives.DOES_ENTITY_EXIST<bool>(handle);
-                if (isEntity.HasValue && isEntity.Value) return false;
-            }
-            catch { }
-            return other.Handle == Handle;
+            if (other is Checkpoint) return Handle == other.Handle;
+            return false;
         }
 
         public float DistanceTo(Vector3 position) => Position.DistanceTo(position);

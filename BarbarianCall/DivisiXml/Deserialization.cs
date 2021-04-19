@@ -41,9 +41,9 @@ namespace BarbarianCall.DivisiXml
                 foreach (XmlNode coordinate in xmlDocument.DocumentElement.SelectNodes("/BarbarianCall/Coordinate"))
                 {
                     Spawnpoint spawnpoint = new(
-                        coordinate.Attributes["X"] != null ? Convert.ToSingle(coordinate.Attributes["X"].Value) : Spawnpoint.Zero.Position.X,
-                        coordinate.Attributes["Y"] != null ? Convert.ToSingle(coordinate.Attributes["Y"].Value) : Spawnpoint.Zero.Position.Y,
-                        coordinate.Attributes["Z"] != null ? Convert.ToSingle(coordinate.Attributes["Z"].Value) : Spawnpoint.Zero.Position.Z,
+                        coordinate.Attributes["X"] == null ? Spawnpoint.Zero.Position.X : Convert.ToSingle(coordinate.Attributes["X"].Value),
+                        coordinate.Attributes["Y"] == null ? Spawnpoint.Zero.Position.Y : Convert.ToSingle(coordinate.Attributes["Y"].Value),
+                        coordinate.Attributes["Z"] == null ? Spawnpoint.Zero.Position.Z : Convert.ToSingle(coordinate.Attributes["Z"].Value),
                         Convert.ToSingle(coordinate.ChildNodes[0].InnerText));
                     ret.Add(spawnpoint);
                 }

@@ -8,7 +8,7 @@ using BarbarianCall.Extensions;
 namespace BarbarianCall
 {
     //Variable-Only class
-    public class CommonVariables
+    public class Globals
     {
         public static Model[] CarsToSelect =
         {
@@ -74,6 +74,7 @@ namespace BarbarianCall
             {"Armenian", new List<Model>(){ "g_m_m_armboss_01", "g_m_m_armgoon_01", "g_m_y_armgoon_02", "g_m_m_armlieut_01" } },
             {"The Lost MC", new List<Model>(){ "g_m_y_lost_01", "g_m_y_lost_02", "g_m_y_lost_03" } },
         };
+        public static List<uint?> RegisteredPedHeadshot = new();
         public static Dictionary<string, int> RoadSpeedLimit = new()
         {
             { "Joshua Rd", 50 },

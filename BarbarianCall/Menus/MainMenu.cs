@@ -15,6 +15,7 @@ namespace BarbarianCall.Menus
         internal static UIMenuItem setting;
         internal static UIMenuListScrollerItem<string> mechanic;
         internal static UIMenuItem insurance;
+        internal static UIMenuListScrollerItem<string> spawnFreemode;
         internal static MenuPool Pool;
         internal static void CreateMenu()
         {
@@ -31,12 +32,13 @@ namespace BarbarianCall.Menus
             Sprite des = new("hei_dlc_orntbankb_txd", "gz_v_bkwood1", Point.Empty, Size.Empty);
             BarbarianCallMenu.SetBannerType(des);
             Pool.Add(BarbarianCallMenu);
-            setting = new UIMenuItem("Settings", "Open BarbarianCall Pause Menu Setting");
-            mechanic = new UIMenuListScrollerItem<string>("Call Mechanic", "Call mechanic to repair ~y~My Vehicle", new[] { "My Vehicle", "Nearby Vehicle" });
+            setting = new("Settings", "Open BarbarianCall Pause Menu Setting");
+            mechanic = new("Call Mechanic", "Call mechanic to repair ~y~My Vehicle", new[] { "My Vehicle", "Nearby Vehicle" });
             mechanic.IndexChanged += (a, i, u) => mechanic.Description = $"Call mechanic to repair ~y~{mechanic.SelectedItem}~s~";
-            insurance = new UIMenuItem("Call Insurance Company", "Call Insurance company to pickup nearest vehicle");
+            insurance = new("Call Insurance Company", "Call Insurance company to pickup nearest vehicle");
+            spawnFreemode = new("[DEBUG] Spawn Freemode Ped", "", new[] { "Male", "Female" });
             BarbarianCallMenu.OnItemSelect += MenuHandler.ItemSelectHandler;
-            BarbarianCallMenu.AddItems(mechanic, insurance, setting);
+            BarbarianCallMenu.AddItems(mechanic, insurance, setting, spawnFreemode);
         }
     }
 }

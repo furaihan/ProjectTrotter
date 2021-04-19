@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UltimateBackup.API;
+using Func = UltimateBackup.API.Functions;
 using Rage;
 
 namespace BarbarianCall.API
@@ -20,24 +17,24 @@ namespace BarbarianCall.API
         {
             return backupType switch
             {
-                EUltimateBackupUnitType.LocalPatrol => UltimateBackup.API.Functions.getLocalPatrolUnit(location, numPeds),
-                EUltimateBackupUnitType.StatePatrol => UltimateBackup.API.Functions.getStatePatrolUnit(location, numPeds),
-                EUltimateBackupUnitType.Ambulance => UltimateBackup.API.Functions.getAmbulanceUnit(location, numPeds),
-                EUltimateBackupUnitType.Coroner => UltimateBackup.API.Functions.getCoronerUnit(location, numPeds),
-                EUltimateBackupUnitType.Firetruk => UltimateBackup.API.Functions.getFireTruckUnit(location, numPeds),
-                EUltimateBackupUnitType.LocalSwat => UltimateBackup.API.Functions.getLocalSWATUnit(location, numPeds),
-                EUltimateBackupUnitType.NOOSESwat => UltimateBackup.API.Functions.getNooseSWATUnit(location, numPeds),
-                EUltimateBackupUnitType.PoliceTransport => UltimateBackup.API.Functions.getPoliceTransportUnit(location, numPeds),
-                _ => UltimateBackup.API.Functions.getLocalPatrolUnit(location, numPeds),
+                EUltimateBackupUnitType.LocalPatrol => Func.getLocalPatrolUnit(location, numPeds),
+                EUltimateBackupUnitType.StatePatrol => Func.getStatePatrolUnit(location, numPeds),
+                EUltimateBackupUnitType.Ambulance => Func.getAmbulanceUnit(location, numPeds),
+                EUltimateBackupUnitType.Coroner => Func.getCoronerUnit(location, numPeds),
+                EUltimateBackupUnitType.Firetruk => Func.getFireTruckUnit(location, numPeds),
+                EUltimateBackupUnitType.LocalSwat => Func.getLocalSWATUnit(location, numPeds),
+                EUltimateBackupUnitType.NOOSESwat => Func.getNooseSWATUnit(location, numPeds),
+                EUltimateBackupUnitType.PoliceTransport => Func.getPoliceTransportUnit(location, numPeds),
+                _ => Func.getLocalPatrolUnit(location, numPeds),
             };
         }
         public static Ped GetPed(EUltimateBackupUnitType unitType, Vector3 location, float heading)
         {
             return unitType switch
             {
-                EUltimateBackupUnitType.LocalPatrol => UltimateBackup.API.Functions.getLocalPatrolPed(location, heading),
-                EUltimateBackupUnitType.Ambulance => UltimateBackup.API.Functions.getAmbulancePed(location, heading),
-                EUltimateBackupUnitType.StatePatrol => UltimateBackup.API.Functions.geStatePatrolPed(location, heading),
+                EUltimateBackupUnitType.LocalPatrol => Func.getLocalPatrolPed(location, heading),
+                EUltimateBackupUnitType.Ambulance => Func.getAmbulancePed(location, heading),
+                EUltimateBackupUnitType.StatePatrol => Func.geStatePatrolPed(location, heading),
                 _ => throw new NotSupportedException("selected unit type is not supported"),
             };
         }
@@ -46,22 +43,23 @@ namespace BarbarianCall.API
         {
             switch (responseType)
             {
-                case EUltimateBackupCallType.Code2: UltimateBackup.API.Functions.callCode2Backup(false, stateBackup); break;
-                case EUltimateBackupCallType.Code3: UltimateBackup.API.Functions.callCode3Backup(false, stateBackup); break;
-                case EUltimateBackupCallType.Ambulance: UltimateBackup.API.Functions.callAmbulance(); break;
-                case EUltimateBackupCallType.Firetruk: UltimateBackup.API.Functions.callFireDepartment(); break;
-                case EUltimateBackupCallType.Pursuit: UltimateBackup.API.Functions.callPursuitBackup(false, stateBackup); break;
-                case EUltimateBackupCallType.TrafficStop: UltimateBackup.API.Functions.callTrafficStopBackup(false, stateBackup); break;
-                case EUltimateBackupCallType.FelonyStop: UltimateBackup.API.Functions.callFelonyStopBackup(false, stateBackup); break;
-                case EUltimateBackupCallType.Panic: UltimateBackup.API.Functions.callPanicButtonBackup(false); break;
-                case EUltimateBackupCallType.SpikeStrips: UltimateBackup.API.Functions.callSpikeStripsBackup(); break;
-                case EUltimateBackupCallType.RoadBlock: UltimateBackup.API.Functions.callRoadBlockBackup(); break;
-                case EUltimateBackupCallType.K9: UltimateBackup.API.Functions.callK9Backup(false, stateBackup); break;
-                case EUltimateBackupCallType.Female: UltimateBackup.API.Functions.callFemaleBackup(false, stateBackup); break;
-                default: UltimateBackup.API.Functions.callCode2Backup(); break;
+                case EUltimateBackupCallType.Code2: Func.callCode2Backup(false, stateBackup); break;
+                case EUltimateBackupCallType.Code3: Func.callCode3Backup(false, stateBackup); break;
+                case EUltimateBackupCallType.Ambulance: Func.callAmbulance(); break;
+                case EUltimateBackupCallType.Firetruk: Func.callFireDepartment(); break;
+                case EUltimateBackupCallType.Pursuit: Func.callPursuitBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.TrafficStop: Func.callTrafficStopBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.FelonyStop: Func.callFelonyStopBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.Panic: Func.callPanicButtonBackup(false); break;
+                case EUltimateBackupCallType.SpikeStrips: Func.callSpikeStripsBackup(); break;
+                case EUltimateBackupCallType.RoadBlock: Func.callRoadBlockBackup(); break;
+                case EUltimateBackupCallType.K9: Func.callK9Backup(false, stateBackup); break;
+                case EUltimateBackupCallType.Female: Func.callFemaleBackup(false, stateBackup); break;
+                default: Func.callCode2Backup(); break;
 
             }
         }
+        public static void DissmissAllBackup() => Func.dismissAllBackupUnits();
         public enum EUltimateBackupUnitType
         {
             LocalPatrol,

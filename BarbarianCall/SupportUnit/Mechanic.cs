@@ -60,6 +60,7 @@ namespace BarbarianCall.SupportUnit
         private AnimationTask JerryCan;
         private readonly AnimationDictionary jc = new("move_weapon@jerrycan@generic");
         private readonly RelationshipGroup MechanicRelationship;
+        private Checkpoint parkCheckpoint;
         public Mechanic(Vehicle brokenVeh)
         {
             State = EMechanicState.Prepare;
@@ -86,7 +87,7 @@ namespace BarbarianCall.SupportUnit
         public void RespondToLocation()
         {
             if (VehicleToFix)
-            {              
+            {
                 GameFiber.StartNew(() =>
                 {
                     try
@@ -126,7 +127,9 @@ namespace BarbarianCall.SupportUnit
                         MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
                         LSPD_First_Response.Mod.API.Functions.SetPedCantBeArrestedByPlayer(MechanicPed, true);
                         var skin = LSPD_First_Response.Engine.Scripting.Entities.VehicleSkin.FromVehicle(MechanicVehicle);
+                        var skin2 = LSPD_First_Response.Engine.Scripting.Entities.VehicleSkin.FromVehicle(VehicleToFix);
                         skin.Model.ToLog();
+                        skin2.Model.ToLog();
 
                         Blip = MechanicPed.AttachBlip();
                         Blip.SetBlipSprite(446);
@@ -154,7 +157,7 @@ namespace BarbarianCall.SupportUnit
                             | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowMedianCrossing | VehicleDrivingFlags.YieldToCrossingPedestrians);
                         int slow = 0;
                         bool warped = false;
-                        bool findRoadSide = false;                      
+                        bool findRoadSide = false;
                         TimeSpan allowWarpTimer = new(0, 0, 120);
                         Stopwatch driveSW = Stopwatch.StartNew();
                         while (task.IsActive)
@@ -220,6 +223,7 @@ namespace BarbarianCall.SupportUnit
                                 if (roadSide == Spawnpoint.Zero) roadSide = SpawnManager.GetRoadSideSpawnPointFavored(MechanicVehicle, 35);
                                 if (roadSide != Spawnpoint.Zero)
                                 {
+                                    try { parkCheckpoint = new Checkpoint(Checkpoint.CheckpointIcon.CylinderCheckerboard, roadSide.Position, 5f, 120f, Color.Gold, Color.IndianRed, true); } catch (Exception e) { e.ToString().ToLog(); }
                                     if (MechanicPed) MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(800);
                                     if (MechanicPed) MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.ReverseStraight).WaitForCompletion(1500);
                                     if (MechanicPed)
@@ -236,11 +240,11 @@ namespace BarbarianCall.SupportUnit
                                 }
                                 else
                                 {
-                                    if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.PerformDrivingManeuver(MechanicVehicle ,VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(250);
+                                    if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.PerformDrivingManeuver(MechanicVehicle, VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(250);
                                     if (MechanicPed && MechanicVehicle) LSPD_First_Response.Mod.API.Functions.StartTaskParkVehicle(MechanicPed, 20000);
                                     if (MechanicPed && MechanicVehicle)
                                     {
-                                        GameFiber.WaitWhile(()=> MechanicVehicle.Speed > 2f, 20000);
+                                        GameFiber.WaitWhile(() => MechanicVehicle.Speed > 2f, 20000);
                                         break;
                                     }
                                 }
@@ -278,9 +282,9 @@ namespace BarbarianCall.SupportUnit
                         {
                             MechanicPed.Position = repairPos;
                             MechanicPed.Heading = MechanicPed.GetHeadingTowards(VehicleToFix);
-                        }                      
+                        }
                         if (MechanicPed)
-                            JerryCan = MechanicPed.Tasks.PlayAnimation(jc, "run", 4.0f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.Loop);                                                
+                            JerryCan = MechanicPed.Tasks.PlayAnimation(jc, "run", 4.0f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.Loop);
                         if (VehicleToFix)
                             RepairVehicle();
                         else throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
@@ -294,7 +298,7 @@ namespace BarbarianCall.SupportUnit
                         if (MethodPassed == EMethodPassed.Respond)
                             CleanUp();
                     }
-                }, "[BarbarianCall] Mechanic Service Fiber");
+                }, "[BarbarianCall] Mechanic Service Fiber - " + Guid.NewGuid().ToString());
             }
         }
         private void RepairVehicle()
@@ -303,7 +307,7 @@ namespace BarbarianCall.SupportUnit
             try
             {
                 MechanicPed.Tasks.Clear();
-                Game.DisplaySubtitle("~b~Mechanic~s~: " + handleDialogue.GetRandomElement());
+                Game.DisplaySubtitle("~b~Mechanic~s~: " + "Hello!");
                 MechanicPed.Tasks.AchieveHeading(VehicleToFix.Heading - 180f).WaitForCompletion(1000);
                 State = EMechanicState.Repairing;
                 JerryCan.WaitForCompletion(12);
@@ -361,13 +365,13 @@ namespace BarbarianCall.SupportUnit
                     VehicleToFix.Wash();
                     OpenHood(VehicleToFix, false);
                     MechanicPed.Tasks.ClearImmediately();
-                    selectedTalk = "~b~Mechanic~s~: " + perfectDialogue.GetRandomElement();
+                    selectedTalk = "~b~Mechanic~s~: " + "the vehicle has been successfully repaired";
                     RepairStatus = ERepairStatus.Perfect;
                 }
                 else
                 {
                     OpenHood(VehicleToFix, false);
-                    selectedTalk = "~b~Mechanic~s~: " + failedDialogue.GetRandomElement();             
+                    selectedTalk = "~b~Mechanic~s~: " + "I am sorry sir, i cant fix that vehicle";           
                     RepairStatus = ERepairStatus.Failed;
                 }
                 VehicleToFix.IsPositionFrozen = false;
@@ -432,6 +436,7 @@ namespace BarbarianCall.SupportUnit
             }
             finally
             {
+                if (parkCheckpoint) parkCheckpoint.Delete();
                 if (VehicleToFix)
                 {
                     if (RepairStatus == ERepairStatus.Perfect || RepairStatus == ERepairStatus.Imperfect) fixedVehs.Add(VehicleToFix);
@@ -458,38 +463,7 @@ namespace BarbarianCall.SupportUnit
                 }
                 else { hood.Close(instantly); }
             }
-        }
-        private readonly List<string> handleDialogue = new()
-        {
-            "Hello, we will handle this vehicle",
-            "Hello, thanks for calling, we will attempt to repair this vehicle",
-            "Hello, looks like this vehicle needs engine repair",
-            "Hello, we will take care of this vehicle, you can do your job now",
-            "Hello, we will handle this vehicle properly, you can go now",
-            "Hello, it seems this vehicle is damaged very bad, we will attempting to repair it carefully",
-            "Hello, let see what we got here"
-        };
-        private readonly List<string> perfectDialogue = new()
-        {
-            "This vehicle has been repaired successfully",
-            "Sir, luckily the damage is not too bad, this vehicle is perfectly fine right now",
-            "Oh Yuck, what a horrible smell. but fortunately this vehicle is not a problem for me",
-            "Oh man, this was not too hard. You can drive this vehicle smoothly now",
-            "Woah, this vehicle damage is pretty severe, but thats not a problem for a professional mechanic like me",
-            "What a damage, You're lucky to have a mechanic like me",
-            "Perfectly Done!!, lucky you entrusted this to me",
-            "The damage is pretty bad, but my mechanic skill can handle this perfectly"
-        };
-        private readonly List<string> failedDialogue = new()
-        {
-            "Sorry, this vehicle is too hard to repair, i cant do anything",
-            "I'm sorry, i tried my best but this vehicle is badly damaged",
-            "How stupid of me, i can't repair this vehicle, maybe you can call a tow truck. I do really sorry for what i have done",
-            "Sir my sincerest apologies, i can't repair this vehicle at all. i'm really sorry",
-            "I'm sorry, this vehicle damage is too severe, i can't repair it now. I sincerely apologize",
-            "Aah sh*t, my skills is very bad, i can't repair this vehicle, maybe you can call a tow truck",
-            "Sir, I apologize from the deepest of my heart because this vehicle seems have severe damage and i can't fix it"
-        };
+        }        
         internal void ReadIniFile()
         {
             try
