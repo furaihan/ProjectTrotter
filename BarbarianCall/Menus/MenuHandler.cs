@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 using Rage;
@@ -51,7 +48,7 @@ namespace BarbarianCall.Menus
                     }
                     else
                     {
-                        Vehicle brokenVeh = Game.LocalPlayer.Character.GetNearbyVehicles(8).Where(v => v && !v.HasOccupants && v.IsOnScreen && (v.IsCar || v.IsBike) && !v.IsBig && 
+                        Vehicle brokenVeh = Game.LocalPlayer.Character.GetNearbyVehicles(8).Where(v => v && !v.HasOccupants && !v.HasDriver && v.IsOnScreen && (v.IsCar || v.IsBike) && !v.IsBig && 
                         !Mechanic.VehicleQueue.Contains(v) && !v.IsInAir && v.DistanceTo(Game.LocalPlayer.Character) < 15f)
                             .OrderBy(v => v.DistanceTo(Game.LocalPlayer.Character)).FirstOrDefault();
                         if (brokenVeh)

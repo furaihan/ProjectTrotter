@@ -1,6 +1,4 @@
-﻿using BarbarianCall.Types;
-
-namespace BarbarianCall.Freemode
+﻿namespace BarbarianCall.Freemode
 {
     using System.Drawing;
     using System.Runtime.InteropServices;

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using BarbarianCall.Freemode;
+﻿using BarbarianCall.Freemode;
 using BarbarianCall.Types;
 using Rage;
 using N = Rage.Native.NativeFunction;

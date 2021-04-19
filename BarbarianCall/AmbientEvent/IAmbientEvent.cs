@@ -1,7 +1,6 @@
 ﻿namespace BarbarianCall.AmbientEvent
 {
     using Rage;
-    using System;
     using System.Collections.Generic;
     using BarbarianCall.Types;
     internal interface IAmbientEvent

@@ -1,7 +1,5 @@
 ﻿namespace BarbarianCall.Freemode
 {
-    using System;
-    using Rage;
     using Rage.Native;
     public class PedComponent
     {
