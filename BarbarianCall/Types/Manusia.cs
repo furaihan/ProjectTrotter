@@ -54,8 +54,7 @@ namespace BarbarianCall.Types
             if (Car && WithVehicle)
             {
                 GameFiber.Wait(575);
-                Game.DisplayNotification("mpcarhud", "transport_car_icon", "~y~BarbarianCall", "~y~Vehicle Details~s~",
-                    $"~y~Model~s~: {Car.GetVehicleDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}");
+                Peralatan.DisplayNotifWithLogo($"~y~Model~s~: {Car.GetVehicleDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}", "~y~Vehicle Details~s~", "mpcarhud", "transport_car_icon");
             }
         }
         private string GetCarColor()

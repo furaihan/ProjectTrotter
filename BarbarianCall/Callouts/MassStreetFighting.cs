@@ -7,6 +7,7 @@ using LSPD_First_Response.Mod.Callouts;
 using LSPDFR = LSPD_First_Response.Mod.API.Functions;
 using BarbarianCall.Extensions;
 using BarbarianCall.Types;
+using BarbarianCall.API;
 
 namespace BarbarianCall.Callouts
 {
@@ -22,6 +23,7 @@ namespace BarbarianCall.Callouts
         private List<Model> Gang2Model;
         private Dictionary<Ped, string> PedNames;
         private Dictionary<Ped, SuspectProperty> SuspectParameters; /*TODO: Use this instead 2 dictionary above*/
+        private Spawnpoint spawn2;
         int gangMemberCount;
         private int deadCount = 0;
         private int arrestedCount = 0;
@@ -46,7 +48,8 @@ namespace BarbarianCall.Callouts
             pursuitPeds = new List<Ped>();
             gang1Relationship = new RelationshipGroup("SIJI");
             gang2Relationship = new RelationshipGroup("LORO");
-            Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 425, 725, true);
+            CheckOtherPluginRunning();
+            Spawn = SpawnManager.GetSlowRoadSpawnPoint(PlayerPed.Position, 400, 750);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 350, 850);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 350, 850);
             if (Spawn == Spawnpoint.Zero)
@@ -56,6 +59,15 @@ namespace BarbarianCall.Callouts
             }
             SpawnPoint = Spawn;
             SpawnHeading = Spawn;
+            spawn2 = SpawnManager.GetSlowRoadSpawnPoint(Spawn.Position, 30, 50);
+            if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetSlowRoadSpawnPoint(Spawn.Position, 50, 80);
+            if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 30, 50);
+            if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 50, 80);
+            if (spawn2 == Spawnpoint.Zero)
+            {
+                spawn2.Position = World.GetNextPositionOnStreet(CalloutPosition.Around2D(Peralatan.Random.Next(30, 50)));
+                spawn2.Heading = SpawnManager.GetRoadHeading(spawn2.Position);
+            }
             Gang1Model = Globals.GangPedModels.Values.ToList().GetRandomElement();
             Gang2Model = Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model);
             Gang1Model.ForEach(m => m.LoadAndWait());
@@ -84,7 +96,7 @@ namespace BarbarianCall.Callouts
                 string mugshot = "WEB_LOSSANTOSPOLICEDEPT";
                 SuspectParameters.Add(gangMember, new SuspectProperty(ESuspectStates.InAction, LSPDFR.GetPersonaForPed(gangMember).FullName, null, mugshot));
             }
-            Vector3 sp2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 30, 50);
+            Vector3 sp2 = spawn2.Position;
             if (sp2 == Vector3.Zero) SpawnManager.GetVehicleSpawnPoint2(Spawn.Position, 30, 50);
             if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(30, 50));
             for (int i = 1; i <= gangMemberCount; i++)
@@ -222,6 +234,9 @@ namespace BarbarianCall.Callouts
                 if (ran) ran.Tasks.AchieveHeading(ran.GetHeadingTowards(PlayerPed));
                 GameFiber.Yield();
             }
+            LSPDFRFunc.RequestBackup(CalloutPosition, LSPD_First_Response.EBackupResponseType.Code2);
+            LSPDFRFunc.RequestBackup(CalloutPosition, LSPD_First_Response.EBackupResponseType.Code2);
+            "Backup is on the way".DisplayNotifWithLogo();
             if (Blip) Blip.Delete();
             foreach (Ped part in Participant)
             {
@@ -244,7 +259,7 @@ namespace BarbarianCall.Callouts
                     if (CalloutRunning)
                     {
                         GetHeadshot();
-                        Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(250f));
+                        Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(350f));
                         Pursuit = LSPDFR.CreatePursuit();
                         try
                         {
@@ -254,17 +269,18 @@ namespace BarbarianCall.Callouts
                         catch { }                     
                         bool pursuitCalled = false;
                         bool heliPursuitBackup = false;
+                        bool isAnyGangWipedOut = false;
                         while (CalloutRunning)
                         {
                             if (CanEnd) break;
-                            if (Participant.Any(IsPedStuck))
+                            if (Participant.Any(IsPedStuck) && !isAnyGangWipedOut)
                             {
                                 var st = Participant.Where(IsPedStuck).GetRandomElement();
                                 if (!st) continue;
 #if DEBUG
                                 $"{LSPDFR.GetPersonaForPed(st).FullName} - {st.Model.Name} is stuck and {st.Tasks.CurrentTaskStatus}, reassign".ToLog();
 #endif
-                                if (st) st.CombatAgainstHatedTargetAroundPed(250f);
+                                if (st) st.CombatAgainstHatedTargetAroundPed(350f);
                             }
                             Participant.ForEach(p =>
                             {
@@ -289,6 +305,26 @@ namespace BarbarianCall.Callouts
                                     }
                                 }
                             });
+                            if (Gang1.All(ped => ped.IsDead) || Gang2.All(ped=> ped.IsDead) && !isAnyGangWipedOut)
+                            {
+                                double chance = Peralatan.Random.NextDouble();
+                                List<Ped> suspectRest = Participant.Where(ped => ped && ped.IsAlive).ToList();
+                                if (chance > 0.6525)
+                                {
+                                    suspectRest.ForEach(p =>
+                                    {
+                                        if (p)
+                                        {
+                                            LSPDFR.AddPedToPursuit(Pursuit, p);
+                                            string weapon = p.Inventory.EquippedWeaponObject.Model.Name;
+                                            LSPDFR.AddPedContraband(p, LSPD_First_Response.Engine.Scripting.Entities.ContrabandType.Weapon, weapon);
+                                            if (StopThePedRunning) StopThePedFunc.InjectPedItem(p, "~r~" + weapon);
+                                            p.Inventory.GiveNewWeapon("WEAPON_UNARMED", -1, true);
+                                        }
+                                    });
+                                }
+                                isAnyGangWipedOut = true;
+                            }
                             if (PursuitCreated && !heliPursuitBackup)
                             {
                                 heliPursuitBackup = true;
@@ -350,6 +386,7 @@ namespace BarbarianCall.Callouts
                 || LSPDFR.IsPedGettingArrested(ped) || pursuitPeds.Contains(ped) || LSPDFR.IsPedArrested(ped) || ped.IsDead || LSPDFR.IsPedStoppedByPlayer(ped)
                 || LSPDFR.IsPedBeingCuffedByPlayer(ped) || LSPDFR.IsPedBeingFriskedByPlayer(ped) || LSPDFR.IsPedBeingGrabbedByPlayer(ped))) return false;
             if (Game.LocalPlayer.IsFreeAimingAtAnyEntity && Game.LocalPlayer.GetFreeAimingTarget() == ped) return false;
+            if (StopThePedRunning && StopThePedFunc.IsPedStoppedWithSTP(ped)) return false;
             return true;
         }
         private void GetHeadshot()
