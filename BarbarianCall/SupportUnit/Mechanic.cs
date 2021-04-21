@@ -61,6 +61,7 @@ namespace BarbarianCall.SupportUnit
         private readonly AnimationDictionary jc = new("move_weapon@jerrycan@generic");
         private readonly RelationshipGroup MechanicRelationship;
         private Checkpoint parkCheckpoint;
+        private static readonly Ped player = Game.LocalPlayer.Character;
         public Mechanic(Vehicle brokenVeh)
         {
             State = EMechanicState.Prepare;
@@ -260,7 +261,8 @@ namespace BarbarianCall.SupportUnit
                         if (MechanicPed) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.None).WaitForCompletion(5000);
                         if (MechanicPed && !MechanicPed.IsOnFoot) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.WarpOut);
                         if (MechanicPed) MechanicPed.PlayAmbientSpeech(Speech.GENERIC_HI);
-                        if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.FollowNavigationMeshToPosition(MechanicVehicle.RearPosition, MechanicVehicle.Heading, 1.2f).WaitForCompletion(12000);
+                        if (MechanicPed && MechanicVehicle) MechanicPed.FollowToOfsettOfEntity(MechanicVehicle, MechanicVehicle.GetPositionOffset(MechanicVehicle.RearPosition), 1.5f, 1f, true).WaitForCompletion(12000);
+                        if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.AchieveHeading(MechanicPed.GetHeadingTowards(MechanicVehicle)).WaitForCompletion(2000);
                         if (MechanicPed) MechanicPed.Tasks.PlayAnimation("rcmepsilonism8", "bag_handler_close_trunk_walk_left", 4f, AnimationFlags.UpperBodyOnly | AnimationFlags.NoSound1 | AnimationFlags.SecondaryTask);
                         ToolBox1 = new Rage.Object("ch_prop_toolbox_01a", Vector3.Zero);
                         ToolBox1.Metadata.BAR_Entity = true;
@@ -268,7 +270,7 @@ namespace BarbarianCall.SupportUnit
                         if (ToolBox1) ToolBox1.IsCollisionEnabled = true;
                         int bone = MechanicPed.GetBoneIndex(PedBoneId.RightPhHand);
                         GameFiber.Wait(2000);
-                        if (ToolBox1) ToolBox1.AttachTo(MechanicPed, bone, new Vector3(0.24f, -0.050f, -0.050f), new Rotator(-99.9999924f, -100.000015f, -1.90734863e-06f));
+                        if (ToolBox1) ToolBox1.AttachTo(MechanicPed, bone, new(0.24f, -0.050f, -0.050f), new(-99.9999924f, -100.000015f, -1.90734863e-06f));
                         GameFiber.Wait(1000);
                         if (MechanicPed) MechanicPed.Tasks.ClearImmediately();
                         if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
@@ -314,8 +316,9 @@ namespace BarbarianCall.SupportUnit
                 if (ToolBox1)
                 {
                     ToolBox1.Detach();
-                    ToolBox1.Position = Vector3.Zero;
+                    ToolBox1.Position += ToolBox1.BelowPosition * 10f;
                     ToolBox1.MakePersistent();
+                    ToolBox1.IsVisible = false;
                 }
                 ToolBox2 = new Rage.Object("ch_prop_toolbox_01b", MechanicPed.GetOffsetPositionRight(0.5f))
                 {
@@ -333,7 +336,7 @@ namespace BarbarianCall.SupportUnit
                 MechanicPed.Tasks.AchieveHeading(MechanicPed.GetHeadingTowards(ToolBox2)).WaitForCompletion(2000);
                 //"after Achieve heading".ToLog();
                 MechanicPed.Tasks.PlayAnimation("pickup_object", "pickup_low", 4.0f, AnimationFlags.SecondaryTask);
-                GameFiber.Wait(1250);
+                GameFiber.Wait(1300);
                 Wrench = new Rage.Object("prop_tool_wrench", Vector3.Zero);
                 Wrench.Metadata.BAR_Entity = true;
                 Wrench.AttachTo(MechanicPed, MechanicPed.GetBoneIndex(PedBoneId.RightPhHand), Vector3.Zero, Rotator.Zero);
@@ -371,7 +374,7 @@ namespace BarbarianCall.SupportUnit
                 else
                 {
                     OpenHood(VehicleToFix, false);
-                    selectedTalk = "~b~Mechanic~s~: " + "I am sorry sir, i cant fix that vehicle";           
+                    selectedTalk = "~b~Mechanic~s~: " + "I am sorry sir, i cant fix the vehicle";           
                     RepairStatus = ERepairStatus.Failed;
                 }
                 VehicleToFix.IsPositionFrozen = false;
@@ -379,12 +382,14 @@ namespace BarbarianCall.SupportUnit
                 GameFiber.Wait(75);
                 if (ToolBox2) ToolBox2.Delete();
                 GameFiber.Wait(75);
+                ToolBox1.IsVisible = true;
+                GameFiber.Wait(75);
                 ToolBox1.AttachTo(MechanicPed, MechanicPed.GetBoneIndex(PedBoneId.RightPhHand),
                     new Vector3(0.25f, -0.06f, -0.04f), new Rotator(-90.0299988f, -79.9999924f, -9.99999905f));
                 GameFiber.Wait(75);
                 if (Game.LocalPlayer.Character.Position.DistanceTo(MechanicPed.Position) < 60f)
-                    MechanicPed.Tasks.FollowNavigationMeshToPosition(Game.LocalPlayer.Character.Position + Game.LocalPlayer.Character.ForwardVector * 1.1125f,
-                        Game.LocalPlayer.Character.Heading - 180.0f, 10.0f).WaitForCompletion(7500);
+                    MechanicPed.FollowToOfsettOfEntity(player, player.GetPositionOffset(player.Position + (player.ForwardVector * 1.1125f)), 10f, 2f, true).WaitForCompletion(7500);
+                if (MechanicPed) MechanicPed.FaceTo(Game.LocalPlayer.Character, -1);
                 Game.DisplaySubtitle(selectedTalk, 1000000);
                 State = EMechanicState.Finish;
                 VehicleToFix.LockStatus = VehicleLockStatus.Unlocked;
@@ -418,15 +423,12 @@ namespace BarbarianCall.SupportUnit
                     if (MechanicVehicle && MechanicPed)
                         if (MechanicPed.Position.DistanceTo(MechanicVehicle.GetOffsetPosition(Vector3.RelativeLeft * 1.8f)) > 8f)
                             MechanicPed.SetPositionWithSnap(MechanicVehicle.GetOffsetPosition(Vector3.RelativeLeft * 1.8f));
+                    if (MechanicPed) MechanicPed.Tasks.ClearSecondary();
                     if (MechanicVehicle && MechanicPed)
                         MechanicPed.Tasks.EnterVehicle(MechanicVehicle, -1).WaitForCompletion(5000);
                     if (MechanicVehicle && MechanicPed)
                         if (!MechanicPed.IsInVehicle(MechanicVehicle, false))
                             MechanicPed.WarpIntoVehicle(MechanicVehicle, -1);
-                    if (MechanicVehicle && MechanicPed)
-                    {
-                        MechanicPed.Tasks.ClearSecondary();
-                    }
                 }
             }
             catch (Exception e)

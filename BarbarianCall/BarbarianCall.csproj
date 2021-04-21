@@ -117,9 +117,11 @@
     <Compile Include="Freemode\HeadBlend.cs" />
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Manusia.cs" />
+    <Compile Include="Types\Mugshot.cs" />
     <Compile Include="Types\PedGroup.cs" />
     <Compile Include="Types\Spawnpoint.cs" />
     <Compile Include="Types\Speech.cs" />
+    <Compile Include="Types\VehicleColor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

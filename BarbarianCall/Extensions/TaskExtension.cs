@@ -1,5 +1,6 @@
 ﻿using Rage;
 using Rage.Native;
+using System;
 
 namespace BarbarianCall.Extensions
 {
@@ -14,6 +15,11 @@ namespace BarbarianCall.Extensions
         {
             NativeFunction.Natives.TASK_LOOK_AT_COORD(ped, target.X, target.Y, target.Z, duration, 0, 2);
             return Task.GetTask(ped, "TASK_LOOK_AT_COORD");
+        }
+        public static Task ShootAtCoord(this Ped ped, Vector3 coordToShoot, int duration, FiringPattern firingPattern)
+        {
+            NativeFunction.Natives.TASK_SHOOT_AT_COORD(ped, coordToShoot.X, coordToShoot.Y, coordToShoot.Z, duration, (uint)firingPattern);
+            return Task.GetTask(ped, "TASK_SHOOT_AT_COORD");
         }
         public static Task ChatTo(this Ped ped, Ped target) 
         {
@@ -61,9 +67,14 @@ namespace BarbarianCall.Extensions
             NativeFunction.Natives.TASK_COMBAT_HATED_TARGETS_AROUND_PED(ped, radius);
             return Task.GetTask(ped, "TASK_COMBAT_HATED_TARGETS_AROUND_PED");
         }
-        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vehicle vehicle, Vector3 destination, float speed = 30.0f)
+        public static Task CombatAgainstHatedTargetInArea(this Ped ped, Vector3 area, float radius)
         {
-            NativeFunction.Natives.TASK_VEHICLE_GOTO_NAVMESH(ped, vehicle, destination.X, destination.Y, destination.Z, speed, 156f, 5.0f);
+            NativeFunction.Natives.TASK_COMBAT_HATED_TARGETS_IN_AREA(ped, area.X, area.Y, area.Z, radius, 0);
+            return Task.GetTask(ped, "TASK_COMBAT_HATED_TARGETS_IN_AREA");
+        }
+        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vehicle vehicle, Vector3 destination, VehicleDrivingFlags flags, float speed = 30.0f)
+        {
+            NativeFunction.Natives.TASK_VEHICLE_GOTO_NAVMESH(ped, vehicle, destination.X, destination.Y, destination.Z, speed, (int)flags, 5.0f);
             return Task.GetTask(ped, "TASK_VEHICLE_GOTO_NAVMESH");
         }
         public static Task EscortVehicle(this Ped ped, Vehicle targetVehicle, EscortVehicleMode mode, float speed, VehicleDrivingFlags drivingFlags, float minDistance, float noRoadDistance)
@@ -73,7 +84,13 @@ namespace BarbarianCall.Extensions
             NativeFunction.Natives.TASK_VEHICLE_ESCORT(ped, vehicleUsedbyPed, vehicleToEscort, (int)mode, speed, (int)drivingFlags, minDistance, -1, noRoadDistance);
             return Task.GetTask(ped, "TASK_VEHICLE_ESCORT");
         }
-        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vector3 destination, float speed = 30.0f) => DriveVehicleWithNavigationMesh(ped, ped.CurrentVehicle, destination, speed);
+        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vector3 destination, VehicleDrivingFlags flags, float speed = 30.0f) => 
+            DriveVehicleWithNavigationMesh(ped, ped.CurrentVehicle, destination, flags, speed);
+        public static Task FaceTo(this Ped ped, Entity target, int duration)
+        {
+            NativeFunction.Natives.TASK_TURN_PED_TO_FACE_ENTITY(ped, target, duration);
+            return Task.GetTask(ped, "TASK_TURN_PED_TO_FACE_ENTITY");
+        }
         public static void PlayVehicleAnimation(this Vehicle vehicle, string animDict, string animName) => NativeFunction.Natives.TASK_VEHICLE_PLAY_ANIM(vehicle, animDict, animName);
         public static void PlayEntityAnim(this Entity entity, AnimationDictionary animDict, string animName, bool loop = false, bool stayInAnim = false)
         {
@@ -90,6 +107,28 @@ namespace BarbarianCall.Extensions
             Right,
             BackLeft,
             BackRight
+        }
+        [Flags]
+        public enum VehicleDrivingStyleFlags : uint
+        {
+            None = 0,
+            FollowTrafficRule = 1,
+            YieldToPeds = 2,
+            AvoidVehicle = 4,
+            AvoidPeds = 8,
+            AvoidObjects = 16,
+            Unk1 = 32,
+            Unk2 = 64,
+            StopAtTrafficLights = 128,
+            UseBlinker = 256 ,
+            AllowWrongWay = 512,
+            Backwards = 1024,
+            Unk3 = 2048,
+            TakeShortestPath = 262144,
+            AvoidOffroad = 524288, //??
+            IgnoreRoads = 4194304,
+            StraightToDestination = 16777216,
+            AvoidHighways = 536870912,
         }
     }
 }

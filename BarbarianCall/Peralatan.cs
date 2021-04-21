@@ -103,6 +103,9 @@ namespace BarbarianCall
                                 plateRandomizerHandler.Next(10).ToString() +
                                 plateRandomizerHandler.Next(10).ToString();
                 vehicle.LicensePlate = plate;
+#if DEBUG
+                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetVehicleDisplayName(), vehicle.LicensePlate));
+#endif
             }           
         }
         internal static string GetVehicleDisplayName(this Vehicle vehicle)
@@ -227,7 +230,7 @@ namespace BarbarianCall
             Speaking = false;
             NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, true);
             if (currentWeapon != null && playerPed.Inventory.Weapons.Contains(currentWeapon)) playerPed.Inventory.EquippedWeapon = currentWeapon;
-            if (talkers.All(p => p)) talkers.ToList().ForEach(p => p.Tasks.Clear());
+            talkers.Where(EntityExtensions.Exists).ToList().ForEach(p => p.Tasks.Clear());
         }
         private static Rage.Object MobilePhone;
         internal static void ToggleMobilePhone(this Ped ped)
@@ -264,7 +267,12 @@ namespace BarbarianCall
         internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT")
         {
             NativeFunction.Natives.REQUEST_STREAMED_TEXTURE_DICT(textureDict,0);
-            GameFiber.SleepUntil(NativeFunction.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>(textureDict), 1000);
+            Stopwatch sw = Stopwatch.StartNew();
+            while (true)
+            {
+                if (NativeFunction.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>(textureDict) || sw.ElapsedMilliseconds > 1000) break;
+                GameFiber.Yield();
+            }
             Game.DisplayNotification(textureDict, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
             NativeFunction.Natives.SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED(textureDict);
         }
@@ -392,6 +400,27 @@ namespace BarbarianCall
                 T temp = list[n];
                 list[n] = list[k];
                 list[k] = temp;
+            }
+        }
+        public static void ShuffleSecure<T>(this IList<T> list)
+        {
+            if (list.Count >= byte.MaxValue)
+            {
+                ToLog("ShuffleSecure is not supported on this list");
+                return;
+            }
+            System.Security.Cryptography.RNGCryptoServiceProvider provider = new();
+            int n = list.Count;
+            while (n > 1)
+            {
+                byte[] box = new byte[1];
+                do provider.GetBytes(box);
+                while (!(box[0] < n * (Byte.MaxValue / n)));
+                int k = (box[0] % n);
+                n--;
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
             }
         }
 

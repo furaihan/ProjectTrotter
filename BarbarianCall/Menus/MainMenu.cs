@@ -32,8 +32,23 @@ namespace BarbarianCall.Menus
             mechanic.IndexChanged += (a, i, u) => mechanic.Description = $"Call mechanic to repair ~y~{mechanic.SelectedItem}~s~";
             insurance = new("Call Insurance Company", "Call Insurance company to pickup nearest vehicle");
             spawnFreemode = new("[DEBUG] Spawn Freemode Ped", "", new[] { "Male", "Female" });
+            UIMenuItem notif = new("[DEBUG] Display Notification");
+            notif.Activated += (m, s) =>
+            {
+                m.Close(false);
+                try
+                {
+                    Types.Mugshot mugshot = new(Rage.Game.LocalPlayer.Character);
+                    Rage.GameFiber.Sleep(2000);
+                    mugshot.DisplayNotification("Test", "Lalala", "Lilili", true);
+                }
+                catch (System.Exception e)
+                {
+                    e.ToString().ToLog();
+                }
+            };
             BarbarianCallMenu.OnItemSelect += MenuHandler.ItemSelectHandler;
-            BarbarianCallMenu.AddItems(mechanic, insurance, setting, spawnFreemode);
+            BarbarianCallMenu.AddItems(mechanic, insurance, setting, spawnFreemode, notif);
         }
     }
 }

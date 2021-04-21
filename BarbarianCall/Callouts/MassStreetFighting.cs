@@ -21,7 +21,6 @@ namespace BarbarianCall.Callouts
         private bool CanEnd = false;
         private List<Model> Gang1Model;
         private List<Model> Gang2Model;
-        private Dictionary<Ped, string> PedNames;
         private Dictionary<Ped, SuspectProperty> SuspectParameters; /*TODO: Use this instead 2 dictionary above*/
         private Spawnpoint spawn2;
         int gangMemberCount;
@@ -41,7 +40,6 @@ namespace BarbarianCall.Callouts
             arrestedCount = 0;
             escapedCount = 0;
             Participant = new List<Ped>();
-            PedNames = new Dictionary<Ped, string>();
             SuspectParameters = new Dictionary<Ped, SuspectProperty>();
             Gang1 = new List<Ped>();
             Gang2 = new List<Ped>();
@@ -84,7 +82,7 @@ namespace BarbarianCall.Callouts
         {            
             for (int i = 1; i <= gangMemberCount; i++)
             {
-                Ped gangMember = new(Gang1Model.GetRandomElement(), SpawnPoint.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : SpawnPoint.GetHeadingTowards(PlayerPed));
+                Ped gangMember = new(Gang1Model.GetRandomElement(), SpawnPoint.Around2D(5f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : SpawnPoint.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -92,7 +90,6 @@ namespace BarbarianCall.Callouts
                 gangMember.Inventory.GiveNewWeapon(meleeWeapon.GetRandomElement(), -1, true);
                 gangMember.RelationshipGroup = gang1Relationship;
                 gangMember.Metadata.BAR_Entity = true;
-                PedNames.Add(gangMember, LSPDFR.GetPersonaForPed(gangMember).FullName);
                 string mugshot = "WEB_LOSSANTOSPOLICEDEPT";
                 SuspectParameters.Add(gangMember, new SuspectProperty(ESuspectStates.InAction, LSPDFR.GetPersonaForPed(gangMember).FullName, null, mugshot));
             }
@@ -101,7 +98,7 @@ namespace BarbarianCall.Callouts
             if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(30, 50));
             for (int i = 1; i <= gangMemberCount; i++)
             {
-                Ped gangMember = new(Gang2Model.GetRandomElement(), sp2.Around2D(10f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
+                Ped gangMember = new(Gang2Model.GetRandomElement(), sp2.Around2D(5f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : sp2.GetHeadingTowards(PlayerPed));
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -109,7 +106,6 @@ namespace BarbarianCall.Callouts
                 gangMember.Inventory.GiveNewWeapon(meleeWeapon.GetRandomElement(), -1, true);
                 gangMember.RelationshipGroup = gang2Relationship;
                 gangMember.Metadata.BAR_Entity = true;
-                PedNames.Add(gangMember, LSPDFR.GetPersonaForPed(gangMember).FullName);
                 string mugshot = "WEB_LOSSANTOSPOLICEDEPT";
                 SuspectParameters.Add(gangMember, new SuspectProperty(ESuspectStates.InAction, LSPDFR.GetPersonaForPed(gangMember).FullName, null, mugshot));
             }
@@ -120,8 +116,10 @@ namespace BarbarianCall.Callouts
             gang2Relationship.SetRelationshipWith(gang1Relationship, Relationship.Hate);
             gang2Relationship.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
             gang2Relationship.SetRelationshipWith(RelationshipGroup.Player, Relationship.Hate);
-            Blip = new Blip(Spawn, 50f);
-            Blip.Color = Yellow;
+            Blip = new(Spawn, 50f)
+            {
+                Color = Yellow
+            };
             Blip.EnableRoute(Yellow);
             SituationTawuran();
             CalloutMainFiber.Start();
@@ -137,7 +135,11 @@ namespace BarbarianCall.Callouts
                     {
                         if (e)
                         {
-                            if (!CalloutEntities.Contains(e)) CalloutEntities.Add(e);
+                            if (!CalloutEntities.Contains(e))
+                            {
+                                CalloutEntities.Add(e);
+                                "Ped is not assigned to callout entities".Print();
+                            }
                         }
                     });
                 }
@@ -305,7 +307,7 @@ namespace BarbarianCall.Callouts
                                     }
                                 }
                             });
-                            if (Gang1.All(ped => ped.IsDead) || Gang2.All(ped=> ped.IsDead) && !isAnyGangWipedOut)
+                            if ((Gang1.All(ped => ped && ped.IsDead) || Gang2.All(ped=> ped && ped.IsDead)) && !isAnyGangWipedOut)
                             {
                                 double chance = Peralatan.Random.NextDouble();
                                 List<Ped> suspectRest = Participant.Where(ped => ped && ped.IsAlive).ToList();
@@ -322,6 +324,43 @@ namespace BarbarianCall.Callouts
                                             p.Inventory.GiveNewWeapon("WEAPON_UNARMED", -1, true);
                                         }
                                     });
+                                    GameFiber.Wait(2500);
+                                    LSPDFR.SetPursuitIsActiveForPlayer(Pursuit, true);
+                                    GameFiber.Wait(1000);
+                                    LSPDFRFunc.RequestBackup(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
+                                    GameFiber.Sleep(500);
+                                    if (GrammarPoliceRunning) GrammarPoliceFunc.SetStatus(GrammarPoliceFunc.EGrammarPoliceStatusType.InPursuit);
+                                }
+                                else if (chance > 0.2585)
+                                {
+                                    gang1Relationship.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Neutral);
+                                    gang2Relationship.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Neutral);
+                                    RelationshipGroup.Cop.SetRelationshipWith(gang1Relationship, Relationship.Neutral);
+                                    RelationshipGroup.Cop.SetRelationshipWith(gang2Relationship, Relationship.Neutral);
+                                    suspectRest.ForEach(p =>
+                                    {
+                                        if (p)
+                                        {
+                                            p.Tasks.PutHandsUp(-1, PlayerPed);
+                                            var equippedWeapon = p.Inventory.EquippedWeapon;
+                                            if (equippedWeapon != null) equippedWeapon.Drop();
+                                            GameFiber.Wait(100);
+                                        }
+                                    });
+                                    GameFiber.Wait(250);
+                                    ("Task Done: " + suspectRest.All(p => p.Tasks.CurrentTaskStatus != TaskStatus.None).ToString()).ToLog();
+                                    Game.DisplaySubtitle("~r~Gang Member~s~: We've given up, you can arrest us officer");
+                                }
+                                else
+                                {
+                                    suspectRest.ForEach(p =>
+                                    {
+                                        if (p)
+                                        {
+                                            p.Inventory.GiveNewWeapon(WeaponHashes.GetRandomElement(true), -1, true);
+                                            p.CombatAgainstHatedTargetAroundPed(350f);
+                                        }
+                                    });
                                 }
                                 isAnyGangWipedOut = true;
                             }
@@ -333,7 +372,7 @@ namespace BarbarianCall.Callouts
                                     GameFiber.Wait(Peralatan.Random.Next(7500, 15000));
                                     if (CalloutRunning && LSPDFR.IsPursuitStillRunning(Pursuit))
                                     {
-                                        API.LSPDFRFunc.RequestAirUnit(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
+                                        LSPDFRFunc.RequestAirUnit(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                                     }
                                 });
                             }
@@ -348,7 +387,7 @@ namespace BarbarianCall.Callouts
                     NetExtension.SendError(e);
                     $"{GetType().Name} callout crashed, please send your log".DisplayNotifWithLogo("Mass Street Fighting");
                     endSuccessfully = false;
-                    End();
+                    End($"exception: {e.Message}");
                 }              
             });          
         }
@@ -380,6 +419,7 @@ namespace BarbarianCall.Callouts
         private bool IsPedStuck(Ped ped)
         {
             if (!ped) return false;
+            if (ped.IsInMeleeCombat) return false;
             if (ped.Tasks.CurrentTaskStatus == TaskStatus.Preparing) return false;
             if (ped.Tasks.CurrentTaskStatus == TaskStatus.InProgress) return false;
             if (ped && (LSPDFR.IsPedBeingCuffed(ped) || LSPDFR.IsPedBeingFrisked(ped) || LSPDFR.IsPedBeingGrabbed(ped) || LSPDFR.IsPedInPursuit(ped) 

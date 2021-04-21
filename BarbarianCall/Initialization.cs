@@ -46,11 +46,12 @@ namespace BarbarianCall
                 }
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
+                try { DivisiXml.Deserialization.LoadPoliceStationLocations(); } catch { "Read Police station error".ToLog(); }
                 $"Found male model: {Globals.MaleModel.Length}".ToLog();
                 $"Found common weapon {Callouts.CalloutBase.WeaponHashes.Where(h => new Model(h).Name != null).ToList().Count}".ToLog();
-                $"RAGENativeUi in installed: {IsRageNativeUIInstalled()}".ToLog();
+                $"RAGENativeUi is installed: {IsRageNativeUIInstalled()}".ToLog();
                 "Prepering to create pause menu".ToLog();               
-                Menus.PauseMenu.CreatePauseMenu();
+                Menus.PauseMenu.CreatePauseMenu();              
             });
             GameFiber.StartNew(delegate
             {
@@ -65,12 +66,16 @@ namespace BarbarianCall
         {
             try
             {
+                $"Checking if {Plugin} is running".ToLog();
                 foreach (Assembly assembly in Functions.GetAllUserPlugins())
                 {
                     if (string.Equals(assembly.GetName().Name, Plugin, StringComparison.CurrentCultureIgnoreCase))
                     {
                         if (minVersion == null || assembly.GetName().Version.CompareTo(minVersion) >= 0)
-                        return true;
+                        {
+                            $"{assembly.GetName().Name} is detected running in version {assembly.GetName().Version}".ToLog();
+                            return true;
+                        }
                     }
                 }
                 $"{Plugin} is not running or outdated".ToLog();
