@@ -66,6 +66,11 @@ namespace BarbarianCall.Callouts
                 spawn2.Position = World.GetNextPositionOnStreet(CalloutPosition.Around2D(Peralatan.Random.Next(30, 50)));
                 spawn2.Heading = SpawnManager.GetRoadHeading(spawn2.Position);
             }
+            try
+            {
+                PlayerPed.RelationshipGroup.Name.ToLog();
+            }
+            catch (Exception e ) { e.ToString().ToLog(); }
             Gang1Model = Globals.GangPedModels.Values.ToList().GetRandomElement();
             Gang2Model = Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model);
             Gang1Model.ForEach(m => m.LoadAndWait());
@@ -399,10 +404,13 @@ namespace BarbarianCall.Callouts
                 {
                     Spawnpoint roadSide1 = SpawnManager.GetRoadSideSpawnPoint(SpawnPoint, SpawnHeading);
                     if (roadSide1 != Spawnpoint.Zero) Participant.ForEach(p => p.Tasks.FollowNavigationMeshToPosition(roadSide1.Position, roadSide1.Heading, 10f, 2f));
+                    gang1Relationship.SetRelationshipWith(gang2Relationship, Relationship.Companion);
+                    gang2Relationship.SetRelationshipWith(gang1Relationship, Relationship.Companion);
                     GetClose();
                     if (CalloutRunning)
                     {
-
+                        GetHeadshot();
+                        Participant.ForEach(p => p.CombatAgainstHatedTargetAroundPed(250f));
                     }
                 }
                 catch (Exception e)

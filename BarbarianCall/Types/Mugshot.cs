@@ -37,7 +37,6 @@ namespace BarbarianCall.Types
             {
                 outputString[i] = str.Substring(i * 99, MathHelper.Clamp(str.Substring(i * 99).Length, 0, 99));
             }
-
             return outputString;
         }
         public uint DisplayNotification(string title, string subtitle, string text, bool blink = false)

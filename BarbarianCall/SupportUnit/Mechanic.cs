@@ -258,10 +258,12 @@ namespace BarbarianCall.SupportUnit
                         }
                         if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
                         State = EMechanicState.Arrive;
+                        Vector3 ofset = Vector3.Zero;
+                        if (MechanicVehicle) ofset = Extension.GetOffsetFromEntityGivenWorldCoords(MechanicVehicle, MechanicVehicle.RearPosition);
                         if (MechanicPed) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.None).WaitForCompletion(5000);
                         if (MechanicPed && !MechanicPed.IsOnFoot) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.WarpOut);
                         if (MechanicPed) MechanicPed.PlayAmbientSpeech(Speech.GENERIC_HI);
-                        if (MechanicPed && MechanicVehicle) MechanicPed.FollowToOfsettOfEntity(MechanicVehicle, MechanicVehicle.GetPositionOffset(MechanicVehicle.RearPosition), 1.5f, 1f, true).WaitForCompletion(12000);
+                        if (MechanicPed && MechanicVehicle) MechanicPed.FollowToOfsettOfEntity(MechanicVehicle, ofset, 1.5f, 1f, true).WaitForCompletion(12000);
                         if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.AchieveHeading(MechanicPed.GetHeadingTowards(MechanicVehicle)).WaitForCompletion(2000);
                         if (MechanicPed) MechanicPed.Tasks.PlayAnimation("rcmepsilonism8", "bag_handler_close_trunk_walk_left", 4f, AnimationFlags.UpperBodyOnly | AnimationFlags.NoSound1 | AnimationFlags.SecondaryTask);
                         ToolBox1 = new Rage.Object("ch_prop_toolbox_01a", Vector3.Zero);
@@ -388,7 +390,7 @@ namespace BarbarianCall.SupportUnit
                     new Vector3(0.25f, -0.06f, -0.04f), new Rotator(-90.0299988f, -79.9999924f, -9.99999905f));
                 GameFiber.Wait(75);
                 if (Game.LocalPlayer.Character.Position.DistanceTo(MechanicPed.Position) < 60f)
-                    MechanicPed.FollowToOfsettOfEntity(player, player.GetPositionOffset(player.Position + (player.ForwardVector * 1.1125f)), 10f, 2f, true).WaitForCompletion(7500);
+                    MechanicPed.FollowToOfsettOfEntity(player, player.ForwardVector * 1.1125f, 10f, 2f, true).WaitForCompletion(7500);
                 if (MechanicPed) MechanicPed.FaceTo(Game.LocalPlayer.Character, -1);
                 Game.DisplaySubtitle(selectedTalk, 1000000);
                 State = EMechanicState.Finish;

@@ -47,6 +47,7 @@ namespace BarbarianCall.Extensions
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
             return Model.VehicleModels.Where(m => files.Any(s => s.Contains(m.Name))).ToArray();
         }
+        internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);
         internal static string GetPedModelName(Ped ped) => GetPedModelName(ped.Model);
         private static string GetPedModelName(Model model)
         {

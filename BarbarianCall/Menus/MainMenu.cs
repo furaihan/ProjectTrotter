@@ -41,6 +41,7 @@ namespace BarbarianCall.Menus
                     Types.Mugshot mugshot = new(Rage.Game.LocalPlayer.Character);
                     Rage.GameFiber.Sleep(2000);
                     mugshot.DisplayNotification("Test", "Lalala", "Lilili", true);
+                    mugshot.Delete();
                 }
                 catch (System.Exception e)
                 {
