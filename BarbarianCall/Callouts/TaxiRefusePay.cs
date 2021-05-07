@@ -36,7 +36,7 @@ namespace BarbarianCall.Callouts
             FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
             PursuitCreated = false;
             CalloutRunning = false;
-            CheckOtherPluginRunning();
+            DeclareVariable();
             Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "TrafficStop.xml")));
             SpawnPoint = Spawn;
             SpawnHeading = Spawn;

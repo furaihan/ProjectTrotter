@@ -25,7 +25,7 @@ namespace BarbarianCall.Callouts
         public bool CalloutRunning = false;
         public Vector3 SpawnPoint = Vector3.Zero;
         public float SpawnHeading = 0f;
-        public Spawnpoint Spawn = Types.Spawnpoint.Zero;
+        public Spawnpoint Spawn = Spawnpoint.Zero;
         public long Timer;
         public DateTime Time;
         public TimeSpan TimeSpan = new(0, 0, 15);
@@ -33,11 +33,11 @@ namespace BarbarianCall.Callouts
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;
-        public bool GrammarPoliceRunning = false;
-        public bool StopThePedRunning = false;
-        public bool UltimateBackupRunning = false;
+        public bool GrammarPoliceRunning => Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2));
+        public bool StopThePedRunning => Initialization.IsLSPDFRPluginRunning("StopThePed", new Version(4, 9, 4, 4));
+        public bool UltimateBackupRunning => Initialization.IsLSPDFRPluginRunning("UltimateBackup", new Version(1, 8, 5, 4));
         public Persona SuspectPersona;
-        public readonly Ped PlayerPed = Game.LocalPlayer.Character;
+        public Ped PlayerPed => Game.LocalPlayer.Character;
         public GameFiber CalloutMainFiber;
         public readonly System.Drawing.Color Yellow = System.Drawing.Color.Yellow;
         public string FilePath;
@@ -165,11 +165,8 @@ namespace BarbarianCall.Callouts
                 Functions.PlayScannerAudioUsingPosition("DISPATCH_TO " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio, position);
             else Functions.PlayScannerAudioUsingPosition($"ATTENTION_ALL_UNITS {audio}", position);
         }
-        protected void CheckOtherPluginRunning()
+        protected void DeclareVariable()
         {
-            GrammarPoliceRunning = Initialization.IsLSPDFRPluginRunning("GrammarPolice");
-            UltimateBackupRunning = Initialization.IsLSPDFRPluginRunning("UltimateBackup");
-            StopThePedRunning = Initialization.IsLSPDFRPluginRunning("StopThePed");
             CalloutRunning = false;
             PursuitCreated = false;
             CalloutStates = ECalloutStates.UnAccepted;

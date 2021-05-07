@@ -64,6 +64,9 @@ namespace BarbarianCall.DivisiXml
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
+                var stationXmls = Directory.EnumerateFiles(@"lspdfr\data\custom\").Select(Path.GetFullPath).Where(s => s.ToLower().Contains("stations")).ToList();
+                stationXmls.Add(@"lspdfr\data\stations.xml");
+                stationXmls.ForEach(Peralatan.ToLog);
                 if (File.Exists(@"lspdfr\data\stations.xml"))
                 {
                     Peralatan.ToLog(string.Format("Attempting to read stations.xml file located in {0}", Path.GetFullPath(@"lspdfr\data\stations.xml")));
@@ -74,7 +77,7 @@ namespace BarbarianCall.DivisiXml
                     {
                         string vectorString = station.ChildNodes[3].InnerText.Replace("f", string.Empty);
                         var v = vectorString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(s => Convert.ToSingle(s)).ToList();
-                        float heading = Convert.ToSingle(station.ChildNodes[4].InnerText);
+                        float heading = Convert.ToSingle(station.ChildNodes[4].InnerText.Replace("f", string.Empty));
                         Spawnpoint sp = new(v[0], v[1], v[2], heading);
                         Peralatan.ToLog($"Found a station location {sp} with name {station.ChildNodes[0].InnerText}");
                         stations.Add(sp);

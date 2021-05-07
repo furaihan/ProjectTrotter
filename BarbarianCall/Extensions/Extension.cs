@@ -149,15 +149,7 @@ namespace BarbarianCall.Extensions
             bool exist = false;
             exist = NativeFunction.Natives.xCC6E3B6BB69501F1<bool>(relationshipGroup.Hash); //_DOES_RELATIONSHIP_GROUP_EXIST
             if (exist) NativeFunction.Natives.REMOVE_RELATIONSHIP_GROUP(relationshipGroup.Hash);
-        }
-        internal static float FloatDiff(this float first, float second) => Math.Abs(Math.Abs(first) - Math.Abs(second));
-        internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);
-        internal static float HeightDiff(this Vector3 first, Vector3 second) => first.Z.FloatDiff(second.Z);
-        internal static float HeightDiff(this ISpatial first, Vector3 second) => first.Position.Z.FloatDiff(second.Z);
-        internal static float HeightDiff(this Vector3 first, ISpatial second) => first.Z.FloatDiff(second.Position.Z);
-        internal static float HeadingDiff(this Entity first, Entity second) => first.Heading.FloatDiff(second.Heading);
-        internal static float HeadingDiff(this float first, Entity second) => first.FloatDiff(second.Heading);
-        internal static float HeadingDiff(this Entity first, float second) => first.Heading.FloatDiff(second);
+        }          
         public static string GetLocalizedString(IntPtr stringPtr) => NativeFunction.Natives.x7B5280EBA9840C72<string>(stringPtr); //_GET_LABEL_TEXT
 
         public static unsafe bool IsStringEmpty(IntPtr stringPtr) => *(byte*)stringPtr == 0;

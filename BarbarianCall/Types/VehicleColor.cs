@@ -171,6 +171,7 @@ namespace BarbarianCall.Types
             EpsilonBlue,
             PureGold,
             BrushedGold,
+            UnknownColor,
         }
         public static Color GetColor(this EVehicleColor vehicleColor) => vehicleColor switch
         {
@@ -336,5 +337,10 @@ namespace BarbarianCall.Types
             EVehicleColor.BrushedGold => Color.FromArgb(127, 106, 72),
             _ => Color.Transparent,
         };
+        public static EVehicleColor FromPrimaryVehicle(Rage.Vehicle vehicle)
+        {
+            Rage.Native.NativeFunction.Natives.GET_VEHICLE_COLOURS(vehicle, out int primary, out int _);
+            return (EVehicleColor)primary;
+        }
     }
 }

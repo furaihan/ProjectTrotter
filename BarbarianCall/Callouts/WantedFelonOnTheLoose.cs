@@ -31,7 +31,7 @@ namespace BarbarianCall.Callouts
         private bool speedChanged = false;
         public override bool OnBeforeCalloutDisplayed()
         {
-            CheckOtherPluginRunning();
+            DeclareVariable();
             CalloutRunning = false;
             PursuitCreated = false;
             Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 425, 725, true);

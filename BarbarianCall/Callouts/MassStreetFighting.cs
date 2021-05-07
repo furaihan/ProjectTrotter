@@ -46,7 +46,7 @@ namespace BarbarianCall.Callouts
             pursuitPeds = new List<Ped>();
             gang1Relationship = new RelationshipGroup("SIJI");
             gang2Relationship = new RelationshipGroup("LORO");
-            CheckOtherPluginRunning();
+            DeclareVariable();
             Spawn = SpawnManager.GetSlowRoadSpawnPoint(PlayerPed.Position, 400, 750);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 350, 850);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 350, 850);
@@ -346,9 +346,9 @@ namespace BarbarianCall.Callouts
                                     {
                                         if (p)
                                         {
-                                            p.Tasks.PutHandsUp(-1, PlayerPed);
                                             var equippedWeapon = p.Inventory.EquippedWeapon;
                                             if (equippedWeapon != null) equippedWeapon.Drop();
+                                            p.Tasks.PutHandsUp(-1, PlayerPed);
                                             GameFiber.Wait(100);
                                         }
                                     });

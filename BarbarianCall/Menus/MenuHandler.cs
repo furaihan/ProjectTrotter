@@ -5,6 +5,8 @@ using RAGENativeUI.Elements;
 using Rage;
 using System.Drawing;
 using BarbarianCall.SupportUnit;
+using BarbarianCall.Types;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall.Menus
 {
@@ -68,6 +70,23 @@ namespace BarbarianCall.Menus
                     ped.Metadata.BAR_Entity = true;
                     if (ped) ped.Dismiss();
                 }
+#if DEBUG
+                else if (selected.Text.ToLower().Contains("raycast"))
+                {
+                    var rcast = selected as UIMenuCheckboxItem;
+                    GameFiber.StartNew(() =>
+                    {
+                        var fpos = MathExtension.RaycastGameplayCamForCoord(new Vector2(0, 0), 160f);
+                        Checkpoint checkpoint = new(Checkpoint.CheckpointIcon.Cyclinder, fpos, 4, 250, Color.HotPink, Color.Wheat, true);
+                        while (rcast.Selected)
+                        {
+                            GameFiber.Yield();
+                            checkpoint.Position = MathExtension.RaycastGameplayCamForCoord(new Vector2(0, 0), 160f);
+                        }
+                        if (checkpoint) checkpoint.Delete();
+                    });                                     
+                }
+#endif
             }
         }
     }

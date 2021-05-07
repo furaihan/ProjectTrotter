@@ -44,7 +44,7 @@ namespace BarbarianCall.Callouts
             FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
             PursuitCreated = false;
             CalloutRunning = false;
-            CheckOtherPluginRunning();
+            DeclareVariable();
             
             Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(Path.Combine(FilePath, "TrafficStop.xml")));
             SpawnPoint = Spawn;
@@ -109,7 +109,7 @@ namespace BarbarianCall.Callouts
             Blip.Color = Color.Yellow;
             Blip.EnableRoute(Color.Yellow);
             Spawnpoint tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
-            if (tempSpawn != Types.Spawnpoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
+            if (tempSpawn != Spawnpoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
             SuspectCar.PrimaryColor = Globals.CommonUnderstandableColor.GetRandomElement();
             SuspectCar.RandomiseLicensePlate();
@@ -524,7 +524,7 @@ namespace BarbarianCall.Callouts
                             }
                             Game.DisplayNotification("~y~Passenger is ~g~giving up~y~, handle the passenger as you see fit");
                             PassengerState = ESuspectStates.Arrested;
-                            GameFiber.SleepUntil(() => passenger.Tasks.CurrentTaskStatus == Rage.TaskStatus.None || !CalloutRunning, -1);
+                            GameFiber.SleepUntil(() => passenger.Tasks.CurrentTaskStatus == TaskStatus.None || !CalloutRunning, -1);
                         });
                     }
                     int rands = Peralatan.Random.Next(1, 100);
@@ -684,7 +684,7 @@ namespace BarbarianCall.Callouts
                     if (Suspect.DistanceTo(PlayerPed) > 850f || Suspect.TravelDistanceTo(PlayerPed) > 1250f)
                     {
                         Spawnpoint closer = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 350, 650);
-                        if (closer == Types.Spawnpoint.Zero) closer = new Spawnpoint(World.GetNextPositionOnStreet(SpawnPoint.Around(350, 650)), 0f);
+                        if (closer == Spawnpoint.Zero) closer = new Spawnpoint(World.GetNextPositionOnStreet(SpawnPoint.Around(350, 650)), 0f);
                         SuspectCar.Position = closer;
                         SuspectCar.Heading = closer;
                     }

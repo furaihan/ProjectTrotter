@@ -32,13 +32,49 @@ namespace BarbarianCall
             }
             return false;
         }
+        [Flags]
+        private enum NodeFlags
+        {
+            None = 0,
+            IsDisabled = 1,
+            UnknownBit2 = 2,
+            SlowNormalRoad = 4,
+            MinorRoad = 8,
+            TunnelOrUndergroundParking = 16,
+            UnknownBit32 = 32,
+            Freeway = 64,
+            Junction = 128,
+            StopNode = 256,
+            SpecialStopNode = 512,
+            Unk1024 = 1024,
+            Unk2048 = 2048,
+            Unk4096 = 4096,
+            Unk8192 = 8192,
+            Unk6542 = 6542,
+        }
+        private static void GetFlags(this Vector3 position)
+        {
+            var valid = NativeFunction.Natives.GetVehicleNodeProperties<bool>(position, out uint density, out uint flag);
+            if (valid)
+            {
+                NodeFlags nodeFlags = (NodeFlags)flag;
+                string flagN = "";
+                foreach (NodeFlags node in Enum.GetValues(typeof(NodeFlags)))
+                {
+                    if (nodeFlags.HasFlag(node)) flagN += node.ToString() + " ";
+                }
+                position.ToString().ToLog();
+                Peralatan.ToLog($"Density: {density}. Flag: {flag}");
+                Peralatan.ToLog(flagN);
+            }
+            else "Unsuccessfull Getting node flag value".ToLog();
+        }
         private static bool IsCoordOnScreen(Vector3 pos) => NativeFunction.Natives.xF9904D11F1ACBEC3<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); //GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION
         private static bool IsSlowRoad(Vector3 position) => (bool)NativeFunction.CallByHash<bool>(0b10_0010_1101_0111_0010_0111_0101_1010_0111_1001_1111_1110_1000_0010_0001_0101, position.X, position.Y, position.Z, 1, 5, 1077936128, 0f);
         internal static float GetRoadHeading(Vector3 pos)
         {
             NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 _, out float heading, 12, 0x40400000, 0);
             return heading;
-
         }
         internal static Spawnpoint GetVehicleSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance, bool considerDirection = false) => 
             GetVehicleSpawnPoint(spatial.Position, minimalDistance, maximumDistance, considerDirection);
@@ -59,10 +95,8 @@ namespace BarbarianCall
                             Spawnpoint ret = new(nodeP, nodeH);
                             $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
-                            if (NativeFunction.Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(ret.Position.X, ret.Position.Y, ret.Position.Z, out int dens, out int flags))
-                            {
-                                string.Format("Density: {0}, Flags: {1}", dens, flags).ToLog();
-                            }
+                            pos.GetFlags();
+                            ret.Position.GetFlags();
                             return ret;
                         }                        
                     }
@@ -85,6 +119,8 @@ namespace BarbarianCall
                         Spawnpoint ret = new(nodeP, nodeH);
                         $"Vehicle Spawn 2 found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                        pos.GetFlags();
+                        ret.Position.GetFlags();
                         return ret;
                     }
                 }
@@ -107,6 +143,8 @@ namespace BarbarianCall
                         Spawnpoint ret = new(nodeP, Extension.GetRandomAbsoluteSingle(1, 359));
                         $"Ped sidewalk spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                        pos.GetFlags();
+                        ret.Position.GetFlags();
                         return ret;
                     }
                 }
@@ -123,6 +161,8 @@ namespace BarbarianCall
                         Spawnpoint ret = new(nodeP, Extension.GetRandomAbsoluteSingle(1, 359));
                         $"Ped safe spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
                         $"{i + 600} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                        pos.GetFlags();
+                        ret.Position.GetFlags();
                         return ret;
                     }
                 }
@@ -148,6 +188,8 @@ namespace BarbarianCall
                             Spawnpoint ret = new(roadSide, nodeH);
                             string.Format("Favored RoadSide Spawnpoint found {0}", ret).ToLog();
                             string.Format("{0} process took {1}", i, sw.ElapsedMilliseconds).ToLog();
+                            pos.GetFlags();
+                            ret.Position.GetFlags();
                             return ret;
                         }
                     }
@@ -246,6 +288,8 @@ namespace BarbarianCall
                                 {
                                     Spawnpoint ret = new(randomNode, heading);
                                     $"Slow road found at {i + 1} tries, that process took {sw.ElapsedMilliseconds} ms".ToLog();
+                                    pos.GetFlags();
+                                    ret.Position.GetFlags();
                                     return ret;
                                 }
                             }

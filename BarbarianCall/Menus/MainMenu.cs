@@ -1,6 +1,10 @@
 ﻿using System.Drawing;
+using System.Collections.Generic;
+using System.Linq;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
+using Rage;
+using Rage.Native;
 
 namespace BarbarianCall.Menus
 {
@@ -10,8 +14,11 @@ namespace BarbarianCall.Menus
         internal static UIMenuItem setting;
         internal static UIMenuListScrollerItem<string> mechanic;
         internal static UIMenuItem insurance;
+#if DEBUG
         internal static UIMenuListScrollerItem<string> spawnFreemode;
+#endif
         internal static MenuPool Pool;
+        private static bool nodeDis = false;
         internal static void CreateMenu()
         {
             Pool = new MenuPool();
@@ -31,6 +38,7 @@ namespace BarbarianCall.Menus
             mechanic = new("Call Mechanic", "Call mechanic to repair ~y~My Vehicle", new[] { "My Vehicle", "Nearby Vehicle" });
             mechanic.IndexChanged += (a, i, u) => mechanic.Description = $"Call mechanic to repair ~y~{mechanic.SelectedItem}~s~";
             insurance = new("Call Insurance Company", "Call Insurance company to pickup nearest vehicle");
+#if DEBUG
             spawnFreemode = new("[DEBUG] Spawn Freemode Ped", "", new[] { "Male", "Female" });
             UIMenuItem notif = new("[DEBUG] Display Notification");
             notif.Activated += (m, s) =>
@@ -38,8 +46,8 @@ namespace BarbarianCall.Menus
                 m.Close(false);
                 try
                 {
-                    Types.Mugshot mugshot = new(Rage.Game.LocalPlayer.Character);
-                    Rage.GameFiber.Sleep(2000);
+                    Types.Mugshot mugshot = new(Game.LocalPlayer.Character);
+                    GameFiber.Sleep(2000);
                     mugshot.DisplayNotification("Test", "Lalala", "Lilili", true);
                     mugshot.Delete();
                 }
@@ -48,8 +56,78 @@ namespace BarbarianCall.Menus
                     e.ToString().ToLog();
                 }
             };
+            UIMenuItem vCol = new("[DEBUG] Get Nearest Vehicle Color");
+            vCol.Activated += (m, s) =>
+            {
+                try
+                {
+                    var veh = Game.LocalPlayer.Character.GetNearbyVehicles(15).OrderBy(v => v.DistanceTo(Game.LocalPlayer.Character)).FirstOrDefault();
+                    Game.Console.Print($"{veh.Model.Name} - {veh.GetVehicleDisplayName()}");
+                    var ev = Types.VehicleColor.FromPrimaryVehicle(veh);
+                    var evc = Types.VehicleColor.GetColor(ev);
+                    Game.DisplaySubtitle($"Primary Color: <font color=\"{ColorTranslator.ToHtml(evc)}\">{ev}</font>");
+                    string primary = NativeFunction.Natives.xB45085B721EFD38C<string>(veh, 0);
+                    string secondary = NativeFunction.Natives.x4967A516ED23A5A1<string>(veh);
+                    Game.Console.Print($"Primary: {string.Format("{0}", primary ?? "Null")}, Secondary: {string.Format("{0}", secondary ?? "Null")}");
+                    string primaryLabeled = NativeFunction.Natives.x7B5280EBA9840C72<string>(primary);
+                    string secondaryLabeled = NativeFunction.Natives.x7B5280EBA9840C72<string>(secondary);
+                    Game.Console.Print($"Labeled => Primary: {primaryLabeled}, Secondary: {secondaryLabeled}");
+                }
+                catch (System.Exception e)
+                {
+                    e.ToString().ToLog();
+                }                
+            };
+            UIMenuNumericScrollerItem<float> checkNode = new UIMenuNumericScrollerItem<float>("[DEBUG] Get Nearest Vehicle Node", "The scroller is minimum distance, Max distance is min distance + 10", 10, 1000, 10)
+            {
+                Value = 20,
+            };
+            checkNode.Activated += (m, s) =>
+            {
+                try
+                {
+                    if (!nodeDis) return;
+                    nodeDis = true;
+                    var mindis = (s as UIMenuNumericScrollerItem<float>).Value;
+                    var sp = SpawnManager.GetVehicleSpawnPoint(Game.LocalPlayer.Character, mindis, mindis + 10, false);
+                    if (sp == Types.Spawnpoint.Zero)
+                    {
+                        Game.DisplaySubtitle("Vehicle Node Is Not Found");
+                        nodeDis = false;
+                        return;
+                    }
+                    Game.DisplaySubtitle("Found vehicle Node: " + sp.ToString());
+                    GameFiber.StartNew(() =>
+                    {
+                        var cp = new Types.Checkpoint(Types.Checkpoint.CheckpointIcon.Cyclinder, sp, 3, 250, Color.Gold, Color.White, true);
+                        while (true)
+                        {
+                            GameFiber.Yield();
+                            if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.D6))
+                            {
+                                break;
+                            }
+                        }
+                        if (cp) cp.Delete();
+                        nodeDis = false;
+                    });
+                }
+                catch (System.Exception e)
+                {
+                    e.ToString().ToLog();
+                }
+                finally
+                {
+                    nodeDis = false;
+                }
+            };
+#endif
             BarbarianCallMenu.OnItemSelect += MenuHandler.ItemSelectHandler;
-            BarbarianCallMenu.AddItems(mechanic, insurance, setting, spawnFreemode, notif);
+            BarbarianCallMenu.AddItems(mechanic, insurance, setting);
+#if DEBUG
+            BarbarianCallMenu.AddItems(spawnFreemode, notif, vCol, checkNode);
+            BarbarianCallMenu.AddItem(new UIMenuCheckboxItem("[DEBUG] Get Gameplay Cam Raycast", false));
+#endif
         }
     }
 }

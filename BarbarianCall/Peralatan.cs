@@ -264,18 +264,8 @@ namespace BarbarianCall
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
-        internal static void DisplayNotifWithLogo(this string msg, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT")
-        {
-            NativeFunction.Natives.REQUEST_STREAMED_TEXTURE_DICT(textureDict,0);
-            Stopwatch sw = Stopwatch.StartNew();
-            while (true)
-            {
-                if (NativeFunction.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>(textureDict) || sw.ElapsedMilliseconds > 1000) break;
-                GameFiber.Yield();
-            }
-            Game.DisplayNotification(textureDict, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
-            NativeFunction.Natives.SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED(textureDict);
-        }
+        internal static void DisplayNotifWithLogo(this string msg, string subtitle = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT", string title = "~y~BarbarianCall~s~") 
+            => Game.DisplayNotification(textureDict, textureName, title, "~y~" + subtitle + "~s~", msg);
         internal static void DisplayNotifWithLogo(this string msg, out uint notifId, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") =>
             notifId = Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
         internal static string FormatKeyBinding(Keys modifierKey, Keys key)

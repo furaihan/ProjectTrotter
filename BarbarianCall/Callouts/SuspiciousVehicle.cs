@@ -19,7 +19,7 @@ namespace BarbarianCall.Callouts
         private bool SuperModel = false;
         public override bool OnBeforeCalloutDisplayed()
         {
-            CheckOtherPluginRunning();
+            DeclareVariable();
             FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
             List<Types.Spawnpoint> spawnPoints = DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "SuspiciousVehicle.xml"));
             Spawn = Peralatan.SelectNearbySpawnpoint(spawnPoints);

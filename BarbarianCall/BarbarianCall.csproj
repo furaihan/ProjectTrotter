@@ -91,6 +91,7 @@
     <Compile Include="Callouts\TaxiRefusePay.cs" />
     <Compile Include="Callouts\Trespassing.cs" />
     <Compile Include="Callouts\WantedFelonOnTheLoose.cs" />
+    <Compile Include="Extensions\MathExtension.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />

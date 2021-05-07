@@ -69,6 +69,7 @@ namespace BarbarianCall.Extensions
         }
         public static Task CombatAgainstHatedTargetAroundPed(this Ped ped, float radius)
         {
+            Natives.REGISTER_HATED_TARGETS_AROUND_PED(ped, radius);
             Natives.TASK_COMBAT_HATED_TARGETS_AROUND_PED(ped, radius);
             return Task.GetTask(ped, "TASK_COMBAT_HATED_TARGETS_AROUND_PED");
         }
