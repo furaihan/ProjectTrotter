@@ -188,9 +188,9 @@ namespace BarbarianCall.Types
             {
                 uint handle = (uint)N.Natives.CREATE_CHECKPOINT<int>((int)Icon, Position.X, Position.Y, Position.Z, NextPosition.X, NextPosition.Y, NextPosition.Z, Radius, Color.R, Color.G, Color.B, Color.A, 0);
                 Handle = new PoolHandle(handle);
-                Game.LogTrivialDebug("After assigning handle");
+                //Game.LogTrivialDebug("After assigning handle");
                 N.Natives.SET_CHECKPOINT_RGBA2(handle, IconColor.R, IconColor.G, IconColor.B, IconColor.A);
-                Game.LogTrivialDebug("After set checkpoint icon color");
+                //Game.LogTrivialDebug("After set checkpoint icon color");
                 N.Natives.SET_CHECKPOINT_CYLINDER_HEIGHT(handle, Height, Height, Radius);
                 _valid = true;
             }
@@ -215,13 +215,13 @@ namespace BarbarianCall.Types
 
         public bool Equals(IHandleable other)
         {
-            if (other is Checkpoint) return Handle == other.Handle;
+            if (other is Checkpoint && IsValid() && other.IsValid()) return Handle.Value == other.Handle.Value;
             return false;
         }
 
         public float DistanceTo(Vector3 position) => Position.DistanceTo(position);
 
-        public float DistanceTo(ISpatial spatialObject) => Position.DistanceTo(spatialObject);
+        public float DistanceTo(ISpatial spatialObject) => Position.DistanceTo(spatialObject.Position);
 
         public float DistanceTo2D(Vector3 position) => Position.DistanceTo2D(position);
 

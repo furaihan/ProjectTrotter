@@ -10,73 +10,156 @@ namespace BarbarianCall.Extensions
 {
     public static class MathExtension
     {
-        internal static Vector3 ConvertToDirection(this Vector3 vector3) => ConvertToDirection(vector3.ToRotator());
-        internal static Vector3 ConvertToDirection(this Rotator rotator)
+        public static Vector3 GameplayCameraPosition => Natives.GET_GAMEPLAY_CAM_COORD<Vector3>();
+        public static Rotator GameplayCameraRotation => ((Vector3)Natives.GET_GAMEPLAY_CAM_ROT<Vector3>(2)).ToRotator();
+        public static Vector3 GameplayCameraRotationVector => Natives.GET_GAMEPLAY_CAM_ROT<Vector3>(2);
+        public static Quaternion GameplayCameraQuarternion => GameplayCameraRotation.ToQuaternion();
+        public static float GameplayCameraHeading => Natives.GET_GAMEPLAY_CAM_RELATIVE_HEADING<float>();
+        public static float GameplayCameraFOV => Natives.GET_GAMEPLAY_CAM_FOV<float>();
+        internal static Vector3 RotationToDirection(this Rotator rotator) => RotationToDirection(rotator.ToVector());
+        internal static Vector3 RotationToDirection(this Vector3 rotation)
         {
-            var rz = MathHelper.ConvertDegreesToRadians(rotator.Yaw);
-            var rx = MathHelper.ConvertDegreesToRadians(rotator.Pitch);
-            float absx = (float)Math.Abs(Math.Cos(rx));
-            return new Vector3((float)(-Math.Sin(rz) * absx), (float)(Math.Cos(rz) * absx), (float)Math.Sin(rz));
+            var z = DegreeToRadian(rotation.Z);
+            var x = DegreeToRadian(rotation.X);
+            var num = Math.Abs(Math.Cos(x));
+            return new Vector3
+            {
+                X = (float)(-Math.Sin(z) * num),
+                Y = (float)(Math.Cos(z) * num),
+                Z = (float)Math.Sin(x),
+            };
         }
         internal static Rotator DirectionToRotator(this Vector3 direction)
         {
             direction.Normalize();
-            float xx = MathHelper.ConvertRadiansToDegrees(Math.Atan2(direction.Z, direction.Y));
+            float xx = RadianToDegree((float)Math.Atan2(direction.Z, direction.Y));
             float yy = 0;
-            float zz = MathHelper.ConvertRadiansToDegrees(Math.Atan2(direction.X, direction.Y));
-            return new Rotator(xx, yy, zz);
+            float zz = RadianToDegree((float)Math.Atan2(direction.X, direction.Y));
+            return new Vector3(xx, yy, zz).ToRotator();
         }
-        private static Vector3 WorldToScreenUsingGameplayCamera(Vector2 screeenCoord)
+        public static float DegreeToRadian(this float degree) => (float)(degree * (Math.PI / 180.0f));
+        public static float RadianToDegree(this float radian) => (float)(radian * (180.0f / Math.PI));
+        private static Vector3 ScreenToWorldUsingGameplayCamera(Vector2 screeenCoord)
         {
-            Vector3 camPosition = Natives.GET_GAMEPLAY_CAM_COORD<Vector3>();
-            Rotator camRotation = Natives.GET_GAMEPLAY_CAM_ROT<Rotator>(2);
+            Vector3 camPos = Natives.GET_GAMEPLAY_CAM_COORD<Vector3>();
+            Vector3 camRot = Natives.GET_GAMEPLAY_CAM_ROT<Vector3>(2);
 
-            Vector3 direction = camRotation.ConvertToDirection();
-            Vector3 vector3 = camRotation.ToVector() + new Vector3(10, 0, 0);
-            Vector3 vector31 = camRotation.ToVector() + new Vector3(-10, 0, 0);
-            Vector3 vector32 = camRotation.ToVector() + new Vector3(0, 0, -10);
-            Vector3 dir1 = ConvertToDirection(camRotation.ToVector() + new Vector3(0, 0, 10)) - ConvertToDirection(vector32);
-            Vector3 dir2 = ConvertToDirection(vector3) - ConvertToDirection(vector31);
-            float rad = -MathHelper.ConvertDegreesToRadians(camRotation.Pitch);
-            Vector3 vector33 = (dir1 * (float)Math.Cos(rad)) - (dir2 * (float)Math.Sin(rad));
-            Vector3 vector34 = (dir1 * (float)Math.Sin(rad)) + (dir2 * (float)Math.Cos(rad));
-            if (!WorldToScreenRelative(camPosition + (direction * 10f) + vector33 + vector34, out Vector2 vector2))
-            {
-                return camPosition + (direction * 10f);
-            }
-            if (!WorldToScreenRelative(camPosition + (direction * 10f), out Vector2 vector21))
-            {
-                return camPosition + (direction * 10f);
-            }
-            if (Math.Abs(vector2.X - vector21.X) < 0.001f || Math.Abs(vector2.Y - vector21.Y) < 0.001f)
-            {
-                return camPosition + (direction * 10f);
-            }
-            float x = (screeenCoord.X - vector21.X) / (vector2.X - vector21.X);
-            float y = (screeenCoord.Y - vector21.Y) / (vector2.Y - vector21.Y);
-            return (camPosition + (direction * 10f)) + (vector33 * x) + (vector34 * y);
+            Vector3 camForward = camRot.RotationToDirection();
+            Vector3 rotUp = camRot + new Vector3(10, 0, 0);
+            Vector3 rotDown = camRot + new Vector3(-10, 0, 0);
+            Vector3 rotLeft = camRot + new Vector3(0, 0, -10);
+            Vector3 rotRight = camRot + new Vector3(0, 0, -10);
+
+            Vector3 camRight = RotationToDirection(rotRight) - RotationToDirection(rotLeft);
+            Vector3 camUp = RotationToDirection(rotUp) - RotationToDirection(rotDown);
+
+            float rollRad = -DegreeToRadian(camRot.Y);
+
+            Vector3 camRightRoll = (camRight * (float)Math.Cos(rollRad)) - (camUp * (float)Math.Sin(rollRad));
+            Vector3 camUpRoll = (camRight * (float)Math.Sin(rollRad)) + (camUp * (float)Math.Cos(rollRad));
+
+            var point3D = camPos + (camForward * 10.0f) + camRightRoll + camUpRoll;
+            if (!WorldToScreenRelative(point3D, out Vector2 point2D)) return camPos + (camForward * 10.0f);
+            if (!WorldToScreenRelative(camPos + (camForward * 10f), out Vector2 point2DZero)) return camPos + (camForward * 10.0f);
+
+            const double eps = 0.001;
+            if (Math.Abs(point2D.X - point2DZero.X) < eps || Math.Abs(point2D.Y - point2DZero.Y) < eps) return camPos + (camForward * 10.0f);
+            float x = (screeenCoord.X - point2DZero.X) / (point2D.X - point2DZero.X);
+            float y = (screeenCoord.Y - point2DZero.Y) / (point2D.Y - point2DZero.Y);
+            return camPos + (camForward * 10f) + (camRightRoll * x) + (camUpRoll * y);
         }
-        public static Vector3 RaycastGameplayCamForCoord(Vector2 screenCoord, float maxDistance, params Entity[] entityToIgnore)
+        public static Vector3 RaycastGameplayCamForCoord(Vector2 screenCoord, params Entity[] entityToIgnore)
         {
-            Vector3 vector3 = Natives.GET_GAMEPLAY_CAM_COORD<Vector3>();
-            Vector3 world = WorldToScreenUsingGameplayCamera(screenCoord);
-            Vector3 vector31 = world - vector3;
-            vector31.Normalize();
-            var res = World.TraceLine(vector3 + (vector31 * 1f), vector3 + (vector31 * maxDistance), TraceFlags.IntersectWorld | TraceFlags.IntersectVehicles | TraceFlags.IntersectPedsSimpleCollision
+            const float raycastToDist = 100.0f;
+
+            Vector3 source3D = Natives.GET_GAMEPLAY_CAM_COORD<Vector3>();
+            Vector3 target3D = ScreenToWorldUsingGameplayCamera(screenCoord);
+            Vector3 dir = target3D - source3D;
+            dir.Normalize();
+
+            if (entityToIgnore?.Contains(Game.LocalPlayer.Character) == true)
+            {
+                if (Game.LocalPlayer.Character.IsInAnyVehicle(false))
+                {
+                    entityToIgnore[Array.IndexOf(entityToIgnore, Game.LocalPlayer.Character)] = Game.LocalPlayer.Character.CurrentVehicle;
+                }
+            }
+
+            var res = World.TraceLine(source3D,
+                source3D + dir * raycastToDist, TraceFlags.IntersectWorld | TraceFlags.IntersectVehicles | TraceFlags.IntersectPedsSimpleCollision
                  | TraceFlags.IntersectPeds | TraceFlags.IntersectObjects | TraceFlags.IntersectFoliage, entityToIgnore);
-            return res.HitPosition;
+            return res.Hit ? res.HitPosition : source3D + (dir * raycastToDist);
+        }
+        public static Vector3 GetGameplayCamRaycastCoord()
+        {
+            Camera camera = new(false)
+            {
+                Position = GameplayCameraPosition,
+                Rotation = GameplayCameraRotation,
+                FOV = GameplayCameraFOV,
+                Heading = GameplayCameraHeading,               
+            };
+            if (World.ConvertScreenPositionToTrace(camera, new Vector2(0, 0), out Vector3 traceStart, out Vector3 traceDir))
+            {
+                Vector3 traceEnd = traceStart + traceDir * 1000f;
+                HitResult hitResult = World.TraceLine(traceStart, traceEnd, TraceFlags.IntersectEverything, Game.LocalPlayer.Character);
+                if (hitResult.Hit)
+                {
+                    if (camera.IsValid()) camera.Delete();
+                    return hitResult.HitPosition;
+                }
+                if (camera.IsValid()) camera.Delete();
+                return traceStart + (traceDir * 100f);
+            }
+            if (camera.IsValid()) camera.Delete();
+            return Game.LocalPlayer.Character.Position;
         }
         private static bool WorldToScreenRelative(Vector3 worldCoords, out Vector2 screenCoords)
         {
-            if (!Natives.GET_SCREEN_COORD_FROM_WORLD_COORD<bool>(worldCoords.X, worldCoords.Y, worldCoords.Z, out screenCoords.X, out screenCoords.Y))
+            if (!Natives.GET_SCREEN_COORD_FROM_WORLD_COORD<bool>(worldCoords.X, worldCoords.Y, worldCoords.Z, out float screenCoordsX, out float screenCoordsY))
             {
+                screenCoords = new Vector2();
                 return false;
             }
-            screenCoords.X = (screenCoords.X - 0.5f) * 2.0f;
-            screenCoords.Y = (screenCoords.Y - 0.5f) * 2.0f;
+            screenCoords.X = (screenCoordsX - 0.5f) * 2.0f;
+            screenCoords.Y = (screenCoordsY - 0.5f) * 2.0f;
             return true;
         }
-        internal static float FloatDiff(this float first, float second) => Math.Abs(Math.Abs(first) - Math.Abs(second));
+        /// <summary>
+        /// Gets an offset position from this position in the given <paramref name="heading"/> direction by a given <paramref name="offset"/> amount.
+        /// </summary>
+        /// <remarks>
+        /// Written by alexguirre. 
+        /// </remarks>
+        public static Vector3 GetOffset(this Vector3 from, float heading, Vector3 offset)
+        {
+            float radians = MathHelper.ConvertDegreesToRadians(heading);
+
+            float cos = (float)Math.Cos(radians);
+            float sin = (float)Math.Sin(radians);
+
+            float resultX = offset.X * cos - offset.Y * sin;
+            float resultY = offset.X * sin + offset.Y * cos;
+
+            return new Vector3(from.X + resultX, from.Y + resultY, from.Z + offset.Z);
+        }
+        public static bool IsAheadPosition(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => IsAheadPosition(spatial.Position, targetSpatial.Position, direction);
+        public static bool IsAheadPosition(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
+        {
+            direction.Normalize();
+            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
+            float heading2 = targetVector.GetHeadingTowards(vector3);
+            return Math.Abs(heading1 - heading2) <= 15f;
+        }
+        public static bool IsBehindPosition(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => IsBehindPosition(spatial.Position, targetSpatial.Position, direction);
+        public static bool IsBehindPosition(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
+        {
+            direction.Normalize();
+            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
+            float heading2 = targetVector.GetHeadingTowards(vector3);
+            return (Math.Abs(heading1 - heading2) - 180) <= 15f;
+        }
+        internal static float FloatDiff(this float first, float second) => Math.Abs(first - second);
         internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);
         internal static float HeightDiff(this Vector3 first, Vector3 second) => first.Z.FloatDiff(second.Z);
         internal static float HeightDiff(this ISpatial first, Vector3 second) => first.Position.Z.FloatDiff(second.Z);

@@ -273,7 +273,7 @@ namespace BarbarianCall
                                           $"~{modifierKey.GetInstructionalId()}~ ~+~ ~{key.GetInstructionalId()}~";
         internal static bool CheckKey(Keys modifierKey, Keys key)
         {
-            bool keyboardInputCheck = NativeFunction.Natives.UPDATE_ONSCREEN_KEYBOARD<int>() == 0;
+            bool keyboardInputCheck = NativeFunction.Natives.x0CF2B696BBF945AE<int>() == 0;
             if (!keyboardInputCheck)
             {
                 if (Game.IsKeyDown(key) && modifierKey == Keys.None) return true;

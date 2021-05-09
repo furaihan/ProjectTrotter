@@ -48,12 +48,10 @@ namespace BarbarianCall.Callouts
             gang2Relationship = new RelationshipGroup("LORO");
             DeclareVariable();
             Spawn = SpawnManager.GetSlowRoadSpawnPoint(PlayerPed.Position, 400, 750);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 350, 850);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 350, 850);
             if (Spawn == Spawnpoint.Zero)
             {
-                Spawn.Position = World.GetNextPositionOnStreet(PlayerPed.Position.Around2D(425, 725));
-                Spawn.Heading = SpawnManager.GetRoadHeading(Spawn.Position);
+                "MassStreetFighting: No location found after 600 tries".ToLog();
+                return false;
             }
             SpawnPoint = Spawn;
             SpawnHeading = Spawn;

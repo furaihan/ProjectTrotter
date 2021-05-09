@@ -3,6 +3,7 @@
     using System;
     using System.Globalization;
     using Rage;
+    using static Rage.Native.NativeFunction;
     public class Spawnpoint : ISpatial, IEquatable<Spawnpoint>, IEquatable<Vector3>, IFormattable
     {
         public Vector3 Position { get; set; }
@@ -51,7 +52,7 @@
 
         public float DistanceTo(Vector3 position) => Position.DistanceTo(position);
 
-        public float DistanceTo(ISpatial spatialObject) => Position.DistanceTo(spatialObject);
+        public float DistanceTo(ISpatial spatialObject) => Position.DistanceTo(spatialObject.Position);
 
         public float DistanceTo2D(Vector3 position) => Position.DistanceTo2D(position);
 

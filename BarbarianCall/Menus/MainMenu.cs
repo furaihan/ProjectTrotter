@@ -18,7 +18,6 @@ namespace BarbarianCall.Menus
         internal static UIMenuListScrollerItem<string> spawnFreemode;
 #endif
         internal static MenuPool Pool;
-        private static bool nodeDis = false;
         internal static void CreateMenu()
         {
             Pool = new MenuPool();
@@ -78,7 +77,7 @@ namespace BarbarianCall.Menus
                     e.ToString().ToLog();
                 }                
             };
-            UIMenuNumericScrollerItem<float> checkNode = new UIMenuNumericScrollerItem<float>("[DEBUG] Get Nearest Vehicle Node", "The scroller is minimum distance, Max distance is min distance + 10", 10, 1000, 10)
+            UIMenuNumericScrollerItem<float> checkNode = new("[DEBUG] Get Nearest Vehicle Node", "The scroller is minimum distance, Max distance is min distance + 10", 10, 1000, 10)
             {
                 Value = 20,
             };
@@ -86,14 +85,13 @@ namespace BarbarianCall.Menus
             {
                 try
                 {
-                    if (!nodeDis) return;
-                    nodeDis = true;
+                    s.Enabled = false;
                     var mindis = (s as UIMenuNumericScrollerItem<float>).Value;
                     var sp = SpawnManager.GetVehicleSpawnPoint(Game.LocalPlayer.Character, mindis, mindis + 10, false);
                     if (sp == Types.Spawnpoint.Zero)
                     {
                         Game.DisplaySubtitle("Vehicle Node Is Not Found");
-                        nodeDis = false;
+                        s.Enabled = true;
                         return;
                     }
                     Game.DisplaySubtitle("Found vehicle Node: " + sp.ToString());
@@ -103,13 +101,12 @@ namespace BarbarianCall.Menus
                         while (true)
                         {
                             GameFiber.Yield();
-                            if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.D6))
+                            if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Tab))
                             {
                                 break;
                             }
                         }
                         if (cp) cp.Delete();
-                        nodeDis = false;
                     });
                 }
                 catch (System.Exception e)
@@ -118,7 +115,7 @@ namespace BarbarianCall.Menus
                 }
                 finally
                 {
-                    nodeDis = false;
+                    s.Enabled = true;
                 }
             };
 #endif
@@ -127,6 +124,7 @@ namespace BarbarianCall.Menus
 #if DEBUG
             BarbarianCallMenu.AddItems(spawnFreemode, notif, vCol, checkNode);
             BarbarianCallMenu.AddItem(new UIMenuCheckboxItem("[DEBUG] Get Gameplay Cam Raycast", false));
+            BarbarianCallMenu.AddItem(new UIMenuItem("[DEBUG] Get Solicitation SpawnPoint"));
 #endif
         }
     }

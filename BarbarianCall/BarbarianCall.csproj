@@ -87,6 +87,7 @@
     <Compile Include="Callouts\CalloutBase.cs" />
     <Compile Include="Callouts\MassStreetFighting.cs" />
     <Compile Include="Callouts\OfficerStabbed.cs" />
+    <Compile Include="Callouts\Solicitation.cs" />
     <Compile Include="Callouts\SuspiciousVehicle.cs" />
     <Compile Include="Callouts\TaxiRefusePay.cs" />
     <Compile Include="Callouts\Trespassing.cs" />
