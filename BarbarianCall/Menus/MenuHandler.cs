@@ -82,7 +82,7 @@ namespace BarbarianCall.Menus
                         {
                             System.Diagnostics.Stopwatch sw = new();
                             sw.Start();
-                            Vector2 center = new(Game.Resolution.Width / 2, Game.Resolution.Height / 2);
+                            Vector2 center = new(0, 0);
                             var fpos = MathExtension.RaycastGameplayCamForCoord(center, Game.LocalPlayer.Character);
                             Checkpoint checkpoint = new(Checkpoint.CheckpointIcon.Cyclinder3, fpos, 2, 250, Color.HotPink, Color.Wheat, true);
                             while (rcast.Checked)
@@ -131,12 +131,9 @@ namespace BarbarianCall.Menus
                                     Game.DisplaySubtitle("~r~Position~s~, ~g~Node Position~s~, ~b~Roadside Position~s~");
                                     List<string> log = new()
                                     {
-                                        $"Position: Ahead: {pos.IsAheadPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} " +
-                                        $"Behind: {pos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))}",
-                                        $"Node Position: Ahead: {nodePos.IsAheadPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} " +
-                                        $"Behind: {nodePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))}",
-                                        $"Roadside Position: Ahead: {roadSidePos.IsAheadPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} " +
-                                        $"Behind: {roadSidePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))}",
+                                        $"Ahead: {pos.InFrontOf(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {pos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Position",
+                                        $"Ahead: {nodePos.InFrontOf(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {nodePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Node Position",
+                                        $"Ahead: {roadSidePos.InFrontOf(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {roadSidePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Roadside Position",
                                     };
                                     log.ForEach(Peralatan.ToLog);
                                 }

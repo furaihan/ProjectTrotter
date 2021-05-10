@@ -19,8 +19,8 @@ namespace BarbarianCall.Extensions
         internal static Vector3 RotationToDirection(this Rotator rotator) => RotationToDirection(rotator.ToVector());
         internal static Vector3 RotationToDirection(this Vector3 rotation)
         {
-            var z = DegreeToRadian(rotation.Z);
-            var x = DegreeToRadian(rotation.X);
+            var z = MathHelper.ConvertDegreesToRadians(rotation.Z);
+            var x = MathHelper.ConvertDegreesToRadians(rotation.X);
             var num = Math.Abs(Math.Cos(x));
             return new Vector3
             {
@@ -32,13 +32,11 @@ namespace BarbarianCall.Extensions
         internal static Rotator DirectionToRotator(this Vector3 direction)
         {
             direction.Normalize();
-            float xx = RadianToDegree((float)Math.Atan2(direction.Z, direction.Y));
+            float xx = MathHelper.ConvertRadiansToDegrees((float)Math.Atan2(direction.Z, direction.Y));
             float yy = 0;
-            float zz = RadianToDegree((float)Math.Atan2(direction.X, direction.Y));
+            float zz = MathHelper.ConvertRadiansToDegrees((float)Math.Atan2(direction.X, direction.Y));
             return new Vector3(xx, yy, zz).ToRotator();
         }
-        public static float DegreeToRadian(this float degree) => (float)(degree * (Math.PI / 180.0f));
-        public static float RadianToDegree(this float radian) => (float)(radian * (180.0f / Math.PI));
         private static Vector3 ScreenToWorldUsingGameplayCamera(Vector2 screeenCoord)
         {
             Vector3 camPos = Natives.GET_GAMEPLAY_CAM_COORD<Vector3>();
@@ -53,7 +51,7 @@ namespace BarbarianCall.Extensions
             Vector3 camRight = RotationToDirection(rotRight) - RotationToDirection(rotLeft);
             Vector3 camUp = RotationToDirection(rotUp) - RotationToDirection(rotDown);
 
-            float rollRad = -DegreeToRadian(camRot.Y);
+            float rollRad = -MathHelper.ConvertDegreesToRadians(camRot.Y);
 
             Vector3 camRightRoll = (camRight * (float)Math.Cos(rollRad)) - (camUp * (float)Math.Sin(rollRad));
             Vector3 camUpRoll = (camRight * (float)Math.Sin(rollRad)) + (camUp * (float)Math.Cos(rollRad));
@@ -90,39 +88,11 @@ namespace BarbarianCall.Extensions
                  | TraceFlags.IntersectPeds | TraceFlags.IntersectObjects | TraceFlags.IntersectFoliage, entityToIgnore);
             return res.Hit ? res.HitPosition : source3D + (dir * raycastToDist);
         }
-        public static Vector3 GetGameplayCamRaycastCoord()
-        {
-            Camera camera = new(false)
-            {
-                Position = GameplayCameraPosition,
-                Rotation = GameplayCameraRotation,
-                FOV = GameplayCameraFOV,
-                Heading = GameplayCameraHeading,               
-            };
-            if (World.ConvertScreenPositionToTrace(camera, new Vector2(0, 0), out Vector3 traceStart, out Vector3 traceDir))
-            {
-                Vector3 traceEnd = traceStart + traceDir * 1000f;
-                HitResult hitResult = World.TraceLine(traceStart, traceEnd, TraceFlags.IntersectEverything, Game.LocalPlayer.Character);
-                if (hitResult.Hit)
-                {
-                    if (camera.IsValid()) camera.Delete();
-                    return hitResult.HitPosition;
-                }
-                if (camera.IsValid()) camera.Delete();
-                return traceStart + (traceDir * 100f);
-            }
-            if (camera.IsValid()) camera.Delete();
-            return Game.LocalPlayer.Character.Position;
-        }
         private static bool WorldToScreenRelative(Vector3 worldCoords, out Vector2 screenCoords)
         {
-            if (!Natives.GET_SCREEN_COORD_FROM_WORLD_COORD<bool>(worldCoords.X, worldCoords.Y, worldCoords.Z, out float screenCoordsX, out float screenCoordsY))
-            {
-                screenCoords = new Vector2();
-                return false;
-            }
-            screenCoords.X = (screenCoordsX - 0.5f) * 2.0f;
-            screenCoords.Y = (screenCoordsY - 0.5f) * 2.0f;
+            var output = World.ConvertWorldPositionToScreenPosition(worldCoords);
+            output = new Vector2(output.X / Game.Resolution.Width, output.Y / Game.Resolution.Height);
+            screenCoords = new Vector2((output.X - 0.5f) * 2, (output.Y - 0.5f) * 2);
             return true;
         }
         /// <summary>
@@ -143,8 +113,8 @@ namespace BarbarianCall.Extensions
 
             return new Vector3(from.X + resultX, from.Y + resultY, from.Z + offset.Z);
         }
-        public static bool IsAheadPosition(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => IsAheadPosition(spatial.Position, targetSpatial.Position, direction);
-        public static bool IsAheadPosition(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
+        public static bool InFrontOf(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => InFrontOf(spatial.Position, targetSpatial.Position, direction);
+        public static bool InFrontOf(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
         {
             direction.Normalize();
             float heading1 = MathHelper.ConvertDirectionToHeading(direction);
@@ -157,7 +127,8 @@ namespace BarbarianCall.Extensions
             direction.Normalize();
             float heading1 = MathHelper.ConvertDirectionToHeading(direction);
             float heading2 = targetVector.GetHeadingTowards(vector3);
-            return (Math.Abs(heading1 - heading2) - 180) <= 15f;
+            heading1 -= 180;
+            return Math.Abs(heading1 - heading2) <= 15f;
         }
         internal static float FloatDiff(this float first, float second) => Math.Abs(first - second);
         internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);

@@ -62,23 +62,23 @@ namespace BarbarianCall
         }
 
 
-        public static bool IsLSPDFRPluginRunning(string Plugin, Version minVersion = null)
+        public static bool IsLSPDFRPluginRunning(string Plugin, Version minVersion = null, bool log = true)
         {
             try
             {
-                $"Checking if {Plugin} is running".ToLog();
+               if (log) $"Checking if {Plugin} is running".ToLog();
                 foreach (Assembly assembly in Functions.GetAllUserPlugins())
                 {
                     if (string.Equals(assembly.GetName().Name, Plugin, StringComparison.CurrentCultureIgnoreCase))
                     {
                         if (minVersion == null || assembly.GetName().Version.CompareTo(minVersion) >= 0)
                         {
-                            $"{assembly.GetName().Name} is detected running in version {assembly.GetName().Version}".ToLog();
+                            if (log) $"{assembly.GetName().Name} is detected running in version {assembly.GetName().Version}".ToLog();
                             return true;
                         }
                     }
                 }
-                $"{Plugin} is not running or outdated".ToLog();
+                if (log) $"{Plugin} is not running or outdated".ToLog();
             }
             catch (Exception e)
             {

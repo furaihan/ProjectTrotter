@@ -76,7 +76,7 @@ namespace BarbarianCall.Callouts
             CalloutPosition = Spawn;
             gangMemberCount = Peralatan.Random.Next(3, 8);
             CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
-            CalloutMessage = "Mass Street Fighting Test";
+            CalloutMessage = "Mass Street Fighting";
             ShowCalloutAreaBlipBeforeAccepting(Spawn, 80f);
             PlayScannerWithCallsign("WE_HAVE BAR_CRIME_GANG_RELATED IN_OR_ON_POSITION", Spawn);
             return base.OnBeforeCalloutDisplayed();
@@ -432,7 +432,7 @@ namespace BarbarianCall.Callouts
                 || LSPDFR.IsPedGettingArrested(ped) || pursuitPeds.Contains(ped) || LSPDFR.IsPedArrested(ped) || ped.IsDead || LSPDFR.IsPedStoppedByPlayer(ped)
                 || LSPDFR.IsPedBeingCuffedByPlayer(ped) || LSPDFR.IsPedBeingFriskedByPlayer(ped) || LSPDFR.IsPedBeingGrabbedByPlayer(ped))) return false;
             if (Game.LocalPlayer.IsFreeAimingAtAnyEntity && Game.LocalPlayer.GetFreeAimingTarget() == ped) return false;
-            if (StopThePedRunning && StopThePedFunc.IsPedStoppedWithSTP(ped)) return false;
+            if (Initialization.IsLSPDFRPluginRunning("StopThePed", null, false) && StopThePedFunc.IsPedStoppedWithSTP(ped)) return false;
             return true;
         }
         private void GetHeadshot()

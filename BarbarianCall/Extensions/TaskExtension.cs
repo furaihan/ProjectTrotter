@@ -102,14 +102,13 @@ namespace BarbarianCall.Extensions
             Natives.TASK_THROW_PROJECTILE(ped, throwPos.X, throwPos.Y, throwPos.Z, 0, 0);
             return Task.GetTask(ped, "TASK_THROW_PROJECTILE");
         }
-        public static void PlayVehicleAnimation(this Vehicle vehicle, string animDict, string animName) => Natives.TASK_VEHICLE_PLAY_ANIM(vehicle, animDict, animName);
-        public static void PlayEntityAnim(this Entity entity, AnimationDictionary animDict, string animName, bool loop = false, bool stayInAnim = false)
+        public static Task PlayScenarioAction(this Ped ped, string scenarioName, bool playEnterAnim)
         {
-            animDict.LoadAndWait();
-            if (entity) Natives.PLAY_ENTITY_ANIM(entity, animName, animDict.Name, 4f, loop, stayInAnim, 0, 0f, 0);
+            Natives.TASK_START_SCENARIO_IN_PLACE(ped, scenarioName, -1, playEnterAnim);
+            return Task.GetTask(ped, "TASK_START_SCENARIO_IN_PLACE");
         }
         public static void StopEntityAnimation(this Entity entity, AnimationDictionary animDict, string animName) => Natives.STOP_ENTITY_ANIM(entity, animName, animDict.Name, 0);
-        public static bool IsEntityPlayingAnim(this Entity entity, string animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict, animName, 3); //IS_ENTITY_PLAYING_ANIM
+        public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM
         public enum EscortVehicleMode : int
         {
             Behind = -1,
@@ -118,28 +117,6 @@ namespace BarbarianCall.Extensions
             Right,
             BackLeft,
             BackRight
-        }
-        [Flags]
-        public enum VehicleDrivingStyleFlags : uint
-        {
-            None = 0,
-            FollowTrafficRule = 1,
-            YieldToPeds = 2,
-            AvoidVehicle = 4,
-            AvoidPeds = 8,
-            AvoidObjects = 16,
-            Unk1 = 32,
-            Unk2 = 64,
-            StopAtTrafficLights = 128,
-            UseBlinker = 256 ,
-            AllowWrongWay = 512,
-            Backwards = 1024,
-            Unk3 = 2048,
-            TakeShortestPath = 262144,
-            AvoidOffroad = 524288, //??
-            IgnoreRoads = 4194304,
-            StraightToDestination = 16777216,
-            AvoidHighways = 536870912,
-        }
+        }   
     }
 }

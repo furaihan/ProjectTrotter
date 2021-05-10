@@ -49,6 +49,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\LSPD First Response.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="RAGENativeUI, Version=1.8.0.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\packages\RAGENativeUI.1.8.0-rc7\lib\net472\RAGENativeUI.dll</HintPath>
     </Reference>
@@ -119,6 +120,7 @@
     <Compile Include="Freemode\HeadBlend.cs" />
     <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Manusia.cs" />
+    <Compile Include="Types\Marker.cs" />
     <Compile Include="Types\Mugshot.cs" />
     <Compile Include="Types\PedGroup.cs" />
     <Compile Include="Types\Spawnpoint.cs" />
