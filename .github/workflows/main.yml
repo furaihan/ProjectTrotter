@@ -16,7 +16,7 @@ jobs:
         uses: NuGet/setup-nuget@v1.0.5
      
       - name: Restore NuGet Packages
-        run: nuget restore BarbarianCall/BarbarianCall.sln
+        run: nuget restore BarbarianCall.sln
       
       - name: Download Library LSPD First Response
         uses: carlosperate/download-file-action@v1.0.3
