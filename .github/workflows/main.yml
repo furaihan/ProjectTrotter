@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup MS Build
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Build Release Library
+        run:  msbuild BarbarianCall.sln /p:Configuration=Release
+        
+      - name: Upload Release Artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: BarbarianCall - Release
+          path: Source/bin/Release
+          
+      - name: Build Debug Library
+        run:  msbuild BarbarianCall.sln /p:Configuration=Debug
+        
+      - name: Upload Debug Artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: BarbarianCall - Debug
+          path: Source/bin/Debug
