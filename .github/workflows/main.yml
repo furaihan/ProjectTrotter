@@ -11,6 +11,12 @@ jobs:
 
       - name: Setup MS Build
         uses: microsoft/setup-msbuild@v1.0.2
+        
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.5
+     
+      - name: Restore NuGet Packages
+        run: nuget restore Source/BarbarianCall.sln
       
       - name: Download Library LSPD First Response
         uses: carlosperate/download-file-action@v1.0.3
