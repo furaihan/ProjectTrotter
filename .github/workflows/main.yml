@@ -49,7 +49,7 @@ jobs:
           location: Dependencies/
 
       - name: Build Release Library
-        run:  msbuild BarbarianCall.sln /p:Configuration=Release
+        run:  msbuild BarbarianCall.sln /p:Configuration=Release /p:Platform=x64
         
       - name: Upload Release Artifact
         uses: actions/upload-artifact@v2.2.3
@@ -58,7 +58,7 @@ jobs:
           path: Source/bin/Release
           
       - name: Build Debug Library
-        run:  msbuild BarbarianCall.sln /p:Configuration=Debug
+        run:  msbuild BarbarianCall.sln /p:Configuration=Debug /p:Platform=x64
         
       - name: Upload Debug Artifact
         uses: actions/upload-artifact@v2.2.3
