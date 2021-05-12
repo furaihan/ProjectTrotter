@@ -16,37 +16,37 @@ jobs:
         uses: NuGet/setup-nuget@v1.0.5
      
       - name: Restore NuGet Packages
-        run: nuget restore BarbarianCall.sln
+        run: nuget restore BarbarianCall/BarbarianCall.sln
       
       - name: Download Library LSPD First Response
         uses: carlosperate/download-file-action@v1.0.3
         with:
           file-url: https://www.dropbox.com/s/4tr30dha5gewg6j/LSPD%20First%20Response.dll?dl=0
-          location: Dependencies/
+          location: BarbarianCall/Dependencies/
 
       - name: Download Library Stop The Ped
         uses: carlosperate/download-file-action@v1.0.3
         with:
           file-url: https://www.dropbox.com/s/b01uomeq1ytg1xm/StopThePed.dll?dl=0
-          location: Dependencies/
+          location: BarbarianCall/Dependencies/
 
       - name: Download Library Ultimate Backup
         uses: carlosperate/download-file-action@v1.0.3
         with:
           file-url: https://www.dropbox.com/s/b01uomeq1ytg1xm/StopThePed.dll?dl=0
-          location: Dependencies/
+          location: BarbarianCall/Dependencies/
 
       - name: Download Library GrammarPolice
         uses: carlosperate/download-file-action@v1.0.3
         with:
           file-url: https://www.dropbox.com/s/jg6fq2tp1rt1jwn/GrammarPolice.dll?dl=0
-          location: Dependencies/
+          location: BarbarianCall/Dependencies/
 
       - name: Download Library Better EMS
         uses: carlosperate/download-file-action@v1.0.3
         with:
           file-url: https://www.dropbox.com/s/5nnk2sox2l749sg/BetterEMS.dll?dl=0
-          location: Dependencies/
+          location: BarbarianCall/Dependencies/
 
       - name: Build Release Library
         run:  msbuild BarbarianCall.sln /p:Configuration=Release /p:Platform=x64
@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.3
         with:
           name: BarbarianCall - Release
-          path: Source/bin/Release
+          path: BarbarianCall/bin/Release
           
       - name: Build Debug Library
         run:  msbuild BarbarianCall.sln /p:Configuration=Debug /p:Platform=x64
@@ -64,4 +64,4 @@ jobs:
         uses: actions/upload-artifact@v2.2.3
         with:
           name: BarbarianCall - Debug
-          path: Source/bin/Debug
+          path: BarbarianCall/bin/Debug
