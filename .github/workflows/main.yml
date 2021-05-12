@@ -18,36 +18,6 @@ jobs:
       - name: Restore NuGet Packages
         run: nuget restore BarbarianCall.sln
       
-      - name: Download Library LSPD First Response
-        uses: carlosperate/download-file-action@v1.0.3
-        with:
-          file-url: https://www.dropbox.com/s/4tr30dha5gewg6j/LSPD%20First%20Response.dll?dl=0
-          location: Dependencies/
-
-      - name: Download Library Stop The Ped
-        uses: carlosperate/download-file-action@v1.0.3
-        with:
-          file-url: https://www.dropbox.com/s/b01uomeq1ytg1xm/StopThePed.dll?dl=0
-          location: Dependencies/
-
-      - name: Download Library Ultimate Backup
-        uses: carlosperate/download-file-action@v1.0.3
-        with:
-          file-url: https://www.dropbox.com/s/b01uomeq1ytg1xm/StopThePed.dll?dl=0
-          location: Dependencies/
-
-      - name: Download Library GrammarPolice
-        uses: carlosperate/download-file-action@v1.0.3
-        with:
-          file-url: https://www.dropbox.com/s/jg6fq2tp1rt1jwn/GrammarPolice.dll?dl=0
-          location: Dependencies/
-
-      - name: Download Library Better EMS
-        uses: carlosperate/download-file-action@v1.0.3
-        with:
-          file-url: https://www.dropbox.com/s/5nnk2sox2l749sg/BetterEMS.dll?dl=0
-          location: Dependencies/
-
       - name: Build Release Library
         run:  msbuild BarbarianCall.sln /p:Configuration=Release /p:Platform=x64
         
