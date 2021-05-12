@@ -131,9 +131,9 @@ namespace BarbarianCall.Menus
                                     Game.DisplaySubtitle("~r~Position~s~, ~g~Node Position~s~, ~b~Roadside Position~s~");
                                     List<string> log = new()
                                     {
-                                        $"Ahead: {pos.InFrontOf(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {pos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Position",
-                                        $"Ahead: {nodePos.InFrontOf(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {nodePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Node Position",
-                                        $"Ahead: {roadSidePos.InFrontOf(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {roadSidePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Roadside Position",
+                                        $"Ahead: {pos.IsAheadPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {pos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Position",
+                                        $"Ahead: {nodePos.IsAheadPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {nodePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Node Position",
+                                        $"Ahead: {roadSidePos.IsAheadPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} Behind: {roadSidePos.IsBehindPosition(PlayerPed, MathHelper.ConvertHeadingToDirection(PlayerPed.Heading))} => Roadside Position",
                                     };
                                     log.ForEach(Peralatan.ToLog);
                                 }

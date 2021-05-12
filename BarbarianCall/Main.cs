@@ -39,7 +39,8 @@ namespace BarbarianCall
             if (onDuty)
             {
                 AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(Initialization.LSPDFRResolveEventHandler);
-                Type[] callouts = { typeof(Callouts.SuspiciousVehicle), typeof(Callouts.OfficerStabbed), typeof(Callouts.TaxiRefusePay), typeof(Callouts.WantedFelonOnTheLoose), typeof(Callouts.MassStreetFighting) };
+                Type[] callouts = { typeof(Callouts.SuspiciousVehicle), typeof(Callouts.OfficerStabbed), typeof(Callouts.TaxiRefusePay), typeof(Callouts.WantedFelonOnTheLoose), typeof(Callouts.MassStreetFighting),
+                typeof(Callouts.Prostitution)};
                 foreach (Type callout in callouts)
                 {
                     Peralatan.ToLog(string.Format("Loading {0} callout", callout.Name));

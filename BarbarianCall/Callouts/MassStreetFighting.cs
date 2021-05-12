@@ -18,7 +18,7 @@ namespace BarbarianCall.Callouts
         private List<Ped> Gang1;
         private List<Ped> Gang2;
         private List<Ped> pursuitPeds;
-        private bool CanEnd = false;
+        public bool CanEnd = false;
         private List<Model> Gang1Model;
         private List<Model> Gang2Model;
         private Dictionary<Ped, SuspectProperty> SuspectParameters; /*TODO: Use this instead 2 dictionary above*/
@@ -214,7 +214,7 @@ namespace BarbarianCall.Callouts
         private void DisplaySummary()
         {
             if (checkpoint) checkpoint.Delete();
-            $"~b~Suspect Count~s~: {gangMemberCount * 2}~n~~b~Suspect Summary~s~:~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".DisplayNotifWithLogo("Mass Street Fighting");
+            $"Suspect Count~s~: {gangMemberCount * 2}~n~Suspect Summary~s~:~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".DisplayNotifWithLogo("Mass Street Fighting");
             End();
         }
         private void GetClose()

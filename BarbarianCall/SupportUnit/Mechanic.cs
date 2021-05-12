@@ -143,7 +143,7 @@ namespace BarbarianCall.SupportUnit
                         BrokenVehicleBlip.Color = Color.LavenderBlush;
                         MethodPassed = EMethodPassed.Respond;
                         MechanicPed.DisplayNotificationsWithPedHeadshot("~g~En Route",
-                            $"~h~Mechanic engineer~h~~s~ is ~g~en route~s~ to ~y~repair~s~ ~c~{VehicleToFix.GetVehicleDisplayName()}~s~. Please be ~g~patient",
+                            $"~h~Mechanic engineer~h~~s~ is ~g~en route~s~ to ~y~repair~s~ ~c~{VehicleToFix.GetDisplayName()}~s~. Please be ~g~patient",
                             "~y~Mechanic Engineer");
                         Status = EMechanicStatus.Running;
                         Spawnpoint drivePosition = SpawnManager.GetVehicleSpawnPoint(VehicleToFix.Position, 25, 35);

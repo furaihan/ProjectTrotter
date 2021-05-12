@@ -54,7 +54,7 @@ namespace BarbarianCall.Types
             if (Car && WithVehicle)
             {
                 GameFiber.Wait(575);
-                Peralatan.DisplayNotifWithLogo($"~y~Model~s~: {Car.GetVehicleDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}", "~y~Vehicle Details~s~", "mpcarhud", "transport_car_icon");
+                Peralatan.DisplayNotifWithLogo($"~y~Model~s~: {Car.GetDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}", "~y~Vehicle Details~s~", "mpcarhud", "transport_car_icon");
             }
         }
         private string GetCarColor()
@@ -74,7 +74,7 @@ namespace BarbarianCall.Types
                 "Get car color error".ToLog();
                 e.ToString().ToLog();
             }          
-            $"{Car.GetVehicleDisplayName()} color is unknown, Argb: {Car.PrimaryColor.ToArgb()}".ToLog();
+            $"{Car.GetDisplayName()} color is unknown, Argb: {Car.PrimaryColor.ToArgb()}".ToLog();
             return "Weirdly colored";
         }
         private int GetAge()

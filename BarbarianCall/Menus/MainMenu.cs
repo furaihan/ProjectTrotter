@@ -61,7 +61,7 @@ namespace BarbarianCall.Menus
                 try
                 {
                     var veh = Game.LocalPlayer.Character.GetNearbyVehicles(15).OrderBy(v => v.DistanceTo(Game.LocalPlayer.Character)).FirstOrDefault();
-                    Game.Console.Print($"{veh.Model.Name} - {veh.GetVehicleDisplayName()}");
+                    Game.Console.Print($"{veh.Model.Name} - {veh.GetDisplayName()}");
                     var ev = Types.VehicleColor.FromPrimaryVehicle(veh);
                     var evc = Types.VehicleColor.GetColor(ev);
                     Game.DisplaySubtitle($"Primary Color: <font color=\"{ColorTranslator.ToHtml(evc)}\">{ev}</font>");

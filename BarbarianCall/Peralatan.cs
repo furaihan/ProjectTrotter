@@ -104,45 +104,32 @@ namespace BarbarianCall
                                 plateRandomizerHandler.Next(10).ToString();
                 vehicle.LicensePlate = plate;
 #if DEBUG
-                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetVehicleDisplayName(), vehicle.LicensePlate));
+                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), vehicle.LicensePlate));
 #endif
             }           
         }
-        internal static string GetVehicleDisplayName(this Vehicle vehicle)
+        internal static string GetDisplayName(this Model vehicleModel)
         {
-            unsafe
-            {
-                CVehicle* vehPtr = (CVehicle*)vehicle.MemoryAddress;
-                IntPtr makeNamePtr = vehPtr->GetMakeName();
-                IntPtr gameNamePtr = vehPtr->GetGameName();
-                string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
-                string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
-                return makeName == null ? gameName : $"{makeName} {gameName}";
-            }
+            string text = NativeFunction.Natives.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL<string>(vehicleModel.Hash);
+            return !string.IsNullOrEmpty(text) && NativeFunction.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? NativeFunction.Natives.x7B5280EBA9840C72<string>(text) : "CARNOTFOUND";
         }
-        internal static string GetVehicleDisplayAudio(Vehicle vehicle)
+        internal static string GetDisplayName(this Vehicle vehicle) => GetDisplayName(vehicle.Model);
+        internal static string GetMakeName(this Model vehicleModel)
         {
-            try
-            {
-                unsafe
-                {
-                    CVehicle* vehPtr = (CVehicle*)vehicle.MemoryAddress;
-                    IntPtr makeNamePtr = vehPtr->GetMakeName();
-                    IntPtr gameNamePtr = vehPtr->GetGameName();
-                    string makeName = Extension.IsStringEmpty(makeNamePtr) ? null : Extension.GetLocalizedString(makeNamePtr);
-                    string gameName = Extension.IsStringEmpty(gameNamePtr) ? null : Extension.GetLocalizedString(gameNamePtr);
-                    string modelName = vehicle.Model.Name;
-                    var audibles = Globals.AudibleCarModel.Select(m => m.Name);
-                    if (!audibles.Any(st => st.Equals(modelName, StringComparison.OrdinalIgnoreCase)) && char.IsDigit(modelName.Last()) && !modelName.StartsWith("0X", StringComparison.OrdinalIgnoreCase))
-                        modelName = modelName.Remove(modelName.Length - 1);
-                    return makeName == null ? vehicle.Model.Name.ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {modelName.ToUpper()}";
-                }
-            }
-            catch (Exception e)
-            {
-                string.Format("Get vehicle display audio error: {0}", e.Message).ToLog();
-            }
-            return string.Empty;
+            string text = NativeFunction.Natives.xF7AF4F159FF99F97<string>(vehicleModel.Hash);
+            return !string.IsNullOrEmpty(text) && NativeFunction.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? NativeFunction.Natives.x7B5280EBA9840C72<string>(text) : "Unknown Manufacturer";
+        }
+        internal static string GetMakeName(this Vehicle vehicle) => GetMakeName(vehicle.Model);
+        internal static string GetPoliceScannerAudio(Vehicle vehicle)
+        {
+            string makeName = GetMakeName(vehicle);
+            string modelName = vehicle.Model.Name;
+            var audibles = Globals.AudibleCarModel.Select(m => m.Name);
+            modelName.Print();
+            if (!audibles.Any(st => st.Equals(modelName, StringComparison.OrdinalIgnoreCase)) && char.IsDigit(modelName.Last()) && !modelName.StartsWith("0X", StringComparison.OrdinalIgnoreCase))
+                modelName = modelName.Remove(modelName.Length - 1);
+            modelName.Print();
+            return makeName == "Unknown Manufacturer" ? vehicle.Model.Name.ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {modelName.ToUpper()}";
         }
         internal static string GetZoneName(this ISpatial spatial) => GetZoneName(spatial.Position);
         internal static string GetZoneName(this Vector3 pos)
@@ -264,10 +251,10 @@ namespace BarbarianCall
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
-        internal static void DisplayNotifWithLogo(this string msg, string subtitle = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string textureDict = " WEB_LOSSANTOSPOLICEDEPT", string title = "~y~BarbarianCall~s~") 
-            => Game.DisplayNotification(textureDict, textureName, title, "~y~" + subtitle + "~s~", msg);
-        internal static void DisplayNotifWithLogo(this string msg, out uint notifId, string calloutName = "", string textureName = "WEB_LOSSANTOSPOLICEDEPT") =>
-            notifId = Game.DisplayNotification(textureName, textureName, "~y~BarbarianCall~s~", "~y~" + calloutName + "~s~", msg);
+        internal static uint DisplayNotifWithLogo(this string msg, string subtitle = "", string textureDict = " WEB_LOSSANTOSPOLICEDEPT", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string title = "~y~BarbarianCall~s~")
+        {
+            return Game.DisplayNotification(textureDict, textureName, title, "~y~" + subtitle + "~s~", msg);
+        }
         internal static string FormatKeyBinding(Keys modifierKey, Keys key)
             => modifierKey == Keys.None ? $"~{key.GetInstructionalId()}~" :
                                           $"~{modifierKey.GetInstructionalId()}~ ~+~ ~{key.GetInstructionalId()}~";
@@ -521,7 +508,7 @@ namespace BarbarianCall
                     "Get car color error".ToLog();
                     e.ToString().ToLog();
                 }
-                $"{vehicle.GetVehicleDisplayName()} color is unknown, Argb: {vehicle.PrimaryColor.ToArgb()}".ToLog();
+                $"{vehicle.GetDisplayName()} color is unknown, Argb: {vehicle.PrimaryColor.ToArgb()}".ToLog();
                 return "Weirdly colored";
             }
             return string.Empty;            

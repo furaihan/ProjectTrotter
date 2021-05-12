@@ -113,8 +113,8 @@ namespace BarbarianCall.Extensions
 
             return new Vector3(from.X + resultX, from.Y + resultY, from.Z + offset.Z);
         }
-        public static bool InFrontOf(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => InFrontOf(spatial.Position, targetSpatial.Position, direction);
-        public static bool InFrontOf(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
+        public static bool IsAheadPosition(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => IsAheadPosition(spatial.Position, targetSpatial.Position, direction);
+        public static bool IsAheadPosition(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
         {
             direction.Normalize();
             float heading1 = MathHelper.ConvertDirectionToHeading(direction);
@@ -130,6 +130,7 @@ namespace BarbarianCall.Extensions
             heading1 -= 180;
             return Math.Abs(heading1 - heading2) <= 15f;
         }
+        internal static float GetRandomFloatInRange(float startRange, float endRange) => Natives.GET_RANDOM_FLOAT_IN_RANGE<float>(startRange, endRange);
         internal static float FloatDiff(this float first, float second) => Math.Abs(first - second);
         internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);
         internal static float HeightDiff(this Vector3 first, Vector3 second) => first.Z.FloatDiff(second.Z);

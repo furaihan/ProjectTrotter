@@ -72,7 +72,7 @@ namespace BarbarianCall
             }
             else "Unsuccessfull Getting node flag value".ToLog();
         }
-        private static bool IsCoordOnScreen(Vector3 pos) => Natives.xF9904D11F1ACBEC3<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); //GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION
+        public static bool IsOnScreen(this Vector3 pos) => Natives.xF9904D11F1ACBEC3<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); //GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION
         private static bool IsSlowRoad(Vector3 position) => CallByHash<bool>(0b10_0010_1101_0111_0010_0111_0101_1010_0111_1001_1111_1110_1000_0010_0001_0101, position.X, position.Y, position.Z, 1, 5, 1077936128, 0f);
         internal static float GetRoadHeading(Vector3 pos)
         {
@@ -92,7 +92,7 @@ namespace BarbarianCall
                 if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
                 {
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance + 5f) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsCoordOnScreen(nodeP))
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
                         {
@@ -118,7 +118,7 @@ namespace BarbarianCall
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)Math.Abs(minimalDistance), (int)Math.Abs(maximumDistance)));
                 if (Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, (i % 5) + 1, out Vector3 nodeP, out float nodeH, 0, 9, 3.0f, 2.5f))
                 {
-                    if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsCoordOnScreen(nodeP))
+                    if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         Spawnpoint ret = new(nodeP, nodeH);
                         $"Vehicle Spawn 2 found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
@@ -141,9 +141,9 @@ namespace BarbarianCall
                 if (Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, true, out Vector3 nodeP, 0))
                 {
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsCoordOnScreen(nodeP))
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsOnScreen(nodeP))
                     {
-                        Spawnpoint ret = new(nodeP, Extension.GetRandomAbsoluteSingle(1, 359));
+                        Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
                         $"Ped sidewalk spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                         pos.GetFlags();
@@ -159,9 +159,9 @@ namespace BarbarianCall
                 if (Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, false, out Vector3 nodeP, 0))
                 {
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsCoordOnScreen(nodeP))
+                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsOnScreen(nodeP))
                     {
-                        Spawnpoint ret = new(nodeP, Extension.GetRandomAbsoluteSingle(1, 359));
+                        Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
                         $"Ped safe spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
                         $"{i + 600} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                         pos.GetFlags();
@@ -186,7 +186,7 @@ namespace BarbarianCall
                 {
                     if (Natives.xA0F8A7517A273C05<bool>(nodeP.X, nodeP.Y, nodeP.Z, nodeH, out Vector3 roadSide))
                     {
-                        if (roadSide.DistanceTo(entity) < 35 + favoredDistance && !roadSide.IsOccupied() && !IsCoordOnScreen(roadSide))
+                        if (roadSide.DistanceTo(entity) < 35 + favoredDistance && !roadSide.IsOccupied() && !IsOnScreen(roadSide))
                         {
                             Spawnpoint ret = new(roadSide, nodeH);
                             string.Format("Favored RoadSide Spawnpoint found {0}", ret).ToLog();
@@ -285,7 +285,7 @@ namespace BarbarianCall
                     {
                         if (Natives.x4F5070AA58F69279<bool>(nodeId))
                         {
-                            if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsCoordOnScreen(randomNode) && pos.HeightDiff(randomNode) < 18f)
+                            if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsOnScreen(randomNode) && pos.HeightDiff(randomNode) < 18f)
                             {
                                 if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(randomNode.X, randomNode.Y, randomNode.Z, 1, out Vector3 _, out float heading, out int _, 1, 3f, 0f))
                                 {
@@ -303,30 +303,22 @@ namespace BarbarianCall
             $"Slow road is not found".ToLog();
             return Spawnpoint.Zero;
         }
-        [Flags]
-        private enum PedNodeFlags
-        {
-            FootPath = 1,
-            InteractionUnk = 2,
-            Interior = 4,
-            Water = 8,
-            FlatGround = 16,
-            Unk32 = 32,
-            Unk64 = 64,
-            Unk128 = 128,
-            Unk254 = 254,
-            Unk512 = 512,
-            Unk1024 = 1024,
-        }
         internal static Spawnpoint GetSolicitationSpawnpoint(Vector3 playerPos, out Spawnpoint nodePosition, out Spawnpoint roadSidePosition)
         {
             int trys = 600;
+            int shouldYieldAt = 40;
             try
             {
                 ulong totalMem = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / 1048576;
-                if (totalMem > 16000) trys = 1200;
+                $"Total Memory: {totalMem} Mb".ToLog();
+                if (totalMem > 16000)
+                {
+                    trys = 1200;
+                    shouldYieldAt = 110;
+                }
             }
-            catch { }
+            catch (System.ComponentModel.Win32Exception e) { (e.ToString() + " " +  e.NativeErrorCode.ToString()).ToLog(); }
+
             nodePosition = Spawnpoint.Zero;
             roadSidePosition = Spawnpoint.Zero;
             Stopwatch sw = Stopwatch.StartNew();
@@ -341,7 +333,7 @@ namespace BarbarianCall
             };
             for (int i = 0; i < trys; i++)
             {
-                if (i % 35 == 0) GameFiber.Yield();
+                if (i % shouldYieldAt == 0) GameFiber.Yield();
                 Vector3 around = playerPos.Around2D(Peralatan.Random.Next(350, 800));
                 if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float _, 0, 3,0,0))
                 {
@@ -352,11 +344,12 @@ namespace BarbarianCall
                         if (blacklist.Any(flag=> nodeFlags.HasFlag(flag))) continue;
                         if (nodeFlags.HasFlag(NodeFlags.SlowNormalRoad) || nodeFlags.HasFlag(NodeFlags.UnknownBit2))
                         {
-                            if (Natives.GET_SAFE_COORD_FOR_PED<bool>(nodePos.X, nodePos.Y, nodePos.Z, true, out Vector3 pedNodePos, (int)(PedNodeFlags.FlatGround | PedNodeFlags.FootPath)))
+                            if (Natives.GET_SAFE_COORD_FOR_PED<bool>(nodePos.X, nodePos.Y, nodePos.Z, true, out Vector3 pedNodePos, 17))
                             {
                                 if (pedNodePos.DistanceTo(nodePos) > 50f || pedNodePos.DistanceTo(playerPos) < 300f) continue;
                                 bool success = Natives.x16F46FB18C8009E4<bool>(pedNodePos.X, pedNodePos.Y, pedNodePos.Z, -1, out Vector3 roadSidePos);
                                 if (!success) continue;
+                                if (roadSidePos.DistanceTo(pedNodePos) < 8f) continue;
                                 Spawnpoint ret = new(pedNodePos, pedNodePos.GetHeadingTowards(nodePos));
                                 $"Get solicitation spawnpoint is successfull {ret}, {i + 1} process took {sw.ElapsedMilliseconds} ms".ToLog();
                                 $"Solicitation Spawnpoint => Distance {ret.DistanceTo(playerPos)}, Travel Distance: {ret.TravelDistanceTo(playerPos)}".ToLog();
@@ -366,6 +359,7 @@ namespace BarbarianCall
                                 nodePosition = new(nodePos, heading);
                                 return ret;
                             }
+                            else $"SafeCoordinate is not found Distance: {nodePos.DistanceTo(Game.LocalPlayer.Character)}".ToLog();
                         }
                     }
                 }

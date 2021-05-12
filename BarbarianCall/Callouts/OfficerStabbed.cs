@@ -665,7 +665,7 @@ namespace BarbarianCall.Callouts
                     List<string> ambulanceConversation = new()
                      {           
                         "~g~Paramedic~s~: Calm down officer, We can handle this, now you can search for the suspect",           
-                        $"~g~Paramedic~s~: All i know he is driving a ~y~{susVehColor}-colored {SuspectCar.GetVehicleDisplayName()}~s~ with license plate ~g~{SuspectCar.LicensePlate}~s~",
+                        $"~g~Paramedic~s~: All i know he is driving a ~y~{susVehColor}-colored {SuspectCar.GetDisplayName()}~s~ with license plate ~g~{SuspectCar.LicensePlate}~s~",
                         "~b~Officer~s~: Thank you for the information i will search the suspect now",
                         "~g~Paramedic~s~: Please be careful, suspect may bring some weapon",
                         "~b~Officer~s~: Sure, thank you"

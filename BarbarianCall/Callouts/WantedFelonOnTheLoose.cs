@@ -51,7 +51,7 @@ namespace BarbarianCall.Callouts
             };
             SuspectCar.MakePersistent();
             SuspectCar.PlaceOnGroundProperly();
-            CalloutAdvisory = string.Format("Vehicle Is: {0} {1}", SuspectCar.GetCarColor(), SuspectCar.GetVehicleDisplayName());
+            CalloutAdvisory = string.Format("Vehicle Is: {0} {1}", SuspectCar.GetCarColor(), SuspectCar.GetDisplayName());
             CalloutMessage = "A Wanted Felon On The Loose";
             FriendlyName = "Wanted Felon On The Loose";
             PlayScannerWithCallsign("WE_HAVE CRIME_WANTED_FELON_ON_THE_LOOSE IN_OR_ON_POSITION", Spawn);
@@ -285,7 +285,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Wait(1500);
                         LSPDFRFunc.WaitAudioScannerCompletion();
                         LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetVehicleDisplayAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
+                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
                         GameFiber.Wait(2500);
                         DisplayGPNotif();
                     });
@@ -351,7 +351,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Wait(1500);
                         LSPDFRFunc.WaitAudioScannerCompletion();
                         LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetVehicleDisplayAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
+                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
                         GameFiber.Wait(2500);
                         DisplayGPNotif();
                     });
@@ -442,7 +442,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Wait(1500);
                         LSPDFRFunc.WaitAudioScannerCompletion();
                         LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetVehicleDisplayAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
+                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
                         GameFiber.Wait(2500);
                         DisplayGPNotif();
                     });
@@ -570,7 +570,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Wait(1500);
                         LSPDFRFunc.WaitAudioScannerCompletion();
                         LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetVehicleDisplayAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
+                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
                         GameFiber.Wait(2500);
                         DisplayGPNotif();
                     });

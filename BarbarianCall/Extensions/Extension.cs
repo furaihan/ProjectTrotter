@@ -45,7 +45,7 @@ namespace BarbarianCall.Extensions
         internal static Model[] GetAudibleVehicleModel()
         {
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
-            return Model.VehicleModels.Where(m => files.Any(s => s.Contains(m.Name))).ToArray();
+            return Model.VehicleModels.Where(m => files.Any(s => s.ToLower().Contains(m.Name.ToLower()))).ToArray();
         }
         internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);
         internal static string GetPedModelName(Ped ped) => GetPedModelName(ped.Model);
@@ -117,15 +117,6 @@ namespace BarbarianCall.Extensions
                 e.ToString().ToLog();
             }
             return "Unknown version";
-        }
-        internal static float GetRandomFloatInRange(float startRange, float endRange) => NativeFunction.Natives.GET_RANDOM_FLOAT_IN_RANGE<float>(startRange, endRange);
-        internal static float GetRandomAbsoluteSingle() => GetRandomAbsoluteSingle(Peralatan.Random.Next(), Peralatan.Random.Next());
-        internal static float GetRandomAbsoluteSingle(float min, float max) => GetRandomAbsoluteSingle(Math.Abs((int)Math.Round(min)), Math.Abs((int)Math.Round(max)));
-        internal static float GetRandomAbsoluteSingle(int min, int max)
-        {
-            int siji = Peralatan.Random.Next(min, max);
-            double loro = Peralatan.Random.NextDouble();
-            return (float)((float)siji + loro);
         }
         internal static bool CanSee(this Ped ped, Ped target) => NativeFunction.Natives.x6CD5A433374D4CFB<bool>(ped, target);
         internal static Vector3 ToGround(this Vector3 position)

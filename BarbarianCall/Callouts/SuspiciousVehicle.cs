@@ -40,7 +40,7 @@ namespace BarbarianCall.Callouts
             AddMinimumDistanceCheck(30f, SpawnPoint);          
             CalloutPosition = SpawnPoint;
             CalloutMessage = "Suspicious Vehicle";
-            CalloutAdvisory = $"Vehicle is {SuspectCar.GetVehicleDisplayName()}";
+            CalloutAdvisory = $"Vehicle is {SuspectCar.GetDisplayName()}";
             PlayScannerWithCallsign($"CITIZENS_REPORT BAR_SUSPICIOUS_VEHICLE IN_OR_ON_POSITION", SpawnPoint);
             return base.OnBeforeCalloutDisplayed();
         }
@@ -246,7 +246,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Wait(1000);
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ " +
-                            $"{Peralatan.GetVehicleDisplayAudio(SuspectCar)} {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                            $"{Peralatan.GetPoliceScannerAudio(SuspectCar)} {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(2000);
                         DisplayGPNotif();
