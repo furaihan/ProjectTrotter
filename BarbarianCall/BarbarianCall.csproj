@@ -35,9 +35,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AmbientAICallouts">
-      <HintPath>..\..\Dependencies\AmbientAICallouts.dll</HintPath>
-    </Reference>
     <Reference Include="BetterEMS">
       <HintPath>..\..\Dependencies\BetterEMS.dll</HintPath>
     </Reference>
@@ -86,12 +83,12 @@
     <Compile Include="API\StopThePedFunc.cs" />
     <Compile Include="API\UltimateBackupFunc.cs" />
     <Compile Include="Callouts\CalloutBase.cs" />
+    <Compile Include="Callouts\HeartAttackCivilian.cs" />
     <Compile Include="Callouts\MassStreetFighting.cs" />
     <Compile Include="Callouts\OfficerStabbed.cs" />
     <Compile Include="Callouts\Prostitution.cs" />
     <Compile Include="Callouts\SuspiciousVehicle.cs" />
     <Compile Include="Callouts\TaxiRefusePay.cs" />
-    <Compile Include="Callouts\Trespassing.cs" />
     <Compile Include="Callouts\WantedFelonOnTheLoose.cs" />
     <Compile Include="Extensions\MathExtension.cs" />
     <Compile Include="Globals.cs" />

@@ -1,8 +1,12 @@
-﻿using LSPD_First_Response.Mod.Callouts;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BarbarianCall.Callouts
 {
-    class Trespassing : Callout
+    public class HeartAttackCivilian : CalloutBase
     {
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -12,10 +16,6 @@ namespace BarbarianCall.Callouts
         {
             return base.OnCalloutAccepted();
         }
-        public override void OnCalloutNotAccepted()
-        {
-            base.OnCalloutNotAccepted();
-        }
         public override void Process()
         {
             base.Process();
@@ -23,6 +23,10 @@ namespace BarbarianCall.Callouts
         public override void End()
         {
             base.End();
+        }
+        public override void OnCalloutNotAccepted()
+        {
+            base.OnCalloutNotAccepted();
         }
     }
 }

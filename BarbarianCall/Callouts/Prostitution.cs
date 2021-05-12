@@ -20,11 +20,11 @@ namespace BarbarianCall.Callouts
         private Ped Suspect;
         private Vehicle SuspectVehicle;
         private Spawnpoint RoadSide;
-        private List<Model> hookerModels = new() { 0x73DEA88B, 0x028ABF95, 0x14C3E407, 0x031640AC, 0x2F4AEC3E, 0xB920CC2B, 0x84A1B11A, 0x9CF26183 };
-        private List<string> scenarios = new() { "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", "WORLD_HUMAN_PROSTITUTE_LOW_CLASS" };
+        private readonly List<Model> hookerModels = new() { 0x73DEA88B, 0x028ABF95, 0x14C3E407, 0x031640AC, 0x2F4AEC3E, 0xB920CC2B, 0x84A1B11A, 0x9CF26183 };
+        private readonly List<string> scenarios = new() { "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", "WORLD_HUMAN_PROSTITUTE_LOW_CLASS" };
         private Spawnpoint SolicitationSpawn;
         private BarTimerBar AwarenessBar;
-        private TimerBarPool pool = new TimerBarPool();
+        private readonly TimerBarPool pool = new();
         public bool CanEnd = false;
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -98,7 +98,7 @@ namespace BarbarianCall.Callouts
                     HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
                     if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
                     else if (PlayerPed.IsInCover) percentage -= 0.006f;
-                    if (PlayerPed.IsSprinting) percentage += 0.005f;
+                    if (PlayerPed.IsSprinting) percentage += 0.0038545f;
                     else if (PlayerPed.IsRunning) percentage += 0.001225f;
                     AwarenessBar.Percentage = percentage;
                 }
@@ -134,25 +134,33 @@ namespace BarbarianCall.Callouts
         {
             CalloutMainFiber = new GameFiber(() =>
             {
-                GetClose();
-                if (!CalloutRunning) return;
-                if (Blip) Blip.Delete();
-                World.GetAllEntities().Where(e => e && !CalloutEntities.Contains(e) && !e.CreatedByTheCallingPlugin && e.GetAttachedBlips().Length == 0 &&
-                (e.IsEntityAPed() || e.IsEntityAVehicle()) && !e.Position.IsOnScreen() && e.DistanceTo(CalloutPosition) <= 50f).ToList().ForEach(x => { if (x) x.Delete(); });
-                Blip = new Blip(Hooker.Position, 30f)
+                try
                 {
-                    Color = Color.FromArgb(120, HudColor.PinkLight.GetColor()),
-                };
-                CalloutBlips.Add(Blip);
-                DisplayHookerAwarenessBar();
-                while (CalloutRunning)
-                {
-                    GameFiber.Yield();
-                    if (AwarenessBar?.Percentage >= 1 && Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
+                    GetClose();
+                    if (!CalloutRunning) return;
+                    if (Blip) Blip.Delete();
+                    World.GetAllEntities().Where(e => e && !CalloutEntities.Contains(e) && !e.CreatedByTheCallingPlugin && e.GetAttachedBlips().Length == 0 &&
+                    (e.IsEntityAPed() || e.IsEntityAVehicle()) && !e.Position.IsOnScreen() && e.DistanceTo(CalloutPosition) <= 50f).ToList().ForEach(x => { if (x) x.Delete(); });
+                    Blip = new Blip(Hooker.Position, 30f)
                     {
-                        End("Konangan su");
+                        Color = Color.FromArgb(120, HudColor.PinkLight.GetColor()),
+                    };
+                    CalloutBlips.Add(Blip);
+                    DisplayHookerAwarenessBar();
+                    while (CalloutRunning)
+                    {
+                        GameFiber.Yield();
+                        if (AwarenessBar?.Percentage >= 1 && Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
+                        {
+                            End("Konangan su");
+                        }
                     }
                 }
+                catch (Exception e)
+                {
+                    e.ToString().ToLog();
+                    NetExtension.SendError(e);
+                }              
             });
         }
     }
