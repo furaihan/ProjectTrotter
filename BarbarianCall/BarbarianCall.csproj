@@ -70,7 +70,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="UltimateBackup, Version=1.8.5.4, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dependencies\UltimateBackup.dll</HintPath>
+      <HintPath>..\Dependencies\UltimateBackup.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
