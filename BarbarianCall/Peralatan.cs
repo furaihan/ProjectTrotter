@@ -18,7 +18,7 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new();
+        public static Random Random = new(NativeFunction.Natives.xF2D49816A804D134<int>(1000, 90080));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)

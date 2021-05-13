@@ -141,8 +141,7 @@ namespace BarbarianCall.Extensions
         {
             direction.Normalize();
             float heading1 = MathHelper.ConvertDirectionToHeading(direction);
-            float heading2 = targetVector.GetHeadingTowards(vector3);
-            heading1 -= 180;
+            float heading2 = vector3.GetHeadingTowards(targetVector);
             return Math.Abs(heading1 - heading2) <= 15f;
         }
         internal static float GetRandomFloatInRange(float startRange, float endRange) => Natives.GET_RANDOM_FLOAT_IN_RANGE<float>(startRange, endRange);

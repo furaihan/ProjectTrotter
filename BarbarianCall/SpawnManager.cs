@@ -134,41 +134,32 @@ namespace BarbarianCall
         internal static Spawnpoint GetPedSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            for (int i = 1; i < 600; i++)
+            for (int i = 1; i < 1800; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 15 == 0) GameFiber.Yield();
-                if (Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, true, out Vector3 nodeP, 0))
+                if (i % 40 == 0) GameFiber.Yield();
+                if (Natives.GET_CLOSEST_MAJOR_VEHICLE_NODE<bool>(v.X, v.Y, v.Z, out Vector3 major, 3.0f, 0))
                 {
-                    if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsOnScreen(nodeP))
+                    if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(major.X, major.Y, major.Z, out int _, out int flag))
                     {
-                        Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
-                        $"Ped sidewalk spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
-                        $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
-                        pos.GetFlags();
-                        ret.Position.GetFlags();
-                        return ret;
+                        NodeFlags[] bl = { NodeFlags.Freeway, NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode };
+                        NodeFlags nodeFlags = (NodeFlags)flag;
+                        if (bl.Any(x => nodeFlags.HasFlag(x))) continue;
                     }
-                }
-            }
-            for (int i = 1; i < 600; i++)
-            {
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 30 == 0) GameFiber.Yield();
-                if (Natives.xB61C8E878A4199CA<bool>(v.X, v.Y, v.Z, false, out Vector3 nodeP, 0))
-                {
-                    if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsOnScreen(nodeP))
+                    if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, 17))
                     {
-                        Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
-                        $"Ped safe spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
-                        $"{i + 600} Process took {sw.ElapsedMilliseconds} ms".ToLog();
-                        pos.GetFlags();
-                        ret.Position.GetFlags();
-                        return ret;
+                        if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
+                        if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsOnScreen(nodeP))
+                        {
+                            Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
+                            $"Ped sidewalk spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
+                            $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                            pos.GetFlags();
+                            ret.Position.GetFlags();
+                            return ret;
+                        }
                     }
-                }
+                }               
             }
             $"Safe coord not found".ToLog();
             $"1200 process took {sw.ElapsedMilliseconds} ms".ToLog();

@@ -47,22 +47,7 @@ namespace BarbarianCall.Extensions
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
             return Model.VehicleModels.Where(m => files.Any(s => s.ToLower().Contains(m.Name.ToLower()))).ToArray();
         }
-        internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);
-        internal static string GetPedModelName(Ped ped) => GetPedModelName(ped.Model);
-        private static string GetPedModelName(Model model)
-        {
-            try
-            {
-                PedModelName name = (PedModelName)model.Hash;
-                string pmn = name.ToString();
-                return pmn.Substring(pmn.IndexOf('_')).AddSpacesToSentence();
-            }        
-            catch (Exception e)
-            {
-                string.Format("error when trying to get ped model name Hash: {0}, Rage Name: {1}, Exc: {2}", model.Hash, model.Name, e.Message).ToLog();
-            }
-            return string.Empty;
-        }
+        internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);        
         internal static string GetVehicleMakeName(Model model) => NativeFunction.Natives.xF7AF4F159FF99F97<string>(model.Hash);
         internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
         internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xADCDE75E1C60F32D<bool>(position.X, position.Y, position.Z, 3f, false, true, true, false, false, 0, false); //IS_POSITION_OCCUPIED

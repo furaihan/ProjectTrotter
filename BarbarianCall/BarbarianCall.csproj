@@ -118,7 +118,6 @@
     <Compile Include="Types\Checkpoint.cs" />
     <Compile Include="Types\CVehicle.cs" />
     <Compile Include="Freemode\HeadBlend.cs" />
-    <Compile Include="Types\Enums.cs" />
     <Compile Include="Types\Manusia.cs" />
     <Compile Include="Types\Marker.cs" />
     <Compile Include="Types\Mugshot.cs" />
