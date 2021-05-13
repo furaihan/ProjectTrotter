@@ -28,6 +28,7 @@ namespace BarbarianCall.Callouts
         public bool CanEnd = false;
         private bool Hooking = false;
         private bool HookSuccess = false;
+        private List<Vehicle> AssignedToHookTask = new();
         public override bool OnBeforeCalloutDisplayed()
         {
             CalloutRunning = false;
@@ -160,15 +161,20 @@ namespace BarbarianCall.Callouts
                         }
                         if (!Hooking)
                         {
+                            if (SuspectCar)
+                            {
+                                if (SuspectCar.Driver) SuspectCar.Driver.Dismiss();
+                                if (SuspectCar) SuspectCar.Dismiss();
+                            }
                             SuspectCar = World.GetAllVehicles().Where(x => x && x.HasDriver && x.IsCar && x.Driver.IsMale && !x.HasPassengers 
-                            && x.DistanceTo(Hooker) > 60f && x.DistanceTo(Hooker) < 250f && !x.Position.IsOnScreen()
-                            && SuspectCar.Metadata.BAR_HookVehicle == null).GetRandomElement();
+                            && x.DistanceTo(Hooker) > 60f && x.DistanceTo(Hooker) < 250f && !x.Position.IsOnScreen() ).GetRandomElement();
                             if (SuspectCar)
                             {
                                 Suspect = SuspectCar.Driver;
                                 Suspect.MakeMissionPed();
                                 SuspectCar.MakePersistent();
                                 SuspectCar.Metadata.BAR_HookVehicle = true;
+                                AssignedToHookTask.Add(SuspectCar);
                                 CalloutEntities.Add(Suspect);
                                 CalloutEntities.Add(SuspectCar);
                                 Suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveRight).WaitForCompletion(600);
