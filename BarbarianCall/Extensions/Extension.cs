@@ -143,7 +143,19 @@ namespace BarbarianCall.Extensions
         }          
         public static string GetLocalizedString(IntPtr stringPtr) => NativeFunction.Natives.x7B5280EBA9840C72<string>(stringPtr); //_GET_LABEL_TEXT
 
-        public static unsafe bool IsStringEmpty(IntPtr stringPtr) => *(byte*)stringPtr == 0;
+        public static void SetForwardSpeed(this Vehicle vehicle, float speed)
+        {
+            speed = MathHelper.Clamp(speed, 1, 29);
+            NativeFunction.Natives.SET_VEHICLE_FORWARD_SPEED(vehicle, speed);
+        }
+        public static int GetAge(this LSPD_First_Response.Engine.Scripting.Entities.Persona persona)
+        {
+            var BirthDay = persona.Birthday;
+            DateTime today = DateTime.Today;
+            int age = today.Year - BirthDay.Year;
+            if (BirthDay.Date < today.AddYears(-age)) age--;
+            return age;
+        }
 
         public enum VehicleWindowIndex
         {

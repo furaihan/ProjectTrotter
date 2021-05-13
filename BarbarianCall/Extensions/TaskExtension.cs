@@ -26,10 +26,10 @@ namespace BarbarianCall.Extensions
             Natives.TASK_CHAT_TO_PED(ped, target, 16, 0f, 0f, 0f, 0f, 0f);
             return Task.GetTask(ped, "TASK_CHAT_TO_PED");
         }
-        public static Task DriveTo(this Ped ped, Vector3 target, float radius, float speed, VehicleDrivingFlags drivingStyle) => DriveTo(ped, ped.CurrentVehicle, target, radius, speed, drivingStyle);
-        public static Task DriveTo(this Ped ped, Vehicle vehicle, Vector3 target, float radius, float speed, VehicleDrivingFlags drivingStyle)
+        public static Task DriveTo(this Ped ped, Vector3 target, float stoppingRange, float speed, VehicleDrivingFlags drivingStyle) => DriveTo(ped, ped.CurrentVehicle, target, stoppingRange, speed, drivingStyle);
+        public static Task DriveTo(this Ped ped, Vehicle vehicle, Vector3 target, float stoppingRange, float speed, VehicleDrivingFlags drivingStyle)
         {
-            Natives.TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(ped, vehicle, target.X, target.Y, target.Z, speed, (int)drivingStyle, radius);
+            Natives.TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(ped, vehicle, target.X, target.Y, target.Z, speed, (int)drivingStyle, stoppingRange);
             return Task.GetTask(ped, "TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE");
         }
         public static Task ParkVehicle(this Ped ped, Vector3 position, float heading, float radius = 20f, bool keepEngineOn = false) => ParkVehicle(ped, ped.CurrentVehicle, position, heading, radius, keepEngineOn);

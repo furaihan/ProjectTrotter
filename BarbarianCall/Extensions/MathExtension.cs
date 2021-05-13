@@ -113,6 +113,21 @@ namespace BarbarianCall.Extensions
 
             return new Vector3(from.X + resultX, from.Y + resultY, from.Z + offset.Z);
         }
+        public static bool IsAheadPositionWithTolerance(this Vector3 vector3, Vector3 targetVector, Vector3 direction, float tolerance)
+        {
+            direction.Normalize();
+            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
+            float heading2 = targetVector.GetHeadingTowards(vector3);
+            return Math.Abs(heading1 - heading2) <= tolerance;
+        }
+        public static bool IsBehindPositionWithTolerance(this Vector3 vector3, Vector3 targetVector, Vector3 direction, float tolerance)
+        {
+            direction.Normalize();
+            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
+            float heading2 = targetVector.GetHeadingTowards(vector3);
+            heading1 -= 180;
+            return Math.Abs(heading1 - heading2) <= tolerance;
+        }
         public static bool IsAheadPosition(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => IsAheadPosition(spatial.Position, targetSpatial.Position, direction);
         public static bool IsAheadPosition(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
         {

@@ -43,6 +43,8 @@ namespace BarbarianCall.Callouts
         public readonly System.Drawing.Color Yellow = System.Drawing.Color.Yellow;
         public string FilePath;
         public static readonly uint[] WeaponHashes = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A, 0xBD248B55, 0x13532244, 0x624FE830 };
+        protected bool Displayed = true;
+        protected bool Accepted = true;
         #endregion
         private GameFiber EndHandlerFiber;
 
@@ -98,7 +100,7 @@ namespace BarbarianCall.Callouts
         {
             CalloutRunning = false;
             Peralatan.Speaking = false;
-            "~g~We Are CODE 4".DisplayNotifWithLogo(CalloutMessage);
+            if (Displayed && Accepted)"~g~We Are CODE 4".DisplayNotifWithLogo(CalloutMessage);
             //StopWatch = null;
             if (Suspect && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
             if (SuspectCar) SuspectCar.Dismiss();
