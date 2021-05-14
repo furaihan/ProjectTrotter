@@ -9,6 +9,7 @@ using LSPDFR = LSPD_First_Response.Mod.API.Functions;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using BarbarianCall.Extensions;
 using BarbarianCall.Types;
+using BarbarianCall.API;
 
 namespace BarbarianCall.Callouts
 {
@@ -16,6 +17,17 @@ namespace BarbarianCall.Callouts
     public class HeartAttackCivilian : CalloutBase
     {
         public Ped Civilian;
+        private Ped Paramedic1;
+        private Ped Paramedic2;
+        private Vehicle Ambulance;
+        private enum CalloutState
+        {
+            EnRoute,
+            OnScene,
+            CivilianEnterAmbulance,
+            EscortingAmbulance,
+        }
+        private CalloutState State;
         public override bool OnBeforeCalloutDisplayed()
         {
             Spawn = SpawnManager.GetPedSpawnPoint(PlayerPed, 350, 950);
@@ -66,6 +78,7 @@ namespace BarbarianCall.Callouts
         }
         private void GetClose()
         {
+            State = CalloutState.EnRoute;
             while(CalloutRunning)
             {
                 GameFiber.Yield();
@@ -79,6 +92,7 @@ namespace BarbarianCall.Callouts
                 else if (Civilian && Civilian.Position.IsOnScreen()) break;
                 else if (Civilian && PlayerPed.DistanceTo(Civilian) < 30f) break;
             }
+            State = CalloutState.OnScene;
             if (Blip) Blip.Delete();
             Blip = Civilian.AttachBlip();
             Blip.Color = Color.Orange;
@@ -92,12 +106,37 @@ namespace BarbarianCall.Callouts
                 {
                     GetClose();
                     if (!CalloutRunning) return;
-                    while (CalloutRunning)
+                    Spawnpoint ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 100, 150);
+                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 80, 200);
+                    if (UltimateBackupRunning)
                     {
-                        GameFiber.Yield();
-                        if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
-                            break;
+                        var ubAmb = UltimateBackupFunc.GetUnit(UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, ambulanceSpawn, 2);
+                        Paramedic1 = ubAmb.Item2.First();
+                        Paramedic2 = ubAmb.Item2.Last();
+                        Ambulance = ubAmb.Item1;
                     }
+                    else
+                    {
+                        Ambulance = new Vehicle("AMBULANCE", ambulanceSpawn);
+                        Paramedic1 = new Ped("s_m_m_paramedic_01", ambulanceSpawn, ambulanceSpawn);
+                        Paramedic2 = new Ped("s_m_m_paramedic_01", ambulanceSpawn, ambulanceSpawn);
+                        Paramedic1.RandomizeVariation();
+                        Paramedic2.RandomizeVariation();
+                        if (Paramedic1) Paramedic1.WarpIntoVehicle(Ambulance, -1);
+                        if (Paramedic2) Paramedic2.WarpIntoVehicle(Ambulance, 0);
+                    }
+                    if (Ambulance) Ambulance.Heading = ambulanceSpawn;
+                    List<Entity> ambulanceEntities = new() { Ambulance, Paramedic1, Paramedic2 };
+                    ambulanceEntities.ForEach(e => e.MakePersistent());
+                    ambulanceEntities.ForEach(e => CalloutEntities.Add(e));
+                    if (Paramedic1) Paramedic1.BlockPermanentEvents = true;
+                    if (Paramedic2) Paramedic2.BlockPermanentEvents = true;
+                    var task1 = Paramedic1.DriveVehicleWithNavigationMesh(CalloutPosition, VehicleDrivingFlags.Emergency, stoppingRange: 10f);
+                    "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attck Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.DegenRed);
+                    GameFiber.WaitWhile(() => task1.IsActive && CalloutRunning, 60000);
+                    if (!CalloutRunning) return;
+                    Paramedic1.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
+                    Paramedic2.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(3000);
                     End();
                 }
                 catch (Exception e)

@@ -45,7 +45,7 @@ namespace BarbarianCall.Callouts
                 Displayed = false;
                 return false;
             }
-            ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 120);
+            ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 60);
             PlayScannerWithCallsign("WE_HAVE CRIME_SOLICITATION IN_OR_ON_POSITION", CalloutPosition);
             return Displayed = base.OnBeforeCalloutDisplayed();
         }

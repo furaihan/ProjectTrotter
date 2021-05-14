@@ -133,12 +133,13 @@ namespace BarbarianCall
         internal static Spawnpoint GetPedSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance) => GetPedSpawnPoint(spatial.Position, minimalDistance, maximumDistance);
         internal static Spawnpoint GetPedSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
+            pos.GetFlags();
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 1; i < 2000; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 90 == 0) GameFiber.Yield();
-                if (Natives.GET_CLOSEST_MAJOR_VEHICLE_NODE<bool>(v.X, v.Y, v.Z, out Vector3 major, 3.0f, 0))
+                if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE<bool>(v, i % 5, out Vector3 major, 1, 0f, 0f))
                 {
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(major.X, major.Y, major.Z, out int _, out int flag))
                     {
@@ -146,7 +147,7 @@ namespace BarbarianCall
                         NodeFlags nodeFlags = (NodeFlags)flag;
                         if (bl.Any(x => nodeFlags.HasFlag(x))) continue;
                     }
-                    if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, 17))
+                    if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] {17, 1, 16 }).GetRandomElement()))
                     {
                         if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
                         if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsOnScreen(nodeP))
@@ -154,7 +155,6 @@ namespace BarbarianCall
                             Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
                             $"Ped sidewalk spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
-                            pos.GetFlags();
                             ret.Position.GetFlags();
                             return ret;
                         }

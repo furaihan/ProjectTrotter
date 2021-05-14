@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using Rage;
-using Rage.Native;
+using N = Rage.Native.NativeFunction;
 using System.Windows.Forms;
 using RAGENativeUI;
 using System.Drawing;
@@ -18,7 +18,7 @@ namespace BarbarianCall
 {
     internal static class Peralatan
     {
-        public static Random Random = new(NativeFunction.Natives.xF2D49816A804D134<int>(1000, 90080));
+        public static Random Random = new(N.Natives.xF2D49816A804D134<int>(1000, 90080));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
@@ -110,14 +110,14 @@ namespace BarbarianCall
         }
         internal static string GetDisplayName(this Model vehicleModel)
         {
-            string text = NativeFunction.Natives.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL<string>(vehicleModel.Hash);
-            return !string.IsNullOrEmpty(text) && NativeFunction.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? NativeFunction.Natives.x7B5280EBA9840C72<string>(text) : "CARNOTFOUND";
+            string text = N.Natives.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL<string>(vehicleModel.Hash);
+            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? N.Natives.x7B5280EBA9840C72<string>(text) : "CARNOTFOUND";
         }
         internal static string GetDisplayName(this Vehicle vehicle) => GetDisplayName(vehicle.Model);
         internal static string GetMakeName(this Model vehicleModel)
         {
-            string text = NativeFunction.Natives.xF7AF4F159FF99F97<string>(vehicleModel.Hash);
-            return !string.IsNullOrEmpty(text) && NativeFunction.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? NativeFunction.Natives.x7B5280EBA9840C72<string>(text) : "Unknown Manufacturer";
+            string text = N.Natives.xF7AF4F159FF99F97<string>(vehicleModel.Hash);
+            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? N.Natives.x7B5280EBA9840C72<string>(text) : "Unknown Manufacturer";
         }
         internal static string GetMakeName(this Vehicle vehicle) => GetMakeName(vehicle.Model);
         internal static string GetPoliceScannerAudio(Vehicle vehicle)
@@ -134,7 +134,7 @@ namespace BarbarianCall
         internal static string GetZoneName(this ISpatial spatial) => GetZoneName(spatial.Position);
         internal static string GetZoneName(this Vector3 pos)
         {
-            string gameName = NativeFunction.Natives.GET_NAME_OF_ZONE<string>(pos.X, pos.Y, pos.Z);
+            string gameName = N.Natives.GET_NAME_OF_ZONE<string>(pos.X, pos.Y, pos.Z);
             return Game.GetLocalizedString(gameName);
         }
         public static string GetCardinalDirectionLowDetailedAudio(this Entity e)
@@ -181,7 +181,7 @@ namespace BarbarianCall
             (modifiedDialogue.Count == Dialogue.Count).ToString().ToLog();
             WeaponDescriptor currentWeapon = playerPed.Inventory.EquippedWeapon;
             playerPed.Inventory.GiveNewWeapon("WEAPON_UNARMED", -1, true);
-            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, false);
+            N.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, false);
             GameFiber.StartNew(delegate
             {
                 while (Speaking)
@@ -215,7 +215,7 @@ namespace BarbarianCall
                 if (!Speaking) break;
             }
             Speaking = false;
-            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, true);
+            N.Natives.SET_PED_CAN_SWITCH_WEAPON(playerPed, true);
             if (currentWeapon != null && playerPed.Inventory.Weapons.Contains(currentWeapon)) playerPed.Inventory.EquippedWeapon = currentWeapon;
             talkers.Where(EntityExtensions.Exists).ToList().ForEach(p => p.Tasks.Clear());
         }
@@ -224,7 +224,7 @@ namespace BarbarianCall
         {
             if (MobilePhone) MobilePhone.Delete();
             var currentWeapon = ped.Inventory.EquippedWeapon;
-            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, false);
+            N.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, false);
             ped.Inventory.GiveNewWeapon(new WeaponAsset("WEAPON_UNARMED"), -1, true);
             MobilePhone = new Rage.Object(new Model("prop_police_phone"), new Vector3(0, 0, 0));
             int boneIndex = ped.GetBoneIndex(PedBoneId.RightPhHand);
@@ -233,7 +233,7 @@ namespace BarbarianCall
             GameFiber.Sleep(3000);
             ped.Tasks.PlayAnimation(new AnimationDictionary("cellphone@"), "cellphone_call_out", 1f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask);
             GameFiber.Sleep(200);
-            NativeFunction.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, true);
+            N.Natives.SET_PED_CAN_SWITCH_WEAPON(ped, true);
             if (currentWeapon != null) ped.Inventory.EquippedWeapon = currentWeapon;
             if (MobilePhone) MobilePhone.Detach();
             if (MobilePhone) MobilePhone.Delete();
@@ -251,16 +251,40 @@ namespace BarbarianCall
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
-        internal static uint DisplayNotifWithLogo(this string msg, string subtitle = "", string textureDict = " WEB_LOSSANTOSPOLICEDEPT", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string title = "~y~BarbarianCall~s~")
+        private static string[] StringToArray(string str)
         {
-            return Game.DisplayNotification(textureDict, textureName, title, "~y~" + subtitle + "~s~", msg);
+            int stringsNeeded = (str.Length % 99 == 0) ? (str.Length / 99) : ((str.Length / 99) + 1);
+
+            string[] outputString = new string[stringsNeeded];
+            for (int i = 0; i < stringsNeeded; i++)
+            {
+                outputString[i] = str.Substring(i * 99, MathHelper.Clamp(str.Substring(i * 99).Length, 0, 99));
+            }
+            return outputString;
+        }
+        internal static uint DisplayNotifWithLogo(this string msg, string subtitle = "", string textureDict = "WEB_LOSSANTOSPOLICEDEPT", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string title = "~y~BarbarianCall~s~", 
+            bool fadeIn = false, bool blink = false, HudColor? hudColor = null)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            while (!N.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>(textureDict))
+            {
+                N.Natives.REQUEST_STREAMED_TEXTURE_DICT(textureDict, false);
+                GameFiber.Yield();
+                if (sw.ElapsedMilliseconds > 1000) break;
+            }
+            var ss = StringToArray(msg);
+            if (hudColor.HasValue) N.Natives.x92F0DA1E27DB96DC((int)hudColor); //_THEFEED_SET_NEXT_POST_BACKGROUND_COLOR
+            N.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
+            foreach (string st in ss) N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(st);
+            N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(textureDict, textureName, fadeIn, 4, title, subtitle);
+            return N.Natives.END_TEXT_COMMAND_THEFEED_POST_TICKER<uint>(blink, true);
         }
         internal static string FormatKeyBinding(Keys modifierKey, Keys key)
             => modifierKey == Keys.None ? $"~{key.GetInstructionalId()}~" :
                                           $"~{modifierKey.GetInstructionalId()}~ ~+~ ~{key.GetInstructionalId()}~";
         internal static bool CheckKey(Keys modifierKey, Keys key)
         {
-            bool keyboardInputCheck = NativeFunction.Natives.x0CF2B696BBF945AE<int>() == 0;
+            bool keyboardInputCheck = N.Natives.x0CF2B696BBF945AE<int>() == 0;
             if (!keyboardInputCheck)
             {
                 if (Game.IsKeyDown(key) && modifierKey == Keys.None) return true;
@@ -295,24 +319,24 @@ namespace BarbarianCall
                 try
                 {
                     "Attempting to register ped headshot".ToLog();
-                    uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
+                    uint headshotHandle = N.Natives.RegisterPedheadshot<uint>(ped);
                     var timer = new TimeSpan(0, 0, 10);
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     while (true)
                     {
                         GameFiber.Yield();
-                        if (NativeFunction.Natives.x7085228842B13A67<bool>(headshotHandle))
+                        if (N.Natives.x7085228842B13A67<bool>(headshotHandle))
                         {
                             $"Ped Headshot found with handle {headshotHandle}".ToLog();
                             break;
                         }
                         if (stopwatch.Elapsed > timer) break;
                     }
-                    string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
+                    string txd = N.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                     Game.DisplayNotification(txd, txd, title, subtitle, text);
                     //GameFiber.Wait(200);
                     Globals.RegisteredPedHeadshot.Add(headshotHandle);
-                    NativeFunction.Natives.UnregisterPedheadshot<uint>(headshotHandle);
+                    N.Natives.UnregisterPedheadshot<uint>(headshotHandle);
                     $"Register ped headshot is took {stopwatch.ElapsedMilliseconds} ms".ToLog();
                 }
                 catch (Exception e)
@@ -330,13 +354,13 @@ namespace BarbarianCall
             try
             {
                 if (!ped) throw new Rage.Exceptions.InvalidHandleableException(ped);
-                uint headshotHandle = NativeFunction.Natives.RegisterPedheadshot<uint>(ped);
+                uint headshotHandle = N.Natives.RegisterPedheadshot<uint>(ped);
                 int startTime = Environment.TickCount;
                 Stopwatch sw = Stopwatch.StartNew();
                 while (true)
                 {
                     GameFiber.Yield();
-                    if (NativeFunction.Natives.x7085228842B13A67<bool>(headshotHandle))
+                    if (N.Natives.x7085228842B13A67<bool>(headshotHandle))
                     {
                         $"Ped Headshot found with handle {headshotHandle}, took {sw.ElapsedMilliseconds} ms".ToLog();
                         break;
@@ -347,7 +371,7 @@ namespace BarbarianCall
                         return failedReturn;
                     }
                 }
-                string txd = NativeFunction.Natives.GetPedheadshotTxdString<string>(headshotHandle);
+                string txd = N.Natives.GetPedheadshotTxdString<string>(headshotHandle);
                 Handle = headshotHandle;
                 Globals.RegisteredPedHeadshot.Add(headshotHandle);
                 return txd;
@@ -363,7 +387,7 @@ namespace BarbarianCall
         {
             if (handle.HasValue)
             {
-                if (NativeFunction.Natives.IS_PEDHEADSHOT_VALID<bool>(handle.Value)) NativeFunction.Natives.UnregisterPedheadshot<uint>(handle.Value);
+                if (N.Natives.IS_PEDHEADSHOT_VALID<bool>(handle.Value)) N.Natives.UnregisterPedheadshot<uint>(handle.Value);
                 else ToLog($"headshot with handle {handle.Value} is invalid");
             }
         }

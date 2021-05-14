@@ -78,9 +78,9 @@ namespace BarbarianCall.Extensions
             Natives.TASK_COMBAT_HATED_TARGETS_IN_AREA(ped, area.X, area.Y, area.Z, radius, 0);
             return Task.GetTask(ped, "TASK_COMBAT_HATED_TARGETS_IN_AREA");
         }
-        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vehicle vehicle, Vector3 destination, VehicleDrivingFlags flags, float speed = 30.0f)
+        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vehicle vehicle, Vector3 destination, VehicleDrivingFlags flags, float speed = 30.0f, float stoppingRange = 5.0f)
         {
-            Natives.TASK_VEHICLE_GOTO_NAVMESH(ped, vehicle, destination.X, destination.Y, destination.Z, speed, (int)flags, 5.0f);
+            Natives.TASK_VEHICLE_GOTO_NAVMESH(ped, vehicle, destination.X, destination.Y, destination.Z, speed, (int)flags, stoppingRange);
             return Task.GetTask(ped, "TASK_VEHICLE_GOTO_NAVMESH");
         }
         public static Task EscortVehicle(this Ped ped, Vehicle targetVehicle, EscortVehicleMode mode, float speed, VehicleDrivingFlags drivingFlags, float minDistance, float noRoadDistance)
@@ -90,8 +90,8 @@ namespace BarbarianCall.Extensions
             Natives.TASK_VEHICLE_ESCORT(ped, vehicleUsedbyPed, vehicleToEscort, (int)mode, speed, (int)drivingFlags, minDistance, -1, noRoadDistance);
             return Task.GetTask(ped, "TASK_VEHICLE_ESCORT");
         }
-        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vector3 destination, VehicleDrivingFlags flags, float speed = 30.0f) => 
-            DriveVehicleWithNavigationMesh(ped, ped.CurrentVehicle, destination, flags, speed);
+        public static Task DriveVehicleWithNavigationMesh(this Ped ped, Vector3 destination, VehicleDrivingFlags flags, float speed = 30.0f, float stoppingRange = 5.0f) => 
+            DriveVehicleWithNavigationMesh(ped, ped.CurrentVehicle, destination, flags, speed, stoppingRange);
         public static Task FaceTo(this Ped ped, Entity target, int duration)
         {
             Natives.TASK_TURN_PED_TO_FACE_ENTITY(ped, target, duration);
