@@ -44,7 +44,7 @@ namespace BarbarianCall.Callouts
             Civilian = new Ped(model, Spawn, Spawn);
             CalloutEntities.Add(Civilian);
             Civilian.MakeMissionPed();
-            LSPDFR.SetPersonaForPed(Suspect, clone);
+            LSPDFR.SetPersonaForPed(Civilian, clone);
             CalloutPosition = Spawn;
             CalloutMessage = "Heart Attack Civilian";
             CalloutAdvisory = $"The Civilian name is {nameRnd.Item1} {nameRnd.Item2}";
