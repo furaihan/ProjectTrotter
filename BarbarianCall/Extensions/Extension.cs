@@ -41,12 +41,15 @@ namespace BarbarianCall.Extensions
                 NativeFunction.Natives.DRAW_MARKER((int)type, pos.X, pos.Y, pos.Z, dir.X, dir.Y, dir.Z, rot.X, rot.Y, rot.Z, scale.X,
                     scale.Y, scale.Z, color.R, color.G, color.B, color.A, bobUpAndDown, faceCamera, 2, rotateY, null, null, drawOnEntity);
             }
-        }       
+        }
+        internal static Model GetRandomMaleModel() => World.GetAllPeds().Where(x => x && x.IsMale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
+        internal static Model GetRandomFemaleModel() => World.GetAllPeds().Where(x => x && x.IsFemale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
         internal static Model[] GetAudibleVehicleModel()
         {
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
             return Model.VehicleModels.Where(m => files.Any(s => s.ToLower().Contains(m.Name.ToLower()))).ToArray();
         }
+        private static bool IsFreemodePed(this Ped ped) => ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8;
         internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);        
         internal static string GetVehicleMakeName(Model model) => NativeFunction.Natives.xF7AF4F159FF99F97<string>(model.Hash);
         internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
@@ -141,6 +144,7 @@ namespace BarbarianCall.Extensions
             if (BirthDay.Date < today.AddYears(-age)) age--;
             return age;
         }
+        internal static void PlaySoundFrontEnd(string audioName, string audioRef) => NativeFunction.Natives.PLAY_SOUND_FRONTEND(-1, audioName, audioRef, true);
 
         public enum VehicleWindowIndex
         {

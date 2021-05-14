@@ -193,7 +193,7 @@ namespace BarbarianCall.Callouts
                 {
                     CalloutRunning = true;
                     if (Suspect) Suspect.Delete();
-                    Suspect = new Ped(Globals.MaleModel.GetRandomElement(), SpawnPoint, SpawnHeading);
+                    Suspect = new Ped(Extension.GetRandomMaleModel(), SpawnPoint, SpawnHeading);
                     Suspect.WarpIntoVehicle(Taxi, 2);
                     SuspectPersona = Functions.GetPersonaForPed(Suspect);
                     GameFiber.Wait(200);

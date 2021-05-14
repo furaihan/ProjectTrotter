@@ -47,8 +47,6 @@ namespace BarbarianCall
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
                 try { DivisiXml.Deserialization.LoadPoliceStationLocations(); } catch { "Read Police station error".ToLog(); }
-                $"Found male model: {Globals.MaleModel.Length}".ToLog();
-                $"Found common weapon {Callouts.CalloutBase.WeaponHashes.Where(h => new Model(h).Name != null).ToList().Count}".ToLog();
                 $"RAGENativeUi is installed: {IsRageNativeUIInstalled()}".ToLog();
                 "Prepering to create pause menu".ToLog();               
                 Menus.PauseMenu.CreatePauseMenu();              

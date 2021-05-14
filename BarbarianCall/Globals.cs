@@ -59,8 +59,6 @@ namespace BarbarianCall
         {
             "prop_donut_01", "prop_donut_02", "prop_donut_02b", "prop_amb_donut"
         };
-        public static Model[] MaleModel = Model.PedModels.Where(m => m.Name.ToLower().Substring(1, 3) == "_m_").ToArray();
-        public static Model[] FemaleModel = Model.PedModels.Where(m => m.Name.ToLower().Substring(1, 3) == "_f_").ToArray();
         public static Model[] AudibleCarModel = Extension.GetAudibleVehicleModel().Where(m => m.IsSuitableCar()).ToArray();
         public static Dictionary<string, List<Model>> GangPedModels = new()
         {

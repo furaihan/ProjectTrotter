@@ -134,10 +134,10 @@ namespace BarbarianCall
         internal static Spawnpoint GetPedSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            for (int i = 1; i < 1800; i++)
+            for (int i = 1; i < 2000; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 40 == 0) GameFiber.Yield();
+                if (i % 90 == 0) GameFiber.Yield();
                 if (Natives.GET_CLOSEST_MAJOR_VEHICLE_NODE<bool>(v.X, v.Y, v.Z, out Vector3 major, 3.0f, 0))
                 {
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(major.X, major.Y, major.Z, out int _, out int flag))
@@ -162,7 +162,7 @@ namespace BarbarianCall
                 }               
             }
             $"Safe coord not found".ToLog();
-            $"1200 process took {sw.ElapsedMilliseconds} ms".ToLog();
+            $"2000 process took {sw.ElapsedMilliseconds} ms".ToLog();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetRoadSideSpawnPointFavored(Entity entity, float favoredDistance)

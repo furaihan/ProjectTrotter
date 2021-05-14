@@ -39,13 +39,14 @@ namespace BarbarianCall.Types
             }
             return outputString;
         }
-        public uint DisplayNotification(string title, string subtitle, string text, bool blink = false)
+        public uint DisplayNotification(string title, string subtitle, string text,bool fadein = false, bool blink = false)
         {
             string[] vs = StringToArray(text);
             GameFiber.SleepUntil(() => IsReady, 1000);
             N.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
             foreach (string st in vs) N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(st);
-            return N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(Texture, Texture, blink, 4, title, subtitle);
+            N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(Texture, Texture, fadein, 4, title, subtitle);
+            return N.Natives.END_TEXT_COMMAND_THEFEED_POST_TICKER<uint>(blink, true);
         }
         public bool IsValid() => N.Natives.IS_PEDHEADSHOT_VALID((uint)Handle);
 
