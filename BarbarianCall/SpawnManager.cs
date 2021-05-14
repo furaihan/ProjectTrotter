@@ -340,7 +340,7 @@ namespace BarbarianCall
                                 if (pedNodePos.DistanceTo(nodePos) > 50f || pedNodePos.DistanceTo(playerPos) < 300f) continue;
                                 bool success = Natives.x16F46FB18C8009E4<bool>(pedNodePos.X, pedNodePos.Y, pedNodePos.Z, -1, out Vector3 roadSidePos);
                                 if (!success) continue;
-                                if (roadSidePos.DistanceTo(pedNodePos) < 8f) continue;
+                                //if (roadSidePos.DistanceTo(pedNodePos) < 8f) continue;
                                 Spawnpoint ret = new(pedNodePos, pedNodePos.GetHeadingTowards(nodePos));
                                 $"Get solicitation spawnpoint is successfull {ret}, {i + 1} process took {sw.ElapsedMilliseconds} ms".ToLog();
                                 $"Solicitation Spawnpoint => Distance {ret.DistanceTo(playerPos)}, Travel Distance: {ret.TravelDistanceTo(playerPos)}".ToLog();

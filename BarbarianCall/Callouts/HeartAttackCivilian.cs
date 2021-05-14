@@ -12,6 +12,7 @@ using BarbarianCall.Types;
 
 namespace BarbarianCall.Callouts
 {
+    [LSPD_First_Response.Mod.Callouts.CalloutInfo("Heart Attack Civilian", LSPD_First_Response.Mod.Callouts.CalloutProbability.High)]
     public class HeartAttackCivilian : CalloutBase
     {
         public Ped Civilian;

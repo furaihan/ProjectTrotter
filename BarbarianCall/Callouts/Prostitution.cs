@@ -64,6 +64,7 @@ namespace BarbarianCall.Callouts
             Hooker.MakeMissionPed();
             CalloutEntities.Add(Hooker);
             Hooker.PlayScenarioAction(scenarios.GetRandomElement(), false);
+            Hooker.MovementAnimationSet = Peralatan.Random.NextDouble() > 0.5f ? "move_f@sexy@a" : "move_f@sexy";
             ClearUnrelatedEntities();
             CalloutMainLogic();
             CalloutMainFiber.Start();
@@ -99,7 +100,7 @@ namespace BarbarianCall.Callouts
                 while (CalloutRunning)
                 {
                     GameFiber.Yield();
-                    float percentage = 1 - (PlayerPed.DistanceTo(Hooker) - 15) / 45;                   
+                    float percentage = Hooker ? 1 - (PlayerPed.DistanceTo(Hooker) - 15) / 45 : 1;                   
                     HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
                     if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
                     else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
@@ -145,7 +146,8 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     if (Blip) Blip.Delete();
                     World.GetAllEntities().Where(e => e && !CalloutEntities.Contains(e) && !e.CreatedByTheCallingPlugin && e.GetAttachedBlips().Length == 0 &&
-                    (e.IsEntityAPed() || e.IsEntityAVehicle()) && !e.Position.IsOnScreen() && e.DistanceTo(CalloutPosition) <= 50f).ToList().ForEach(x => { if (x) x.Delete(); });
+                    (e.IsEntityAPed() || e.IsEntityAVehicle()) && !e.Position.IsOnScreen() && e.DistanceTo(CalloutPosition) <= 50f && e != PlayerPed
+                    && e != PlayerPed.CurrentVehicle).ToList().ForEach(x => { if (x) x.Delete(); });
                     Blip = new Blip(Hooker.Position, 30f)
                     {
                         Color = Color.FromArgb(120, HudColor.PinkLight.GetColor()),
@@ -167,7 +169,8 @@ namespace BarbarianCall.Callouts
                                 if (SuspectCar) SuspectCar.Dismiss();
                             }
                             SuspectCar = World.GetAllVehicles().Where(x => x && x.HasDriver && x.IsCar && x.Driver.IsMale && !x.HasPassengers 
-                            && x.DistanceTo(Hooker) > 60f && x.DistanceTo(Hooker) < 250f && !x.Position.IsOnScreen() ).GetRandomElement();
+                            && x.DistanceTo(Hooker) > 60f && x.DistanceTo(Hooker) < 250f && !x.Position.IsOnScreen() && 
+                            x.Driver != PlayerPed && x != PlayerPed.CurrentVehicle).GetRandomElement();
                             if (SuspectCar)
                             {
                                 Suspect = SuspectCar.Driver;
@@ -202,19 +205,24 @@ namespace BarbarianCall.Callouts
                 {
                     if (suspect && suspectVeh)
                     {
-                        var driveTask = suspect.DriveTo(RoadSide, 0.5f, MathExtension.GetRandomFloatInRange(15f, 21f), VehicleDrivingFlags.Normal);
+                        var driveTask = suspect.DriveTo(RoadSide, 0.5f, MathExtension.GetRandomFloatInRange(15f, 21f), (VehicleDrivingFlags)786603/*Normal*/);
                         while (driveTask.IsActive)
                         {
                             GameFiber.Wait(200);
                             var raycast = World.TraceLine(suspectVeh.FrontPosition, Hooker.Position, TraceFlags.IntersectEverything);
                             if (raycast.Hit && raycast.HitEntity == Hooker && suspectVeh.DistanceTo(Hooker) < 60f) suspectVeh.SetForwardSpeed(9f);
                             else if (suspectVeh.DistanceTo(Hooker) < 30f) suspectVeh.SetForwardSpeed(9f);
-                            if (suspectVeh.DistanceTo(RoadSide.Position) < 1f) break;
+                            if (suspectVeh.DistanceTo(Hooker) < 10f)
+                            {
+                                suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(200);
+                                suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveRight).WaitForCompletion(900);
+                                suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveLeft).WaitForCompletion(550);
+                                break;
+                            }
                         }
                         Hooker.Tasks.Clear();
-                        Hooker.MovementAnimationSet = "move_f@sexy@a";
                         var walkPos = Extension.GetEntryPositionOfVehicleDoor(suspectVeh, Extension.VehicleDoorIndex.FrontRightDoor);
-                        Hooker.Tasks.FollowNavigationMeshToPosition(walkPos, walkPos.GetHeadingTowards(suspect), 1f);
+                        Hooker.Tasks.FollowNavigationMeshToPosition(walkPos, walkPos.GetHeadingTowards(suspect), 1f).WaitForCompletion(15000);
                         var chance = Peralatan.Random.NextDouble();
                         if (suspect && suspectVeh && Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge()) >= 20)
                         {
@@ -228,6 +236,10 @@ namespace BarbarianCall.Callouts
                             suspectVeh.SetForwardSpeed(speedRnd);
                             suspect.WanderWithVehicle(speedRnd, VehicleDrivingFlags.Normal);
                             HookSuccess = true;
+                        }
+                        else
+                        {
+                            Hooker.Tasks.FollowNavigationMeshToPosition(CalloutPosition, SolicitationSpawn, 1f);
                         }
                     }
                 }
