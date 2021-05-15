@@ -145,6 +145,7 @@ namespace BarbarianCall.Extensions
             return age;
         }
         internal static void PlaySoundFrontEnd(string audioName, string audioRef) => NativeFunction.Natives.PLAY_SOUND_FRONTEND(-1, audioName, audioRef, true);
+        public static void DrawLine(Vector3 pos1, Vector3 pos2, Color color) => NativeFunction.Natives.DRAW_LINE(pos1, pos2, color.R, color.G, color.B, color.A);
 
         public enum VehicleWindowIndex
         {

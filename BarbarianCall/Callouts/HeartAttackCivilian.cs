@@ -27,7 +27,7 @@ namespace BarbarianCall.Callouts
             CivilianEnterAmbulance,
             EscortingAmbulance,
         }
-        private CalloutState State;
+        private new CalloutState State;
         public override bool OnBeforeCalloutDisplayed()
         {
             Spawn = SpawnManager.GetPedSpawnPoint(PlayerPed, 350, 950);
@@ -49,6 +49,7 @@ namespace BarbarianCall.Callouts
             CalloutMessage = "Heart Attack Civilian";
             CalloutAdvisory = $"The Civilian name is {nameRnd.Item1} {nameRnd.Item2}";
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 30f);
+            AddMinimumDistanceCheck(100f, CalloutPosition);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -60,6 +61,7 @@ namespace BarbarianCall.Callouts
             };
             Civilian.Tasks.PlayAnimation("random@drunk_driver_1", "drunk_fall_over", 4.0f, AnimationFlags.StayInEndFrame | AnimationFlags.Loop | AnimationFlags.RagdollOnCollision);
             Civilian.IsInvincible = true;
+            CalloutRunning = true;
             MainSituation();
             CalloutMainFiber.Start();
             return base.OnCalloutAccepted();
@@ -70,6 +72,10 @@ namespace BarbarianCall.Callouts
         }
         public override void End()
         {
+            if (State != CalloutState.EscortingAmbulance)
+            {
+
+            }
             base.End();
         }
         public override void OnCalloutNotAccepted()
@@ -83,13 +89,18 @@ namespace BarbarianCall.Callouts
             {
                 GameFiber.Yield();
                 var traceStart = PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition;
+                Extension.DrawLine(traceStart, Civilian.Position, Color.Red);
                 var raycast = World.TraceLine(traceStart, Civilian.Position, (TraceFlags)(1 | 2 | 4 | 8 | 16 | 256));
                 if (Civilian && raycast.Hit && raycast.HitEntity && raycast.HitEntity == Civilian)
                 {
                     "Raycast hit civilian".ToLog();
                     break;
                 }
-                else if (Civilian && Civilian.Position.IsOnScreen()) break;
+                else if (Civilian && Civilian.Position.IsOnScreen())
+                {
+                    "Civilian is on screen".ToLog();
+                    break;
+                }
                 else if (Civilian && PlayerPed.DistanceTo(Civilian) < 30f) break;
             }
             State = CalloutState.OnScene;
@@ -132,8 +143,18 @@ namespace BarbarianCall.Callouts
                     if (Paramedic1) Paramedic1.BlockPermanentEvents = true;
                     if (Paramedic2) Paramedic2.BlockPermanentEvents = true;
                     var task1 = Paramedic1.DriveVehicleWithNavigationMesh(CalloutPosition, VehicleDrivingFlags.Emergency, stoppingRange: 10f);
-                    "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attck Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.DegenRed);
-                    GameFiber.WaitWhile(() => task1.IsActive && CalloutRunning, 60000);
+                    "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attack Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.RedLight);
+                    StopWatch = new();
+                    StopWatch.Start();
+                    while (CalloutRunning)
+                    {
+                        GameFiber.Yield();
+                        if (!task1.IsActive || StopWatch.ElapsedMilliseconds > 60000) 
+                        {
+                            $"Task Status: {task1.Status}, Elapsed: {StopWatch.ElapsedMilliseconds} ms".ToLog();
+                            break; 
+                        }
+                    }
                     if (!CalloutRunning) return;
                     Paramedic1.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
                     Paramedic2.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(3000);

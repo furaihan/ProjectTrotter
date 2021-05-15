@@ -133,6 +133,8 @@ namespace BarbarianCall
         internal static Spawnpoint GetPedSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance) => GetPedSpawnPoint(spatial.Position, minimalDistance, maximumDistance);
         internal static Spawnpoint GetPedSpawnPoint(Vector3 pos, float minimalDistance, float maximumDistance)
         {
+            int nodeCount, flagCount, distanceCount, safeCount, propCount;
+            nodeCount = flagCount = distanceCount = safeCount = propCount = 0;
             pos.GetFlags();
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 1; i < 2000; i++)
@@ -145,11 +147,26 @@ namespace BarbarianCall
                     {
                         NodeFlags[] bl = { NodeFlags.Freeway, NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode };
                         NodeFlags nodeFlags = (NodeFlags)flag;
-                        if (bl.Any(x => nodeFlags.HasFlag(x))) continue;
+                        if (bl.Any(x => nodeFlags.HasFlag(x)))
+                        {
+                            flagCount++;
+                            continue;
+                        }
                     }
-                    if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] {17, 1, 16 }).GetRandomElement()))
+                    else
                     {
-                        if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance) continue;
+                        propCount++;
+                        continue;
+                    }
+
+                    if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] { 17, 1, 16 }).GetRandomElement()))
+                    {
+                        if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance)
+                        {
+                            distanceCount++;
+                            continue;
+                        }
+
                         if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && !IsOnScreen(nodeP))
                         {
                             Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
@@ -159,10 +176,18 @@ namespace BarbarianCall
                             return ret;
                         }
                     }
-                }               
+                    else
+                    {
+                        Game.LogTrivialDebug($"BC | GetPedSpawnPoint: Safe coord wasn't successful, {pos.DistanceTo(v)}");
+                        safeCount++;
+                    }
+                }
+                else nodeCount++;               
             }
             $"Safe coord not found".ToLog();
             $"2000 process took {sw.ElapsedMilliseconds} ms".ToLog();
+#if DEBUG
+            $"Node: {nodeCount}, Flag: {flagCount}, Distance: {distanceCount}, Safe: {safeCount}, Prop: {propCount}".ToLog();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetRoadSideSpawnPointFavored(Entity entity, float favoredDistance)
