@@ -186,7 +186,6 @@ namespace BarbarianCall
             }
             $"Safe coord not found".ToLog();
             $"2000 process took {sw.ElapsedMilliseconds} ms".ToLog();
-#if DEBUG
             $"Node: {nodeCount}, Flag: {flagCount}, Distance: {distanceCount}, Safe: {safeCount}, Prop: {propCount}".ToLog();
             return Spawnpoint.Zero;
         }
