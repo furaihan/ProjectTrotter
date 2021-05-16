@@ -200,7 +200,7 @@ namespace BarbarianCall.Callouts
                 {
                     if (p)
                     {
-                        if (p.IsAlive && p.IsEntityAPed()) p.Inventory.GiveNewWeapon("WEAPON_UNARMED", -1, true);
+                        if (p.IsAlive && p.IsPed()) p.Inventory.GiveNewWeapon("WEAPON_UNARMED", -1, true);
                         if (p) p.Dismiss();
                     }
                 });

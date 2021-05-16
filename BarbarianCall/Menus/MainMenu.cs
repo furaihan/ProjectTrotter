@@ -54,29 +54,7 @@ namespace BarbarianCall.Menus
                 {
                     e.ToString().ToLog();
                 }
-            };
-            UIMenuItem vCol = new("[DEBUG] Get Nearest Vehicle Color");
-            vCol.Activated += (m, s) =>
-            {
-                try
-                {
-                    var veh = Game.LocalPlayer.Character.GetNearbyVehicles(15).OrderBy(v => v.DistanceTo(Game.LocalPlayer.Character)).FirstOrDefault();
-                    Game.Console.Print($"{veh.Model.Name} - {veh.GetDisplayName()}");
-                    var ev = Types.VehicleColor.FromPrimaryVehicle(veh);
-                    var evc = Types.VehicleColor.GetColor(ev);
-                    Game.DisplaySubtitle($"Primary Color: <font color=\"{ColorTranslator.ToHtml(evc)}\">{ev}</font>");
-                    string primary = NativeFunction.Natives.xB45085B721EFD38C<string>(veh, 0);
-                    string secondary = NativeFunction.Natives.x4967A516ED23A5A1<string>(veh);
-                    Game.Console.Print($"Primary: {string.Format("{0}", primary ?? "Null")}, Secondary: {string.Format("{0}", secondary ?? "Null")}");
-                    string primaryLabeled = NativeFunction.Natives.x7B5280EBA9840C72<string>(primary);
-                    string secondaryLabeled = NativeFunction.Natives.x7B5280EBA9840C72<string>(secondary);
-                    Game.Console.Print($"Labeled => Primary: {primaryLabeled}, Secondary: {secondaryLabeled}");
-                }
-                catch (System.Exception e)
-                {
-                    e.ToString().ToLog();
-                }                
-            };
+            };           
             UIMenuNumericScrollerItem<float> checkNode = new("[DEBUG] Get Nearest Vehicle Node", "The scroller is minimum distance, Max distance is min distance + 10", 10, 1000, 10)
             {
                 Value = 20,
@@ -122,7 +100,7 @@ namespace BarbarianCall.Menus
             BarbarianCallMenu.OnItemSelect += MenuHandler.ItemSelectHandler;
             BarbarianCallMenu.AddItems(mechanic, insurance, setting);
 #if DEBUG
-            BarbarianCallMenu.AddItems(spawnFreemode, notif, vCol, checkNode);
+            BarbarianCallMenu.AddItems(spawnFreemode, notif, checkNode);
             BarbarianCallMenu.AddItem(new UIMenuCheckboxItem("[DEBUG] Get Gameplay Cam Raycast", false));
             BarbarianCallMenu.AddItem(new UIMenuItem("[DEBUG] Get Solicitation SpawnPoint"));
 #endif

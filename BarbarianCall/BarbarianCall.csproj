@@ -99,7 +99,6 @@
     <Compile Include="DivisiXml\Deserialization.cs" />
     <Compile Include="AmbientEvent\DispatchCall.cs" />
     <Compile Include="Extensions\BlipExtension.cs" />
-    <Compile Include="Extensions\ColorExtension.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\TaskExtension.cs" />
     <Compile Include="Freemode\FreemodePed.cs" />
@@ -125,6 +124,7 @@
     <Compile Include="Types\Spawnpoint.cs" />
     <Compile Include="Types\Speech.cs" />
     <Compile Include="Types\VehicleColor.cs" />
+    <Compile Include="Types\VehiclePaint.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

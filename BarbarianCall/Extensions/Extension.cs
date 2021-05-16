@@ -56,9 +56,9 @@ namespace BarbarianCall.Extensions
         internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xADCDE75E1C60F32D<bool>(position.X, position.Y, position.Z, 3f, false, true, true, false, false, 0, false); //IS_POSITION_OCCUPIED
         internal static bool IsSuitableCar(this Model model) => model.IsCar && !model.IsBigVehicle && (model.NumberOfSeats == 2 || model.NumberOfSeats == 4) && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle;
         internal static bool IsSuitableMotor(this Model model) => model.IsBike && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle && !model.IsCar && !model.IsBigVehicle && model.NumberOfSeats <= 2;
-        internal static bool IsEntityAPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
-        internal static bool IsEntityAVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
-        internal static bool IsEntityAnObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);
+        internal static bool IsPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
+        internal static bool IsVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
+        internal static bool IsObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);
         internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
         internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);  
         internal static string GetCardinalDirection(this Entity e, bool fullform) => GetCardinalDirection(e.Heading, fullform);
@@ -146,6 +146,48 @@ namespace BarbarianCall.Extensions
         }
         internal static void PlaySoundFrontEnd(string audioName, string audioRef) => NativeFunction.Natives.PLAY_SOUND_FRONTEND(-1, audioName, audioRef, true);
         public static void DrawLine(Vector3 pos1, Vector3 pos2, Color color) => NativeFunction.Natives.DRAW_LINE(pos1, pos2, color.R, color.G, color.B, color.A);
+        /// <summary>
+        /// Gets the <see cref="VehicleColor"/> of this <see cref="Vehicle"/>
+        /// </summary>
+        public static VehicleColor GetColor(this Vehicle vehicle)
+        {
+            NativeFunction.Natives.GET_VEHICLE_COLOURS(vehicle, out int primary, out int secondary);
+            VehiclePaint primaryColor = primary >= 0 && primary <= 160 ? (VehiclePaint)primary : VehiclePaint.Unknown;
+            VehiclePaint secondaryColor = secondary >= 0 && secondary <= 160 ? (VehiclePaint)secondary : VehiclePaint.Unknown;
+            return new VehicleColor(primaryColor, secondaryColor);
+        }
+        /// <summary>
+        /// Sets this <see cref="Vehicle"/> colors
+        /// </summary>
+        public static void SetColor(this Vehicle vehicle, VehicleColor vehicleColor)
+        {
+            if (vehicleColor.PrimaryColor == VehiclePaint.Unknown || vehicleColor.SecondaryColor == VehiclePaint.Unknown)
+            {
+                throw new NotSupportedException();
+            }
+            NativeFunction.Natives.SET_VEHICLE_COLOURS(vehicle, (int)vehicleColor.PrimaryColor, (int)vehicleColor.SecondaryColor);
+        }
+        /// <summary>
+        /// Sets this <see cref="Vehicle"/> primary and secondary colors
+        /// </summary>
+        /// <param name="primaryColor">The primary color to be sets</param>
+        /// <param name="secondaryColor">The secondary color to be sets</param>
+        public static void SetColor(this Vehicle vehicle, VehiclePaint primaryColor, VehiclePaint secondaryColor) => vehicle.SetColor(new VehicleColor(primaryColor, secondaryColor));
+        /// <summary>
+        /// Sets this <see cref="Vehicle"/> primary color only
+        /// </summary>
+        /// <param name="primaryColor">The primary color to be sets</param>
+        public static void SetColor(this Vehicle vehicle, VehiclePaint primaryColor) => vehicle.SetColor(new VehicleColor(primaryColor, vehicle.GetColor().SecondaryColor));
+        public static void MarkAsNoLongerNeeded(this Entity entity)
+        {
+            if (entity)
+            {
+                if (entity.IsPed()) NativeFunction.Natives.SET_PED_AS_NO_LONGER_NEEDED(entity as Ped);
+                else if (entity.IsVehicle()) NativeFunction.Natives.SET_VEHICLE_AS_NO_LONGER_NEEDED(entity as Vehicle);
+                else if (entity.IsObject()) NativeFunction.Natives.SET_OBJECT_AS_NO_LONGER_NEEDED(entity as Rage.Object);
+                else NativeFunction.Natives.SET_ENTITY_AS_NO_LONGER_NEEDED(entity);
+            }
+        }
 
         public enum VehicleWindowIndex
         {

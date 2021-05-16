@@ -184,8 +184,8 @@ namespace BarbarianCall.Callouts
                 {
                     if (!ent.CreatedByTheCallingPlugin && ent.GetAttachedBlips().Length == 0 && !ent.Position.IsOnScreen())
                     {
-                        if (ent && Extensions.Extension.IsEntityAVehicle(ent) && (ent as Vehicle).IsEmpty) ent.Delete();
-                        else if (ent && Extensions.Extension.IsEntityAPed(ent))
+                        if (ent && Extensions.Extension.IsVehicle(ent) && (ent as Vehicle).IsEmpty) ent.Delete();
+                        else if (ent && Extensions.Extension.IsPed(ent))
                         {
                             var ped = ent as Ped;
                             ped.Tasks.ClearImmediately();

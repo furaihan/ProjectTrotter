@@ -142,7 +142,7 @@ namespace BarbarianCall.Callouts
                     ambulanceEntities.ForEach(e => CalloutEntities.Add(e));
                     if (Paramedic1) Paramedic1.BlockPermanentEvents = true;
                     if (Paramedic2) Paramedic2.BlockPermanentEvents = true;
-                    var task1 = Paramedic1.DriveVehicleWithNavigationMesh(CalloutPosition, VehicleDrivingFlags.Emergency, stoppingRange: 10f);
+                    var task1 = Paramedic1.DriveTo(CalloutPosition, 10f, MathExtension.GetRandomFloatInRange(15, 51), VehicleDrivingFlags.Emergency);
                     "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attack Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.RedLight);
                     StopWatch = new();
                     StopWatch.Start();

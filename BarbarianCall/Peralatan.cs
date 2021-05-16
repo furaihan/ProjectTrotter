@@ -20,13 +20,14 @@ namespace BarbarianCall
     {
         public static Random Random = new(N.Natives.xF2D49816A804D134<int>(1000, 90080));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
+        private static Ped PlayerPed => Game.LocalPlayer.Character;
 
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
         {
             try
             {
                 ToLog("Calculating the best location for callout");
-                List<Spawnpoint> suitable = spawnPoints.Where(sp => sp.DistanceTo(Game.LocalPlayer.Character) < maxDistance && sp.DistanceTo(Game.LocalPlayer.Character) > minDistance
+                List<Spawnpoint> suitable = spawnPoints.Where(sp => Vector3.DistanceSquared(sp,PlayerPed)  < maxDistance && Vector3.DistanceSquared(sp, PlayerPed) > minDistance
                 && sp.TravelDistanceTo(Game.LocalPlayer.Character) < maxDistance * 2 && sp.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
                 if (suitable.Count > 0)
                 {
@@ -251,7 +252,7 @@ namespace BarbarianCall
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
         }
-        private static string[] StringToArray(string str)
+        private static string[] StringToNativeString(string str)
         {
             int stringsNeeded = (str.Length % 99 == 0) ? (str.Length / 99) : ((str.Length / 99) + 1);
 
@@ -272,8 +273,8 @@ namespace BarbarianCall
                 GameFiber.Yield();
                 if (sw.ElapsedMilliseconds > 1000) break;
             }
-            var ss = StringToArray(msg);
-            if (hudColor.HasValue) N.Natives.x92F0DA1E27DB96DC((int)hudColor); //_THEFEED_SET_NEXT_POST_BACKGROUND_COLOR
+            var ss = StringToNativeString(msg);
+            if (hudColor.HasValue) N.Natives.x92F0DA1E27DB96DC((int)hudColor.Value); //_THEFEED_SET_NEXT_POST_BACKGROUND_COLOR
             N.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
             foreach (string st in ss) N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(st);
             N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(textureDict, textureName, fadeIn, 4, title, subtitle);
