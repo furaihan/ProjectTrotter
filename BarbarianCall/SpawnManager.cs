@@ -91,13 +91,13 @@ namespace BarbarianCall
                 if (i % 35 == 0) GameFiber.Yield();
                 if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
                 {
-                    if (nodeP.DistanceToSquared(pos) < minimalDistance || nodeP.DistanceToSquared(pos) > maximumDistance + 5f) continue;
+                    if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance + 5f) continue;
                     if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
                         {
                             Spawnpoint ret = new(nodeP, nodeH);
-                            $"Vehicle Spawn found {ret}. Distance: {ret.DistanceToSquared(pos):0.00}".ToLog();
+                            $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();                            
                             ret.Position.GetFlags();
                             return ret;
@@ -118,7 +118,7 @@ namespace BarbarianCall
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)Math.Abs(minimalDistance), (int)Math.Abs(maximumDistance)));
                 if (Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, (i % 5) + 1, out Vector3 nodeP, out float nodeH, 0, 9, 3.0f, 2.5f))
                 {
-                    if (nodeP.DistanceToSquared(pos) > minimalDistance && nodeP.DistanceToSquared(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
+                    if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         Spawnpoint ret = new(nodeP, nodeH);
                         $"Vehicle Spawn 2 found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
@@ -162,7 +162,7 @@ namespace BarbarianCall
 
                     if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] { 17, 1, 16 }).GetRandomElement()))
                     {
-                        if (nodeP.DistanceToSquared(pos) < minimalDistance || nodeP.DistanceToSquared(pos) > maximumDistance)
+                        if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance)
                         {
                             distanceCount++;
                             continue;
@@ -203,7 +203,7 @@ namespace BarbarianCall
                 {
                     if (Natives.xA0F8A7517A273C05<bool>(nodeP.X, nodeP.Y, nodeP.Z, nodeH, out Vector3 roadSide))
                     {
-                        if (roadSide.DistanceToSquared(entity) < 35 + favoredDistance && !roadSide.IsOccupied() && !IsOnScreen(roadSide))
+                        if (roadSide.DistanceTo(entity) < 35 + favoredDistance && !roadSide.IsOccupied() && !IsOnScreen(roadSide))
                         {
                             Spawnpoint ret = new(roadSide, nodeH);
                             string.Format("Favored RoadSide Spawnpoint found {0}", ret).ToLog();
@@ -233,7 +233,7 @@ namespace BarbarianCall
                     {
                         if (Natives.xFF071FB798B803B0<bool>(rsPos.X, rsPos.Y, rsPos.Z, out Vector3 _, out float nodeHeading, 5, 3.0f, 0))
                         {
-                            if (rsPos.DistanceToSquared(pos) < 100f && !rsPos.IsOccupied())
+                            if (rsPos.DistanceTo(pos) < 100f && !rsPos.IsOccupied())
                             {
                                 Spawnpoint ret = new(rsPos, nodeHeading);
                                 $"RoadSide with heading found {ret}".ToLog();
@@ -254,7 +254,7 @@ namespace BarbarianCall
                     {
                         if (Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //_GET_ROAD_SIDE_POINT_WITH_HEADING
                         {
-                            if (rsPos.DistanceToSquared(pos) < 100f && !rsPos.IsOccupied())
+                            if (rsPos.DistanceTo(pos) < 100f && !rsPos.IsOccupied())
                             {
                                 Spawnpoint ret = new(rsPos, nodeHeading);
                                 $"RoadSide with heading found {ret}".ToLog();
@@ -273,7 +273,7 @@ namespace BarbarianCall
                 {
                     if (Natives.xFF071FB798B803B0<bool>(roadSide.X, roadSide.Y, roadSide.Z, out Vector3 nodePos, out float nodeHeading, 12, 0x40400000, 0))
                     {
-                        if (nodePos.DistanceToSquared(roadSide) < 50f && roadSide.DistanceToSquared(pos) < 100f && !roadSide.IsOccupied())
+                        if (nodePos.DistanceTo(roadSide) < 50f && roadSide.DistanceTo(pos) < 100f && !roadSide.IsOccupied())
                         {
                             Spawnpoint ret = new(roadSide, nodeHeading);
                             $"RoadSide found without heading {ret}".ToLog();
@@ -302,7 +302,7 @@ namespace BarbarianCall
                     {
                         if (Natives.x4F5070AA58F69279<bool>(nodeId))
                         {
-                            if (randomNode.DistanceToSquared(pos) < maximumDistance && randomNode.DistanceToSquared(pos) > minimumDistance && !IsOnScreen(randomNode) && pos.HeightDiff(randomNode) < 18f)
+                            if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsOnScreen(randomNode) && pos.HeightDiff(randomNode) < 18f)
                             {
                                 if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(randomNode.X, randomNode.Y, randomNode.Z, 1, out Vector3 _, out float heading, out int _, 1, 3f, 0f))
                                 {
@@ -354,7 +354,7 @@ namespace BarbarianCall
                 Vector3 around = playerPos.Around2D(Peralatan.Random.Next(350, 800));
                 if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float _, 0, 3,0,0))
                 {
-                    if (nodePos.DistanceToSquared(playerPos) > 800f || nodePos.TravelDistanceTo(playerPos) > 1250) continue;
+                    if (nodePos.DistanceTo(playerPos) > 800f || nodePos.TravelDistanceTo(playerPos) > 1250) continue;
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodePos.X, nodePos.Y, nodePos.Z, out int heading, out int flag))
                     {
                         NodeFlags nodeFlags = (NodeFlags)flag;

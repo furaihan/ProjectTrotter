@@ -93,6 +93,7 @@
     <Compile Include="Callouts\SuspiciousVehicle.cs" />
     <Compile Include="Callouts\TaxiRefusePay.cs" />
     <Compile Include="Callouts\WantedFelonOnTheLoose.cs" />
+    <Compile Include="Commands.cs" />
     <Compile Include="Extensions\MathExtension.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />

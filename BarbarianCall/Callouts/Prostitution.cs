@@ -102,7 +102,7 @@ namespace BarbarianCall.Callouts
                 while (CalloutRunning)
                 {
                     GameFiber.Yield();
-                    float percentage = Hooker ? 1 - (PlayerPed.DistanceToSquared(Hooker) - 15) / 45 : 1;                   
+                    float percentage = Hooker ? 1 - (PlayerPed.DistanceTo(Hooker) - 15) / 45 : 1;                   
                     HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
                     if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
                     else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
@@ -158,7 +158,7 @@ namespace BarbarianCall.Callouts
                         break;
                     }
                 }
-                if (PlayerPed.DistanceToSquared(CalloutPosition) < 80f || PlayerPed.DistanceToSquared(Hooker) < 25f) break;
+                if (PlayerPed.DistanceTo(CalloutPosition) < 80f || PlayerPed.DistanceTo(Hooker) < 25f) break;
             }
             if (Blip) Blip.Delete();
         }
@@ -172,7 +172,7 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     if (Blip) Blip.Delete();
                     World.GetAllEntities().Where(e => e && !CalloutEntities.Contains(e) && !e.CreatedByTheCallingPlugin && e.GetAttachedBlips().Length == 0 &&
-                    (e.IsPed() || e.IsVehicle()) && !e.Position.IsOnScreen() && e.DistanceToSquared(CalloutPosition) <= 50f && e != PlayerPed
+                    (e.IsPed() || e.IsVehicle()) && !e.Position.IsOnScreen() && e.DistanceTo(CalloutPosition) <= 50f && e != PlayerPed
                     && e != PlayerPed.CurrentVehicle).ToList().ForEach(x => { if (x) x.Delete(); });
                     Blip = new Blip(Hooker.Position, 30f)
                     {
