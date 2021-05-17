@@ -182,10 +182,7 @@ namespace BarbarianCall.Extensions
         {
             if (entity)
             {
-                if (entity.IsPed()) NativeFunction.Natives.SET_PED_AS_NO_LONGER_NEEDED(entity as Ped);
-                else if (entity.IsVehicle()) NativeFunction.Natives.SET_VEHICLE_AS_NO_LONGER_NEEDED(entity as Vehicle);
-                else if (entity.IsObject()) NativeFunction.Natives.SET_OBJECT_AS_NO_LONGER_NEEDED(entity as Rage.Object);
-                else NativeFunction.Natives.SET_ENTITY_AS_NO_LONGER_NEEDED(entity);
+                entity.Dismiss();
             }
         }
 

@@ -23,7 +23,6 @@ namespace BarbarianCall.Callouts
         private readonly List<string> scenarios = new() { "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", "WORLD_HUMAN_PROSTITUTE_LOW_CLASS" };
         private Spawnpoint SolicitationSpawn;
         private BarTimerBar AwarenessBar;
-        private TimerBarIcon TimerBarIcon;
         private readonly TimerBarPool pool = new();
         public bool CanEnd = false;
         private bool Hooking = false;
@@ -95,13 +94,15 @@ namespace BarbarianCall.Callouts
         {
             GameFiber.StartNew(() =>
             {
-                TimerBarIcon = TimerBarIcon.Hidden;
                 AwarenessBar = new BarTimerBar("Awareness")
                 {
-                    ForegroundColor = HudColor.Pink.GetColor()
+                    ForegroundColor = HudColor.Pink.GetColor(),
                 };
                 AwarenessBar.BackgroundColor = Color.FromArgb(120, AwarenessBar.ForegroundColor);
+                IconsTimerBar icons = new(PlayerPed.DistanceToSquared(Hooker).ToString("0.00"));
+                icons.Icons.Add(TimerBarIcon.Hidden);
                 pool.Add(AwarenessBar);
+                pool.Add(icons);
                 while (CalloutRunning)
                 {
                     GameFiber.Yield();
@@ -112,6 +113,7 @@ namespace BarbarianCall.Callouts
                     if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
                     else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
                     AwarenessBar.Percentage = percentage;
+                    icons.Label = PlayerPed.DistanceToSquared(Hooker).ToString("0.00");
                 }
             });
             GameFiber.StartNew(() =>
@@ -127,7 +129,7 @@ namespace BarbarianCall.Callouts
         {
             GameFiber.StartNew(delegate
             {
-                while (SpawnVehicles)
+                while (SpawnVehicles && CalloutRunning)
                 {
                     GameFiber.Yield();
                     try
@@ -174,15 +176,14 @@ namespace BarbarianCall.Callouts
                     GetClose();
                     if (!CalloutRunning) return;
                     if (Blip) Blip.Delete();
-                    World.GetAllEntities().Where(e => e && !CalloutEntities.Contains(e) && !e.CreatedByTheCallingPlugin && e.GetAttachedBlips().Length == 0 &&
-                    (e.IsPed() || e.IsVehicle()) && !e.Position.IsOnScreen() && e.DistanceTo(CalloutPosition) <= 50f && e != PlayerPed
-                    && e != PlayerPed.CurrentVehicle).ToList().ForEach(x => { if (x) x.Delete(); });
                     Blip = new Blip(Hooker.Position, 30f)
                     {
                         Color = Color.FromArgb(120, HudColor.PinkLight.GetColor()),
                     };
                     CalloutBlips.Add(Blip);
                     DisplayHookerAwarenessBar();
+                    SpawnVehicles = true;
+                    VehicleSpawner();
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
@@ -199,7 +200,7 @@ namespace BarbarianCall.Callouts
                             }
                             SuspectCar = (Vehicle)World.GetEntities(CalloutPosition, 10f,
                                 GetEntitiesFlags.ConsiderGroundVehicles | GetEntitiesFlags.ExcludeEmergencyVehicles | GetEntitiesFlags.ExcludePlayerVehicle | GetEntitiesFlags.ConsiderCars).GetRandomElement();
-                            if (SuspectCar && SuspectCar.Driver && SuspectCar.Driver.IsMale && !SuspectCar.HasPassengers && !AssignedToHookTask.Contains(SuspectCar))
+                            if (SuspectCar && SuspectCar.Driver && SuspectCar.Driver.IsMale && !SuspectCar.HasPassengers && !AssignedToHookTask.Contains(SuspectCar) && SuspectCar.Model.IsSuitableCar())
                             {
                                 Suspect = SuspectCar.Driver;
                                 Suspect.MakeMissionPed();
@@ -208,9 +209,6 @@ namespace BarbarianCall.Callouts
                                 AssignedToHookTask.Add(SuspectCar);
                                 CalloutEntities.Add(Suspect);
                                 CalloutEntities.Add(SuspectCar);
-                                Suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveRight).WaitForCompletion(600);
-                                GameFiber.Wait(Peralatan.Random.Next(5500, 15001));
-                                SuspectCar.Repair();
                                 Hooking = true;
                                 HookProcess(Suspect, SuspectCar);
                             }
@@ -246,9 +244,6 @@ namespace BarbarianCall.Callouts
                 {
                     if (suspect && suspectVeh)
                     {
-                        var raycast = World.TraceLine(suspectVeh.FrontPosition, Hooker.Position, TraceFlags.IntersectEverything);
-                        if (raycast.Hit && raycast.HitEntity == Hooker && suspectVeh.DistanceTo(Hooker) < 60f) suspectVeh.SetForwardSpeed(9f);
-                        else if (suspectVeh.DistanceTo(Hooker) < 30f) suspectVeh.SetForwardSpeed(9f);
                         if (suspectVeh.DistanceTo(Hooker) < 5f)
                         {
                             suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(200);

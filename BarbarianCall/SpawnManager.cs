@@ -91,6 +91,19 @@ namespace BarbarianCall
                 if (i % 35 == 0) GameFiber.Yield();
                 if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
                 {
+                    if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
+                    {
+                        NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
+                        NodeFlags nodeFlags = (NodeFlags)flag;
+                        if (bl.Any(x => nodeFlags.HasFlag(x)))
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
                     if (nodeP.DistanceTo(pos) < minimalDistance || nodeP.DistanceTo(pos) > maximumDistance + 5f) continue;
                     if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
@@ -135,7 +148,7 @@ namespace BarbarianCall
         {
             int nodeCount, flagCount, distanceCount, safeCount, propCount;
             nodeCount = flagCount = distanceCount = safeCount = propCount = 0;
-            List<float> distanceList = new List<float>();
+            List<float> distanceList = new();
             pos.GetFlags();
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 1; i < 2000; i++)
@@ -188,7 +201,7 @@ namespace BarbarianCall
             $"Safe coord not found".ToLog();
             $"2000 process took {sw.ElapsedMilliseconds} ms".ToLog();
             $"Node: {nodeCount}, Flag: {flagCount}, Distance: {distanceCount}, Safe: {safeCount}, Prop: {propCount}".ToLog();
-            $"Distance: Max: {distanceList.Max()}, Mix: {distanceList.Min()}, Avg: {distanceList.Average()}".ToLog();
+            $"Distance: Max: {Math.Sqrt(distanceList.Max())}, Mix: {Math.Sqrt(distanceList.Min())}, Avg: {Math.Sqrt(distanceList.Average())}".ToLog();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetRoadSideSpawnPointFavored(Entity entity, float favoredDistance)

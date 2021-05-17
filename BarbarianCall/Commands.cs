@@ -12,10 +12,10 @@ using LSPD_First_Response.Mod.API;
 
 namespace BarbarianCall
 {
-    public class Commands
+    public static class Commands
     {
         [ConsoleCommand(Name = "BCGetVehicleColor", Description = "Gets the selected vehicle color and play the scanner audio")]
-        public static void GetVehicleColor([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
+        public static void Command_BCGetVehicleColor([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
         {
             if (vehicle)
             {
@@ -39,7 +39,7 @@ namespace BarbarianCall
             else Game.LogTrivial("Vehicle doesn't exist");
         }
         [ConsoleCommand(Name = "SpawnFreemodePed", Description = "Spawn the freemode ped and the randomise their appearance")]
-        public static void SpawnFreemode([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterBoolean))] bool isMale)
+        public static void Command_SpawnFreemode([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterBoolean))] bool isMale)
         {
             var pos = Game.LocalPlayer.Character.Position + Game.LocalPlayer.Character.ForwardVector * 8f;
             float heading = Game.LocalPlayer.Character.Heading - 180f;
@@ -48,7 +48,7 @@ namespace BarbarianCall
             freemodePed.Dismiss();
         }
         [ConsoleCommand(Name = "SaveHairColor", Description = "Save hair color of freemode ped")]
-        public static void SaveHairColor([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandParameterAutoCompleter))]string filename)
+        public static void Command_SaveHairColor([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandParameterAutoCompleter))]string filename)
         {
             int num = Freemode.HeadBlend.GetNumberOfPedHairColors();
             StringBuilder @string = new();

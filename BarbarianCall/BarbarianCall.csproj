@@ -45,7 +45,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dependencies\GrammarPolice.dll</HintPath>
     </Reference>
-    <Reference Include="LSPD First Response, Version=0.4.7749.28226, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="LSPD First Response, Version=0.4.7800.3124, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dependencies\LSPD First Response.dll</HintPath>
     </Reference>
