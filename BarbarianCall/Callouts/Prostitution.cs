@@ -52,8 +52,11 @@ namespace BarbarianCall.Callouts
         }
         public override bool OnCalloutAccepted()
         {
-            Model selected = hookerModels.GetRandomElement(true);
+            $"Model Count: {hookerModels.Count}, Valid: {hookerModels.Where(x => x.IsValid && x.IsInCdImage).Count()}".ToLog();
+            Model selected = hookerModels.GetRandomElement(m=>m.IsValid && m.IsInCdImage, true);
             selected.Load();
+            selected.LoadCollision();
+            GameFiber.SleepUntil(() => selected.IsLoaded && selected.IsCollisionLoaded, 1000);
             Blip = new Blip(CalloutPosition.Around2D(50f).ToGround(), 80f)
             {
                 Color = Color.FromArgb(100, HudColor.Franklin.GetColor()),

@@ -269,7 +269,7 @@ namespace BarbarianCall.Freemode
             if (Gender == Gender.Male)
             {
                 HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, maleHairModel.GetRandomElement(true), 0, 0);
-                int hairColor = random.Next() % 2 == 0 ? 0 : random.Next(1, 68);
+                int hairColor = random.Next() % 2 == 0 ? 0 : random.Next(1, HB.GetNumberOfPedHairColors());
                 HB.SetPedHairColor(this, hairColor, hairColor);
                 foreach (var olay in randomizedOIds)
                 {
@@ -307,7 +307,7 @@ namespace BarbarianCall.Freemode
             else
             {
                 HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, femaleHairModel.GetRandomElement(true), 0, 0);
-                int hairColor = random.Next() % 2 == 0 ? 0 : random.Next(1, 68);
+                int hairColor = random.Next() % 2 == 0 ? 0 : random.Next(1, HB.GetNumberOfPedHairColors());
                 HB.SetPedHairColor(this, hairColor, hairColor);
                 foreach (var olay in randomizedOIds)
                 {
@@ -318,7 +318,7 @@ namespace BarbarianCall.Freemode
                         OverlayId.Eyebrows => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Eyebrows)),
                         OverlayId.Ageing => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Ageing)),
                         //OverlayId.Makeup => random.Next(74),
-                        OverlayId.Blush => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blush)),
+                        //OverlayId.Blush => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Blush)),
                         OverlayId.Complexion => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Complexion)),
                         OverlayId.SunDamage => random.Next() % 2 == 0 ? 255 : random.Next(HB.GetNumHeadOverlayValues(OverlayId.SunDamage)),
                         OverlayId.Lipstick => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Lipstick)),
