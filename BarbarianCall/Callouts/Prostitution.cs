@@ -102,28 +102,24 @@ namespace BarbarianCall.Callouts
         {
             GameFiber.StartNew(() =>
             {
-            AwarenessBar = new BarTimerBar("Awareness")
-            {
-                ForegroundColor = HudColor.Pink.GetColor(),
-            };
-            AwarenessBar.BackgroundColor = Color.FromArgb(120, AwarenessBar.ForegroundColor);
-            IconsTimerBar icons = new(PlayerPed.DistanceToSquared(Hooker).ToString("0.00"));
-            IconsTimerBar icons1 = new(PlayerPed.DistanceTo(Hooker).ToString("0.00"));
-            icons.Icons.Add(TimerBarIcon.Hidden);
-            pool.Add(AwarenessBar);
-            pool.Add(icons, icons1);
-            while (CalloutRunning)
-            {
-                GameFiber.Yield();
-                float percentage = Hooker ? 1 - (PlayerPed.DistanceToSquared(Hooker) - 250) / 3400 : 0;
-                HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
-                if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
-                else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
-                if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
-                else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
-                AwarenessBar.Percentage = percentage;
-                icons.Label = PlayerPed.DistanceToSquared(Hooker).ToString("0.00");
-                icons1.Label = PlayerPed.DistanceTo(Hooker).ToString("0.00");
+                AwarenessBar = new BarTimerBar("Awareness")
+                {
+                    ForegroundColor = HudColor.Pink.GetColor(),
+                };
+                AwarenessBar.BackgroundColor = Color.FromArgb(120, AwarenessBar.ForegroundColor);
+                AwarenessBar.Accent = Color.HotPink;
+                AwarenessBar.Markers.Add(new TimerBarMarker(0.72585f, Color.Gold));
+                pool.Add(AwarenessBar);
+                while (CalloutRunning)
+                {
+                    GameFiber.Yield();
+                    float percentage = Hooker ? 1 - (PlayerPed.DistanceSquaredTo(Hooker) - 250) / 3400 : 0;
+                    HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
+                    if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
+                    else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
+                    if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
+                    else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
+                    AwarenessBar.Percentage = percentage;
                 }
             });
             GameFiber.StartNew(() =>
@@ -173,7 +169,7 @@ namespace BarbarianCall.Callouts
                         break;
                     }
                 }
-                if (PlayerPed.DistanceToSquared(CalloutPosition) < 6400f || PlayerPed.DistanceToSquared(Hooker) < 625f) break;
+                if (PlayerPed.DistanceSquaredTo(CalloutPosition) < 6400f || PlayerPed.DistanceSquaredTo(Hooker) < 625f) break;
             }
             if (Blip) Blip.Delete();
         }
@@ -211,6 +207,7 @@ namespace BarbarianCall.Callouts
                             }
                             SuspectCar = (Vehicle)World.GetEntities(CalloutPosition, 10f,
                                 GetEntitiesFlags.ConsiderGroundVehicles | GetEntitiesFlags.ExcludeEmergencyVehicles | GetEntitiesFlags.ExcludePlayerVehicle | GetEntitiesFlags.ConsiderCars).GetRandomElement();
+                            if (SuspectCar.DistanceSquaredTo(Hooker) > 100f) continue;
                             if (SuspectCar && SuspectCar.Driver && SuspectCar.Driver.IsMale && !SuspectCar.HasPassengers && !AssignedToHookTask.Contains(SuspectCar) && SuspectCar.Model.IsSuitableCar())
                             {
                                 Suspect = SuspectCar.Driver;
@@ -231,11 +228,12 @@ namespace BarbarianCall.Callouts
                                     $"Color: {SuspectCar.GetColor().PrimaryColorName}",
                                     $"Driver Male: {SuspectCar.Driver && SuspectCar.Driver.IsMale}",
                                     $"Has Passenger: {SuspectCar.HasPassengers}, Count: {SuspectCar.Passengers.Length}",
-                                    $"Distance: {Vector3.DistanceSquared(SuspectCar.Position, Hooker)}"
+                                    $"Distance: {Vector3.Distance(SuspectCar.Position, Hooker)}"
                                 };
                                 log.ForEach(Peralatan.ToLog);
                                 AssignedToHookTask.Contains(SuspectCar);
-                                if (SuspectCar && SuspectCar.Driver) SuspectCar.Driver.Tasks.CruiseWithVehicle(15f, )
+                                if (SuspectCar && SuspectCar.Driver) SuspectCar.Driver.Tasks.CruiseWithVehicle(15f, Globals.Normal);
+                                GameFiber.Wait(Peralatan.Random.Next(5000, 8000));
                             }
                         }
                     }
