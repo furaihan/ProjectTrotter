@@ -85,6 +85,8 @@ namespace BarbarianCall
         {
             pos.GetFlags();
             Stopwatch sw = Stopwatch.StartNew();
+            var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
+            var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
             for (int i = 1; i < 900; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
@@ -104,7 +106,7 @@ namespace BarbarianCall
                     {
                         continue;
                     }
-                    if (nodeP.DistanceSquaredTo(pos) < minimalDistance * minimalDistance || nodeP.DistanceSquaredTo(pos) > maximumDistance * maximumDistance + 25f) continue;
+                    if (nodeP.DistanceSquaredTo(pos) < minimalDistanceSquared || nodeP.DistanceSquaredTo(pos) > maximumDistanceSquared + 25f) continue;
                     if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
@@ -151,8 +153,8 @@ namespace BarbarianCall
             List<float> distanceList = new();
             pos.GetFlags();
             Stopwatch sw = Stopwatch.StartNew();
-            minimalDistance = (float)Math.Pow(minimalDistance, 2);
-            maximumDistance = (float)Math.Pow(maximumDistance, 2);
+            var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
+            var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
             for (int i = 1; i < 2000; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
@@ -177,7 +179,7 @@ namespace BarbarianCall
 
                     if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] { 17, 1, 16 }).GetRandomElement()))
                     {
-                        if (nodeP.DistanceSquaredTo(pos) < minimalDistance || nodeP.DistanceSquaredTo(pos) > maximumDistance)
+                        if (nodeP.DistanceSquaredTo(pos) < minimalDistanceSquared || nodeP.DistanceSquaredTo(pos) > maximumDistanceSquared)
                         {
                             distanceCount++;
                             continue;
@@ -369,7 +371,7 @@ namespace BarbarianCall
                 Vector3 around = playerPos.Around2D(Peralatan.Random.Next(350, 800));
                 if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float _, 0, 3,0,0))
                 {
-                    if (nodePos.DistanceTo(playerPos) > 800f || nodePos.TravelDistanceTo(playerPos) > 1250) continue;
+                    if (nodePos.DistanceSquaredTo(playerPos) > 640000f || nodePos.TravelDistanceTo(playerPos) > 1250) continue;
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodePos.X, nodePos.Y, nodePos.Z, out int heading, out int flag))
                     {
                         NodeFlags nodeFlags = (NodeFlags)flag;
@@ -378,7 +380,7 @@ namespace BarbarianCall
                         {
                             if (Natives.GET_SAFE_COORD_FOR_PED<bool>(nodePos.X, nodePos.Y, nodePos.Z, true, out Vector3 pedNodePos, 17))
                             {
-                                if (pedNodePos.DistanceTo(nodePos) > 50f || pedNodePos.DistanceTo(playerPos) < 300f) continue;
+                                if (pedNodePos.DistanceSquaredTo(nodePos) > 2500f || pedNodePos.DistanceTo(playerPos) < 90000f) continue;
                                 bool success = Natives.x16F46FB18C8009E4<bool>(pedNodePos.X, pedNodePos.Y, pedNodePos.Z, -1, out Vector3 roadSidePos);
                                 if (!success) continue;
                                 //if (roadSidePos.DistanceTo(pedNodePos) < 8f) continue;
