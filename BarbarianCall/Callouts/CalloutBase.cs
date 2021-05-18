@@ -176,26 +176,6 @@ namespace BarbarianCall.Callouts
             $"Callout Created From {CreationSource}".ToLog();
         }
         protected void PlayRadioAnimation(int duration) => Functions.PlayPlayerRadioAction(Functions.GetPlayerRadioAction(), duration);
-        protected void ClearUnrelatedEntities()
-        {
-            World.GetEntities(CalloutPosition, 50f, GetEntitiesFlags.ConsiderGroundVehicles | GetEntitiesFlags.ConsiderHumanPeds).ToList().ForEach(ent =>
-            {
-                if (ent)
-                {
-                    if (!ent.CreatedByTheCallingPlugin && ent.GetAttachedBlips().Length == 0 && !ent.Position.IsOnScreen())
-                    {
-                        if (ent && Extensions.Extension.IsVehicle(ent) && (ent as Vehicle).IsEmpty) ent.Delete();
-                        else if (ent && Extensions.Extension.IsPed(ent))
-                        {
-                            var ped = ent as Ped;
-                            ped.Tasks.ClearImmediately();
-                            ped.Dismiss();
-                            if (ped.DistanceTo(CalloutPosition) < 20f) ped.Delete();
-                        }
-                    }
-                }
-            });
-        }
         public static UIMenuItem[] CreateMenu()
         {
             "Creating callout menu tab, menu items".ToLog();

@@ -27,7 +27,7 @@ namespace BarbarianCall.Callouts
         public bool CanEnd = false;
         private bool Hooking = false;
         private bool HookSuccess = false;
-        private List<Vehicle> AssignedToHookTask = new();
+        private readonly List<Vehicle> AssignedToHookTask = new();
         private bool SpawnVehicles = false;
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -46,16 +46,17 @@ namespace BarbarianCall.Callouts
                 return false;
             }
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 60);
+            AddMaximumDistanceCheck(1000f, CalloutPosition);
+            AddMinimumDistanceCheck(50f, CalloutPosition);
             PlayScannerWithCallsign("WE_HAVE CRIME_SOLICITATION IN_OR_ON_POSITION", CalloutPosition);
-            return Displayed = base.OnBeforeCalloutDisplayed();
+            return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
         {
             $"Model Count: {hookerModels.Count}, Valid: {hookerModels.Where(x => x.IsValid && x.IsInCdImage).Count()}".ToLog();
             Model selected = hookerModels.GetRandomElement(m=>m.IsValid && m.IsInCdImage, true);
             selected.Load();
-            selected.LoadCollision();
-            GameFiber.SleepUntil(() => selected.IsLoaded && selected.IsCollisionLoaded, 1000);
+            selected.LoadCollisionAndWait();
             Blip = new Blip(CalloutPosition.Around2D(50f).ToGround(), 80f)
             {
                 Color = Color.FromArgb(100, HudColor.Franklin.GetColor()),
@@ -67,12 +68,15 @@ namespace BarbarianCall.Callouts
             Hooker.MakeMissionPed();
             Hooker.RandomizeVariation();
             CalloutEntities.Add(Hooker);
+            "Playing ped scenario action".ToLog();
             Hooker.PlayScenarioAction(scenarios.GetRandomElement(), false);
+            "Set the hooker movement animation set".ToLog();
             Hooker.MovementAnimationSet = Peralatan.Random.NextDouble() > 0.5f ? "move_f@sexy@a" : "move_f@sexy";
-            ClearUnrelatedEntities();
+            "Lets go to the main logic of this callout".ToLog();
             CalloutMainLogic();
+            "Fiber is created, starting...".ToLog();
             CalloutMainFiber.Start();
-            return Accepted = base.OnCalloutAccepted();
+            return base.OnCalloutAccepted();
         }
         public override void OnCalloutNotAccepted()
         {
@@ -88,32 +92,35 @@ namespace BarbarianCall.Callouts
         }
         public override void End()
         {
+            SpawnVehicles = false;
             base.End();
         }
         private void DisplayHookerAwarenessBar()
         {
             GameFiber.StartNew(() =>
             {
-                AwarenessBar = new BarTimerBar("Awareness")
-                {
-                    ForegroundColor = HudColor.Pink.GetColor(),
-                };
-                AwarenessBar.BackgroundColor = Color.FromArgb(120, AwarenessBar.ForegroundColor);
-                IconsTimerBar icons = new(PlayerPed.DistanceToSquared(Hooker).ToString("0.00"));
-                icons.Icons.Add(TimerBarIcon.Hidden);
-                pool.Add(AwarenessBar);
-                pool.Add(icons);
-                while (CalloutRunning)
-                {
-                    GameFiber.Yield();
-                    float percentage = Hooker ? 1 - (PlayerPed.DistanceTo(Hooker) - 15) / 45 : 1;                   
-                    HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
-                    if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
-                    else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
-                    if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
-                    else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
-                    AwarenessBar.Percentage = percentage;
-                    icons.Label = PlayerPed.DistanceToSquared(Hooker).ToString("0.00");
+            AwarenessBar = new BarTimerBar("Awareness")
+            {
+                ForegroundColor = HudColor.Pink.GetColor(),
+            };
+            AwarenessBar.BackgroundColor = Color.FromArgb(120, AwarenessBar.ForegroundColor);
+            IconsTimerBar icons = new(PlayerPed.DistanceToSquared(Hooker).ToString("0.00"));
+            IconsTimerBar icons1 = new(PlayerPed.DistanceTo(Hooker).ToString("0.00"));
+            icons.Icons.Add(TimerBarIcon.Hidden);
+            pool.Add(AwarenessBar);
+            pool.Add(icons, icons1);
+            while (CalloutRunning)
+            {
+                GameFiber.Yield();
+                float percentage = Hooker ? 1 - (PlayerPed.DistanceTo(Hooker) - 15) / 45 : 1;
+                HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
+                if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
+                else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
+                if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
+                else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
+                AwarenessBar.Percentage = percentage;
+                icons.Label = PlayerPed.DistanceToSquared(Hooker).ToString("0.00");
+                icons1.Label = PlayerPed.DistanceTo(Hooker).ToString("0.00");
                 }
             });
             GameFiber.StartNew(() =>
@@ -169,6 +176,7 @@ namespace BarbarianCall.Callouts
         }
         private void CalloutMainLogic()
         {
+            "Set the GameFiber content".ToLog();
             CalloutMainFiber = new GameFiber(() =>
             {
                 try
@@ -235,6 +243,7 @@ namespace BarbarianCall.Callouts
                     End();
                 }              
             });
+            "Let the OnCalloutAccepted is taking care of this part".ToLog();
         }
         private void HookProcess(Ped suspect, Vehicle suspectVeh)
         {

@@ -8,6 +8,7 @@ using System.Reflection;
 using BarbarianCall.AmbientEvent;
 using BarbarianCall.Extensions;
 
+[assembly: Rage.Attributes.Plugin("BarbarianCall", Description = "INSTALL IN GTAV/PLUGINS/LSPDFR", Author = "furaihan")]
 namespace BarbarianCall
 {
     public class EntryPoint
@@ -21,17 +22,6 @@ namespace BarbarianCall
     }
     internal static class Initialization
     {
-        public static Assembly LSPDFRResolveEventHandler(object sender, ResolveEventArgs args) 
-        { 
-            foreach (Assembly assembly in Functions.GetAllUserPlugins()) 
-            { 
-                if (args.Name.ToLower().Contains(assembly.GetName().Name.ToLower())) 
-                { 
-                    return assembly; 
-                } 
-            } 
-            return null; 
-        }
         public static void Initialize()
         {
             GameFiber.StartNew(delegate
