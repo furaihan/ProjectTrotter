@@ -46,6 +46,7 @@ namespace BarbarianCall
                     Functions.RegisterCallout(callout);
                     Peralatan.ToLog(string.Format("{0} has been loaded successfully", callout.Name));
                 }
+                Game.AddConsoleCommands(new[] { typeof(Commands) });
                 Initialization.Initialize();
             }          
         }

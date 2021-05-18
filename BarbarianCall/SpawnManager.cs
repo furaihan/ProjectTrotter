@@ -341,7 +341,8 @@ namespace BarbarianCall
         {
             int trys = 1000;
             int shouldYieldAt = 60;
-            int distanceCount = 0;
+            int distanceCount, safeCount, nodeCount, pedDisCount, propCount, flagCount, flag2Count;
+            distanceCount = safeCount = nodeCount = pedDisCount = propCount = flagCount = flag2Count = 0;
             try
             {
                 ulong totalMem = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / 1048576;
@@ -381,14 +382,27 @@ namespace BarbarianCall
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodePos.X, nodePos.Y, nodePos.Z, out int heading, out int flag))
                     {
                         NodeFlags nodeFlags = (NodeFlags)flag;
-                        if (blacklist.Any(flag=> nodeFlags.HasFlag(flag))) continue;
+                        if (blacklist.Any(flag=> nodeFlags.HasFlag(flag)))
+                        {
+                            flagCount++;
+                            continue;
+                        }
+
                         if (nodeFlags.HasFlag(NodeFlags.SlowNormalRoad) || nodeFlags.HasFlag(NodeFlags.UnknownBit2))
                         {
                             if (Natives.GET_SAFE_COORD_FOR_PED<bool>(nodePos.X, nodePos.Y, nodePos.Z, true, out Vector3 pedNodePos, 17))
                             {
-                                if (pedNodePos.DistanceSquaredTo(nodePos) > 2500f || pedNodePos.DistanceTo(playerPos) < 90000f) continue;
+                                if (pedNodePos.DistanceSquaredTo(nodePos) > 2500f || pedNodePos.DistanceSquaredTo(playerPos) < 90000f)
+                                {
+                                    pedDisCount++;
+                                    continue;
+                                }
                                 bool success = Natives.x16F46FB18C8009E4<bool>(pedNodePos.X, pedNodePos.Y, pedNodePos.Z, -1, out Vector3 roadSidePos);
-                                if (!success) continue;
+                                if (!success)
+                                {
+                                    propCount++;
+                                    continue;
+                                }
                                 //if (roadSidePos.DistanceTo(pedNodePos) < 8f) continue;
                                 Spawnpoint ret = new(pedNodePos, pedNodePos.GetHeadingTowards(nodePos));
                                 $"Get solicitation spawnpoint is successfull {ret}, {i + 1} process took {sw.ElapsedMilliseconds} ms".ToLog();
@@ -399,13 +413,14 @@ namespace BarbarianCall
                                 nodePosition = new(nodePos, heading);
                                 return ret;
                             }
-                            else $"SafeCoordinate is not found Distance: {nodePos.DistanceTo(Game.LocalPlayer.Character)}".ToLog();
+                            else safeCount++;
                         }
+                        else flag2Count++;
                     }
                 }
             }
             $"Solicitation spawnpoint was not successfull, {sw.ElapsedMilliseconds} ms".ToLog();
-            $"Distance: {distanceCount}".ToLog();
+            $"Distance: {distanceCount}, Flag1: {flagCount}, Flag2: {flag2Count}, Safe: {safeCount}, Prop: {propCount}, Ped Node Distance: {pedDisCount}".ToLog();
             return Spawnpoint.Zero;
         }
     }
