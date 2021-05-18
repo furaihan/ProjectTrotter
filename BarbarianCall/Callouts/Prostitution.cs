@@ -114,8 +114,7 @@ namespace BarbarianCall.Callouts
                 {
                     GameFiber.Yield();
                     float percentage = Hooker ? 1 - (PlayerPed.DistanceSquaredTo(Hooker) - 250) / 3400 : 0;
-                    HitResult hitResult = World.TraceLine(Hooker.FrontPosition, PlayerPed.Position, TraceFlags.IntersectEverything);
-                    if (hitResult.HitEntity && hitResult.HitEntity == Game.LocalPlayer.Character && AwarenessBar.Percentage < 0.75f) percentage += 0.007125f;
+                    if (Hooker.IsHeadingTowards(PlayerPed, 50f)) percentage += 0.0071595f;
                     else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
                     if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
                     else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;

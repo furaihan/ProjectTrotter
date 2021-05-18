@@ -113,6 +113,12 @@ namespace BarbarianCall.Extensions
 
             return new Vector3(from.X + resultX, from.Y + resultY, from.Z + offset.Z);
         }
+        public static bool IsHeadingTowards(this Entity entity, Entity otherEntity, float degreeTolerance)
+        {
+            float heading1 = entity.Heading;
+            float heading2 = entity.GetHeadingTowards(otherEntity);
+            return Math.Abs(heading1 - heading2) <= degreeTolerance;
+        }
         public static bool IsAheadPositionWithTolerance(this Vector3 vector3, Vector3 targetVector, Vector3 direction, float tolerance)
         {
             direction.Normalize();

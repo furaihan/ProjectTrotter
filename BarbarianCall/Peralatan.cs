@@ -142,7 +142,7 @@ namespace BarbarianCall
         {
             float degrees = e.Heading;
             string[] cardinals = { "DIRECTION_BOUND_NORTH", "DIRECTION_BOUND_WEST", "DIRECTION_BOUND_SOUTH", "DIRECTION_BOUND_EAST", "DIRECTION_BOUND_NORTH" };
-            return cardinals[(int)Math.Round(((double)degrees % 360) / 90)];
+            return cardinals[(int)Math.Round((double)degrees % 360 / 90)];
         }
         internal static bool Speaking;
         internal static void HandleSpeech(List<string> Dialogue, params Ped[] talkers)
@@ -303,7 +303,7 @@ namespace BarbarianCall
         }
         public static float GetHeadingTowards(this Vector3 position, Vector3 towardsPosition)
         {
-            Vector3 directionFromEntityToPosition = (towardsPosition - position);
+            Vector3 directionFromEntityToPosition = towardsPosition - position;
             directionFromEntityToPosition.Normalize();
 
             float heading = MathHelper.ConvertDirectionToHeading(directionFromEntityToPosition);
@@ -418,7 +418,7 @@ namespace BarbarianCall
                 byte[] box = new byte[1];
                 do provider.GetBytes(box);
                 while (!(box[0] < n * (Byte.MaxValue / n)));
-                int k = (box[0] % n);
+                int k = box[0] % n;
                 n--;
                 T value = list[k];
                 list[k] = list[n];
