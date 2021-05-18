@@ -71,7 +71,10 @@ namespace BarbarianCall.Callouts
             "Playing ped scenario action".ToLog();
             Hooker.PlayScenarioAction(scenarios.GetRandomElement(), false);
             "Set the hooker movement animation set".ToLog();
-            Hooker.MovementAnimationSet = Peralatan.Random.NextDouble() > 0.5f ? "move_f@sexy@a" : "move_f@sexy";
+            Hooker.MovementAnimationSet = Peralatan.Random.NextDouble() > 0.5f ? "move_f@sexy@a" : "move_f@femme@";
+            "After setting mas".ToLog();
+            Game.ProductVersion.ToString().ToLog();
+            "After game product ver".ToLog();
             "Lets go to the main logic of this callout".ToLog();
             CalloutMainLogic();
             "Fiber is created, starting...".ToLog();
