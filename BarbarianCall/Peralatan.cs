@@ -513,6 +513,7 @@ namespace BarbarianCall
             return;
         }
         internal static void SetPedAsWanted(this Ped ped) => SetPedAsWanted(ped, out Persona _);
+        [Obsolete]
         internal static string GetCarColor(this Vehicle vehicle)
         {
             if (vehicle)

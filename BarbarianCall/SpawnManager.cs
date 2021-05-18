@@ -339,15 +339,16 @@ namespace BarbarianCall
         }
         internal static Spawnpoint GetSolicitationSpawnpoint(Vector3 playerPos, out Spawnpoint nodePosition, out Spawnpoint roadSidePosition)
         {
-            int trys = 600;
-            int shouldYieldAt = 40;
+            int trys = 1000;
+            int shouldYieldAt = 60;
+            int distanceCount = 0;
             try
             {
                 ulong totalMem = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / 1048576;
                 $"Total Memory: {totalMem} Mb".ToLog();
                 if (totalMem > 16000)
                 {
-                    trys = 1200;
+                    trys = 2000;
                     shouldYieldAt = 110;
                 }
             }
@@ -371,7 +372,12 @@ namespace BarbarianCall
                 Vector3 around = playerPos.Around2D(Peralatan.Random.Next(350, 800));
                 if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float _, 0, 3,0,0))
                 {
-                    if (nodePos.DistanceSquaredTo(playerPos) > 640000f || nodePos.TravelDistanceTo(playerPos) > 1250) continue;
+                    if (nodePos.DistanceSquaredTo(playerPos) > 640000f || nodePos.TravelDistanceTo(playerPos) > 1250)
+                    {
+                        distanceCount++;
+                        continue;
+                    }
+
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodePos.X, nodePos.Y, nodePos.Z, out int heading, out int flag))
                     {
                         NodeFlags nodeFlags = (NodeFlags)flag;
@@ -399,6 +405,7 @@ namespace BarbarianCall
                 }
             }
             $"Solicitation spawnpoint was not successfull, {sw.ElapsedMilliseconds} ms".ToLog();
+            $"Distance: {distanceCount}".ToLog();
             return Spawnpoint.Zero;
         }
     }

@@ -230,8 +230,9 @@ namespace BarbarianCall.Callouts
                                     $"Distance: {Vector3.Distance(SuspectCar.Position, Hooker)}"
                                 };
                                 log.ForEach(Peralatan.ToLog);
-                                AssignedToHookTask.Contains(SuspectCar);
+                                AssignedToHookTask.Add(SuspectCar);
                                 if (SuspectCar && SuspectCar.Driver) SuspectCar.Driver.Tasks.CruiseWithVehicle(15f, Globals.Normal);
+                                if (SuspectCar && !Func.GetIsAudioEngineBusy()) Func.PlayScannerAudio(SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio());
                                 GameFiber.Wait(Peralatan.Random.Next(5000, 8000));
                             }
                         }

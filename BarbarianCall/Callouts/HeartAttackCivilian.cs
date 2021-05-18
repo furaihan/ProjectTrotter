@@ -36,14 +36,23 @@ namespace BarbarianCall.Callouts
                 Displayed = false;
                 return false;
             }
+            if (PlayerPed.Position.GetZoneName().ToLower() == "island")
+            {
+                "Cayo Perico Island is not supported yet".ToLog();
+                Displayed = false;
+                return false;
+            }
             var nameRnd = PersonaHelper.GetRandomName(LSPD_First_Response.Gender.Male);
             var model = Extension.GetRandomMaleModel();
-            Persona clone = Persona.FromExistingPed(World.GetAllPeds().Where(x => x && x.Model.Hash == model.Hash).GetRandomElement());
-            clone.Forename = nameRnd.Item1;
-            clone.Surname = nameRnd.Item2;
+            "Creating male ped".ToLog();
             Civilian = new Ped(model, Spawn, Spawn);
             CalloutEntities.Add(Civilian);
             Civilian.MakeMissionPed();
+            "Cloning ped persona".ToLog();
+            Persona clone = Persona.FromExistingPed(Civilian);
+            clone.Forename = nameRnd.Item1;
+            clone.Surname = nameRnd.Item2;
+            $"Setting persona for ped {Civilian.Model.Name}".ToLog();
             LSPDFR.SetPersonaForPed(Civilian, clone);
             CalloutPosition = Spawn;
             CalloutMessage = "Heart Attack Civilian";
@@ -59,10 +68,13 @@ namespace BarbarianCall.Callouts
                 Color = Yellow,
                 IsRouteEnabled = true
             };
+            "Playing fall animation".ToLog();
             Civilian.Tasks.PlayAnimation("random@drunk_driver_1", "drunk_fall_over", 4.0f, AnimationFlags.StayInEndFrame | AnimationFlags.Loop | AnimationFlags.RagdollOnCollision);
             Civilian.IsInvincible = true;
             CalloutRunning = true;
+            "Getting Callout Main Fiber content".ToLog();
             MainSituation();
+            "Starting Fiber".ToLog();
             CalloutMainFiber.Start();
             return base.OnCalloutAccepted();
         }
@@ -142,7 +154,7 @@ namespace BarbarianCall.Callouts
                     ambulanceEntities.ForEach(e => CalloutEntities.Add(e));
                     if (Paramedic1) Paramedic1.BlockPermanentEvents = true;
                     if (Paramedic2) Paramedic2.BlockPermanentEvents = true;
-                    var task1 = Paramedic1.DriveTo(CalloutPosition, 10f, MathExtension.GetRandomFloatInRange(15, 51), VehicleDrivingFlags.Emergency);
+                    var task1 = Paramedic1.DriveTo(CalloutPosition, 10f, MathExtension.GetRandomFloatInRange(15, 21), VehicleDrivingFlags.Emergency);
                     "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attack Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.RedLight);
                     StopWatch = new();
                     StopWatch.Start();

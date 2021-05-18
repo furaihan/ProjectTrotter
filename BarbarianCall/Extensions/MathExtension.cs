@@ -113,6 +113,12 @@ namespace BarbarianCall.Extensions
 
             return new Vector3(from.X + resultX, from.Y + resultY, from.Z + offset.Z);
         }
+        public static Vector3 AroundPosition(this Vector3 vector3, float minDistance, float maxDistance)
+        {
+            float x = Peralatan.Random.NextDouble() > 0.5 ? GetRandomFloatInRange(minDistance, maxDistance) : -GetRandomFloatInRange(minDistance, maxDistance);
+            float y = Peralatan.Random.NextDouble() > 0.5 ? GetRandomFloatInRange(minDistance, maxDistance) : -GetRandomFloatInRange(minDistance, maxDistance);
+            return vector3 + new Vector3(x, y, 0.0f);
+        }
         public static bool IsHeadingTowards(this Entity entity, Entity otherEntity, float degreeTolerance)
         {
             float heading1 = entity.Heading;
