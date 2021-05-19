@@ -343,6 +343,7 @@ namespace BarbarianCall
             int shouldYieldAt = 60;
             int distanceCount, safeCount, nodeCount, pedDisCount, propCount, flagCount, flag2Count;
             distanceCount = safeCount = nodeCount = pedDisCount = propCount = flagCount = flag2Count = 0;
+            List<int> flags = new();
             try
             {
                 ulong totalMem = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / 1048576;
@@ -415,12 +416,18 @@ namespace BarbarianCall
                             }
                             else safeCount++;
                         }
-                        else flag2Count++;
+                        else
+                        {
+                            flag2Count++;
+                            flags.Add(flag);
+                        }
                     }
                 }
             }
             $"Solicitation spawnpoint was not successfull, {sw.ElapsedMilliseconds} ms".ToLog();
             $"Distance: {distanceCount}, Flag1: {flagCount}, Flag2: {flag2Count}, Safe: {safeCount}, Prop: {propCount}, Ped Node Distance: {pedDisCount}".ToLog();
+            var groups = flags.GroupBy(v => v).ToList();
+            groups.ForEach(g => Peralatan.ToLog($"Value {g.Key} has {g.Count()} items"));
             return Spawnpoint.Zero;
         }
     }

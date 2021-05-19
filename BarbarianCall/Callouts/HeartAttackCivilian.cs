@@ -97,24 +97,25 @@ namespace BarbarianCall.Callouts
         private void GetClose()
         {
             State = CalloutState.EnRoute;
-            while(CalloutRunning)
+            while (CalloutRunning)
             {
                 GameFiber.Yield();
                 var traceStart = PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition;
                 Extension.DrawLine(traceStart, Civilian.Position, Color.Red);
-                var raycast = World.TraceLine(traceStart, Civilian.Position, (TraceFlags)(1 | 2 | 4 | 8 | 16 | 256));
+                var raycast = World.TraceLine(traceStart, Civilian.Position, TraceFlags.None);
                 if (Civilian && raycast.Hit && raycast.HitEntity && raycast.HitEntity == Civilian)
                 {
                     "Raycast hit civilian".ToLog();
                     break;
                 }
-                else if (Civilian && Civilian.Position.IsOnScreen())
+                if (Civilian && Civilian.Position.IsOnScreen())
                 {
                     "Civilian is on screen".ToLog();
                     break;
                 }
-                else if (Civilian && PlayerPed.DistanceTo(Civilian) < 30f) break;
+                if (Civilian && PlayerPed.DistanceSquaredTo(Civilian) < 900f) break;
             }
+            $"Distance: {PlayerPed.DistanceTo(Civilian)}".ToLog();
             State = CalloutState.OnScene;
             if (Blip) Blip.Delete();
             Blip = Civilian.AttachBlip();

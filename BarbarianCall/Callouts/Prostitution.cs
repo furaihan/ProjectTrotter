@@ -112,13 +112,18 @@ namespace BarbarianCall.Callouts
                 pool.Add(AwarenessBar);
                 while (CalloutRunning)
                 {
-                    GameFiber.Yield();
-                    float percentage = Hooker ? 1 - (PlayerPed.DistanceSquaredTo(Hooker) - 250) / 3400 : 0;
-                    if (Hooker.IsHeadingTowards(PlayerPed, 50f)) percentage += 0.0071595f;
-                    else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
-                    if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
-                    else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
-                    AwarenessBar.Percentage = percentage;
+                    try
+                    {
+                        float percentage = Hooker ? 1 - (PlayerPed.DistanceSquaredTo(Hooker) - 250) / 3400 : 0;
+                        if (Hooker.IsHeadingTowards(PlayerPed, 50f)) percentage += 0.0071595f;
+                        else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
+                        if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
+                        else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
+                        if (percentage > 0.725) percentage += (AwarenessBar.Percentage - percentage);
+                        AwarenessBar.Percentage = percentage;
+                    }
+                    catch { continue; }
+                    GameFiber.Yield();                  
                 }
             });
             GameFiber.StartNew(() =>
@@ -206,7 +211,8 @@ namespace BarbarianCall.Callouts
                             }
                             SuspectCar = (Vehicle)World.GetEntities(CalloutPosition, 10f,
                                 GetEntitiesFlags.ConsiderGroundVehicles | GetEntitiesFlags.ExcludeEmergencyVehicles | GetEntitiesFlags.ExcludePlayerVehicle | GetEntitiesFlags.ConsiderCars).GetRandomElement();
-                            if (SuspectCar.DistanceSquaredTo(Hooker) > 100f) continue;
+                            if (!SuspectCar) continue;
+                            if (SuspectCar && SuspectCar.DistanceSquaredTo(Hooker) > 100f) continue;
                             if (SuspectCar && SuspectCar.Driver && SuspectCar.Driver.IsMale && !SuspectCar.HasPassengers && !AssignedToHookTask.Contains(SuspectCar) && SuspectCar.Model.IsSuitableCar())
                             {
                                 Suspect = SuspectCar.Driver;
@@ -255,11 +261,11 @@ namespace BarbarianCall.Callouts
                 {
                     if (suspect && suspectVeh)
                     {
-                        if (suspectVeh.DistanceTo(Hooker) < 5f)
+                        if (suspectVeh.DistanceTo(Hooker) <= 5f)
                         {
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(200);
+                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightHalfAcceleration).WaitForCompletion(200);
                             suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveRight).WaitForCompletion(900);
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveLeft).WaitForCompletion(550);
+                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveAndBrakeLeft).WaitForCompletion(550);
                         }
                         suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
                         GameFiber.Wait(2000);
