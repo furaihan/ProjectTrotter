@@ -107,7 +107,7 @@ namespace BarbarianCall.Callouts
                     ForegroundColor = HudColor.Pink.GetColor(),
                 };
                 AwarenessBar.BackgroundColor = Color.FromArgb(120, AwarenessBar.ForegroundColor);
-                AwarenessBar.Accent = Color.HotPink;
+                AwarenessBar.Accent = Color.Gold;
                 AwarenessBar.Markers.Add(new TimerBarMarker(0.72585f, Color.Gold));
                 pool.Add(AwarenessBar);
                 while (CalloutRunning)
@@ -119,7 +119,7 @@ namespace BarbarianCall.Callouts
                         else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
                         if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
                         else if (PlayerPed.IsRunning && AwarenessBar.Percentage > 0) percentage += 0.001225f;
-                        if (percentage > 0.725) percentage += (AwarenessBar.Percentage - percentage);
+                        if (percentage > 0.725) percentage += (float)(percentage * 0.085);
                         AwarenessBar.Percentage = percentage;
                     }
                     catch { continue; }
@@ -210,8 +210,10 @@ namespace BarbarianCall.Callouts
                                 if (SuspectCar) SuspectCar.Dismiss();
                             }
                             SuspectCar = (Vehicle)World.GetEntities(CalloutPosition, 10f,
-                                GetEntitiesFlags.ConsiderGroundVehicles | GetEntitiesFlags.ExcludeEmergencyVehicles | GetEntitiesFlags.ExcludePlayerVehicle | GetEntitiesFlags.ConsiderCars).GetRandomElement();
+                                GetEntitiesFlags.ConsiderGroundVehicles | GetEntitiesFlags.ExcludeEmergencyVehicles | GetEntitiesFlags.ExcludePlayerVehicle | GetEntitiesFlags.ConsiderCars | 
+                                GetEntitiesFlags.ExcludeEmptyVehicles).GetRandomElement();
                             if (!SuspectCar) continue;
+                            if (!SuspectCar.IsVehicle()) continue;
                             if (SuspectCar && SuspectCar.DistanceSquaredTo(Hooker) > 100f) continue;
                             if (SuspectCar && SuspectCar.Driver && SuspectCar.Driver.IsMale && !SuspectCar.HasPassengers && !AssignedToHookTask.Contains(SuspectCar) && SuspectCar.Model.IsSuitableCar())
                             {
@@ -263,14 +265,15 @@ namespace BarbarianCall.Callouts
                     {
                         if (suspectVeh.DistanceTo(Hooker) <= 5f)
                         {
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightHalfAcceleration).WaitForCompletion(200);
+                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightHalfAcceleration).WaitForCompletion(500);
                             suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveRight).WaitForCompletion(900);
                             suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveAndBrakeLeft).WaitForCompletion(550);
                         }
                         suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
+                        if (suspectVeh.HasRoof) suspectVeh.ConvertibleRoofState = VehicleConvertibleRoofState.Lowering;
                         GameFiber.Wait(2000);
                         Hooker.Tasks.Clear();
-                        var walkPos = Extension.GetEntryPositionOfVehicleDoor(suspectVeh, Extension.VehicleDoorIndex.FrontRightDoor);
+                        var walkPos = Extension.GetEntryPositionOfVehicleDoor(suspectVeh, suspect.SeatIndex);
                         Hooker.Tasks.FollowNavigationMeshToPosition(walkPos, walkPos.GetHeadingTowards(suspect), 1f).WaitForCompletion(15000);
                         var chance = Peralatan.Random.NextDouble();
                         if (suspect && suspectVeh && Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge()) >= 20)
@@ -280,7 +283,7 @@ namespace BarbarianCall.Callouts
                         }
                         if (chance > 0.5f)
                         {
-                            Hooker.Tasks.EnterVehicle(suspectVeh, 0);
+                            Hooker.Tasks.EnterVehicle(suspectVeh, 0).WaitForCompletion();
                             var speedRnd = Peralatan.Random.Next(15, 21);
                             suspectVeh.SetForwardSpeed(speedRnd);
                             suspect.WanderWithVehicle(speedRnd, (VehicleDrivingFlags)0xC00AB);
@@ -289,15 +292,21 @@ namespace BarbarianCall.Callouts
                         else
                         {
                             Hooker.Tasks.FollowNavigationMeshToPosition(CalloutPosition, SolicitationSpawn, 1f).WaitForCompletion(10000);
-                            SuspectCar.Dismiss();
-                            SuspectCar.Occupants.ToList().ForEach(Extension.MarkAsNoLongerNeeded);
+                            if (Hooker.DistanceTo(CalloutPosition) < 2f)
+                            {
+                                Hooker.Tasks.AchieveHeading(SolicitationSpawn).WaitForCompletion(2000);
+                                Hooker.PlayScenarioAction(scenarios.GetRandomElement(), true);
+                            }
+                            suspectVeh.Dismiss();
+                            suspectVeh.Occupants.ToList().ForEach(Extension.MarkAsNoLongerNeeded);
                             Hooking = false;
                         }
                     }
+                    Hooking = false;
                 }
-                catch
+                catch (Exception e)
                 {
-                    throw;
+                    throw e;
                 }
             });
         }

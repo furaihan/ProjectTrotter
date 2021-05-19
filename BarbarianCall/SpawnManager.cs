@@ -55,7 +55,7 @@ namespace BarbarianCall
             Unk6542 = 6542,
             Restricted = 19,
         }
-        private static void GetFlags(this Vector3 position)
+        internal static void GetFlags(this Vector3 position)
         {
             var valid = Natives.GetVehicleNodeProperties<bool>(position, out uint density, out uint flag);
             if (valid)
@@ -341,8 +341,8 @@ namespace BarbarianCall
         {
             int trys = 1000;
             int shouldYieldAt = 60;
-            int distanceCount, safeCount, nodeCount, pedDisCount, propCount, flagCount, flag2Count;
-            distanceCount = safeCount = nodeCount = pedDisCount = propCount = flagCount = flag2Count = 0;
+            int distanceCount, safeCount, nodeCount, pedDisCount, propCount, flagCount, flag2Count, densityCount;
+            distanceCount = safeCount = nodeCount = pedDisCount = propCount = flagCount = flag2Count = densityCount = 0;
             List<int> flags = new();
             try
             {
@@ -372,7 +372,7 @@ namespace BarbarianCall
             {
                 if (i % shouldYieldAt == 0) GameFiber.Yield();
                 Vector3 around = playerPos.Around2D(Peralatan.Random.Next(350, 800));
-                if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float _, 0, 3,0,0))
+                if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float nodeHeading, 0, 3,0,0))
                 {
                     if (nodePos.DistanceSquaredTo(playerPos) > 640000f || nodePos.TravelDistanceTo(playerPos) > 1250)
                     {
@@ -380,16 +380,22 @@ namespace BarbarianCall
                         continue;
                     }
 
-                    if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodePos.X, nodePos.Y, nodePos.Z, out int heading, out int flag))
+                    if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodePos.X, nodePos.Y, nodePos.Z, out int density, out int flag))
                     {
                         NodeFlags nodeFlags = (NodeFlags)flag;
+                        flags.Add(flag);
                         if (blacklist.Any(flag=> nodeFlags.HasFlag(flag)))
                         {
                             flagCount++;
                             continue;
                         }
+                        if (density > 10f)
+                        {
+                            densityCount++;
+                            continue;
+                        }
 
-                        if (nodeFlags.HasFlag(NodeFlags.SlowNormalRoad) || nodeFlags.HasFlag(NodeFlags.UnknownBit2))
+                        if (nodeFlags.HasFlag(NodeFlags.SlowNormalRoad) || nodeFlags.HasFlag(NodeFlags.UnknownBit2) || nodeFlags == NodeFlags.None)
                         {
                             if (Natives.GET_SAFE_COORD_FOR_PED<bool>(nodePos.X, nodePos.Y, nodePos.Z, true, out Vector3 pedNodePos, 17))
                             {
@@ -410,8 +416,8 @@ namespace BarbarianCall
                                 $"Solicitation Spawnpoint => Distance {ret.DistanceTo(playerPos)}, Travel Distance: {ret.TravelDistanceTo(playerPos)}".ToLog();
                                 pedNodePos.GetFlags();
                                 nodePos.GetFlags();
-                                roadSidePosition = new(roadSidePos, heading);
-                                nodePosition = new(nodePos, heading);
+                                roadSidePosition = new(roadSidePos, 0f);
+                                nodePosition = new(nodePos, nodeHeading);
                                 return ret;
                             }
                             else safeCount++;
@@ -419,13 +425,12 @@ namespace BarbarianCall
                         else
                         {
                             flag2Count++;
-                            flags.Add(flag);
                         }
                     }
                 }
             }
             $"Solicitation spawnpoint was not successfull, {sw.ElapsedMilliseconds} ms".ToLog();
-            $"Distance: {distanceCount}, Flag1: {flagCount}, Flag2: {flag2Count}, Safe: {safeCount}, Prop: {propCount}, Ped Node Distance: {pedDisCount}".ToLog();
+            $"Distance: {distanceCount}, Flag1: {flagCount}, Flag2: {flag2Count}, Safe: {safeCount}, Prop: {propCount}, Ped Node Distance: {pedDisCount}, Density: {densityCount}".ToLog();
             var groups = flags.GroupBy(v => v).ToList();
             groups.ForEach(g => Peralatan.ToLog($"Value {g.Key} has {g.Count()} items"));
             return Spawnpoint.Zero;
