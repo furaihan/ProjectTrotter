@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
+using System.IO;
 using Rage;
 using Rage.ConsoleCommands.AutoCompleters;
 using Rage.Attributes;
@@ -32,8 +33,8 @@ namespace BarbarianCall
                     $"     RGBA: {vehicleColor.SecondaryColorRGBA}",
                 };
                 log.ForEach(Game.LogTrivial);
-                Game.DisplaySubtitle($"Primary: <font color=\"{System.Drawing.ColorTranslator.ToHtml(vehicleColor.PrimaryColorRGBA)}\">{vehicleColor.PrimaryColorName}</font>," +
-                    $" Secondary: <font color=\"{System.Drawing.ColorTranslator.ToHtml(vehicleColor.SecondaryColorRGBA)}\">{vehicleColor.SecondaryColorName}</font>");
+                Game.DisplaySubtitle($"Primary: <font color=\"{ColorTranslator.ToHtml(vehicleColor.PrimaryColorRGBA)}\">{vehicleColor.PrimaryColorName}</font>," +
+                    $" Secondary: <font color=\"{ColorTranslator.ToHtml(vehicleColor.SecondaryColorRGBA)}\">{vehicleColor.SecondaryColorName}</font>");
                 Functions.PlayScannerAudioUsingPosition(VehiclePaintExtensions.GetPoliceScannerColorAudio(vehicleColor.PrimaryColor), Game.LocalPlayer.Character.Position);
             }
             else Game.LogTrivial("Vehicle doesn't exist");
@@ -53,15 +54,38 @@ namespace BarbarianCall
             int num = Freemode.HeadBlend.GetNumberOfPedHairColors();
             StringBuilder @string = new();
             @string.AppendLine($"This file created in {DateTime.Now.ToLongDateString()} - {DateTime.Now.ToLongTimeString()}");
+            List<string> vs = new();
             for (int i = 0; i < num; i++)
             {
-                System.Drawing.Color color = Freemode.HeadBlend.GetHairColor(i);
+                Color color = Freemode.HeadBlend.GetHairColor(i);
                 var str = $"{i}+{255}+{color.R}+{color.G}+{color.B}";
                 @string.AppendLine(str);
+                vs.Add($"<font color=\"{ColorTranslator.ToHtml(color)}\">{i}</font>");
             }
-            string path = System.IO.Path.Combine("Plugins", "LSPDFR", "BarbarianCall", filename);
-            System.IO.File.WriteAllText(path, @string.ToString());
+            string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", filename);
+            File.WriteAllText(path, @string.ToString());
+            GameFiber.StartNew(() =>
+            {
+                int i = 0;
+                StringBuilder sb = new();
+                GameFiber.Wait(20);
+                vs.ForEach(x =>
+                {
+                    i++;
+                    sb.Append(x + " ");
+                    if (i == 10)
+                    {
+                        Game.DisplaySubtitle(sb.ToString());
+                        Game.DisplayHelp($"Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.J)} to continue");
+                        sb.Clear();
+                        i = 0;
+                        GameFiber.WaitUntil(() => Game.IsKeyDownRightNow(System.Windows.Forms.Keys.J));
+                    }
+                    
+                });
+            });
         }
+        [ConsoleCommand(Name = "GetPlayerPosFlags", Description = "Gets the flags of the player position")]
         public static void GetFlags()
         {
             Game.LocalPlayer.Character.Position.GetFlags();
