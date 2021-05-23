@@ -112,6 +112,9 @@ namespace BarbarianCall
                     new Sound.Stream("Monkey_Stream", "FBI_05_SOUNDS"),
                 };
                 UIMenu menu = new("Sound Name", "");
+                menu.WidthOffset = 200;
+                menu.AllowCameraMovement = true;
+                menu.MouseControlsEnabled = false;
                 menu.RemoveBanner();
                 foreach (Sound.Stream stream in streams)
                 {
@@ -123,6 +126,8 @@ namespace BarbarianCall
                 {
                     GameFiber.Yield();
                     menu.Draw();
+                    menu.ProcessControl();
+                    menu.ProcessMouse();
                     if (!menu.Visible) menu.Visible = true;
                 }
                 menu.OnItemSelect += (m, s, i) =>
