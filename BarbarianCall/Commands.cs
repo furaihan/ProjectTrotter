@@ -9,6 +9,8 @@ using Rage.ConsoleCommands.AutoCompleters;
 using Rage.Attributes;
 using BarbarianCall.Extensions;
 using BarbarianCall.Types;
+using RAGENativeUI;
+using RAGENativeUI.Elements;
 using LSPD_First_Response.Mod.API;
 
 namespace BarbarianCall
@@ -89,6 +91,49 @@ namespace BarbarianCall
         public static void GetFlags()
         {
             Game.LocalPlayer.Character.Position.GetFlags();
+        }
+        [ConsoleCommand(Name = "PlayAudioStream", Description = "This will open an UI to select audio list")]
+        public static void PlayStream([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterEntity))] Entity entity)
+        {
+            bool draw = true;
+            GameFiber.StartNew(() =>
+            {
+                Game.LogTrivial("Close the console");
+                GameFiber.Wait(20);
+                List<Sound.Stream> streams = new()
+                {
+                    new Sound.Stream("MUSIC", "EPSILONISM_SITE_SOUNDS"),
+                    new Sound.Stream("MUSIC", "DLC_AW_Arena_Websites_Sounds"),
+                    new Sound.Stream("Distant_Sirens_Rappel", "FBI_HEIST_FINALE_CHOPPER"),
+                    new Sound.Stream("CAR_CRASH_OFF_CLIFF_STREAM", "EXILE_2_SOUNDS"),
+                    new Sound.Stream("FLASHBACK_01", "MICHAEL1_FLASHBACK_SOUNDSET"),
+                    new Sound.Stream("FLASHBACK_02", "MICHAEL1_FLASHBACK_SOUNDSET"),
+                    new Sound.Stream("FLASHBACK_03", "MICHAEL1_FLASHBACK_SOUNDSET"),
+                    new Sound.Stream("Monkey_Stream", "FBI_05_SOUNDS"),
+                };
+                UIMenu menu = new("Sound Name", "");
+                menu.RemoveBanner();
+                foreach (Sound.Stream stream in streams)
+                {
+                    menu.AddItem(new UIMenuItem($"{stream.Name} {stream.SoundSet}"));
+                }
+                menu.RefreshIndex();
+                menu.Visible = true;
+                while (draw)
+                {
+                    GameFiber.Yield();
+                    menu.Draw();
+                    if (!menu.Visible) menu.Visible = true;
+                }
+                menu.OnItemSelect += (m, s, i) =>
+                {
+                    draw = false;
+                    var txt = s.Text.Split(' ');
+                    Sound.Stream stream1 = new(txt[0], txt[1]);
+                    stream1.LoadAndWait();
+                    stream1.PlayFromEntity(entity);
+                };
+            });
         }
 
     }
