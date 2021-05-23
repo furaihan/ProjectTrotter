@@ -78,6 +78,10 @@ namespace BarbarianCall.Sound
         {
             Natives.STOP_STREAM();
         }
+        public override string ToString()
+        {
+            return $"Name: {Name} SoundSet: {SoundSet}";
+        }
         public static bool IsPlaying => Natives.IS_STREAM_PLAYING<bool>();
         public static int PlayTime => Natives.GET_STREAM_PLAY_TIME<int>();
 

@@ -95,6 +95,11 @@ namespace BarbarianCall
         [ConsoleCommand(Name = "PlayAudioStream", Description = "This will open an UI to select audio list")]
         public static void PlayStream([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterEntity))] Entity entity)
         {
+            if (!entity)
+            {
+                "That entity doesn't exist".ToLog();
+                return;
+            }
             bool draw = true;
             GameFiber.StartNew(() =>
             {
@@ -110,34 +115,45 @@ namespace BarbarianCall
                     new Sound.Stream("FLASHBACK_02", "MICHAEL1_FLASHBACK_SOUNDSET"),
                     new Sound.Stream("FLASHBACK_03", "MICHAEL1_FLASHBACK_SOUNDSET"),
                     new Sound.Stream("Monkey_Stream", "FBI_05_SOUNDS"),
+                    new Sound.Stream("Gold_Cart_Push_Anim_01", "BIG_SCORE_3B_SOUNDS"),
+                    new Sound.Stream("Gold_Cart_Push_Anim_02", "BIG_SCORE_3B_SOUNDS"),
+                    new Sound.Stream("CHI_2_FARMHOUSE_INTRO", "CHINESE2_FARMHOUSE_INTRODUCTION")
                 };
                 UIMenu menu = new("Sound Name", "");
                 menu.WidthOffset = 200;
                 menu.AllowCameraMovement = true;
                 menu.MouseControlsEnabled = false;
                 menu.RemoveBanner();
+                menu.DescriptionSeparatorColor = Color.Red;
                 foreach (Sound.Stream stream in streams)
                 {
                     menu.AddItem(new UIMenuItem($"{stream.Name} {stream.SoundSet}"));
                 }
                 menu.RefreshIndex();
-                menu.Visible = true;
-                while (draw)
-                {
-                    GameFiber.Yield();
-                    menu.Draw();
-                    menu.ProcessControl();
-                    menu.ProcessMouse();
-                    if (!menu.Visible) menu.Visible = true;
-                }
                 menu.OnItemSelect += (m, s, i) =>
                 {
+                    $"Selected {s.Text}".ToLog();
                     draw = false;
                     var txt = s.Text.Split(' ');
                     Sound.Stream stream1 = new(txt[0], txt[1]);
                     stream1.LoadAndWait();
                     stream1.PlayFromEntity(entity);
                 };
+                menu.Visible = true;
+                while (draw)
+                {
+                    GameFiber.Yield();
+                    if (menu.Visible)
+                    {
+                        menu.ProcessControl();
+                        menu.ProcessMouse();
+                    }
+                    if (menu.Visible)
+                    {
+                        menu.Draw();
+                    }
+                    if (!menu.Visible) menu.Visible = true;
+                }
             });
         }
 
