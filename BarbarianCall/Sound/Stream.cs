@@ -17,38 +17,83 @@ namespace BarbarianCall.Sound
             Name = name;
             SoundSet = soundSet;
         }
+        public Stream(string name)
+        {
+            Name = name;
+            SoundSet = string.Empty;
+        }
         public void Load()
         {
             GameFiber.StartNew(() =>
             {
-                while (!Natives.LOAD_STREAM<bool>(Name, SoundSet))
+                if (string.IsNullOrWhiteSpace(SoundSet))
                 {
-                    GameFiber.Yield();
+                    while (!Natives.LOAD_STREAM<bool>(Name, 0))
+                    {
+                        GameFiber.Yield();
+                    }
+                }      
+                else
+                {
+                    while (!Natives.LOAD_STREAM<bool>(Name, SoundSet))
+                    {
+                        GameFiber.Yield();
+                    }
                 }
             });            
         }
         public void LoadAndWait()
         {
-            while (!Natives.LOAD_STREAM<bool>(Name, SoundSet))
+            if (string.IsNullOrWhiteSpace(SoundSet))
             {
-                GameFiber.Yield();
+                while (!Natives.LOAD_STREAM<bool>(Name, 0))
+                {
+                    GameFiber.Yield();
+                }
+            }
+            else
+            {
+                while (!Natives.LOAD_STREAM<bool>(Name, SoundSet))
+                {
+                    GameFiber.Yield();
+                }
             }
         }
         public void LoadWithStartOffset(int startOffset)
         {
             GameFiber.StartNew(() =>
             {
-                while (!Natives.LOAD_STREAM_WITH_START_OFFSET<bool>(Name, startOffset, SoundSet))
+                if (string.IsNullOrWhiteSpace(SoundSet))
                 {
-                    GameFiber.Yield();
+                    while (!Natives.LOAD_STREAM_WITH_START_OFFSET<bool>(Name, startOffset, 0))
+                    {
+                        GameFiber.Yield();
+                    }
+                }
+                else
+                {
+                    while (!Natives.LOAD_STREAM_WITH_START_OFFSET<bool>(Name, startOffset, SoundSet))
+                    {
+                        GameFiber.Yield();
+                    }
                 }
             });
         }
         public void LoadWithStartOffsetAndWait(int startOffset)
         {
-            while (!Natives.LOAD_STREAM_WITH_START_OFFSET<bool>(Name, startOffset, SoundSet))
+            if (string.IsNullOrWhiteSpace(SoundSet))
             {
-                GameFiber.Yield();
+                while (!Natives.LOAD_STREAM_WITH_START_OFFSET<bool>(Name, startOffset, 0))
+                {
+                    GameFiber.Yield();
+                }
+            }
+            else
+            {
+                while (!Natives.LOAD_STREAM_WITH_START_OFFSET<bool>(Name, startOffset, SoundSet))
+                {
+                    GameFiber.Yield();
+                }
             }
         }
         public void PlayFrontEnd()
@@ -74,13 +119,13 @@ namespace BarbarianCall.Sound
                 Natives.PLAY_STREAM_FROM_OBJECT(entity);
             }
         }
-        public void Stop()
-        {
-            Natives.STOP_STREAM();
-        }
         public override string ToString()
         {
             return $"Name: {Name} SoundSet: {SoundSet}";
+        }
+        public static void StopAnyStream()
+        {
+            Natives.STOP_STREAM();
         }
         public static bool IsPlaying => Natives.IS_STREAM_PLAYING<bool>();
         public static int PlayTime => Natives.GET_STREAM_PLAY_TIME<int>();

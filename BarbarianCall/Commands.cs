@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.IO;
+using System.Diagnostics;
 using Rage;
 using Rage.ConsoleCommands.AutoCompleters;
 using Rage.Attributes;
@@ -93,7 +94,7 @@ namespace BarbarianCall
             Game.LocalPlayer.Character.Position.GetFlags();
         }
         [ConsoleCommand(Name = "PlayAudioStream", Description = "This will open an UI to select audio list")]
-        public static void PlayStream([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterEntity))] Entity entity)
+        public static void PlayStream([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle entity)
         {
             if (!entity)
             {
@@ -107,20 +108,32 @@ namespace BarbarianCall
                 GameFiber.Wait(20);
                 List<Sound.Stream> streams = new()
                 {
-                    new Sound.Stream("MUSIC", "EPSILONISM_SITE_SOUNDS"),
-                    new Sound.Stream("MUSIC", "DLC_AW_Arena_Websites_Sounds"),
                     new Sound.Stream("Distant_Sirens_Rappel", "FBI_HEIST_FINALE_CHOPPER"),
                     new Sound.Stream("CAR_CRASH_OFF_CLIFF_STREAM", "EXILE_2_SOUNDS"),
                     new Sound.Stream("FLASHBACK_01", "MICHAEL1_FLASHBACK_SOUNDSET"),
                     new Sound.Stream("FLASHBACK_02", "MICHAEL1_FLASHBACK_SOUNDSET"),
                     new Sound.Stream("FLASHBACK_03", "MICHAEL1_FLASHBACK_SOUNDSET"),
-                    new Sound.Stream("Monkey_Stream", "FBI_05_SOUNDS"),
                     new Sound.Stream("Gold_Cart_Push_Anim_01", "BIG_SCORE_3B_SOUNDS"),
                     new Sound.Stream("Gold_Cart_Push_Anim_02", "BIG_SCORE_3B_SOUNDS"),
-                    new Sound.Stream("CHI_2_FARMHOUSE_INTRO", "CHINESE2_FARMHOUSE_INTRODUCTION")
+                    new Sound.Stream("CHI_2_FARMHOUSE_INTRO", "CHINESE2_FARMHOUSE_INTRODUCTION"),
+                    new Sound.Stream("Boats_Jump", "EXILE_3_SOUNDS"),
+                    new Sound.Stream("CHI_2_FARMHOUSE_INTRO", "CHINESE2_FARMHOUSE_INTRODUCTION"),
+                    new Sound.Stream("INTRO_STREAM", "DIRT_RACES_SOUNDSET"),
+                    new Sound.Stream("Player_Ride", "DLC_IND_ROLLERCOASTER_SOUNDS"),
+                    new Sound.Stream("Ambient_Ride", "DLC_IND_ROLLERCOASTER_SOUNDS"),
+                    new Sound.Stream("STASH_TOXIN_STREAM", "FBI_05_SOUNDS"),
+                    new Sound.Stream("DRILL_WALL", "BIG_SCORE_3B_SOUNDS"),
+                    new Sound.Stream("Construction_Site_Stream", "FBI_HEIST_SOUNDSET"),
+                    new Sound.Stream("Walla_Normal", "DLC_H3_Arcade_Walla_Sounds"),
+                    new Sound.Stream("casino_walla", "DLC_VW_Casino_Interior_Sounds"),
+                    new Sound.Stream("WINDOWWASHERFALL_MASTER"),
+                    new Sound.Stream("AFT_SON_PORN"),
+                    new Sound.Stream("FAM2_BOAT_PARTY_MASTER"),
+                    new Sound.Stream("MARIACHI", "MINUTE_MAN_01_SOUNDSET"),
+                    new Sound.Stream("MARTIN_1_DAMAGED_PLANE_MASTER"),
                 };
                 UIMenu menu = new("Sound Name", "");
-                menu.WidthOffset = 200;
+                menu.WidthOffset = 220;
                 menu.AllowCameraMovement = true;
                 menu.MouseControlsEnabled = false;
                 menu.RemoveBanner();
@@ -136,6 +149,7 @@ namespace BarbarianCall
                     draw = false;
                     var txt = s.Text.Split(' ');
                     Sound.Stream stream1 = new(txt[0], txt[1]);
+                    stream1.ToString().ToLog();
                     stream1.LoadAndWait();
                     stream1.PlayFromEntity(entity);
                 };
@@ -154,6 +168,40 @@ namespace BarbarianCall
                     }
                     if (!menu.Visible) menu.Visible = true;
                 }
+            });
+        }
+        [ConsoleCommand(Name = "StopAudioStream", Description = "Stop any audio stream that currently played on")]
+        public static void StopStream() => Sound.Stream.StopAnyStream();
+        private enum PNF
+        {
+            B02_IsFootpath = 1,
+            B15_InteractionUnk = 2,
+            B14_IsInterior = 4,
+            B07_IsWater = 8,
+            B17_IsFlatGround = 16,
+            FootpathFlat = 17
+        }
+        [ConsoleCommand(Name = "GetPedPlaceCoord", Description = "Get nearest coordinates to safely places a ped")]
+        private static void GetSafeCoordinateForPed([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandParameterAutoCompleterEnum))] PNF flag)
+        {
+            GameFiber.StartNew(() =>
+            {
+                Vector3 pros;
+                if (SpawnManager.GetSafeCoordForPed(Game.LocalPlayer.Character.Position, true, out var result, (int)flag)) pros = result;
+                else if (SpawnManager.GetSafeCoordForPed(Game.LocalPlayer.Character.Position, false, out var result1, (int)flag)) pros = result1;
+                else
+                {
+                    Game.LogTrivial("Safe Coordinate is not found");
+                    return;
+                }
+                Stopwatch sw = Stopwatch.StartNew();
+                Checkpoint checkpoint = new(Checkpoint.CheckpointIcon.CylinderTripleArrow4, pros, 2f, 200f, Color.LightCoral, Color.DarkMagenta, true);
+                while (true)
+                {
+                    GameFiber.Yield();
+                    if (sw.Elapsed > TimeSpan.FromSeconds(150) || Game.IsKeyDownRightNow(System.Windows.Forms.Keys.D7)) break;
+                }
+                if (checkpoint) checkpoint.Delete();
             });
         }
 

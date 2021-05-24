@@ -441,5 +441,10 @@ namespace BarbarianCall
             groups.ForEach(g => Peralatan.ToLog($"Value {g.Key} has {g.Count()} items"));
             return Spawnpoint.Zero;
         }
+        public static bool GetSafeCoordForPed(Vector3 pos, bool onFootpath, out Vector3 result, int flag)
+        {
+            bool ret = Natives.GET_SAFE_COORD_FOR_PED<bool>(pos.X, pos.Y, pos.Z, onFootpath, out result, flag);
+            return ret;
+        }
     }
 }
