@@ -372,10 +372,10 @@ namespace BarbarianCall
             for (int i = 0; i < trys; i++)
             {
                 if (i % shouldYieldAt == 0) GameFiber.Yield();
-                Vector3 around = playerPos.Around2D(Peralatan.Random.Next(350, 800));
+                Vector3 around = playerPos.Around2D(Peralatan.Random.Next(250, 500));
                 if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0, 0))
                 {
-                    if (nodePos.DistanceSquaredTo(playerPos) > 640000f || nodePos.TravelDistanceTo(playerPos) > 1250)
+                    if (nodePos.DistanceSquaredTo(playerPos) > 250000f || nodePos.TravelDistanceTo(playerPos) > 1250)
                     {
                         distanceCount++;
                         continue;

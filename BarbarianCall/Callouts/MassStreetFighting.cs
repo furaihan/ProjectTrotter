@@ -275,23 +275,23 @@ namespace BarbarianCall.Callouts
                         bool pursuitCalled = false;
                         bool heliPursuitBackup = false;
                         bool isAnyGangWipedOut = false;
+                        StopWatch = new();
+                        StopWatch.Start();
                         while (CalloutRunning)
                         {
                             if (CanEnd) break;
-                            if (Participant.Any(IsPedStuck) && !isAnyGangWipedOut)
+                            if (StopWatch.ElapsedMilliseconds > 5000 && Participant.Any(IsPedStuck) && !isAnyGangWipedOut)
                             {
+                                StopWatch.Restart();
                                 var st = Participant.Where(IsPedStuck).GetRandomElement();
                                 if (!st) continue;
-#if DEBUG
-                                $"{LSPDFR.GetPersonaForPed(st).FullName} - {st.Model.Name} is stuck and {st.Tasks.CurrentTaskStatus}, reassign".ToLog();
-#endif
                                 if (st) st.CombatAgainstHatedTargetAroundPed(350f);
                             }
                             Participant.ForEach(p =>
                             {
                                 if (p)
                                 {
-                                    if (!pursuitPeds.Contains(p) && (p.DistanceTo(SpawnPoint) > 200f || p.IsFleeing))
+                                    if (!pursuitPeds.Contains(p) && (p.DistanceSquaredTo(SpawnPoint) > 40000f || p.IsFleeing))
                                     {
                                         if (p)
                                         {
@@ -379,7 +379,7 @@ namespace BarbarianCall.Callouts
                                     }
                                 });
                             }
-                            GameFiber.Sleep(500);
+                            GameFiber.Wait(1);
                         }
                     }
                 }

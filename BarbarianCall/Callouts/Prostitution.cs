@@ -75,6 +75,11 @@ namespace BarbarianCall.Callouts
             "After setting mas".ToLog();
             Game.ProductVersion.ToString().ToLog();
             "After game product ver".ToLog();
+            World.GetEntities(CalloutPosition, 30f, GetEntitiesFlags.ConsiderCars).Where(x => x && x.IsVehicle()).Select(x => x as Vehicle).Where(x => x.IsEmpty && x.Speed < 2f && !x.Model.IsLawEnforcementVehicle).
+                ToList().ForEach(x =>
+               {
+                   if (x) x.Delete();
+               });
             "Lets go to the main logic of this callout".ToLog();
             CalloutMainLogic();
             "Fiber is created, starting...".ToLog();
@@ -170,6 +175,7 @@ namespace BarbarianCall.Callouts
                     if (raycast.HitEntity && raycast.HitEntity == Hooker)
                     {
                         "Raycast Hit Hooker".ToLog();
+                        Game.DisplaySubtitle("~g~BarbarianCall~s~: Raycast hit hooker");
                         break;
                     }
                 }
@@ -197,7 +203,7 @@ namespace BarbarianCall.Callouts
                     VehicleSpawner();
                     while (CalloutRunning)
                     {
-                        GameFiber.Yield();
+                        GameFiber.Wait(1);
                         if (AwarenessBar?.Percentage >= 1 && Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
                         {
                             End("Konangan su");
@@ -214,6 +220,7 @@ namespace BarbarianCall.Callouts
                                 GetEntitiesFlags.ExcludeEmptyVehicles).GetRandomElement();
                             if (!SuspectCar) continue;
                             if (!SuspectCar.IsVehicle()) continue;
+                            if (SuspectCar && !Func.GetIsAudioEngineBusy()) Func.PlayScannerAudio(SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio());
                             if (SuspectCar && SuspectCar.DistanceSquaredTo(Hooker) > 100f) continue;
                             if (SuspectCar && SuspectCar.Driver && SuspectCar.Driver.IsMale && !SuspectCar.HasPassengers && !AssignedToHookTask.Contains(SuspectCar) && SuspectCar.Model.IsSuitableCar())
                             {
@@ -240,7 +247,6 @@ namespace BarbarianCall.Callouts
                                 log.ForEach(Peralatan.ToLog);
                                 AssignedToHookTask.Add(SuspectCar);
                                 if (SuspectCar && SuspectCar.Driver) SuspectCar.Driver.Tasks.CruiseWithVehicle(15f, Globals.Normal);
-                                if (SuspectCar && !Func.GetIsAudioEngineBusy()) Func.PlayScannerAudio(SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio());
                                 GameFiber.Wait(Peralatan.Random.Next(5000, 8000));
                             }
                         }
@@ -263,17 +269,18 @@ namespace BarbarianCall.Callouts
                 {
                     if (suspect && suspectVeh)
                     {
-                        if (suspectVeh.DistanceTo(Hooker) <= 5f)
+                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
+                        if (suspectVeh.DistanceSquaredTo(Hooker) <= 50f)
                         {
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightHalfAcceleration).WaitForCompletion(500);
+                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightHalfAcceleration).WaitForCompletion(400);
+                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(100);
                             suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveRight).WaitForCompletion(900);
                             suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveAndBrakeLeft).WaitForCompletion(550);
                         }
-                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
                         if (suspectVeh.HasRoof) suspectVeh.ConvertibleRoofState = VehicleConvertibleRoofState.Lowering;
                         GameFiber.Wait(2000);
                         Hooker.Tasks.Clear();
-                        var walkPos = Extension.GetEntryPositionOfVehicleDoor(suspectVeh, suspect.SeatIndex);
+                        var walkPos = suspectVeh.Position + Vector3.RelativeLeft * 1.5f;
                         Hooker.Tasks.FollowNavigationMeshToPosition(walkPos, walkPos.GetHeadingTowards(suspect), 1f).WaitForCompletion(15000);
                         var chance = Peralatan.Random.NextDouble();
                         if (suspect && suspectVeh && Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge()) >= 20)
@@ -306,7 +313,9 @@ namespace BarbarianCall.Callouts
                 }
                 catch (Exception e)
                 {
-                    throw e;
+                    e.ToString().ToLog();
+                    Hooking = false;
+                    HookSuccess = false;
                 }
             });
         }

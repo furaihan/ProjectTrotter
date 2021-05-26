@@ -83,6 +83,7 @@ namespace BarbarianCall
                         sb.Clear();
                         i = 0;
                         GameFiber.WaitUntil(() => Game.IsKeyDownRightNow(System.Windows.Forms.Keys.J));
+                        GameFiber.Wait(500);
                     }
                     
                 });
@@ -204,6 +205,5 @@ namespace BarbarianCall
                 if (checkpoint) checkpoint.Delete();
             });
         }
-
     }
 }
