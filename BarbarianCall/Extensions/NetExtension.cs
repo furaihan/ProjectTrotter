@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
@@ -54,6 +55,10 @@ namespace BarbarianCall.Extensions
                     SendException.Start();
                     GameFiber.SleepUntil(() => SendException.ThreadState == System.Threading.ThreadState.Stopped, 18000);
                 }
+                catch (ThreadAbortException tae)
+                {
+                    Game.LogTrivial(tae.Message + " from " + tae.Source);
+                }
                 catch (Exception exc)
                 {
                     $"Fetch webhooks error. Loop: {frames}".ToLog();
@@ -94,6 +99,10 @@ namespace BarbarianCall.Extensions
                         }
                     }
                 }
+                catch (ThreadAbortException tae)
+                {
+                    Game.LogTrivial(tae.Message + " from " + tae.Source);
+                }
                 catch (Exception e)
                 {
                     e.ToString().ToLog();
@@ -103,11 +112,22 @@ namespace BarbarianCall.Extensions
                     if (ping != null) ping.Dispose();
                 }
             });
-            Pinger.Start();
+            try
+            {
+                Pinger.Start();
+            }
+            catch (ThreadAbortException tae)
+            {
+                Game.LogTrivial(tae.Message + " from " + tae.Source);
+            }         
+            catch (Exception e)
+            {
+                e.ToString().ToLog();
+            }
             GameFiber.SleepUntil(() => Pinger.ThreadState == System.Threading.ThreadState.Stopped, 6000);
             return Success;
         }
-        internal static Version CurrentVersion;
+        internal static Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
         internal static void CheckUpdate()
         {
             GameFiber.StartNew(() =>

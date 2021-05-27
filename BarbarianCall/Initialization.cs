@@ -27,13 +27,6 @@ namespace BarbarianCall
             GameFiber.StartNew(delegate
             {
                 GameFiber.Wait(5600);
-                if (!Types.GameOffsets.Init())
-                {
-                    $"Game Version is not supported".ToLog();
-                    $"Supported Version: {new Version(1, 0, 2189, 0)}".ToLog();
-                    $"Current Version: {Game.ProductVersion}".ToLog();
-                    Game.UnloadActivePlugin();
-                }
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
                 try { DivisiXml.Deserialization.LoadPoliceStationLocations(); } catch { "Read Police station error".ToLog(); }
@@ -85,6 +78,7 @@ namespace BarbarianCall
                 "",
                 "",
                 "VERSION INFO",
+                $"Game Version: {Game.ProductVersion}",
                 $"LSPD First Response : {Extension.GetFileVersion(@"Plugins/LSPD First Response.dll")}",
                 $"RAGENativeUI : {Extension.GetFileVersion("RAGENativeUI.dll")}",
                 $"RAGEPluginHook : {Extension.GetFileVersion("RAGEPluginHook.exe")}",

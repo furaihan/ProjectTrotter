@@ -106,6 +106,8 @@
 
         public static bool operator ==(Spawnpoint left, Spawnpoint right) => left.Position == right.Position && left.Heading == right.Heading;
         public static bool operator !=(Spawnpoint left, Spawnpoint right) => !(left.Position == right.Position && left.Heading == right.Heading);
+        public static bool operator ==(Spawnpoint left, Vector3 right) => left.Position == right;
+        public static bool operator !=(Spawnpoint left, Vector3 right) => left.Position != right;
         public static implicit operator Vector3(Spawnpoint s) => s.Position;
         //public static implicit operator float[](SpawnPoint s) => new float[] { s.Position.X, s.Position.Y, s.Position.Z };
         public static implicit operator float(Spawnpoint s) => s.Heading;

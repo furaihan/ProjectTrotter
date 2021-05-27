@@ -104,6 +104,7 @@ namespace BarbarianCall.Callouts
         public override void End()
         {
             SpawnVehicles = false;
+            displayTimerBar = false;
             AssignedToHookTask.ForEach(x =>
             {
                 if (x)
@@ -166,7 +167,7 @@ namespace BarbarianCall.Callouts
                         var sp = SpawnManager.GetVehicleSpawnPoint(Hooker.Position, 100, 300);
                         if (sp == Spawnpoint.Zero) continue;
                         GameFiber.Wait(Peralatan.Random.Next(3000, 15001));
-                        var rv = new Vehicle(m => m.IsSuitableCar() && Globals.AudibleCarModel.Contains(m), sp.Position, sp.Heading);
+                        var rv = new Vehicle(m => m.IsSuitableCar() && Globals.AudibleCarModel.Contains(m) && m.IsValid, sp.Position, sp.Heading);
                         var rp = rv.CreateRandomDriver();
                         CalloutEntities.Add(rv);
                         CalloutEntities.Add(rp);
@@ -307,6 +308,7 @@ namespace BarbarianCall.Callouts
             });
             "Let the OnCalloutAccepted is taking care of this part".ToLog();
         }
+        private Checkpoint checkpoint;
         private void HookProcess(Ped suspect, Vehicle suspectVeh)
         {
             GameFiber.StartNew(() =>
@@ -316,17 +318,19 @@ namespace BarbarianCall.Callouts
                     VehicleClass[] richClasses = { VehicleClass.Sport, VehicleClass.SportClassic, VehicleClass.Super };
                     if (suspect && suspectVeh)
                     {
+                        if (checkpoint) checkpoint.Delete();
                         var pinggir = SpawnManager.GetRoadSidePointWithHeading(suspectVeh);
-                        var cp = new Checkpoint(Checkpoint.CheckpointIcon.Cyclinder, pinggir, 1.29845f, 100f, Color.DarkCyan, Yellow, true);
-                        CalloutCheckpoints.Add(cp);
-                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
-                        if (suspectVeh.DistanceSquaredTo(Hooker) <= 50f)
-                        {
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightHalfAcceleration).WaitForCompletion(400);
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightBraking).WaitForCompletion(100);
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveRight).WaitForCompletion(900);
-                            suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.SwerveAndBrakeLeft).WaitForCompletion(550);
-                        }
+                        checkpoint = new Checkpoint(Checkpoint.CheckpointIcon.Cyclinder, pinggir, 1.29845f, 100f, Color.DarkCyan, Yellow, true);
+                        CalloutCheckpoints.Add(checkpoint);
+                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(200);
+                        suspect.Tasks.Clear();
+                        suspectVeh.SteeringAngle = -14.5f;
+                        suspectVeh.SetForwardSpeed(2f);
+                        var jarak = suspectVeh.DistanceTo(pinggir);
+                        GameFiber.Wait(2000);
+                        suspectVeh.SteeringAngle = 14.5f;
+                        suspectVeh.SetForwardSpeed(2f);
+                        GameFiber.Wait(600);
                         suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
                         if (suspectVeh.HasRoof) suspectVeh.ConvertibleRoofState = VehicleConvertibleRoofState.Lowering;
                         GameFiber.Wait(2000);
@@ -339,7 +343,7 @@ namespace BarbarianCall.Callouts
                             Peralatan.ToLog($"Hook unsuccessful, Age Different: {Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge())}");
                             chance = 0.0005;
                         }
-                        else if (richClasses.Any(x=> suspectVeh.Class == x))
+                        else if (richClasses.Any(x => suspectVeh.Class == x))
                         {
                             Peralatan.ToLog($"Susoect vehicle is special, chance of success increased");
                             if (Peralatan.Random.NextDouble() < 0.8095285f)
@@ -353,8 +357,9 @@ namespace BarbarianCall.Callouts
                             Peralatan.ToLog(str + "Hook Successful");
                             Hooker.Tasks.EnterVehicle(suspectVeh, 0).WaitForCompletion();
                             var speedRnd = Peralatan.Random.Next(15, 21);
-                            suspectVeh.SetForwardSpeed(speedRnd);
                             suspect.WanderWithVehicle(speedRnd, (VehicleDrivingFlags)0xC00AB);
+                            SuspectCar = suspectVeh;
+                            Suspect = suspect;
                             HookSuccess = true;
                             displayTimerBar = false;
                         }
@@ -372,7 +377,7 @@ namespace BarbarianCall.Callouts
                             Hooking = false;
                         }
                     }
-                    Hooking = false;
+                    else Hooking = false;
                 }
                 catch (Exception e)
                 {

@@ -89,6 +89,10 @@ namespace BarbarianCall.AmbientEvent
                             default: GameFiber.Sleep(90); break;
                         }
                     }
+                    catch (System.Threading.ThreadAbortException tae)
+                    {
+                        $"There is a thread abort crash from {tae.Source}".ToLog();
+                    }
                     catch (Exception e)
                     {
                         "Ambient Dispatch Call Error".ToLog();

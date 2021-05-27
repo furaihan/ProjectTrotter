@@ -30,7 +30,7 @@ namespace BarbarianCall.Callouts
         private new CalloutState State;
         public override bool OnBeforeCalloutDisplayed()
         {
-            Spawn = SpawnManager.GetPedSpawnPoint(PlayerPed, 350, 950);
+            Spawn = SpawnManager.GetPedSpawnPoint(PlayerPed, 300,500);
             if (Spawn == Spawnpoint.Zero)
             {
                 Displayed = false;
@@ -69,7 +69,7 @@ namespace BarbarianCall.Callouts
                 IsRouteEnabled = true
             };
             "Playing fall animation".ToLog();
-            Civilian.Tasks.PlayAnimation("random@drunk_driver_1", "drunk_fall_over", 4.0f, AnimationFlags.StayInEndFrame | AnimationFlags.Loop | AnimationFlags.RagdollOnCollision);
+            Civilian.Tasks.PlayAnimation("random@drunk_driver_1", "drunk_fall_over", 4.0f, AnimationFlags.DisableRootMotion | AnimationFlags.StayInEndFrame);
             Civilian.IsInvincible = true;
             CalloutRunning = true;
             "Getting Callout Main Fiber content".ToLog();
@@ -171,6 +171,8 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     Paramedic1.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
                     Paramedic2.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(3000);
+
+                    GameFiber.WaitUntil(() => Game.IsKeyDown(System.Windows.Forms.Keys.End));
                     End();
                 }
                 catch (Exception e)

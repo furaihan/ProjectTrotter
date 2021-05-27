@@ -205,5 +205,48 @@ namespace BarbarianCall
                 if (checkpoint) checkpoint.Delete();
             });
         }
+        [ConsoleCommand(Name = "DisplayUIChoice", Description = "Display AssortedCallout-Like UI")]
+        private static void DisplayUI(int timeoutMilisecond)
+        {
+            GameFiber.StartNew(() =>
+            {
+                List<string> files = Directory.EnumerateFiles(Path.Combine("lspdfr", "audio", "scanner", "STREETS")).ToList();
+                PopupChoiceUI choiceUI = new(files.GetRandomNumberOfElements(4, true).ToList(), "Choose One", true);
+                choiceUI.LineHeight = 18;
+                choiceUI.BackgroundColor = Color.Chocolate;
+                choiceUI.TextColor = Color.White;
+                choiceUI.Opacity = 150;
+                choiceUI.Process();
+                Stopwatch sw = Stopwatch.StartNew();
+                string selected = "Timeout";
+                while (true)
+                {
+                    GameFiber.Yield();
+                    choiceUI.Draw();
+                    if (sw.ElapsedMilliseconds > timeoutMilisecond) break;
+                    if (Game.IsKeyDown(System.Windows.Forms.Keys.D1))
+                    {
+                        selected = choiceUI.Choices[0];
+                        break;
+                    }
+                    else if (Game.IsKeyDown(System.Windows.Forms.Keys.D2))
+                    {
+                        selected = choiceUI.Choices[1];
+                        break;
+                    }
+                    else if (Game.IsKeyDown(System.Windows.Forms.Keys.D3))
+                    {
+                        selected = choiceUI.Choices[2];
+                        break;
+                    }
+                    else if (Game.IsKeyDown(System.Windows.Forms.Keys.D4))
+                    {
+                        selected = choiceUI.Choices[3];
+                        break;
+                    }
+                }
+                Game.DisplaySubtitle($"Selected: {selected}");
+            });
+        }
     }
 }
