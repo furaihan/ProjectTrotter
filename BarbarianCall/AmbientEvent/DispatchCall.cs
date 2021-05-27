@@ -71,7 +71,7 @@ namespace BarbarianCall.AmbientEvent
                         string crime = ambientCrimes.Keys.GetRandomElement();
                         Functions.PlayScannerAudioUsingPosition($"DISPATCH_TO {randomCallsign} {reporter} {crime} IN_OR_ON_POSITION", randomLocation);
 #if DEBUG
-                        $"DISPATCH_TO {randomCallsign} {reporter} {crime} IN_OR_ON_POSITION {randomLocation.GetZoneName()}".Print();
+                        $"DISPATCH_TO {randomCallsign} {reporter} {crime} IN_OR_ON_POSITION {randomLocation.Position.GetZoneName()}".Print();
                         randomLocation.ToString().Print();
 #endif
                         API.LSPDFRFunc.WaitAudioScannerCompletion();

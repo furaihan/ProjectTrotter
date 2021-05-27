@@ -16,6 +16,7 @@ namespace BarbarianCall.Callouts
         public enum ECalloutStates { UnAccepted, EnRoute, OnScene, InPursuit, Finish };
         public static List<Blip> CalloutBlips { get; protected set; } = new List<Blip>();
         public static List<Entity> CalloutEntities { get; protected set; } = new List<Entity>();
+        public static List<Checkpoint> CalloutCheckpoints { get; protected set; } = new List<Checkpoint>();
         public ECalloutStates CalloutStates;
         public Ped Suspect;
         public Vehicle SuspectCar;
@@ -119,6 +120,10 @@ namespace BarbarianCall.Callouts
                     else if (e.Model.IsObject) e.Delete();
                     else e.Dismiss();
                 }
+            });
+            CalloutCheckpoints.ForEach(c =>
+            {
+                if (c) c.Delete();
             });
             if (CarModel.IsLoaded) CarModel.Dismiss();
             //CalloutMainFiber?.Abort();

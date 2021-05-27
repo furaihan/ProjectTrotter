@@ -239,6 +239,7 @@ namespace BarbarianCall.Types
                 N.Natives.DELETE_CHECKPOINT(handle);
                 _valid = false;
             }
+            else throw new Rage.Exceptions.InvalidHandleableException("The specified checkpoint is invalid");
         }
         public static implicit operator bool(Checkpoint value)
         {

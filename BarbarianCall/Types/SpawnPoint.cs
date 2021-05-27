@@ -3,8 +3,7 @@
     using System;
     using System.Globalization;
     using Rage;
-    using static Rage.Native.NativeFunction;
-    public class Spawnpoint : ISpatial, IEquatable<Spawnpoint>, IEquatable<Vector3>, IFormattable
+    public class Spawnpoint : IEquatable<Spawnpoint>, IEquatable<Vector3>, IFormattable
     {
         public Vector3 Position { get; set; }
         public float Heading { get; set; }
@@ -49,18 +48,6 @@
             Position = new Vector3(values[0], values[1], values[2]);
             Heading = values[3];
         }
-
-        public float DistanceTo(Vector3 position) => Position.DistanceTo(position);
-
-        public float DistanceTo(ISpatial spatialObject) => Position.DistanceTo(spatialObject.Position);
-
-        public float DistanceTo2D(Vector3 position) => Position.DistanceTo2D(position);
-
-        public float DistanceTo2D(ISpatial spatialObject) => Position.DistanceTo2D(spatialObject);
-
-        public float TravelDistanceTo(Vector3 position) => Position.TravelDistanceTo(position);
-
-        public float TravelDistanceTo(ISpatial spatialObject) => Position.TravelDistanceTo(spatialObject);
         public override int GetHashCode()
         {
             unchecked
@@ -95,8 +82,11 @@
             if (format == null)
                 return ToString();
 
-            return string.Format(CultureInfo.CurrentCulture, "[X:{0} Y:{1} Z:{2}] Heading:{3}", Position.X.ToString(format, CultureInfo.CurrentCulture),
-                Position.Y.ToString(format, CultureInfo.CurrentCulture), Position.Z.ToString(format, CultureInfo.CurrentCulture), Heading.ToString(format, CultureInfo.CurrentCulture));
+            return string.Format(CultureInfo.CurrentCulture, "[X:{0} Y:{1} Z:{2}] Heading:{3}", 
+                Position.X.ToString(format, CultureInfo.CurrentCulture),
+                Position.Y.ToString(format, CultureInfo.CurrentCulture), 
+                Position.Z.ToString(format, CultureInfo.CurrentCulture), 
+                Heading.ToString(format, CultureInfo.CurrentCulture));
         }
         public string ToString(IFormatProvider formatProvider)
         {
@@ -107,8 +97,11 @@
             if (format == null)
                 return ToString(formatProvider);
 
-            return string.Format(formatProvider, "[X:{0} Y:{1} Z:{2}] Heading:{3}", Position.X.ToString(format, formatProvider),
-                Position.Y.ToString(format, formatProvider), Position.Z.ToString(format, formatProvider), Heading.ToString(format, formatProvider));
+            return string.Format(formatProvider, "[X:{0} Y:{1} Z:{2}] Heading:{3}", 
+                Position.X.ToString(format, formatProvider),
+                Position.Y.ToString(format, formatProvider), 
+                Position.Z.ToString(format, formatProvider), 
+                Heading.ToString(format, formatProvider));
         }
 
         public static bool operator ==(Spawnpoint left, Spawnpoint right) => left.Position == right.Position && left.Heading == right.Heading;

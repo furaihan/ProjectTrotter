@@ -112,7 +112,7 @@ namespace BarbarianCall
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
                         {
                             Spawnpoint ret = new(nodeP, nodeH);
-                            $"Vehicle Spawn found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
+                            $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();                            
                             ret.Position.GetFlags();
                             return ret;
@@ -136,7 +136,7 @@ namespace BarbarianCall
                     if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         Spawnpoint ret = new(nodeP, nodeH);
-                        $"Vehicle Spawn 2 found {ret}. Distance: {ret.DistanceTo(pos):0.00}".ToLog();
+                        $"Vehicle Spawn 2 found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                         ret.Position.GetFlags();
                         return ret;
@@ -188,7 +188,7 @@ namespace BarbarianCall
                         if (!IsOnScreen(nodeP))
                         {
                             Spawnpoint ret = new(nodeP, MathExtension.GetRandomFloatInRange(0, 360));
-                            $"Ped sidewalk spawn found {ret} Distance: {ret.DistanceTo(pos)}".ToLog();
+                            $"Ped sidewalk spawn found {ret} Distance: {ret.Position.DistanceTo(pos)}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                             ret.Position.GetFlags();
                             return ret;
@@ -305,6 +305,18 @@ namespace BarbarianCall
             $"1200 process took {sw.ElapsedMilliseconds} ms".ToLog();
             return Spawnpoint.Zero;
         }
+        internal static Vector3 GetRoadSidePointWithHeading(Entity entity)
+        {
+            var pos = entity.Position;
+            for (int i = 0; i < 40; i++)
+            {
+                if (Natives.xA0F8A7517A273C05<bool>(pos.X, pos.Y, pos.Z, entity.Heading, out Vector3 result))
+                {
+                    return result;
+                }
+            }
+            return Vector3.Zero;
+        }
         internal static Spawnpoint GetSlowRoadSpawnPoint(Vector3 pos, float minimumDistance, float maximumDistance)
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -418,7 +430,7 @@ namespace BarbarianCall
                                 //if (roadSidePos.DistanceTo(pedNodePos) < 8f) continue;
                                 Spawnpoint ret = new(pedNodePos, pedNodePos.GetHeadingTowards(nodePos));
                                 $"Get solicitation spawnpoint is successfull {ret}, {i + 1} process took {sw.ElapsedMilliseconds} ms".ToLog();
-                                $"Solicitation Spawnpoint => Distance {ret.DistanceTo(playerPos)}, Travel Distance: {ret.TravelDistanceTo(playerPos)}".ToLog();
+                                $"Solicitation Spawnpoint => Distance {ret.Position.DistanceTo(playerPos)}, Travel Distance: {ret.Position.TravelDistanceTo(playerPos)}".ToLog();
                                 pedNodePos.GetFlags();
                                 nodePos.GetFlags();
                                 roadSidePosition = new(roadSidePos, 0f);
