@@ -48,6 +48,11 @@
             Position = new Vector3(values[0], values[1], values[2]);
             Heading = values[3];
         }
+        public System.Xml.Linq.XElement ToXmlElement(string elementName) => new(elementName,
+                                                                                new System.Xml.Linq.XAttribute("X", Position.X),
+                                                                                new System.Xml.Linq.XAttribute("Y", Position.Y),
+                                                                                new System.Xml.Linq.XAttribute("Z", Position.Z),
+                                                                                new System.Xml.Linq.XAttribute("Heading", Heading));
         public override int GetHashCode()
         {
             unchecked

@@ -212,10 +212,11 @@ namespace BarbarianCall
             {
                 List<string> files = Directory.EnumerateFiles(Path.Combine("lspdfr", "audio", "scanner", "STREETS")).ToList();
                 PopupChoiceUI choiceUI = new(files.GetRandomNumberOfElements(4, true).ToList(), "Choose One", true);
-                choiceUI.LineHeight = 18;
+                choiceUI.LineHeight = 8;
                 choiceUI.BackgroundColor = Color.Chocolate;
                 choiceUI.TextColor = Color.White;
                 choiceUI.Opacity = 150;
+                choiceUI.BackgroundSize = new Size(480, 550);
                 choiceUI.Process();
                 Stopwatch sw = Stopwatch.StartNew();
                 string selected = "Timeout";

@@ -122,6 +122,7 @@
     <Compile Include="Types\Marker.cs" />
     <Compile Include="Types\Mugshot.cs" />
     <Compile Include="Types\PedGroup.cs" />
+    <Compile Include="Types\Place.cs" />
     <Compile Include="Types\PopupChoiceUI.cs" />
     <Compile Include="Types\Spawnpoint.cs" />
     <Compile Include="Types\Speech.cs" />
