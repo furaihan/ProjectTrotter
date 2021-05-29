@@ -18,6 +18,11 @@ namespace BarbarianCall.Types
         public List<Spawnpoint> PedEntrance { get; set; } = new List<Spawnpoint>();
         public List<Spawnpoint> VehicleExits { get; set; } = new List<Spawnpoint>();
         public List<Spawnpoint> PedExits { get; set; } = new List<Spawnpoint>();
+        public Place(string name, Vector3 position)
+        {
+            Name = name;
+            Position = position;
+        }
         public XElement ToXmlElement()
             => new("Place",
                  new XElement("Name", Name),
