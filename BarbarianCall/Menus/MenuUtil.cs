@@ -15,10 +15,9 @@ namespace BarbarianCall.Menus
         public static string GetKeyboardInput(string title, string boxText, int textLength)
         {
             NativeFunction.Natives.DISABLE_ALL_CONTROL_ACTIONS(2);
-
-            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(title);
-
             NativeFunction.Natives.DISPLAY_ONSCREEN_KEYBOARD(true, "STRING", 0, boxText, 0, 0, 0, textLength);
+            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(title);
+            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_KEYBOARD_DISPLAY(title);
             Game.DisplayHelp($"Press {FormatKeyBinding(Keys.None, Keys.Enter)} to commit changes\nPress {FormatKeyBinding(Keys.None, Keys.Escape)} to back", true);
             Game.DisplaySubtitle(title, 900000);
             while (NativeFunction.Natives.x0CF2B696BBF945AE<int>() == 0)

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Diagnostics;
 using Rage;
+using Rage.Native;
 using Rage.ConsoleCommands.AutoCompleters;
 using Rage.Attributes;
 using BarbarianCall.Extensions;
@@ -93,86 +94,7 @@ namespace BarbarianCall
         public static void GetFlags()
         {
             Game.LocalPlayer.Character.Position.GetFlags();
-        }
-        [ConsoleCommand(Name = "PlayAudioStream", Description = "This will open an UI to select audio list")]
-        public static void PlayStream([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle entity)
-        {
-            if (!entity)
-            {
-                "That entity doesn't exist".ToLog();
-                return;
-            }
-            bool draw = true;
-            GameFiber.StartNew(() =>
-            {
-                Game.LogTrivial("Close the console");
-                GameFiber.Wait(20);
-                List<Sound.Stream> streams = new()
-                {
-                    new Sound.Stream("Distant_Sirens_Rappel", "FBI_HEIST_FINALE_CHOPPER"),
-                    new Sound.Stream("CAR_CRASH_OFF_CLIFF_STREAM", "EXILE_2_SOUNDS"),
-                    new Sound.Stream("FLASHBACK_01", "MICHAEL1_FLASHBACK_SOUNDSET"),
-                    new Sound.Stream("FLASHBACK_02", "MICHAEL1_FLASHBACK_SOUNDSET"),
-                    new Sound.Stream("FLASHBACK_03", "MICHAEL1_FLASHBACK_SOUNDSET"),
-                    new Sound.Stream("Gold_Cart_Push_Anim_01", "BIG_SCORE_3B_SOUNDS"),
-                    new Sound.Stream("Gold_Cart_Push_Anim_02", "BIG_SCORE_3B_SOUNDS"),
-                    new Sound.Stream("CHI_2_FARMHOUSE_INTRO", "CHINESE2_FARMHOUSE_INTRODUCTION"),
-                    new Sound.Stream("Boats_Jump", "EXILE_3_SOUNDS"),
-                    new Sound.Stream("CHI_2_FARMHOUSE_INTRO", "CHINESE2_FARMHOUSE_INTRODUCTION"),
-                    new Sound.Stream("INTRO_STREAM", "DIRT_RACES_SOUNDSET"),
-                    new Sound.Stream("Player_Ride", "DLC_IND_ROLLERCOASTER_SOUNDS"),
-                    new Sound.Stream("Ambient_Ride", "DLC_IND_ROLLERCOASTER_SOUNDS"),
-                    new Sound.Stream("STASH_TOXIN_STREAM", "FBI_05_SOUNDS"),
-                    new Sound.Stream("DRILL_WALL", "BIG_SCORE_3B_SOUNDS"),
-                    new Sound.Stream("Construction_Site_Stream", "FBI_HEIST_SOUNDSET"),
-                    new Sound.Stream("Walla_Normal", "DLC_H3_Arcade_Walla_Sounds"),
-                    new Sound.Stream("casino_walla", "DLC_VW_Casino_Interior_Sounds"),
-                    new Sound.Stream("WINDOWWASHERFALL_MASTER"),
-                    new Sound.Stream("AFT_SON_PORN"),
-                    new Sound.Stream("FAM2_BOAT_PARTY_MASTER"),
-                    new Sound.Stream("MARIACHI", "MINUTE_MAN_01_SOUNDSET"),
-                    new Sound.Stream("MARTIN_1_DAMAGED_PLANE_MASTER"),
-                };
-                UIMenu menu = new("Sound Name", "");
-                menu.WidthOffset = 220;
-                menu.AllowCameraMovement = true;
-                menu.MouseControlsEnabled = false;
-                menu.RemoveBanner();
-                menu.DescriptionSeparatorColor = Color.Red;
-                foreach (Sound.Stream stream in streams)
-                {
-                    menu.AddItem(new UIMenuItem($"{stream.Name} {stream.SoundSet}"));
-                }
-                menu.RefreshIndex();
-                menu.OnItemSelect += (m, s, i) =>
-                {
-                    $"Selected {s.Text}".ToLog();
-                    draw = false;
-                    var txt = s.Text.Split(' ');
-                    Sound.Stream stream1 = new(txt[0], txt[1]);
-                    stream1.ToString().ToLog();
-                    stream1.LoadAndWait();
-                    stream1.PlayFromEntity(entity);
-                };
-                menu.Visible = true;
-                while (draw)
-                {
-                    GameFiber.Yield();
-                    if (menu.Visible)
-                    {
-                        menu.ProcessControl();
-                        menu.ProcessMouse();
-                    }
-                    if (menu.Visible)
-                    {
-                        menu.Draw();
-                    }
-                    if (!menu.Visible) menu.Visible = true;
-                }
-            });
-        }
-        [ConsoleCommand(Name = "StopAudioStream", Description = "Stop any audio stream that currently played on")]
-        public static void StopStream() => Sound.Stream.StopAnyStream();
+        }        
         private enum PNF
         {
             B02_IsFootpath = 1,
@@ -212,7 +134,7 @@ namespace BarbarianCall
             {
                 List<string> files = Directory.EnumerateFiles(Path.Combine("lspdfr", "audio", "scanner", "STREETS")).ToList();
                 PopupChoiceUI choiceUI = new(files.GetRandomNumberOfElements(4, true).ToList(), "Choose One", true);
-                choiceUI.LineHeight = 8;
+                choiceUI.LineHeight = 30;
                 choiceUI.BackgroundColor = Color.Chocolate;
                 choiceUI.TextColor = Color.White;
                 choiceUI.Opacity = 150;
@@ -247,6 +169,23 @@ namespace BarbarianCall
                     }
                 }
                 Game.DisplaySubtitle($"Selected: {selected}");
+            });
+        }
+        [ConsoleCommand(Name = "DisplayVersusNotification", Description = "This is a native test")]
+        private static void DrawVersusNotif(string text)
+        {
+            NativeFunction.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
+            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
+            NativeFunction.Natives.END_TEXT_COMMAND_THEFEED_POST_VERSUS_TU("CHAR_DIAL_A_SUB", "CHAR_DIAL_A_SUB", 25, "CHAR_CHOP", "CHAR_CHOP", 26, (int)HudColor.TrevorDark, (int)HudColor.FranklinDark);
+        }
+        [ConsoleCommand(Name = "ActivatePlaceEditor", Description = "Activate place editor menu")]
+        private static void ActivatePlaceEditor()
+        {
+            Game.LogTrivial("Press PageUp to open place editor menu");
+            GameFiber.Wait(20);
+            GameFiber.StartNew(delegate
+            {
+                Menus.PlaceEditor.MenuHandler();
             });
         }
     }

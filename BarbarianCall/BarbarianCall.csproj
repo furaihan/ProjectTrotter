@@ -112,6 +112,7 @@
     <Compile Include="Menus\PauseMenu.cs" />
     <Compile Include="Extensions\NetExtension.cs" />
     <Compile Include="Menus\PlaceEditor.cs" />
+    <Compile Include="Menus\PlaceXmlMenu.cs" />
     <Compile Include="Peralatan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sound\Stream.cs" />
