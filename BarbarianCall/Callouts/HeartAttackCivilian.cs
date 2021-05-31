@@ -69,7 +69,7 @@ namespace BarbarianCall.Callouts
                 IsRouteEnabled = true
             };
             "Playing fall animation".ToLog();
-            Civilian.Tasks.PlayAnimation("random@drunk_driver_1", "drunk_fall_over", 4.0f, AnimationFlags.DisableRootMotion | AnimationFlags.StayInEndFrame);
+            Civilian.PlayScenarioAction("WORLD_HUMAN_STUPOR", true);
             Civilian.IsInvincible = true;
             CalloutRunning = true;
             "Getting Callout Main Fiber content".ToLog();
@@ -107,13 +107,8 @@ namespace BarbarianCall.Callouts
                 {
                     "Raycast hit civilian".ToLog();
                     break;
-                }
-                if (Civilian && Civilian.Position.IsOnScreen())
-                {
-                    "Civilian is on screen".ToLog();
-                    break;
-                }
-                if (Civilian && PlayerPed.DistanceSquaredTo(Civilian) < 900f) break;
+                }                
+                else if (Civilian && PlayerPed.DistanceToSquared(Civilian) < 900f) break;
             }
             $"Distance: {PlayerPed.DistanceTo(Civilian)}".ToLog();
             State = CalloutState.OnScene;

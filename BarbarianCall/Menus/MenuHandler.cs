@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
+using System.Windows.Forms;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 using Rage;
@@ -16,6 +18,7 @@ namespace BarbarianCall.Menus
         private static Ped PlayerPed => Game.LocalPlayer.Character;
         internal static void ItemSelectHandler(UIMenu sender, UIMenuItem selected, int index)
         {
+            $"Menu Item Pressed: {sender.TitleText} - {selected.Text}, {index}".ToLog();
             if (sender == MainMenu.BarbarianCallMenu)
             {
                 if (selected == MainMenu.setting)
@@ -54,7 +57,7 @@ namespace BarbarianCall.Menus
                     {
                         Vehicle brokenVeh = PlayerPed.GetNearbyVehicles(8).Where(v => v && !v.HasOccupants && !v.HasDriver && v.IsOnScreen && (v.IsCar || v.IsBike) && !v.IsBig && 
                         !Mechanic.VehicleQueue.Contains(v) && !v.IsInAir && v.DistanceTo(Game.LocalPlayer.Character) < 15f)
-                            .OrderBy(v => v.DistanceSquaredTo(Game.LocalPlayer.Character)).FirstOrDefault();
+                            .OrderBy(v => v.DistanceToSquared(Game.LocalPlayer.Character)).FirstOrDefault();
                         if (brokenVeh)
                         {
                             Mechanic mechanic = new(brokenVeh);
@@ -80,11 +83,11 @@ namespace BarbarianCall.Menus
                     {
                         if (rcast.Checked)
                         {
-                            System.Diagnostics.Stopwatch sw = new();
+                            Stopwatch sw = new();
                             sw.Start();
                             Vector2 center = new(0, 0);
                             var fpos = MathExtension.RaycastGameplayCamForCoord(center, Game.LocalPlayer.Character);
-                            Checkpoint checkpoint = new(Checkpoint.CheckpointIcon.Cyclinder3, fpos, 2, 250, Color.HotPink, Color.Wheat, true);
+                            Checkpoint checkpoint = new(CheckpointIcon.Cylinder3, fpos, 2, 250, Color.HotPink, Color.Wheat, true);
                             while (rcast.Checked)
                             {
                                 GameFiber.Yield();
@@ -109,9 +112,9 @@ namespace BarbarianCall.Menus
                         var pos = SpawnManager.GetSolicitationSpawnpoint(PlayerPed.Position, out Spawnpoint nodePos, out Spawnpoint roadSidePos);
                         if (pos != Spawnpoint.Zero)
                         {
-                            Checkpoint checkpoint1 = new(Checkpoint.CheckpointIcon.CylinderTripleArrow5, pos, 2f, 250, Color.Red, Color.HotPink, true);
-                            Checkpoint checkpoint2 = new(Checkpoint.CheckpointIcon.CylinderTripleArrow5, nodePos, 2f, 250, Color.Green, Color.HotPink, true);
-                            Checkpoint checkpoint3 = new(Checkpoint.CheckpointIcon.CylinderTripleArrow5, roadSidePos, 2f, 250, Color.Blue, Color.HotPink, true);
+                            Checkpoint checkpoint1 = new(CheckpointIcon.CylinderTripleArrow5, pos, 2f, 250, Color.Red, Color.HotPink, true);
+                            Checkpoint checkpoint2 = new(CheckpointIcon.CylinderTripleArrow5, nodePos, 2f, 250, Color.Green, Color.HotPink, true);
+                            Checkpoint checkpoint3 = new(CheckpointIcon.CylinderTripleArrow5, roadSidePos, 2f, 250, Color.Blue, Color.HotPink, true);
                             Blip blip = new(pos)
                             {
                                 Color = Color.Yellow,
@@ -141,6 +144,136 @@ namespace BarbarianCall.Menus
                     });
                 }
 #endif
+            }
+            else if (sender == PlaceEditor.PlaceEditorMenu)
+            {
+                int dur = 0;
+                Stopwatch stopwatch = new();
+                Place place = PlaceEditor.PlaceList.Items.Any() ? PlaceEditor.PlaceList.SelectedItem : null;
+                if (selected == PlaceEditor.VehicleEntry)
+                {
+                    sender.Close();
+                    var item = selected as UIMenuListScrollerItem<string>;
+                    if (item.SelectedItem.Contains("Remove"))
+                    {
+                        if (place is null) return;
+                        if (!place.VehicleEntrance.Any()) return;
+                        stopwatch.Start();
+                        dur = 8;
+                        Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel (8)", 8);
+                        while (true)
+                        {
+                            GameFiber.Yield();
+                            if (stopwatch.ElapsedMilliseconds > 8000 || Game.IsKeyDown(Keys.N))
+                            {
+                                Game.DisplaySubtitle("~r~Cancelled");
+                                return;
+                            }
+                            if (Game.IsKeyDown(Keys.Y)) break;
+                            if (stopwatch.ElapsedMilliseconds % 1000 == 0)
+                                Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel ({dur--})", 8);
+                        }
+                        place.VehicleEntrance.Remove(place.VehicleEntrance.Last());
+                        return;
+                    }
+                    if (PlayerPed.IsInAnyVehicle(false))
+                    {
+                        PlaceEditor.PlaceList.SelectedItem.VehicleEntrance.Add(new Spawnpoint(PlayerPed.CurrentVehicle.Position, PlayerPed.CurrentVehicle.Heading));
+                        $"Successfully added {selected.Text.ToLower()}".DisplayNotifWithLogo(selected.Text, "DESKTOP_PC", "FOLDER", "Place Editor", hudColor: HudColor.Gold);
+                    }
+                    else Game.DisplaySubtitle($"You must be inside vehicle to add vehicle entrance");
+                }
+                else if (selected == PlaceEditor.PedEntry)
+                {
+                    sender.Close();
+                    var item = selected as UIMenuListScrollerItem<string>;
+                    if (item.SelectedItem.Contains("Remove"))
+                    {
+                        if (place is null) return;
+                        if (!place.PedEntrance.Any()) return;
+                        stopwatch.Start();
+                        dur = 8;
+                        Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel (8)", 8);
+                        while (true)
+                        {
+                            GameFiber.Yield();
+                            if (stopwatch.ElapsedMilliseconds > 8000 || Game.IsKeyDown(Keys.N))
+                            {
+                                Game.DisplaySubtitle("~r~Cancelled");
+                                return;
+                            }
+                            if (Game.IsKeyDown(Keys.Y)) break;
+                            if (stopwatch.ElapsedMilliseconds % 1000 == 0)
+                                Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel ({dur--})", 8);
+                        }
+                        place.PedEntrance.Remove(place.PedEntrance.Last());
+                        return;
+                    }
+                    PlaceEditor.PlaceList.SelectedItem.PedEntrance.Add(new Spawnpoint(PlayerPed.Position, PlayerPed.Heading));
+                    $"Successfully added {selected.Text.ToLower()}".DisplayNotifWithLogo(selected.Text, "DESKTOP_PC", "FOLDER", "Place Editor", hudColor: HudColor.Gold);
+                }
+                else if (selected == PlaceEditor.VehicleExit)
+                {
+                    sender.Close();
+                    var item = selected as UIMenuListScrollerItem<string>;
+                    if (item.SelectedItem.Contains("Remove"))
+                    {
+                        if (place is null) return;
+                        if (!place.VehicleExits.Any()) return;
+                        stopwatch.Start();
+                        dur = 8;
+                        Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel (8)", 8);
+                        while (true)
+                        {
+                            GameFiber.Yield();
+                            if (stopwatch.ElapsedMilliseconds > 8000 || Game.IsKeyDown(Keys.N))
+                            {
+                                Game.DisplaySubtitle("~r~Cancelled");
+                                return;
+                            }
+                            if (Game.IsKeyDown(Keys.Y)) break;
+                            if (stopwatch.ElapsedMilliseconds % 1000 == 0)
+                                Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel ({dur--})", 8);
+                        }
+                        place.VehicleExits.Remove(place.VehicleExits.Last());
+                        return;
+                    }
+                    if (PlayerPed.IsInAnyVehicle(false))
+                    {
+                        PlaceEditor.PlaceList.SelectedItem.VehicleExits.Add(new Spawnpoint(PlayerPed.CurrentVehicle.Position, PlayerPed.CurrentVehicle.Heading));
+                        $"Successfully added {selected.Text.ToLower()}".DisplayNotifWithLogo(selected.Text, "DESKTOP_PC", "FOLDER", "Place Editor", hudColor: HudColor.Gold);
+                    }
+                    else Game.DisplaySubtitle($"You must be inside vehicle to add vehicle entrance");
+                }
+                else if (selected == PlaceEditor.PedExit)
+                {
+                    sender.Close();
+                    var item = selected as UIMenuListScrollerItem<string>;
+                    if (item.SelectedItem.Contains("Remove"))
+                    {
+                        if (place is null) return;
+                        if (!place.PedExits.Any()) return;
+                        stopwatch.Start();
+                        dur = 8;
+                        Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel (8)", 8);
+                        while (true)
+                        {
+                            GameFiber.Yield();
+                            if (stopwatch.ElapsedMilliseconds > 8000 || Game.IsKeyDown(Keys.N))
+                            {
+                                Game.DisplaySubtitle("~r~Cancelled");
+                                return;
+                            }
+                            if (Game.IsKeyDown(Keys.Y)) break;
+                            if (stopwatch.ElapsedMilliseconds % 1000 == 0)
+                                Game.DisplayHelp($"Confirm Delete~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.Y)} To Confirm~n~Press {Peralatan.FormatKeyBinding(Keys.None, Keys.N)} To Cancel ({dur--})", 8);
+                        }
+                        place.PedExits.Remove(place.PedExits.Last());
+                        return;
+                    }
+                    PlaceEditor.PlaceList.SelectedItem.PedExits.Add(new Spawnpoint(PlayerPed.Position, PlayerPed.Heading));
+                    $"Successfully added {selected.Text.ToLower()}".DisplayNotifWithLogo(selected.Text, "DESKTOP_PC", "FOLDER", "Place Editor", hudColor: HudColor.Gold);
+                }
             }
         }
     }

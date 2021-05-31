@@ -75,7 +75,7 @@ namespace BarbarianCall.Menus
                     Game.DisplaySubtitle("Found vehicle Node: " + sp.ToString());
                     GameFiber.StartNew(() =>
                     {
-                        var cp = new Types.Checkpoint(Types.Checkpoint.CheckpointIcon.Cyclinder, sp, 3, 250, Color.Gold, Color.White, true);
+                        var cp = new Types.Checkpoint(Types.CheckpointIcon.Cylinder, sp, 3, 250, Color.Gold, Color.White, true);
                         while (true)
                         {
                             GameFiber.Yield();

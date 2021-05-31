@@ -8,6 +8,7 @@ using N = Rage.Native.NativeFunction;
 using System.Windows.Forms;
 using RAGENativeUI;
 using System.Drawing;
+using System.IO;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using LSPD_First_Response.Mod.API;
 using BarbarianCall.Types;
@@ -46,11 +47,23 @@ namespace BarbarianCall
             return Spawnpoint.Zero;
         }
         internal static void Print(this string msg) => Game.Console.Print(msg);
+        private static readonly Stopwatch LogStopwatch = new();
+        private static readonly StringBuilder LogBuilder = new();
         internal static void ToLog(this string micin) => ToLog(micin, false);
         internal static void ToLog(this string micin, bool makeUppercase)
         {
+            if (!LogStopwatch.IsRunning) LogStopwatch.Start();
             string text = makeUppercase ? micin.ToUpper() : micin;
             Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " + text : "[BarbarianCall]: " + text);
+            LogBuilder.AppendLine(string.Format("[{0}]: {1}", DateTime.Now.ToString("d MMM yyyy - HH:mm:ss:FFFFF"), text));
+            if (LogStopwatch.ElapsedMilliseconds > 20000)
+            {
+                LogStopwatch.Restart();
+                string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "Log.txt");
+                if (File.Exists(path)) File.AppendAllText(path, LogBuilder.ToString());
+                else Game.LogTrivial("Your log file doesnt exist");
+                LogBuilder.Clear();
+            }
         }
         internal static string GetLicensePlateAudio(Vehicle veh) => GetLicensePlateAudio(veh.LicensePlate);
         internal static string GetLicensePlateAudio(string licensePlate)

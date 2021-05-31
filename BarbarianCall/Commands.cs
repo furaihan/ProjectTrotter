@@ -118,7 +118,7 @@ namespace BarbarianCall
                     return;
                 }
                 Stopwatch sw = Stopwatch.StartNew();
-                Checkpoint checkpoint = new(Checkpoint.CheckpointIcon.CylinderTripleArrow4, pros, 2f, 200f, Color.LightCoral, Color.DarkMagenta, true);
+                Checkpoint checkpoint = new(CheckpointIcon.CylinderTripleArrow4, pros, 2f, 200f, Color.LightCoral, Color.DarkMagenta, true);
                 while (true)
                 {
                     GameFiber.Yield();
@@ -174,9 +174,19 @@ namespace BarbarianCall
         [ConsoleCommand(Name = "DisplayVersusNotification", Description = "This is a native test")]
         private static void DrawVersusNotif(string text)
         {
-            NativeFunction.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
-            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
-            NativeFunction.Natives.END_TEXT_COMMAND_THEFEED_POST_VERSUS_TU("CHAR_DIAL_A_SUB", "CHAR_DIAL_A_SUB", 25, "CHAR_CHOP", "CHAR_CHOP", 26, (int)HudColor.TrevorDark, (int)HudColor.FranklinDark);
+            GameFiber.StartNew(() =>
+            {
+                GameFiber.Wait(20);
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                while (!NativeFunction.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>("CHAR_DIAL_A_SUB") && !NativeFunction.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>("CHAR_CHOP"))
+                {
+                    GameFiber.Yield();
+                    if (stopwatch.ElapsedMilliseconds > 1000) break;
+                }
+                NativeFunction.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
+                NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
+                NativeFunction.Natives.END_TEXT_COMMAND_THEFEED_POST_VERSUS_TU("CHAR_DIAL_A_SUB", "CHAR_DIAL_A_SUB", 25, "CHAR_CHOP", "CHAR_CHOP", 26, (int)HudColor.TrevorDark, (int)HudColor.FranklinDark);
+            });            
         }
         [ConsoleCommand(Name = "ActivatePlaceEditor", Description = "Activate place editor menu")]
         private static void ActivatePlaceEditor()
@@ -185,7 +195,7 @@ namespace BarbarianCall
             GameFiber.Wait(20);
             GameFiber.StartNew(delegate
             {
-                Menus.PlaceEditor.MenuHandler();
+                Menus.PlaceEditor.CreateMenu();
             });
         }
     }

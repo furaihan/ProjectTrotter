@@ -156,10 +156,10 @@ namespace BarbarianCall.Extensions
             float heading2 = vector3.GetHeadingTowards(targetVector);
             return Math.Abs(heading1 - heading2) <= 15f;
         }
-        public static float DistanceSquaredTo(this Vector3 vector3, Vector3 to) => Vector3.DistanceSquared(vector3, to);
-        public static float DistanceSquaredTo(this ISpatial spatial, Vector3 to) => Vector3.DistanceSquared(spatial.Position, to);
-        public static float DistanceSquaredTo(this Vector3 vector3, ISpatial spatial) => Vector3.DistanceSquared(vector3, spatial.Position);
-        public static float DistanceSquaredTo(this ISpatial spatial, ISpatial to) => Vector3.DistanceSquared(spatial.Position, to.Position);
+        public static float DistanceToSquared(this Vector3 vector3, Vector3 to) => Vector3.DistanceSquared(vector3, to);
+        public static float DistanceToSquared(this ISpatial spatial, Vector3 to) => Vector3.DistanceSquared(spatial.Position, to);
+        public static float DistanceToSquared(this Vector3 vector3, ISpatial spatial) => Vector3.DistanceSquared(vector3, spatial.Position);
+        public static float DistanceToSquared(this ISpatial spatial, ISpatial to) => Vector3.DistanceSquared(spatial.Position, to.Position);
         internal static float GetRandomFloatInRange(float startRange, float endRange) => Natives.GET_RANDOM_FLOAT_IN_RANGE<float>(startRange, endRange);
         internal static float FloatDiff(this float first, float second) => Math.Abs(first - second);
         internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);

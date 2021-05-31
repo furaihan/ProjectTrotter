@@ -6,56 +6,56 @@ using System;
 
 namespace BarbarianCall.Types
 {
-    public class Checkpoint: IHandleable, ISpatial, IDeletable
+    public enum CheckpointIcon
     {
-		public enum CheckpointIcon
-		{
-			CylinderSingleArrow,
-			CylinderDoubleArrow,
-			CylinderTripleArrow,
-			CylinderCycleArrow,
-			CylinderCheckerboard,
-			CylinderSingleArrow2,
-			CylinderDoubleArrow2,
-			CylinderTripleArrow2,
-			CylinderCycleArrow2,
-			CylinderCheckerboard2,
-			RingSingleArrow,
-			RingDoubleArrow,
-			RingTripleArrow,
-			RingCycleArrow,
-			RingCheckerboard,
-			SingleArrow,
-			DoubleArrow,
-			TripleArrow,
-			CycleArrow,
-			Checkerboard,
-			CylinderSingleArrow3,
-			CylinderDoubleArrow3,
-			CylinderTripleArrow3,
-			CylinderCycleArrow3,
-			CylinderCheckerboard3,
-			CylinderSingleArrow4,
-			CylinderDoubleArrow4,
-			CylinderTripleArrow4,
-			CylinderCycleArrow4,
-			CylinderCheckerboard4,
-			CylinderSingleArrow5,
-			CylinderDoubleArrow5,
-			CylinderTripleArrow5,
-			CylinderCycleArrow5,
-			CylinderCheckerboard5,
-			RingPlaneUp,
-			RingPlaneLeft,
-			RingPlaneRight,
-			RingPlaneDown,
-			Empty,
-			Ring,
-			Empty2,
-			Cyclinder = 45,
-			Cyclinder2,
-			Cyclinder3,
-		}
+        CylinderSingleArrow,
+        CylinderDoubleArrow,
+        CylinderTripleArrow,
+        CylinderCycleArrow,
+        CylinderCheckerboard,
+        CylinderSingleArrow2,
+        CylinderDoubleArrow2,
+        CylinderTripleArrow2,
+        CylinderCycleArrow2,
+        CylinderCheckerboard2,
+        RingSingleArrow,
+        RingDoubleArrow,
+        RingTripleArrow,
+        RingCycleArrow,
+        RingCheckerboard,
+        SingleArrow,
+        DoubleArrow,
+        TripleArrow,
+        CycleArrow,
+        Checkerboard,
+        CylinderSingleArrow3,
+        CylinderDoubleArrow3,
+        CylinderTripleArrow3,
+        CylinderCycleArrow3,
+        CylinderCheckerboard3,
+        CylinderSingleArrow4,
+        CylinderDoubleArrow4,
+        CylinderTripleArrow4,
+        CylinderCycleArrow4,
+        CylinderCheckerboard4,
+        CylinderSingleArrow5,
+        CylinderDoubleArrow5,
+        CylinderTripleArrow5,
+        CylinderCycleArrow5,
+        CylinderCheckerboard5,
+        RingPlaneUp,
+        RingPlaneLeft,
+        RingPlaneRight,
+        RingPlaneDown,
+        Empty,
+        Ring,
+        Empty2,
+        Cylinder = 47,
+        Cylinder2,
+        Cylinder3,
+    }
+    public class Checkpoint: IHandleable, ISpatial, IDeletable, IEquatable<Checkpoint>
+    {		
 		public PoolHandle Handle { get; protected set; }
         private bool _valid = false;
         private Color _color;
@@ -239,13 +239,19 @@ namespace BarbarianCall.Types
                 N.Natives.DELETE_CHECKPOINT(handle);
                 _valid = false;
             }
-            else throw new Rage.Exceptions.InvalidHandleableException("The specified checkpoint is invalid");
+            else throw new Rage.Exceptions.InvalidHandleableException($"Operation is not valid because the specified {nameof(Checkpoint)} is invalid.");
         }
+
+        public bool Equals(Checkpoint other)
+        {
+            return ReferenceEquals(other, null) && Handle == other.Handle;
+        }
+
         public static implicit operator bool(Checkpoint value)
         {
             if (value is null) return false;
             if (value.Handle.IsZero) return false;
             return value.IsValid();
-        }
+        }       
     }
 }

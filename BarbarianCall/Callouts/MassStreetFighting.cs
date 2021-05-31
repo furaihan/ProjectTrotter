@@ -269,7 +269,7 @@ namespace BarbarianCall.Callouts
                         try
                         {
                             Spawnpoint slowR = SpawnManager.GetSlowRoadSpawnPoint(PlayerPed.Position, 50, 100);
-                            if (slowR != Spawnpoint.Zero) checkpoint = new Checkpoint(Checkpoint.CheckpointIcon.Cyclinder, slowR, 5f, 80, Color.HotPink, Color.Gold);
+                            if (slowR != Spawnpoint.Zero) checkpoint = new Checkpoint(CheckpointIcon.Cylinder, slowR, 5f, 80, Color.HotPink, Color.Gold);
                         }
                         catch { }                     
                         bool pursuitCalled = false;
@@ -291,7 +291,7 @@ namespace BarbarianCall.Callouts
                             {
                                 if (p)
                                 {
-                                    if (!pursuitPeds.Contains(p) && (p.DistanceSquaredTo(SpawnPoint) > 40000f || p.IsFleeing))
+                                    if (!pursuitPeds.Contains(p) && (p.DistanceToSquared(SpawnPoint) > 40000f || p.IsFleeing))
                                     {
                                         if (p)
                                         {

@@ -106,7 +106,7 @@ namespace BarbarianCall
                     {
                         continue;
                     }
-                    if (nodeP.DistanceSquaredTo(pos) < minimalDistanceSquared || nodeP.DistanceSquaredTo(pos) > maximumDistanceSquared + 25f) continue;
+                    if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared + 25f) continue;
                     if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
@@ -179,7 +179,7 @@ namespace BarbarianCall
 
                     if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] { 17, 1, 16 }).GetRandomElement()))
                     {
-                        if (nodeP.DistanceSquaredTo(pos) < minimalDistanceSquared || nodeP.DistanceSquaredTo(pos) > maximumDistanceSquared)
+                        if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared)
                         {
                             distanceCount++;
                             continue;
@@ -387,7 +387,7 @@ namespace BarbarianCall
                 Vector3 around = playerPos.Around2D(Peralatan.Random.Next(250, 500));
                 if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0, 0))
                 {
-                    if (nodePos.DistanceSquaredTo(playerPos) > 250000f || nodePos.TravelDistanceTo(playerPos) > 1250)
+                    if (nodePos.DistanceToSquared(playerPos) > 250000f || nodePos.TravelDistanceTo(playerPos) > 1250)
                     {
                         distanceCount++;
                         continue;
@@ -416,7 +416,7 @@ namespace BarbarianCall
                         {
                             if (Natives.GET_SAFE_COORD_FOR_PED<bool>(nodePos.X, nodePos.Y, nodePos.Z, true, out Vector3 pedNodePos, 17))
                             {
-                                if (pedNodePos.DistanceSquaredTo(nodePos) > 2500f || pedNodePos.DistanceSquaredTo(playerPos) < 90000f)
+                                if (pedNodePos.DistanceToSquared(nodePos) > 2500f || pedNodePos.DistanceToSquared(playerPos) < 90000f)
                                 {
                                     pedDisCount++;
                                     continue;

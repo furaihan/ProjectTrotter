@@ -9,7 +9,7 @@ using Rage;
 
 namespace BarbarianCall.Types
 {
-    public class Place : ISpatial, IFormattable
+    public class Place : ISpatial, IEquatable<Place>
     {
         public string Name { get; set; }
         public string PoliceScannerAudio { get; set; } = string.Empty;
@@ -25,8 +25,8 @@ namespace BarbarianCall.Types
         }
         public XElement ToXmlElement()
             => new("Place",
-                 new XElement("Name", Name),
-                 new XElement("ScannerAudio", PoliceScannerAudio),
+                 new XAttribute("Name", Name),
+                 new XAttribute("ScannerAudio", PoliceScannerAudio),
                  new XElement("Position",
                      new XAttribute("X", Position.X),
                      new XAttribute("Y", Position.Y),
@@ -49,39 +49,20 @@ namespace BarbarianCall.Types
             return null;
         }
 
-        public float DistanceTo(Vector3 position)
-        {
-            throw new NotImplementedException();
-        }
+        public float DistanceTo(Vector3 position) => Position.DistanceTo(position);
 
-        public float DistanceTo(ISpatial spatialObject)
-        {
-            throw new NotImplementedException();
-        }
+        public float DistanceTo(ISpatial spatialObject) => Position.DistanceTo(spatialObject.Position);
 
-        public float DistanceTo2D(Vector3 position)
-        {
-            throw new NotImplementedException();
-        }
+        public float DistanceTo2D(Vector3 position) => Position.DistanceTo2D(position);
 
-        public float DistanceTo2D(ISpatial spatialObject)
-        {
-            throw new NotImplementedException();
-        }
+        public float DistanceTo2D(ISpatial spatialObject) => Position.DistanceTo2D(spatialObject.Position);
 
-        public float TravelDistanceTo(Vector3 position)
-        {
-            throw new NotImplementedException();
-        }
+        public float TravelDistanceTo(Vector3 position) => Position.TravelDistanceTo(position);
 
-        public float TravelDistanceTo(ISpatial spatialObject)
+        public float TravelDistanceTo(ISpatial spatialObject) => Position.TravelDistanceTo(spatialObject.Position);
+        public bool Equals(Place other)
         {
-            throw new NotImplementedException();
-        }
-
-        public string ToString(string format, IFormatProvider formatProvider)
-        {
-            throw new NotImplementedException();
+            return other is not null && Name == other.Name;
         }
     }
 }

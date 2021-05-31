@@ -2,6 +2,9 @@
 using Rage;
 using System;
 using System.Linq;
+using System.Text;
+using System.Reflection;
+using System.IO;
 
 namespace BarbarianCall
 {
@@ -30,6 +33,17 @@ namespace BarbarianCall
 
         public override void Initialize()
         {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("BarbarianCall - An LSPDFR Callout Plugins, Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            sb.AppendLine($"This log started on {DateTime.Now.ToLongDateString()} - {DateTime.Now.ToLongTimeString()}");
+            sb.AppendLine(TimeZoneInfo.Local.DisplayName);
+            string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "Log.txt");
+            using (StreamWriter sw = new(path, false))
+            {
+                sw.WriteLine(sb.ToString());
+                sw.Close();
+            }
+            Game.LogTrivial("BarbarianCall log file has been successfully initialized");
             Functions.OnOnDutyStateChanged += Functions_OnOnDutyStateChanged;
             "BarbarianCall Has beeen loaded, go on duty to start the callouts".ToLog();
         }
@@ -37,7 +51,7 @@ namespace BarbarianCall
         private void Functions_OnOnDutyStateChanged(bool onDuty)
         {
             if (onDuty)
-            {
+            {                
                 Type[] callouts = { typeof(Callouts.SuspiciousVehicle), typeof(Callouts.OfficerStabbed), typeof(Callouts.TaxiRefusePay), typeof(Callouts.WantedFelonOnTheLoose), typeof(Callouts.MassStreetFighting),
                 typeof(Callouts.Prostitution), typeof(Callouts.HeartAttackCivilian)};
                 foreach (Type callout in callouts)

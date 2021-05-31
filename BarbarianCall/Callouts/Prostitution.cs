@@ -134,7 +134,7 @@ namespace BarbarianCall.Callouts
                 {
                     try
                     {
-                        float percentage = Hooker ? 1 - (PlayerPed.DistanceSquaredTo(Hooker) - 250) / 3400 : 0;
+                        float percentage = Hooker ? 1 - (PlayerPed.DistanceToSquared(Hooker) - 250) / 3400 : 0;
                         if (Hooker.IsHeadingTowards(PlayerPed, 50f)) percentage += 0.0071595f;
                         else if (PlayerPed.IsInCover && AwarenessBar.Percentage > 0) percentage -= 0.006f;
                         if (PlayerPed.IsSprinting && AwarenessBar.Percentage > 0) percentage += 0.0038545f;
@@ -196,7 +196,7 @@ namespace BarbarianCall.Callouts
                         break;
                     }
                 }
-                if (PlayerPed.DistanceSquaredTo(CalloutPosition) < 6400f || PlayerPed.DistanceSquaredTo(Hooker) < 625f) break;
+                if (PlayerPed.DistanceToSquared(CalloutPosition) < 6400f || PlayerPed.DistanceToSquared(Hooker) < 625f) break;
             }
             if (Blip) Blip.Delete();
         }
@@ -241,7 +241,7 @@ namespace BarbarianCall.Callouts
                             if (!SuspectCar) continue;
                             if (!SuspectCar.IsVehicle()) continue;
                             if (SuspectCar && !Func.GetIsAudioEngineBusy()) Func.PlayScannerAudio(SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio());
-                            if (SuspectCar && SuspectCar.DistanceSquaredTo(Hooker) > 100f) continue;
+                            if (SuspectCar && SuspectCar.DistanceToSquared(Hooker) > 100f) continue;
                             if (SuspectCar && SuspectCar.Driver && SuspectCar.Driver.IsMale && !SuspectCar.HasPassengers && !AssignedToHookTask.Contains(SuspectCar) && SuspectCar.Model.IsSuitableCar())
                             {
                                 Suspect = SuspectCar.Driver;
@@ -286,7 +286,7 @@ namespace BarbarianCall.Callouts
                                 StopWatch.Restart();
                                 Game.DisplayHelp("Perform a traffic stop on a ~r~suspect~s~");
                             }
-                            if (PlayerPed.DistanceSquaredTo(SuspectCar) < 100f && !caught)
+                            if (PlayerPed.DistanceToSquared(SuspectCar) < 100f && !caught)
                             {
                                 caught = true;
                                 var chance = Peralatan.Random.NextDouble();
@@ -320,7 +320,7 @@ namespace BarbarianCall.Callouts
                     {
                         if (checkpoint) checkpoint.Delete();
                         var pinggir = SpawnManager.GetRoadSidePointWithHeading(suspectVeh);
-                        checkpoint = new Checkpoint(Checkpoint.CheckpointIcon.Cyclinder, pinggir, 1.29845f, 100f, Color.DarkCyan, Yellow, true);
+                        checkpoint = new Checkpoint(CheckpointIcon.Cylinder, pinggir, 1.29845f, 100f, Color.DarkCyan, Yellow, true);
                         CalloutCheckpoints.Add(checkpoint);
                         suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(200);
                         suspect.Tasks.Clear();

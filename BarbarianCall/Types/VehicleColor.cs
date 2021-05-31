@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace BarbarianCall.Types
 {
-    public class VehicleColor
+    public class VehicleColor : IEquatable<VehicleColor>
     {
         /// <summary>
         /// The primary color paint index
@@ -51,6 +51,11 @@ namespace BarbarianCall.Types
             SecondaryColorRGBA = secondary.GetColor();
             PrimaryColorName = primary.GetName();
             SecondaryColorName = secondary.GetName();
+        }
+
+        public bool Equals(VehicleColor other)
+        {
+            return other is not null && other.PrimaryColor == PrimaryColor && other.SecondaryColor == SecondaryColor;
         }
     }
 }

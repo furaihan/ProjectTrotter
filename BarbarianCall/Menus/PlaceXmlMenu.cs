@@ -14,11 +14,11 @@ using BarbarianCall.Types;
 
 namespace BarbarianCall.Menus
 {
-    public class PlaceXmlMenu
+    internal class PlaceXmlMenu
     {
         internal static UIMenu XmlMenu;
         internal static UIMenuItem BeginExport;
-        internal static Dictionary<UIMenuCheckboxItem, Place> PlaceList = new Dictionary<UIMenuCheckboxItem, Place>();
+        internal static Dictionary<UIMenuCheckboxItem, Place> PlaceList = new();
         internal static void CreateMenu()
         {
             XmlMenu = new UIMenu("Export Xml", "Export your created place(s) to an xml file")
@@ -26,9 +26,7 @@ namespace BarbarianCall.Menus
                 AllowCameraMovement = true,
                 MouseControlsEnabled = false,
                 WidthOffset = 200,
-                TitleStyle = new TextStyle(TextFont.Monospace, Color.Aquamarine),
-                ParentMenu = PlaceEditor.PlaceEditorMenu,
-                ParentItem = PlaceEditor.ExportXml,
+                TitleStyle = new TextStyle(TextFont.Monospace, Color.Aquamarine, 1.05f, TextJustification.Center)
             };
             XmlMenu.SetBannerType(new Sprite("vbblockgroup7+hi", "_ml_bvpfloor01", Point.Empty, Size.Empty));
             MainMenu.Pool.Add(XmlMenu);
@@ -42,11 +40,21 @@ namespace BarbarianCall.Menus
             };
             BeginExport.Activated += BeginExport_Activated;
             XmlMenu.OnMenuOpen += XmlMenu_OnMenuOpen;
+            var dump = new UIMenuItem("---XML EXPORT---")
+            {
+                Enabled = false,
+                TextStyle = TextStyle.Default.With(scale: 0.40f, font: TextFont.ChaletLondon, justification: TextJustification.Center),
+                RightBadge = UIMenuItem.BadgeStyle.GoldMedal,
+                LeftBadge = UIMenuItem.BadgeStyle.GoldMedal
+            };
+            XmlMenu.AddItem(dump);
             InstructionalButtonGroup selectAll = new("Select All", Keys.LControlKey.GetInstructionalId(), Keys.A.GetInstructionalId());
             InstructionalButtonGroup deselectAll = new("Select All", Keys.LShiftKey.GetInstructionalId(), Keys.A.GetInstructionalId());
             XmlMenu.AddInstructionalButton(selectAll);
             XmlMenu.AddInstructionalButton(deselectAll);
-            XmlMenu.BindMenuToItem(XmlMenu, PlaceEditor.ExportXml);
+            Peralatan.ToLog("Bind the xml menu item to xml menu");
+            PlaceEditor.PlaceEditorMenu.BindMenuToItem(XmlMenu, PlaceEditor.ExportXml);
+            XmlMenu.RefreshIndex();
         }
 
         private static void XmlMenu_OnMenuOpen(UIMenu sender)
@@ -55,13 +63,15 @@ namespace BarbarianCall.Menus
             {
                 foreach (Place place in PlaceEditor.Places)
                 {
+                    if (XmlMenu.MenuItems.Any(x => x.Text == place.Name)) continue;
                     UIMenuCheckboxItem item = new(place.Name, true);
                     PlaceList.Add(item, place);
                     XmlMenu.AddItem(item);
                 }
-                XmlMenu.AddItem(BeginExport);
+                if (!XmlMenu.MenuItems.Contains(BeginExport)) XmlMenu.AddItem(BeginExport);
                 XmlMenu.RefreshIndex();
             }
+            else sender.Close();
         }
 
         private static void BeginExport_Activated(UIMenu sender, UIMenuItem selectedItem)
@@ -74,7 +84,7 @@ namespace BarbarianCall.Menus
             }
             string rootXml = MenuUtil.GetKeyboardInput("Enter xml root name", "PlaceList", 25);
             List<Place> places = PlaceList.Where(x => x.Key.Checked).Select(x => x.Value).ToList();
-            XDocument xml = new XDocument(new XDeclaration("1.0", "utf-8", "yes"),
+            XDocument xml = new(new XDeclaration("1.0", "utf-8", "yes"),
                                             from p in places
                                             select p.ToXmlElement());
             xml.Save(Path.Combine("Plugins", "LSPDFR", "BarbarianCall", filename));
