@@ -276,8 +276,18 @@ namespace BarbarianCall
             }
             return outputString;
         }
+        internal enum NotificationIcon
+        {
+            ChatBox = 1,
+            Email,
+            AddFriendRequest,
+            Nothing,
+            RightJumpingArrow = 7,
+            RPIcon,
+            DollarSign
+        }
         internal static uint DisplayNotifWithLogo(this string msg, string subtitle = "", string textureDict = "WEB_LOSSANTOSPOLICEDEPT", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string title = "~y~BarbarianCall~s~", 
-            bool fadeIn = false, bool blink = false, HudColor? hudColor = null)
+            bool fadeIn = false, bool blink = false, HudColor? hudColor = null, NotificationIcon icon = NotificationIcon.Nothing)
         {
             Stopwatch sw = Stopwatch.StartNew();
             while (!N.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>(textureDict))
@@ -290,8 +300,17 @@ namespace BarbarianCall
             if (hudColor.HasValue) N.Natives.x92F0DA1E27DB96DC((int)hudColor.Value); //_THEFEED_SET_NEXT_POST_BACKGROUND_COLOR
             N.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
             foreach (string st in ss) N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(st);
-            N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(textureDict, textureName, fadeIn, 4, title, subtitle);
+            N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(textureDict, textureName, fadeIn, (int)icon, title, subtitle);
             return N.Natives.END_TEXT_COMMAND_THEFEED_POST_TICKER<uint>(blink, true);
+        }
+        public static void AddLongString(string str)
+        {
+            const int strLen = 99;
+            for (int i = 0; i < str.Length; i += strLen)
+            {
+                string substr = str.Substring(i, Math.Min(strLen, str.Length - i));
+                N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(substr);
+            }
         }
         internal static string FormatKeyBinding(Keys modifierKey, Keys key)
             => modifierKey == Keys.None ? $"~{key.GetInstructionalId()}~" :

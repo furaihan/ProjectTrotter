@@ -8,7 +8,7 @@ using N = Rage.Native.NativeFunction;
 
 namespace BarbarianCall.Types
 {
-    public class Mugshot : IHandleable, IDeletable
+    public class Mugshot : IHandleable, IDeletable, IEquatable<Mugshot>
     {
         public Ped Ped { get; protected set; }
         public string Texture { get; protected set; } = "CHAR_BLANK_ENTRY";
@@ -19,15 +19,18 @@ namespace BarbarianCall.Types
         {
             GameFiber.StartNew(() =>
             {
+                Ped = ped;
                 int _handle = isTransparent ? N.Natives.x953563CE563143AF<int>(ped) : N.Natives.REGISTER_PEDHEADSHOT<int>(ped);
                 Handle = new PoolHandle((uint)_handle);
                 IsTransparentBackground = isTransparent;
                 GameFiber.SleepUntil(() => IsReady, 1000);
                 Peralatan.ToLog($"Mugshot creation is success: {IsReady}");
                 Texture = IsReady ? N.Natives.GET_PEDHEADSHOT_TXD_STRING<string>((uint)Handle) : "CHAR_BLANK_ENTRY";
+                ped.Metadata.BAR_MugshotCreated = true;
             });          
         }
-        public static Mugshot FromPed(Ped ped, bool transparent = false) => new(ped, transparent);
+        public static Mugshot FromPed(Ped ped, bool transparent) => new(ped, transparent);
+        public static Mugshot FromPed(Ped ped) => FromPed(ped, false);
         private static string[] StringToArray(string str)
         {
             int stringsNeeded = (str.Length % 99 == 0) ? (str.Length / 99) : ((str.Length / 99) + 1);
@@ -50,15 +53,13 @@ namespace BarbarianCall.Types
         }
         public bool IsValid() => N.Natives.IS_PEDHEADSHOT_VALID((uint)Handle);
 
-        public bool Equals(IHandleable other)
-        {
-            if (other is Mugshot)
-            {
-                return other.Handle == Handle;
-            }
-            return false;
-        }
+        public bool Equals(IHandleable other) => other is not null && other is Mugshot && Handle == other.Handle;
 
         public void Delete() => N.Natives.UNREGISTER_PEDHEADSHOT((uint)Handle);
+
+        public bool Equals(Mugshot other)
+        {
+            return other is not null && other.Ped == Ped;
+        }
     }
 }

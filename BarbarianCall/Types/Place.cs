@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Rage;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall.Types
 {
@@ -27,10 +28,7 @@ namespace BarbarianCall.Types
             => new("Place",
                  new XAttribute("Name", Name),
                  new XAttribute("ScannerAudio", PoliceScannerAudio),
-                 new XElement("Position",
-                     new XAttribute("X", Position.X),
-                     new XAttribute("Y", Position.Y),
-                     new XAttribute("Z", Position.Z)),
+                 Position.ToXmlElement("Position"),
                  new XElement("VehicleEntrance",
                      from sp in VehicleEntrance
                      select sp.ToXmlElement("Point")),
@@ -42,12 +40,7 @@ namespace BarbarianCall.Types
                      select sp.ToXmlElement("Point")),
                   new XElement("PedExits",
                      from sp in PedExits
-                     select sp.ToXmlElement("Point")));
-        public static Place ReadFromXml(XmlNode node)
-        {
-
-            return null;
-        }
+                     select sp.ToXmlElement("Point")));      
 
         public float DistanceTo(Vector3 position) => Position.DistanceTo(position);
 

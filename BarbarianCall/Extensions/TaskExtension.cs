@@ -102,10 +102,17 @@ namespace BarbarianCall.Extensions
             Natives.TASK_THROW_PROJECTILE(ped, throwPos.X, throwPos.Y, throwPos.Z, 0, 0);
             return Task.GetTask(ped, "TASK_THROW_PROJECTILE");
         }
-        public static Task PlayScenarioAction(this Ped ped, string scenarioName, bool playEnterAnim)
+        public static Task PlayScenarioAction(this Ped ped, Types.PedScenario pedScenario, bool playEnterAnim)
         {
+            string scenarioName = pedScenario.ToString();
             Natives.TASK_START_SCENARIO_IN_PLACE(ped, scenarioName, -1, playEnterAnim);
             return Task.GetTask(ped, "TASK_START_SCENARIO_IN_PLACE");
+        }
+        public static Task VehicleTempAction(this Ped ped, VehicleManeuver vehicleManuever, int timeout) => VehicleTempAction(ped, ped.CurrentVehicle, vehicleManuever, timeout);
+        public static Task VehicleTempAction(this Ped ped, Vehicle vehicle, VehicleManeuver vehicleManeuver, int timeMiliseconds)
+        {
+            Natives.TASK_VEHICLE_TEMP_ACTION(ped, vehicle, (int)vehicleManeuver, timeMiliseconds);
+            return Task.GetTask(ped, "TASK_VEHICLE_TEMP_ACTION");
         }
         public static void StopEntityAnimation(this Entity entity, AnimationDictionary animDict, string animName) => Natives.STOP_ENTITY_ANIM(entity, animName, animDict.Name, 0);
         public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM

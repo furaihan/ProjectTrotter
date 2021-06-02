@@ -1,6 +1,7 @@
 ﻿namespace BarbarianCall.Types
 {
     using System;
+    using System.Text;
     using System.Globalization;
     using Rage;
     public class Spawnpoint : IEquatable<Spawnpoint>, IEquatable<Vector3>, IFormattable
@@ -47,12 +48,7 @@
                 throw new ArgumentOutOfRangeException("values", "first three value must be representing a new Vector3 and the last value is the heading");
             Position = new Vector3(values[0], values[1], values[2]);
             Heading = values[3];
-        }
-        public System.Xml.Linq.XElement ToXmlElement(string elementName) => new(elementName,
-                                                                                new System.Xml.Linq.XAttribute("X", Position.X),
-                                                                                new System.Xml.Linq.XAttribute("Y", Position.Y),
-                                                                                new System.Xml.Linq.XAttribute("Z", Position.Z),
-                                                                                new System.Xml.Linq.XAttribute("Heading", Heading));
+        }        
         public override int GetHashCode()
         {
             unchecked
@@ -80,33 +76,33 @@
 
         public override string ToString()
         {
-            return string.Format(CultureInfo.CurrentCulture, "[X:{0} Y:{1} Z:{2}] Heading:{3}", Position.X, Position.Y, Position.Z, Heading);
+            return ToString("G", CultureInfo.CurrentCulture);
         }
         public string ToString(string format)
         {
-            if (format == null)
-                return ToString();
-
-            return string.Format(CultureInfo.CurrentCulture, "[X:{0} Y:{1} Z:{2}] Heading:{3}", 
-                Position.X.ToString(format, CultureInfo.CurrentCulture),
-                Position.Y.ToString(format, CultureInfo.CurrentCulture), 
-                Position.Z.ToString(format, CultureInfo.CurrentCulture), 
-                Heading.ToString(format, CultureInfo.CurrentCulture));
-        }
-        public string ToString(IFormatProvider formatProvider)
-        {
-            return string.Format(formatProvider, "[X:{0} Y:{1} Z:{2}] Heading: {3}", Position.X, Position.Y, Position.Z, Heading);
-        }
+            return ToString(format, CultureInfo.CurrentCulture);
+        }       
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            if (format == null)
-                return ToString(formatProvider);
-
-            return string.Format(formatProvider, "[X:{0} Y:{1} Z:{2}] Heading:{3}", 
-                Position.X.ToString(format, formatProvider),
-                Position.Y.ToString(format, formatProvider), 
-                Position.Z.ToString(format, formatProvider), 
-                Heading.ToString(format, formatProvider));
+            StringBuilder sb = new();
+            string separator = NumberFormatInfo.GetInstance(formatProvider).NumberGroupSeparator;
+            sb.Append('<');
+            sb.Append("X:");
+            sb.Append(Position.X.ToString(format, formatProvider));
+            sb.Append(separator);
+            sb.Append(' ');
+            sb.Append("Y:");
+            sb.Append(Position.Y.ToString(format, formatProvider));
+            sb.Append(separator);
+            sb.Append(' ');
+            sb.Append("Z:");
+            sb.Append(Position.Z.ToString(format, formatProvider));
+            sb.Append('>');
+            sb.Append(' ');
+            sb.Append("Heading:");
+            sb.Append(' ');
+            sb.Append(Heading.ToString(format, formatProvider));
+            return sb.ToString();
         }
 
         public static bool operator ==(Spawnpoint left, Spawnpoint right) => left.Position == right.Position && left.Heading == right.Heading;

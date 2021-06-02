@@ -138,7 +138,9 @@ namespace BarbarianCall
                 choiceUI.BackgroundColor = Color.Chocolate;
                 choiceUI.TextColor = Color.White;
                 choiceUI.Opacity = 150;
-                choiceUI.BackgroundSize = new Size(480, 550);
+                choiceUI.BackgroundSize = new Size(520, 680);
+                choiceUI.Point = new Point(30, 40);
+                choiceUI.TextScale = 40;
                 choiceUI.Process();
                 Stopwatch sw = Stopwatch.StartNew();
                 string selected = "Timeout";
@@ -172,20 +174,14 @@ namespace BarbarianCall
             });
         }
         [ConsoleCommand(Name = "DisplayVersusNotification", Description = "This is a native test")]
-        private static void DrawVersusNotif(string text)
+        private static void DrawVersusNotif()
         {
             GameFiber.StartNew(() =>
             {
                 GameFiber.Wait(20);
-                Stopwatch stopwatch = Stopwatch.StartNew();
-                while (!NativeFunction.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>("CHAR_DIAL_A_SUB") && !NativeFunction.Natives.HAS_STREAMED_TEXTURE_DICT_LOADED<bool>("CHAR_CHOP"))
-                {
-                    GameFiber.Yield();
-                    if (stopwatch.ElapsedMilliseconds > 1000) break;
-                }
-                NativeFunction.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
-                NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
-                NativeFunction.Natives.END_TEXT_COMMAND_THEFEED_POST_VERSUS_TU("CHAR_DIAL_A_SUB", "CHAR_DIAL_A_SUB", 25, "CHAR_CHOP", "CHAR_CHOP", 26, (int)HudColor.TrevorDark, (int)HudColor.FranklinDark);
+                Stopwatch stopwatch = Stopwatch.StartNew();               
+                NativeFunction.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("");
+                NativeFunction.Natives.END_TEXT_COMMAND_THEFEED_POST_VERSUS_TU("CHAR_TREVOR", "CHAR_TREVOR", 25, "CHAR_FRANKLIN", "CHAR_FRANKLIN", 26, (int)HudColor.TrevorDark, (int)HudColor.FranklinDark);
             });            
         }
         [ConsoleCommand(Name = "ActivatePlaceEditor", Description = "Activate place editor menu")]

@@ -69,7 +69,7 @@ namespace BarbarianCall.Callouts
                 IsRouteEnabled = true
             };
             "Playing fall animation".ToLog();
-            Civilian.PlayScenarioAction("WORLD_HUMAN_STUPOR", true);
+            Civilian.PlayScenarioAction(PedScenario.WORLD_HUMAN_STUPOR, true);
             Civilian.IsInvincible = true;
             CalloutRunning = true;
             "Getting Callout Main Fiber content".ToLog();

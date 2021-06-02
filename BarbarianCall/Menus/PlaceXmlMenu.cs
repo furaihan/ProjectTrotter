@@ -83,11 +83,15 @@ namespace BarbarianCall.Menus
                 filename = MenuUtil.GetKeyboardInput("Invalid filename (must end with '.xml' extension)", filename, 50);
             }
             string rootXml = MenuUtil.GetKeyboardInput("Enter xml root name", "PlaceList", 25);
+            string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", filename);
+            if (File.Exists(path))
+            {
+
+            }
             List<Place> places = PlaceList.Where(x => x.Key.Checked).Select(x => x.Value).ToList();
             XDocument xml = new(new XDeclaration("1.0", "utf-8", "yes"),
-                                            from p in places
-                                            select p.ToXmlElement());
-            xml.Save(Path.Combine("Plugins", "LSPDFR", "BarbarianCall", filename));
+                new XElement(rootXml, from p in places select p.ToXmlElement()));
+            xml.Save(path);
         }
     }
 }

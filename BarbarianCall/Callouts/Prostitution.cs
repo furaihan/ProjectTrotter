@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using LSPD_First_Response.Mod.Callouts;
 using Func = LSPD_First_Response.Mod.API.Functions;
 using Rage;
 using BarbarianCall.Types;
@@ -14,13 +14,13 @@ using RAGENativeUI.Elements;
 
 namespace BarbarianCall.Callouts
 {
-    [CalloutInfo("Prostitution", CalloutProbability.High)]
+    [LSPD_First_Response.Mod.Callouts.CalloutInfo("Prostitution", LSPD_First_Response.Mod.Callouts.CalloutProbability.High)]
     public class Prostitution : CalloutBase
     {
         private Ped Hooker;
         private Spawnpoint RoadSide;
         private readonly List<Model> hookerModels = new() { 0x73DEA88B, 0x028ABF95, 0x14C3E407, 0x031640AC, 0x2F4AEC3E, 0xB920CC2B, 0x84A1B11A, 0x9CF26183 };
-        private readonly List<string> scenarios = new() { "WORLD_HUMAN_PROSTITUTE_HIGH_CLASS", "WORLD_HUMAN_PROSTITUTE_LOW_CLASS" };
+        private readonly List<PedScenario> scenarios = new() { PedScenario.WORLD_HUMAN_PROSTITUTE_HIGH_CLASS, PedScenario.WORLD_HUMAN_PROSTITUTE_LOW_CLASS };
         private Spawnpoint SolicitationSpawn;
         private BarTimerBar AwarenessBar;
         private readonly TimerBarPool pool = new();
@@ -186,7 +186,7 @@ namespace BarbarianCall.Callouts
             while (CalloutRunning)
             {
                 GameFiber.Yield();
-                var raycast = World.TraceLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, Hooker.Position, TraceFlags.IntersectEverything);
+                var raycast = World.TraceLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, Hooker.Position, (TraceFlags)(1|2|4|8|16|256));
                 if (raycast.Hit)
                 {
                     if (raycast.HitEntity && raycast.HitEntity == Hooker)
@@ -319,24 +319,35 @@ namespace BarbarianCall.Callouts
                     if (suspect && suspectVeh)
                     {
                         if (checkpoint) checkpoint.Delete();
-                        var pinggir = SpawnManager.GetRoadSidePointWithHeading(suspectVeh);
-                        checkpoint = new Checkpoint(CheckpointIcon.Cylinder, pinggir, 1.29845f, 100f, Color.DarkCyan, Yellow, true);
-                        CalloutCheckpoints.Add(checkpoint);
-                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(200);
-                        suspect.Tasks.Clear();
+                        checkpoint = new Checkpoint(CheckpointIcon.Cylinder, Spawn, 2f, 15f, VehiclePaint.Matte_Lime_Green.GetColor(), Color.White, true);
                         suspectVeh.SteeringAngle = -14.5f;
-                        suspectVeh.SetForwardSpeed(2f);
-                        var jarak = suspectVeh.DistanceTo(pinggir);
-                        GameFiber.Wait(2000);
-                        suspectVeh.SteeringAngle = 14.5f;
-                        suspectVeh.SetForwardSpeed(2f);
-                        GameFiber.Wait(600);
+                        suspect.VehicleTempAction(VehicleManeuver.GoForwardWithCustomSteeringAngle, 10000);
+                        Stopwatch parkSw = Stopwatch.StartNew();
+                        while (CalloutRunning)
+                        {
+                            GameFiber.Yield();
+                            var park = SpawnManager.GetRoadSidePointWithHeading(suspectVeh);
+                            if (park != Vector3.Zero)
+                            {
+                                checkpoint.Position = park;
+                                if (suspectVeh.DistanceToSquared(park) < 15f) break;
+                            }
+                            if (parkSw.ElapsedMilliseconds > 10000)
+                            {
+                                Peralatan.ToLog("Abort Park: Timeout");
+                                break;
+                            }
+                        }
+                        if (checkpoint) checkpoint.Delete();
+                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(500);
+                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraightHalfAcceleration).WaitForCompletion(1000);
                         suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
                         if (suspectVeh.HasRoof) suspectVeh.ConvertibleRoofState = VehicleConvertibleRoofState.Lowering;
                         GameFiber.Wait(2000);
                         Hooker.Tasks.Clear();
-                        var walkPos = suspectVeh.Position + Vector3.RelativeLeft * 1.5f;
+                        var walkPos = suspectVeh.Position + Vector3.RelativeRight * 1.5f;
                         Hooker.Tasks.FollowNavigationMeshToPosition(walkPos, walkPos.GetHeadingTowards(suspect), 1f).WaitForCompletion(15000);
+                        suspectVeh.Windows[3].RollDown();
                         var chance = Peralatan.Random.NextDouble();
                         if (suspect && suspectVeh && Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge()) >= 20)
                         {

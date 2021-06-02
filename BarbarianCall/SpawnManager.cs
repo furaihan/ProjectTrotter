@@ -308,12 +308,9 @@ namespace BarbarianCall
         internal static Vector3 GetRoadSidePointWithHeading(Entity entity)
         {
             var pos = entity.Position;
-            for (int i = 0; i < 40; i++)
+            if (Natives.xA0F8A7517A273C05<bool>(pos.X, pos.Y, pos.Z, entity.Heading, out Vector3 result))
             {
-                if (Natives.xA0F8A7517A273C05<bool>(pos.X, pos.Y, pos.Z, entity.Heading, out Vector3 result))
-                {
-                    return result;
-                }
+                return result;
             }
             return Vector3.Zero;
         }

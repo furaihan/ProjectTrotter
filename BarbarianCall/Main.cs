@@ -33,10 +33,11 @@ namespace BarbarianCall
 
         public override void Initialize()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.AppendLine("BarbarianCall - An LSPDFR Callout Plugins, Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
             sb.AppendLine($"This log started on {DateTime.Now.ToLongDateString()} - {DateTime.Now.ToLongTimeString()}");
             sb.AppendLine(TimeZoneInfo.Local.DisplayName);
+            sb.AppendLine(System.Globalization.CultureInfo.CurrentCulture.DisplayName);
             string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "Log.txt");
             using (StreamWriter sw = new(path, false))
             {
