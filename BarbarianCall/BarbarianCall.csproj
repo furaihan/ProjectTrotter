@@ -143,6 +143,7 @@
     <PostBuildEvent>
 del UltimateBackup.dll StopThePed.dll RagePluginHook.xml RagePluginHook.dll RAGENativeUI.xml Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll "LSPD First Response.xml" "LSPD First Response.dll" GrammarPolice.dll BetterEMS.dll
 
+move /Y "$(SolutionDir)Resources\plugins\LSPDFR\RAGENativeUI.dll" ..\Resources\RAGENativeUI.dll
 </PostBuildEvent>
   </PropertyGroup>
 </Project>
