@@ -19,19 +19,14 @@ jobs:
         run: nuget restore BarbarianCall.sln
       
       - name: Build Release Library
-        run:  msbuild BarbarianCall.sln /p:Configuration=Release
-        
-      - name: Upload Release Artifact
-        uses: actions/upload-artifact@v2.2.3
-        with:
-          name: BarbarianCall - Release
-          path: BarbarianCall/bin/Release
-          
-      - name: Build Debug Library
         run:  msbuild BarbarianCall.sln /p:Configuration=Debug
         
-      - name: Upload Debug Artifact
+      - name: Move RNUI
+        run: move RAGENativeUI.dll "..\..\"
+        
+      - name: Upload Artifact
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: BarbarianCall - Debug
-          path: BarbarianCall/bin/Debug
+          name: BarbarianCall 
+          path: ..\Resources\
+          retention-days: 2
