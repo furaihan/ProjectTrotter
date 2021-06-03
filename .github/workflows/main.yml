@@ -22,7 +22,7 @@ jobs:
         run:  msbuild BarbarianCall.sln /p:Configuration=Debug
         
       - name: Move RNUI
-        run: move RAGENativeUI.dll "..\..\"
+        run: move ..\Resources\plugins\LSPDFR\RAGENativeUI.dll ..\..\Resources\RAGENativeUI.dll
         
       - name: Upload Artifact
         uses: actions/upload-artifact@v2.2.3
