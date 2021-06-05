@@ -136,6 +136,7 @@ namespace BarbarianCall.Extensions
             speed = MathHelper.Clamp(speed, 1, 29);
             NativeFunction.Natives.SET_VEHICLE_FORWARD_SPEED(vehicle, speed);
         }
+        
         public static int GetAge(this LSPD_First_Response.Engine.Scripting.Entities.Persona persona)
         {
             var BirthDay = persona.Birthday;

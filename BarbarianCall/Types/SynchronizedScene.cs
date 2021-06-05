@@ -1,5 +1,6 @@
 ﻿using Rage;
 using static Rage.Native.NativeFunction;
+using System.Collections.Generic;
 
 namespace BarbarianCall.Types
 {
@@ -28,7 +29,7 @@ namespace BarbarianCall.Types
             set => Natives.SET_SYNCHRONIZED_SCENE_HOLD_LAST_FRAME(HandleValue, value);
         }
         public bool IsRunning => this is not null && Natives.IS_SYNCHRONIZED_SCENE_RUNNING<bool>(HandleValue);
-        public bool IsAttached { get; private set; }
+        public bool IsAttached { get; private set; } = false;
 
         public Vector3 Position { get; set; }
         public Rotator Rotation { get; set; }
@@ -43,6 +44,7 @@ namespace BarbarianCall.Types
             Rotation = rotator;
             uint _handle = Natives.CREATE_SYNCHRONIZED_SCENE<uint>(Position.X, Position.Y, Position.Z, Rotation.Roll, Rotation.Pitch, Rotation.Yaw,2);
             Handle = new PoolHandle(_handle);
+            InternalList.Add(this);
         }
         /// <summary>
         /// Initialize a new instance of <see cref="SynchronizedScene"/> class
@@ -53,6 +55,7 @@ namespace BarbarianCall.Types
             Rotation = new Rotator(pitch, roll, yaw);
             uint _handle = Natives.CREATE_SYNCHRONIZED_SCENE<uint>(Position.X, Position.Y, Position.Z, Rotation.Roll, Rotation.Pitch, Rotation.Yaw,2);
             Handle = new PoolHandle(_handle);
+            InternalList.Add(this);
         }
 
         public void AttachToEntity(Entity entity, int entityBoneIndex)
@@ -62,6 +65,7 @@ namespace BarbarianCall.Types
         }
         public void Detach()
         {
+            if (!IsAttached) return;
             Natives.DETACH_SYNCHRONIZED_SCENE(HandleValue);
             IsAttached = false;
         }
@@ -110,6 +114,7 @@ namespace BarbarianCall.Types
 
         public float TravelDistanceTo(ISpatial spatialObject)
             => Natives.CALCULATE_TRAVEL_DISTANCE_BETWEEN_POINTS<float>(Position.X, Position.Y, Position.Z, spatialObject.Position.X, spatialObject.Position.Y, spatialObject.Position.Z);
+        internal static List<SynchronizedScene> InternalList = new List<SynchronizedScene>();
         public static Vector3 GetAnimationInitialOffsettPosition(AnimationDictionary dictionary, string animName, Vector3 pos, Rotator rotator)
         {
             dictionary.LoadAndWait();
@@ -123,6 +128,17 @@ namespace BarbarianCall.Types
             Vector3 rotation = rotator.ToVector();
             Vector3 ret = Natives.GET_ANIM_INITIAL_OFFSET_ROTATION<Vector3>(dictionary.Name, animName, pos.X, pos.Y, pos.Z, rotation.X, rotation.Y, rotation.Z, 0, 2);
             return ret.ToRotator();
+        }      
+        internal static void DeleteAllSynchronizedScene()
+        {
+            if (!System.Linq.Enumerable.Any(InternalList)) return;
+            foreach (SynchronizedScene scene in InternalList)
+            {
+                if (scene is not null && scene.IsValid())
+                {
+                    scene.Delete();
+                }
+            }
         }
     }
 }

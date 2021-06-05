@@ -29,6 +29,7 @@ namespace BarbarianCall.Extensions
                 Z = (float)Math.Sin(x),
             };
         }
+        internal static float ToHeading(this Rotator rotator) => MathHelper.ConvertDirectionToHeading(RotationToDirection(rotator));
         internal static Rotator DirectionToRotator(this Vector3 direction)
         {
             direction.Normalize();

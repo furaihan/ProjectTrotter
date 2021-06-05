@@ -164,7 +164,7 @@ namespace BarbarianCall.Callouts
                     GameFiber.Yield();
                     try
                     {
-                        var sp = SpawnManager.GetVehicleSpawnPoint(Hooker.Position, 100, 300);
+                        var sp = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 100, 300);
                         if (sp == Spawnpoint.Zero) continue;
                         GameFiber.Wait(Peralatan.Random.Next(3000, 15001));
                         var rv = new Vehicle(m => m.IsSuitableCar() && Globals.AudibleCarModel.Contains(m) && m.IsValid, sp.Position, sp.Heading);
@@ -315,12 +315,15 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
+                    var topSpeed = suspectVeh.TopSpeed;
                     VehicleClass[] richClasses = { VehicleClass.Sport, VehicleClass.SportClassic, VehicleClass.Super };
                     if (suspect && suspectVeh)
                     {
                         if (checkpoint) checkpoint.Delete();
                         checkpoint = new Checkpoint(CheckpointIcon.Cylinder, Spawn, 2f, 15f, VehiclePaint.Matte_Lime_Green.GetColor(), Color.White, true);
-                        suspectVeh.SteeringAngle = -14.5f;
+                        suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(500);
+                        suspectVeh.SteeringAngle = -12f;
+                        suspectVeh.TopSpeed = 3f;
                         suspect.VehicleTempAction(VehicleManeuver.GoForwardWithCustomSteeringAngle, 10000);
                         Stopwatch parkSw = Stopwatch.StartNew();
                         while (CalloutRunning)

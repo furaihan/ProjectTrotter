@@ -95,6 +95,7 @@
     <Compile Include="Callouts\WantedFelonOnTheLoose.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Extensions\MathExtension.cs" />
+    <Compile Include="Extensions\SyncSceneTick.cs" />
     <Compile Include="Extensions\XmlExtension.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />

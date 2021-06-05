@@ -87,6 +87,7 @@ namespace BarbarianCall
             Stopwatch sw = Stopwatch.StartNew();
             var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
             var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
+            NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
             for (int i = 1; i < 900; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
@@ -94,8 +95,7 @@ namespace BarbarianCall
                 if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
                 {
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
-                    {
-                        NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
+                    {                       
                         NodeFlags nodeFlags = (NodeFlags)flag;
                         if (bl.Any(x => nodeFlags.HasFlag(x)))
                         {
@@ -307,7 +307,7 @@ namespace BarbarianCall
         }
         internal static Vector3 GetRoadSidePointWithHeading(Entity entity)
         {
-            var pos = entity.Position;
+            var pos = entity.FrontPosition;
             if (Natives.xA0F8A7517A273C05<bool>(pos.X, pos.Y, pos.Z, entity.Heading, out Vector3 result))
             {
                 return result;

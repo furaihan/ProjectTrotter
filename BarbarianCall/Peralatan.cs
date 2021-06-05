@@ -264,18 +264,7 @@ namespace BarbarianCall
             ped.Metadata.BAR_Entity = ped.IsVisible = true;
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
-        }
-        private static string[] StringToNativeString(string str)
-        {
-            int stringsNeeded = (str.Length % 99 == 0) ? (str.Length / 99) : ((str.Length / 99) + 1);
-
-            string[] outputString = new string[stringsNeeded];
-            for (int i = 0; i < stringsNeeded; i++)
-            {
-                outputString[i] = str.Substring(i * 99, MathHelper.Clamp(str.Substring(i * 99).Length, 0, 99));
-            }
-            return outputString;
-        }
+        }       
         internal enum NotificationIcon
         {
             ChatBox = 1,
@@ -296,13 +285,24 @@ namespace BarbarianCall
                 GameFiber.Yield();
                 if (sw.ElapsedMilliseconds > 1000) break;
             }
-            var ss = StringToNativeString(msg);
             if (hudColor.HasValue) N.Natives.x92F0DA1E27DB96DC((int)hudColor.Value); //_THEFEED_SET_NEXT_POST_BACKGROUND_COLOR
             N.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
-            foreach (string st in ss) N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(st);
+            AddLongString(msg);
             N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(textureDict, textureName, fadeIn, (int)icon, title, subtitle);
             return N.Natives.END_TEXT_COMMAND_THEFEED_POST_TICKER<uint>(blink, true);
         }
+        public static void DisplayHelpTextWithGXTEntriesThisFrame(params string[] gxtEntries)
+        {
+            N.Natives.BEGIN_TEXT_COMMAND_DISPLAY_HELP(gxtEntries[0]);
+            if (gxtEntries.Length > 1)
+            {
+                for (int i = 1; i > gxtEntries.Length; i++)
+                {
+                    N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_TEXT_LABEL(gxtEntries[i]);
+                }
+            }
+            N.Natives.END_TEXT_COMMAND_DISPLAY_HELP(0, 0, 1, -1);
+;        }
         public static void AddLongString(string str)
         {
             const int strLen = 99;
