@@ -296,7 +296,7 @@ namespace BarbarianCall
             N.Natives.BEGIN_TEXT_COMMAND_DISPLAY_HELP(gxtEntries[0]);
             if (gxtEntries.Length > 1)
             {
-                for (int i = 1; i > gxtEntries.Length; i++)
+                for (int i = 1; i < gxtEntries.Length; i++)
                 {
                     N.Natives.ADD_TEXT_COMPONENT_SUBSTRING_TEXT_LABEL(gxtEntries[i]);
                 }

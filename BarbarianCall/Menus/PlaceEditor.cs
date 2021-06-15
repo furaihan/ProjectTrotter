@@ -140,6 +140,7 @@ namespace BarbarianCall.Menus
                 while (true)
                 {
                     GameFiber.Yield();
+                    if (!VehicleEntry.Enabled || !PedEntry.Enabled || !VehicleExit.Enabled || !PedExit.Enabled) continue;
                     if (PlaceEditorMenu.Visible)
                     {
                         if (VehicleEntry.Selected)

@@ -129,7 +129,6 @@ namespace BarbarianCall.Extensions
             exist = NativeFunction.Natives.xCC6E3B6BB69501F1<bool>(relationshipGroup.Hash); //_DOES_RELATIONSHIP_GROUP_EXIST
             if (exist) NativeFunction.Natives.REMOVE_RELATIONSHIP_GROUP(relationshipGroup.Hash);
         }          
-        public static string GetLocalizedString(IntPtr stringPtr) => NativeFunction.Natives.x7B5280EBA9840C72<string>(stringPtr); //_GET_LABEL_TEXT
 
         public static void SetForwardSpeed(this Vehicle vehicle, float speed)
         {

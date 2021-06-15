@@ -108,6 +108,16 @@ namespace BarbarianCall.Extensions
             Natives.TASK_START_SCENARIO_IN_PLACE(ped, scenarioName, -1, playEnterAnim);
             return Task.GetTask(ped, "TASK_START_SCENARIO_IN_PLACE");
         }
+        public static Task PlayScenarioAction(this Ped ped, string scenario, Vector3 position, float heading, int duration, bool sitScenario, bool teleport = false)
+        {
+            Natives.TASK_START_SCENARIO_AT_POSITION(ped, scenario, position, heading, duration, sitScenario, teleport);
+            return Task.GetTask(ped, "TASK_START_SCENARIO_AT_POSITION");
+        }
+        public static Task OpenVehicleDoor(this Ped ped, Vehicle vehicle, int timeout, int seatIndex, float speed)
+        {
+            Natives.TASK_OPEN_VEHICLE_DOOR(ped, vehicle, timeout, seatIndex, speed);
+            return Task.GetTask(ped, "TASK_OPEN_VEHICLE_DOOR");
+        }
         public static Task VehicleTempAction(this Ped ped, VehicleManeuver vehicleManuever, int timeout) => VehicleTempAction(ped, ped.CurrentVehicle, vehicleManuever, timeout);
         public static Task VehicleTempAction(this Ped ped, Vehicle vehicle, VehicleManeuver vehicleManeuver, int timeMiliseconds)
         {

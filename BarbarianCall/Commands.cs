@@ -194,5 +194,13 @@ namespace BarbarianCall
                 Menus.PlaceEditor.CreateMenu();
             });
         }
+        [ConsoleCommand(Name = "ActivateSitAnywhere")]
+        private static void ActivateSofaOnTick()
+        {
+            GameFiber.StartNew(delegate
+            {
+                SyncSceneTick.ChairSit();
+            });
+        }
     }
 }

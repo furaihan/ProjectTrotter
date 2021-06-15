@@ -253,19 +253,19 @@ namespace BarbarianCall.Freemode
         public void RandomizeFaceShape()
         {
             Random random = new((int)Game.GetHashKey(DateTime.UtcNow.Ticks.ToString("X8")));
-            int[] maleSkinSecondID = { 0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 20, 3, 4, 42, 43, 44, 5, 6, 7, 8, 9 };
-            int[] femaleSecondID = { 0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 3, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 4, 40, 41, 45, 5, 6, 7, 8, 9 };
+            int[] mothers = { 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45 };
+            int[] fathers = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 42, 43, 44 };
             int[] maleHairModel = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 30, 31, 35,
                 36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,65,66,68,70,71,72,73,74 };
             int[] femaleHairModel = {1, 2,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,28,30,31,32,36,37,38,39,40,
                 41,42,45,46,47,48,49,50,52,53,54,55,56,57,58,59,60,61,65,73,78,74,77,76 };
-            HeadBlendData = Gender == Gender.Male ?
-                new HeadBlendData(random.Next(44), random.Next(44), 0, random.Next(44), maleSkinSecondID.GetRandomElement(), 0, (float)Math.Round(random.NextDouble(), 5), (float)Math.Round(random.NextDouble(), 5), 0.0f, false) :
-                new HeadBlendData(random.Next(21, 45), femaleSecondID.GetRandomElement(), 0, random.Next(21, 45), femaleSecondID.GetRandomElement(), 0, (float)Math.Round(random.NextDouble(), 5), (float)Math.Round(random.NextDouble(), 5), 0.0f, false);
+            int mother = mothers.GetRandomElement();
+            int father = fathers.GetRandomElement();
+            HeadBlendData = new HeadBlendData(mother, father, 0, mother, father, 0, (float)Math.Round(random.NextDouble(), 5), (float)Math.Round(random.NextDouble(), 5), 0.0f, false);
             OverlayId[] oIds = (OverlayId[])Enum.GetValues(typeof(OverlayId));
             var randomizedOIds = oIds.GetRandomNumberOfElements(random.Next(2, oIds.Length));
             FaceFeature[] faces = (FaceFeature[])Enum.GetValues(typeof(FaceFeature));
-            var randomizedFaces = faces.GetRandomNumberOfElements(random.Next(3, faces.Length));
+            var randomizedFaces = faces.GetRandomNumberOfElements(random.Next(5, faces.Length));
             if (Gender == Gender.Male)
             {
                 HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, maleHairModel.GetRandomElement(true), 0, 0);
@@ -287,7 +287,7 @@ namespace BarbarianCall.Freemode
                         OverlayId.Freckles => random.Next(HB.GetNumHeadOverlayValues(OverlayId.Freckles)),
                         OverlayId.ChestHair => random.Next(HB.GetNumHeadOverlayValues(OverlayId.ChestHair)),
                         OverlayId.BodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.BodyBlemishes)),
-                        OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes)),
+                        //OverlayId.AddBodyBlemishes => random.Next(HB.GetNumHeadOverlayValues(OverlayId.AddBodyBlemishes)),
                         _ => 255
                     };
                     index = random.NextDouble() > 0.958475 ? 255 : index;

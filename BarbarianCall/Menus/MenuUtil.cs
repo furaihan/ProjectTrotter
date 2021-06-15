@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Rage;
 using Rage.Native;
 using RAGENativeUI;
@@ -14,8 +9,8 @@ namespace BarbarianCall.Menus
     {
         public static string GetKeyboardInput(string title, string boxText, int textLength)
         {
-            NativeFunction.Natives.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(title);
-            NativeFunction.Natives.DISPLAY_ONSCREEN_KEYBOARD(true, "STRING", 0, boxText, 0, 0, 0, textLength);
+            Localization.SetText("BAR_KEYB_TT", title);
+            NativeFunction.Natives.DISPLAY_ONSCREEN_KEYBOARD(true, "BAR_KEYB_TT", 0, boxText, 0, 0, 0, textLength);
             Game.DisplayHelp($"Press {FormatKeyBinding(Keys.None, Keys.Enter)} to commit changes\nPress {FormatKeyBinding(Keys.None, Keys.Escape)} to back", true);
             Game.DisplaySubtitle(title, 900000);
             while (NativeFunction.Natives.x0CF2B696BBF945AE<int>() == 0)

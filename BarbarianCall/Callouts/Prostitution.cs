@@ -278,7 +278,7 @@ namespace BarbarianCall.Callouts
                                 GameFiber.StartNew(() =>
                                 {
                                     API.LSPDFRFunc.WaitAudioScannerCompletion();
-                                    API.LSPDFRFunc.PlayScannerAudio($"VEHICLE_IS {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                                    API.LSPDFRFunc.PlayScannerAudio($"VEHICLE BAR_IS BAR_A_CONJ {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
                                 });
                             }                           
                             if (StopWatch.ElapsedMilliseconds > 5000 && !caught)
@@ -320,7 +320,7 @@ namespace BarbarianCall.Callouts
                     if (suspect && suspectVeh)
                     {
                         if (checkpoint) checkpoint.Delete();
-                        checkpoint = new Checkpoint(CheckpointIcon.Cylinder, Spawn, 2f, 15f, VehiclePaint.Matte_Lime_Green.GetColor(), Color.White, true);
+                        checkpoint = new Checkpoint(CheckpointIcon.Cylinder3, Spawn, 2f, 15f, VehiclePaint.Matte_Lime_Green.GetColor(), Color.White, true);
                         suspect.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(500);
                         suspectVeh.SteeringAngle = -12f;
                         suspectVeh.TopSpeed = 3f;
@@ -390,6 +390,7 @@ namespace BarbarianCall.Callouts
                             suspectVeh.Occupants.ToList().ForEach(Extension.MarkAsNoLongerNeeded);
                             Hooking = false;
                         }
+                        suspectVeh.TopSpeed = topSpeed;
                     }
                     else Hooking = false;
                 }

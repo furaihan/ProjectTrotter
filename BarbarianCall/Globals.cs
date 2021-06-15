@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq;
 using Rage;
 using BarbarianCall.Extensions;
+using BarbarianCall.Types;
 
 namespace BarbarianCall
 {
@@ -73,5 +74,16 @@ namespace BarbarianCall
         };
         public static List<uint?> RegisteredPedHeadshot = new();
         public static VehicleDrivingFlags Normal = (VehicleDrivingFlags)786603;
+        public static List<Spawnpoint> Hospitals = new()
+        {
+            new Spawnpoint(new Vector3(302.67f, -1434.97f, 29.8f), 226.77f),
+            new Spawnpoint(new Vector3(-655.09f, 306.63f, 82.66f), 351.63f),
+              new Spawnpoint(new Vector3(-468.15f, -338.61f, 34.37f), 340.77f),
+              new Spawnpoint(new Vector3(364.79f, -591.24f, 28.69f), 156.37f),
+              new Spawnpoint(new Vector3(-874.32f, -300.1f, 39.59f), 169.03f),
+              new Spawnpoint(new Vector3(1157.52f, -1514.13f, 34.69f), 267.04f),
+              new Spawnpoint(new Vector3(1828.68f, 3693.94f, 34.22f), 299.74f),
+              new Spawnpoint(new Vector3(-239.51f, 6333.98f, 32.43f), 39.85f)
+        };
     }
 }
