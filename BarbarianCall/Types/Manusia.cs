@@ -4,6 +4,7 @@ using System.Linq;
 using Rage;
 using System.Reflection;
 using System.Drawing;
+using BarbarianCall.Extensions;
 
 namespace BarbarianCall.Types
 {
@@ -59,23 +60,7 @@ namespace BarbarianCall.Types
         }
         private string GetCarColor()
         {
-            try
-            {
-                PropertyInfo[] cname = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
-                List<Color> colour = cname.Select(c => Color.FromKnownColor((KnownColor)Enum.Parse(typeof(KnownColor), c.Name))).ToList();
-                List<int> cint = colour.Select(c => c.ToArgb()).ToList();
-                if (cint.Contains(Car.PrimaryColor.ToArgb()))
-                {
-                    return cname[cint.IndexOf(Car.PrimaryColor.ToArgb())].Name.AddSpacesToSentence();
-                }
-            }
-            catch (Exception e)
-            {
-                "Get car color error".ToLog();
-                e.ToString().ToLog();
-            }          
-            $"{Car.GetDisplayName()} color is unknown, Argb: {Car.PrimaryColor.ToArgb()}".ToLog();
-            return "Weirdly colored";
+            return Car.GetColor().PrimaryColorName;
         }
         private int GetAge()
         {

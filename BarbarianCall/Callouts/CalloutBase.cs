@@ -125,6 +125,9 @@ namespace BarbarianCall.Callouts
             {
                 if (c) c.Delete();
             });
+            CalloutBlips = new List<Blip>();
+            CalloutEntities = new List<Entity>();
+            CalloutCheckpoints = new List<Checkpoint>();
             if (CarModel.IsLoaded) CarModel.Dismiss();
             //CalloutMainFiber?.Abort();
             base.End();

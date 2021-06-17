@@ -25,11 +25,13 @@ namespace BarbarianCall
 
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
         {
+            float max = maxDistance * maxDistance;
+            float min = minDistance * minDistance;
             try
             {
                 ToLog("Calculating the best location for callout");
-                List<Spawnpoint> suitable = spawnPoints.Where(sp => Vector3.DistanceSquared(sp,PlayerPed)  < maxDistance && Vector3.DistanceSquared(sp, PlayerPed) > minDistance
-                && sp.Position.TravelDistanceTo(Game.LocalPlayer.Character) < maxDistance * 2 && sp.Position.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
+                List<Spawnpoint> suitable = spawnPoints.Where(sp => Vector3.DistanceSquared(sp,PlayerPed)  < max && Vector3.DistanceSquared(sp, PlayerPed) > min
+                 && sp.Position.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
                 if (suitable.Count > 0)
                 {
                     ToLog($"Found {suitable.Count} suitable location, choosing a random location from that list");
@@ -81,29 +83,14 @@ namespace BarbarianCall
             //Game.Console.Print(audio);
             return lpAudio.ToString();
         }
-        internal static string GetColorAudio(this Vehicle vehicle) => GetColorAudio(vehicle.PrimaryColor);
-        internal static string GetColorAudio(Color color)
+        internal static string GetColorAudio(this Vehicle vehicle)
         {
-            ToLog("Trying to get color audio");
-            List<int> audibleArgb = (from x in Globals.AudibleColor select x.ToArgb()).ToList();
-            Color selected;
-            if (audibleArgb.Contains(color.ToArgb()))
-            {
-                ToLog("Color match, converting to scanner audio");
-                selected = Globals.AudibleColor[audibleArgb.ToList().IndexOf(color.ToArgb())];
-                string ret = "COLOR_" + selected.Name.AddSpacesToSentence().Replace(" ", "_").ToUpper();
-#if DEBUG
-                ret.Print();
-#endif
-                return ret;
-            }
-            ToLog($"Color not match {color.ToArgb()}");
-            return string.Empty;
+            return vehicle.GetColor().PrimaryColor.GetPoliceScannerColorAudio();
         }
         internal static void RandomiseLicensePlate(this Vehicle vehicle)
         {
             System.Security.Cryptography.RNGCryptoServiceProvider provider = new();
-            byte[] box = new byte[4];
+            byte[] box = new byte[16];
             provider.GetBytes(box);
             Random plateRandomizerHandler = new(BitConverter.ToInt32(box, 0));
             if (vehicle)
@@ -117,9 +104,7 @@ namespace BarbarianCall
                                 plateRandomizerHandler.Next(10).ToString() +
                                 plateRandomizerHandler.Next(10).ToString();
                 vehicle.LicensePlate = plate;
-#if DEBUG
                 ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), vehicle.LicensePlate));
-#endif
             }           
         }
         internal static string GetDisplayName(this Model vehicleModel)
@@ -201,7 +186,7 @@ namespace BarbarianCall
                 while (Speaking)
                 {
                     GameFiber.Yield();
-                    if (Vector3.Distance(playerPed.Position, playerPos) > 2.5f)
+                    if (Vector3.DistanceSquared(playerPed.Position, playerPos) > 6.25f)
                     {
                         playerPed.Tasks.FollowNavigationMeshToPosition(playerPos, playerHead, 1.5f).WaitForCompletion(1000);
                     }

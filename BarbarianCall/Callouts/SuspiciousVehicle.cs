@@ -6,6 +6,7 @@ using LSPD_First_Response.Mod.Callouts;
 using System.Windows.Forms;
 using System.Drawing;
 using BarbarianCall.Extensions;
+using BarbarianCall.Types;
 
 namespace BarbarianCall.Callouts
 {
@@ -49,7 +50,7 @@ namespace BarbarianCall.Callouts
             CalloutRunning = true;
             GangModels = Globals.GangPedModels.Values.GetRandomElement();
             SuspectCar.RandomiseLicensePlate();
-            SuspectCar.PrimaryColor = Globals.AudibleColor.GetRandomElement();
+            SuspectCar.SetRandomColor();
             Suspect = new Ped(GangModels.GetRandomElement(m=> m.IsValid), Spawn, SpawnHeading);
             Suspect.MakeMissionPed();
             Suspect.WarpIntoVehicle(SuspectCar, -1);
@@ -127,7 +128,7 @@ namespace BarbarianCall.Callouts
             while (CalloutRunning)
             {
                 GameFiber.Yield();
-                if (Game.LocalPlayer.Character.DistanceTo(SpawnPoint) < 45f)
+                if (Game.LocalPlayer.Character.DistanceToSquared(SpawnPoint) < 2025f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                     break;
@@ -167,7 +168,7 @@ namespace BarbarianCall.Callouts
                     {
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(2500);
-                        PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                        PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
                         GameFiber.Sleep(1000);
                         Manusia.DisplayNotif();
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
@@ -246,7 +247,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Wait(1000);
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ " +
-                            $"{Peralatan.GetPoliceScannerAudio(SuspectCar)} {Peralatan.GetColorAudio(SuspectCar.PrimaryColor)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                            $"{Peralatan.GetPoliceScannerAudio(SuspectCar)} {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(2000);
                         DisplayGPNotif();

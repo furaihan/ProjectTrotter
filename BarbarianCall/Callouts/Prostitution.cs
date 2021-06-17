@@ -171,6 +171,7 @@ namespace BarbarianCall.Callouts
                         var rp = rv.CreateRandomDriver();
                         CalloutEntities.Add(rv);
                         CalloutEntities.Add(rp);
+                        rv.RandomiseLicensePlate();
                         rv.MarkAsNoLongerNeeded();
                         rp.MarkAsNoLongerNeeded();
                     }

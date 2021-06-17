@@ -42,6 +42,7 @@ namespace BarbarianCall.API
         }
         public static void CallMechanicToRepairPlayerVehicle()
         {
+            $"Executing CallMechanicToRepairPlayerVehicle. Request From {Assembly.GetCallingAssembly().GetName().Name}".ToLog();
             if (Game.LocalPlayer.Character.IsInAnyVehicle(false))
             {
                 Game.DisplayNotification("~b~Please leave any vehicle first");

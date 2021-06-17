@@ -7,6 +7,7 @@ using Rage.Native;
 using System.Diagnostics;
 using System.IO;
 using BarbarianCall.Types;
+using L = LSPD_First_Response.Mod.API.Functions;
 
 namespace BarbarianCall.Extensions
 {
@@ -42,8 +43,8 @@ namespace BarbarianCall.Extensions
                     scale.Y, scale.Z, color.R, color.G, color.B, color.A, bobUpAndDown, faceCamera, 2, rotateY, null, null, drawOnEntity);
             }
         }
-        internal static Model GetRandomMaleModel() => World.GetAllPeds().Where(x => x && x.IsMale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
-        internal static Model GetRandomFemaleModel() => World.GetAllPeds().Where(x => x && x.IsFemale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
+        internal static Model GetRandomMaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsMale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
+        internal static Model GetRandomFemaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsFemale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
         internal static Model[] GetAudibleVehicleModel()
         {
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
@@ -56,6 +57,11 @@ namespace BarbarianCall.Extensions
         internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xADCDE75E1C60F32D<bool>(position.X, position.Y, position.Z, 3f, false, true, true, false, false, 0, false); //IS_POSITION_OCCUPIED
         internal static bool IsSuitableCar(this Model model) => model.IsCar && !model.IsBigVehicle && (model.NumberOfSeats == 2 || model.NumberOfSeats == 4) && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle;
         internal static bool IsSuitableMotor(this Model model) => model.IsBike && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle && !model.IsCar && !model.IsBigVehicle && model.NumberOfSeats <= 2;
+        internal static bool IsAmbientOnFoot(this Ped ped)
+        {
+            RelationshipGroup[] bl = { RelationshipGroup.Cop, RelationshipGroup.Medic, RelationshipGroup.Army, RelationshipGroup.PrivateSecurity, RelationshipGroup.Fireman, RelationshipGroup.SecurityGuard };
+            return ped && !ped.CreatedByTheCallingPlugin && ped.IsHuman && ped.GetAttachedBlips().Length == 0 && ped.IsOnFoot && !L.IsPedACop(ped) && !bl.Contains(ped.RelationshipGroup) && !ped.IsPlayer;
+        }
         internal static bool IsPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
         internal static bool IsVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
         internal static bool IsObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);
@@ -166,6 +172,16 @@ namespace BarbarianCall.Extensions
                 throw new NotSupportedException();
             }
             NativeFunction.Natives.SET_VEHICLE_COLOURS(vehicle, (int)vehicleColor.PrimaryColor, (int)vehicleColor.SecondaryColor);
+        }
+        public static void SetRandomColor(this Vehicle vehicle)
+        {
+            VehiclePaint[] blackList =
+            {
+                VehiclePaint.DEFAULT_ALLOY_COLOR, VehiclePaint.Unknown, VehiclePaint.Police_Car_Blue, VehiclePaint.Metallic_Taxi_Yellow, VehiclePaint.MP100_GOLD, VehiclePaint.MP100_GOLD_SATIN,
+                VehiclePaint.MP100_GOLD_SPEC, VehiclePaint.MODSHOP_BLACK1,
+            };
+            VehiclePaint selected = Enum.GetValues(typeof(VehiclePaint)).Cast<VehiclePaint>().Except(blackList).GetRandomElement();
+            vehicle.SetColor(new VehicleColor(selected, selected));
         }
         /// <summary>
         /// Sets this <see cref="Vehicle"/> primary and secondary colors

@@ -62,7 +62,7 @@ namespace BarbarianCall.Callouts
             susVehModel.LoadAndWait();
             CalloutPosition = SpawnPoint;
             CalloutMessage = "Officer Stabbed";
-            CalloutAdvisory = $"Suspect vehicle is {Game.GetLocalizedString(susVehModel.Name)}";
+            CalloutAdvisory = $"Suspect vehicle is {susVehModel.GetDisplayName()}";
             uint zoneHash = Rage.Native.NativeFunction.Natives.GET_HASH_OF_MAP_AREA_AT_COORDS<uint>(SpawnPoint.X, SpawnPoint.Y, SpawnPoint.Z);
             if (UltimateBackupRunning)
             {
@@ -111,7 +111,7 @@ namespace BarbarianCall.Callouts
             Spawnpoint tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
             if (tempSpawn != Spawnpoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
             else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
-            SuspectCar.PrimaryColor = Globals.CommonUnderstandableColor.GetRandomElement();
+            SuspectCar.SetRandomColor();
             SuspectCar.RandomiseLicensePlate();
             SuspectCar.Metadata.BAR_Entity = true;
             Suspect = SuspectCar.CreateRandomDriver();
@@ -138,7 +138,7 @@ namespace BarbarianCall.Callouts
                     passengerWeapon = passenger.Inventory.GiveNewWeapon(0xDBBD7280, -1, false);
                 }
             }
-            susVehColor = SuspectCar.GetCarColor();
+            susVehColor = SuspectCar.GetColor().PrimaryColorName;
             SuspectState = ESuspectStates.InAction;
             PassengerState = ESuspectStates.InAction;
             Functions.AddPedContraband(Suspect, ContrabandType.Weapon, "Knife");
@@ -279,7 +279,7 @@ namespace BarbarianCall.Callouts
             {
                 GameFiber.Yield();
                 counter++;
-                if (officer && Game.LocalPlayer.Character.DistanceTo(officer) < 45f)
+                if (officer && Game.LocalPlayer.Character.DistanceToSquared(officer) < 2025f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                     break;
@@ -312,6 +312,7 @@ namespace BarbarianCall.Callouts
                     CalloutRunning = true;
                     GetClose();
                     if (!CalloutRunning) return;
+                    officer.SetPositionZ(World.GetGroundZ(officer.Position, false, false) ?? officer.Position.Z);
                     "We have send an ambulance to your location".DisplayNotifWithLogo("Officer Stabbed");
                     if (Initialization.IsLSPDFRPluginRunning("BetterEMS"))
                     {
@@ -321,7 +322,7 @@ namespace BarbarianCall.Callouts
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (Game.LocalPlayer.Character.Position.DistanceTo(SpawnPoint) < 13f) break;
+                        if (Game.LocalPlayer.Character.Position.DistanceToSquared(SpawnPoint) < 169f) break;
                     }
                     if (!CalloutRunning) return;
                     Functions.PlayPlayerRadioAction(Functions.GetPlayerRadioAction(), 5000);
@@ -352,7 +353,7 @@ namespace BarbarianCall.Callouts
                     {
                         Suspect.Health = Suspect.MaxHealth;
                         if (passenger) passenger.Health = passenger.MaxHealth;
-                        if (Suspect.DistanceTo(currSusPos) > 80f)
+                        if (Suspect.DistanceToSquared(currSusPos) > 6400f)
                         {
                             currSusPos = Suspect.Position;
                             if (Blip) Blip.Delete();
@@ -368,7 +369,7 @@ namespace BarbarianCall.Callouts
                                   //  $"Suspect Location: ~g~{Suspect.Position.GetZoneName()}~s~ Near ~g~{World.GetStreetName(Suspect.Position)}~n~~y~License Plate~s~: {SuspectCar.LicensePlate}");
                             }                           
                         }
-                        if (Game.LocalPlayer.Character.DistanceTo(Suspect) < 15f)
+                        if (Game.LocalPlayer.Character.DistanceToSquared(Suspect) < 225f)
                         {
                             int chaseScenario = Peralatan.Random.Next(7250);
                             if (PlayerPed.IsInAnyVehicle(false) && PlayerPed.CurrentVehicle.IsSirenOn)
@@ -461,6 +462,7 @@ namespace BarbarianCall.Callouts
                     uint deathTime = Game.GameTime;
                     DisplayGPNotif();
                     GetClose();
+                    officer.SetPositionZ(World.GetGroundZ(officer.Position, false, false) ?? officer.Position.Z);
                     if (!CalloutRunning) return;
                     "We have send an ambulance to your location".DisplayNotifWithLogo("Officer Stabbed");
                     if (Initialization.IsLSPDFRPluginRunning("BetterEMS"))
@@ -499,7 +501,7 @@ namespace BarbarianCall.Callouts
                         }
                         if (Game.IsKeyDown(System.Windows.Forms.Keys.Y))
                         {
-                            if (PlayerPed.DistanceTo(Suspect) < 15f) break;
+                            if (PlayerPed.DistanceToSquared(Suspect) < 225f) break;
                             else Game.DisplayHelp("~y~Please get ~g~closer~y~ to the ~r~suspect~y~ first");
                         }
                         GameFiber.Yield();
@@ -639,6 +641,7 @@ namespace BarbarianCall.Callouts
                     CalloutEntities.Add(Ambulance);
                     GetClose();
                     if (!CalloutRunning) return;
+                    officer.SetPositionZ(World.GetGroundZ(officer.Position, false, false) ?? officer.Position.Z);
                     Suspect.Tasks.CruiseWithVehicle(20f, VehicleDrivingFlags.Emergency);
                     
                     Game.DisplayHelp($"~y~Get ~o~closer~y~ to the ~g~paramedic~y~ and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ ~y~to talk");
@@ -652,9 +655,9 @@ namespace BarbarianCall.Callouts
                         }
                         if (Game.IsKeyDown(System.Windows.Forms.Keys.Y))
                         {
-                            if (PlayerPed.DistanceTo(Paramedic1) < 6f)
+                            if (PlayerPed.DistanceToSquared(Paramedic1) < 18f)
                             {
-                                Game.DisplaySubtitle("~b~Officer~s~: Is he alright? Where is the suspect?");
+                                Game.DisplaySubtitle($"~b~{Globals.PlayerPedName}~s~: Is he alright? Where is the suspect?");
                                 break;
                             }
                             else Game.DisplayHelp("Please get ~o~closer with ~g~paramedic");
@@ -666,9 +669,9 @@ namespace BarbarianCall.Callouts
                      {           
                         "~g~Paramedic~s~: Calm down officer, We can handle this, now you can search for the suspect",           
                         $"~g~Paramedic~s~: All i know he is driving a ~y~{susVehColor}-colored {SuspectCar.GetDisplayName()}~s~ with license plate ~g~{SuspectCar.LicensePlate}~s~",
-                        "~b~Officer~s~: Thank you for the information i will search the suspect now",
+                        $"~b~{Globals.PlayerPedName}~s~: Thank you for the information i will search the suspect now",
                         "~g~Paramedic~s~: Please be careful, suspect may bring some weapon",
-                        "~b~Officer~s~: Sure, thank you"
+                        $"~b~{Globals.PlayerPedName}~s~: Sure, thank you"
                     };
                     float amb1Heading = Paramedic1.Heading;
                     Peralatan.HandleSpeech(ambulanceConversation, Paramedic1);
@@ -697,7 +700,7 @@ namespace BarbarianCall.Callouts
                     {
                         Suspect.Health = Suspect.MaxHealth;
                         if (passenger) passenger.Health = passenger.MaxHealth;
-                        if (Suspect.DistanceTo(currSusPos) > 80f)
+                        if (Suspect.DistanceToSquared(currSusPos) > 6400f)
                         {
                             currSusPos = Suspect.Position;
                             if (Blip) Blip.Delete();
@@ -710,7 +713,7 @@ namespace BarbarianCall.Callouts
                                 Functions.PlayScannerAudioUsingPosition($"SUSPECT_HEADING {Suspect.GetCardinalDirectionLowDetailedAudio()} IN_OR_ON_POSITION", currSusPos);                               
                             }                         
                         }
-                        if (Game.LocalPlayer.Character.DistanceTo(Suspect) < 15f)
+                        if (Game.LocalPlayer.Character.DistanceToSquared(Suspect) < 225f)
                         {
                             int chaseScenario = Peralatan.Random.Next(1, 1000);
                             $"Suspect chase scenario : {chaseScenario}".ToLog();
@@ -811,6 +814,7 @@ namespace BarbarianCall.Callouts
                     CalloutRunning = true;
                     GetClose();
                     if (!CalloutRunning) return;
+                    officer.SetPositionZ(World.GetGroundZ(officer.Position, false, false) ?? officer.Position.Z);
                     if (Suspect.IsInVehicle(SuspectCar, false)) Suspect.Tasks.LeaveVehicle(LeaveVehicleFlags.None);
                     if (passenger.IsInVehicle(SuspectCar, false)) passenger.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion();
                     Suspect.Inventory.GiveNewWeapon(new WeaponAsset(WeaponHashes.GetRandomElement()), -1, true);

@@ -172,7 +172,7 @@ namespace BarbarianCall.Callouts
         {
             while (CalloutRunning)
             {
-                if (PlayerPed.DistanceTo(SpawnPoint) < 45f)
+                if (PlayerPed.DistanceToSquared(SpawnPoint) < 2025f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                     if (Menus.PauseMenu.onSceneAudio.Checked)
@@ -300,7 +300,7 @@ namespace BarbarianCall.Callouts
                     bool alerted = false;
                     while (CalloutRunning)
                     {
-                        if (PlayerPed.DistanceTo(SpawnPoint) < 45f)
+                        if (PlayerPed.DistanceToSquared(SpawnPoint) < 2025f)
                         {
                             if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                             if (Menus.PauseMenu.onSceneAudio.Checked)
@@ -348,7 +348,7 @@ namespace BarbarianCall.Callouts
                     $"Callout scenario: {HostageScenario}".ToLog();
                     while (CalloutRunning)
                     {
-                        if (PlayerPed.DistanceTo(Suspect) < 12f || PlayerPed.DistanceTo(TaxiDriver) < 12f) break;
+                        if (PlayerPed.DistanceToSquared(Suspect) < 144f || PlayerPed.DistanceToSquared(TaxiDriver) < 144f) break;
                         GameFiber.Yield();
                     }
                     if (!CalloutRunning) return;
@@ -489,7 +489,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Yield();
                         if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y))
                         {
-                            if (PlayerPed.DistanceTo(Witness) < 5f && PlayerPed.IsOnFoot) break;
+                            if (PlayerPed.DistanceToSquared(Witness) < 25f && PlayerPed.IsOnFoot) break;
                             else Game.DisplayHelp("~s~Please move ~p~closer~s~ and ~o~leave~s~ from vehicle");
                         }
                         if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 12000)
@@ -551,14 +551,14 @@ namespace BarbarianCall.Callouts
                     });
                     while (CalloutRunning)
                     {
-                        if (PlayerPed.DistanceTo(Suspect) < 18f) break;
+                        if (PlayerPed.DistanceToSquared(Suspect) < 324f) break;
                         if (DateTime.UtcNow >= Time)
                         {
                             Time = DateTime.UtcNow + new TimeSpan(0, 0, 20);
                             Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS SUSPECT_LAST_SEEN IN_OR_ON_POSITION", Suspect.Position);
                             Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
                                $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}~n~~y~Last Seen~s~: {Suspect.Position.GetZoneName()}");
-                            if (Suspect.DistanceTo(curPos) > 80f)
+                            if (Suspect.DistanceToSquared(curPos) > 6400f)
                             {
                                 if (Blip) Blip.Delete();
                                 Blip = new Blip(Suspect.Position.Around(8f, 10f), 70f);
@@ -657,7 +657,7 @@ namespace BarbarianCall.Callouts
                         {
                             if (!PlayerPed.IsInAnyVehicle(false))
                             {
-                                if (PlayerPed.DistanceTo(TaxiDriver) < 6f) break;
+                                if (PlayerPed.DistanceToSquared(TaxiDriver) < 36f) break;
                                 else Game.DisplayHelp("Please move ~g~closer");
                             }
                             else Game.DisplayHelp("~y~Get out~s~ from vehicle first");

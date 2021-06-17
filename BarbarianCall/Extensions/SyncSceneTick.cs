@@ -243,7 +243,8 @@ namespace BarbarianCall.Extensions
                     case 1:
                         if (playing) break;
                         Seat seat = Seats[objs.IndexOf(obj.Model.Hash)];
-                        scenarioTask =  PlayerPed.PlayScenarioAction(seat.ScenarioName, obj.GetOffsetPosition(seat.Offsett), obj.Heading, -1, true, false);
+                        PlayerPed.Tasks.FollowNavigationMeshToPosition(obj.Position + obj.ForwardVector * -1f, obj.Heading + seat.Heading, 1f, 10000);
+                        scenarioTask =  PlayerPed.PlayScenarioAction(seat.ScenarioName, obj.Position + seat.Offsett, obj.Heading, -1, true, true);
                         GameFiber.Wait(2500);
                         playing = true;
                         status = 2;

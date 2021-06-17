@@ -45,20 +45,17 @@ namespace BarbarianCall.Callouts
             SpawnHeading = Spawn;
             CarModel = Globals.CarsToSelect.GetRandomElement(m => m.IsValid && Globals.AudibleCarModel.Contains(m) && m.NumberOfSeats >= 4, true);
             CarModel.LoadAndWait();
-            SuspectCar = new(CarModel, SpawnPoint, SpawnHeading)
-            {
-                PrimaryColor = Globals.AudibleColor.GetRandomElement()
-            };
+            SuspectCar = new Vehicle(CarModel, Spawn, Spawn);
+            SuspectCar.SetRandomColor();
             SuspectCar.MakePersistent();
             SuspectCar.PlaceOnGroundProperly();
-            CalloutAdvisory = string.Format("Vehicle Is: {0} {1}", SuspectCar.GetCarColor(), SuspectCar.GetDisplayName());
+            CalloutAdvisory = string.Format("Vehicle Is: {0} {1}", SuspectCar.GetColor().PrimaryColorName, SuspectCar.GetDisplayName());
             CalloutMessage = "A Wanted Felon On The Loose";
             FriendlyName = "Wanted Felon On The Loose";
             PlayScannerWithCallsign("WE_HAVE CRIME_WANTED_FELON_ON_THE_LOOSE IN_OR_ON_POSITION", Spawn);
             CalloutPosition = Spawn;
             AddMinimumDistanceCheck(100, Spawn);
             ShowCalloutAreaBlipBeforeAccepting(Spawn, 80);
-
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -116,6 +113,19 @@ namespace BarbarianCall.Callouts
                     break;
             }
             CalloutMainFiber.Start();
+            GameFiber.StartNew(() =>
+            {
+                Ped wanted = (new[] { Driver, Passenger1, Passenger2, Passenger3 }).GetRandomElement();
+                Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
+                LSPDFRFunc.WaitAudioScannerCompletion();
+                GameFiber.Sleep(1000);
+                Manusia.DisplayNotif();
+                GameFiber.Wait(1500);
+                LSPDFRFunc.WaitAudioScannerCompletion();
+                LSPDFRFunc.PlayScannerAudio($"SUSPECT_IS DRIVING_A {SuspectCar.GetColorAudio()} {Peralatan.GetPoliceScannerAudio(SuspectCar)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}", true);
+                GameFiber.Wait(2500);
+                DisplayGPNotif();
+            });
             return base.OnCalloutAccepted();
         }
         public override void Process()
@@ -230,7 +240,7 @@ namespace BarbarianCall.Callouts
                     End();
                     break;
                 }
-                if (StopWatch.ElapsedMilliseconds > 20000 && SuspectCar.DistanceTo(curPos) > 50f)
+                if (StopWatch.ElapsedMilliseconds > 20000 && SuspectCar.DistanceToSquared(curPos) > 2500f)
                 {
                     StopWatch.Restart();
                     curPos = SuspectCar.Position;
@@ -242,7 +252,7 @@ namespace BarbarianCall.Callouts
                     Blip.EnableRoute(Yellow);
                     LSPDFRFunc.PlayScannerAudioUsingPosition(string.Format("SUSPECT_HEADING {0} IN_OR_ON_POSITION", SuspectCar.GetCardinalDirectionLowDetailedAudio()), SuspectCar.Position);
                 }
-                if (PlayerPed.DistanceTo(SuspectCar) < 25f && SuspectCar.IsOnScreen)
+                if (PlayerPed.DistanceToSquared(SuspectCar) < 625f && SuspectCar.IsOnScreen)
                 {
                     if (Blip) Blip.Delete();
                     break;
@@ -274,21 +284,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
-                    FreemodePed wanted = Suspects.GetRandomElement(fp => fp);
-                    if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
-                    GameFiber.StartNew(() =>
-                    {
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        GameFiber.Sleep(1000);
-                        Manusia.DisplayNotif();
-                        GameFiber.Wait(1500);
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
-                        GameFiber.Wait(2500);
-                        DisplayGPNotif();
-                    });
+                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };                   
                     if (Suspects.All(s => s)) Suspects.ForEach(s => s.RelationshipGroup = "CRIMINAL");
                     GameFiber.Wait(75);
                     SetRelationship();
@@ -340,21 +336,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
-                    FreemodePed wanted = Suspects.GetRandomElement(fp => fp);
-                    if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
-                    GameFiber.StartNew(() =>
-                    {
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        GameFiber.Sleep(1000);
-                        Manusia.DisplayNotif();
-                        GameFiber.Wait(1500);
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
-                        GameFiber.Wait(2500);
-                        DisplayGPNotif();
-                    });
+                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };                        
                     if (Suspects.All(s => s)) Suspects.ForEach(s => s.RelationshipGroup = "CRIMINAL");
                     GameFiber.Wait(75);
                     SetRelationship();
@@ -431,21 +413,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
-                    FreemodePed wanted = Suspects.GetRandomElement(fp => fp);                  
-                    if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
-                    GameFiber.StartNew(() =>
-                    {
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        GameFiber.Sleep(1000);
-                        if (Manusia != null) Manusia.DisplayNotif();
-                        GameFiber.Wait(1500);
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
-                        GameFiber.Wait(2500);
-                        DisplayGPNotif();
-                    });
+                    List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };                   
                     if (Suspects.All(s => s)) Suspects.ForEach(s => s.RelationshipGroup = "CRIMINAL");
                     GameFiber.Wait(75);
                     SetRelationship();

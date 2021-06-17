@@ -97,6 +97,9 @@
     <Compile Include="Extensions\MathExtension.cs" />
     <Compile Include="Extensions\SyncSceneTick.cs" />
     <Compile Include="Extensions\XmlExtension.cs" />
+    <Compile Include="Freemode\PedFaceFeature.cs" />
+    <Compile Include="Freemode\HeadOverlay.cs" />
+    <Compile Include="Freemode\PedHeadOverlay.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />

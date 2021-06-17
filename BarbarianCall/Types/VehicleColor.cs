@@ -57,5 +57,6 @@ namespace BarbarianCall.Types
         {
             return other is not null && other.PrimaryColor == PrimaryColor && other.SecondaryColor == SecondaryColor;
         }
+        public static implicit operator VehicleColor(VehiclePaint paint) => new VehicleColor(paint, paint);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Rage;
 using static Rage.Native.NativeFunction;
 using System;
+using System.Runtime.InteropServices;
 
 namespace BarbarianCall.Extensions
 {
@@ -123,6 +124,54 @@ namespace BarbarianCall.Extensions
         {
             Natives.TASK_VEHICLE_TEMP_ACTION(ped, vehicle, (int)vehicleManeuver, timeMiliseconds);
             return Task.GetTask(ped, "TASK_VEHICLE_TEMP_ACTION");
+        }
+        public static unsafe Task PlayScriptedAnim(this Ped ped,
+                                                   AnimationDictionary animationDictionary,
+                                                   string animName,
+                                                   AnimationFlags flags,
+                                                   string boneMask,
+                                                   float framePosition = 0.0f)
+        {
+            float fpos = framePosition;
+            float blendInSpeed = 8f;
+            float blendOutSpeed = -8f;
+            long minOne = -1;
+            long one = 1;
+            long unk1 = 1065353216;
+            long unk2 = 1040187392;
+            long[] longs = new long[32];
+            long[] longs1 = new long[32];
+            fixed (long* ptr1 = &longs1[0])
+                fixed (long* ptr2 = &longs[0])
+            {
+                ptr2[1] = Marshal.StringToHGlobalAnsi(animationDictionary).ToInt64();
+                ptr2[2] = Marshal.StringToHGlobalAnsi(animName).ToInt64();
+                ptr2[3] = *(long*)&fpos;
+                ptr2[16] = Game.GetHashKey(boneMask);
+                ptr2[17] = *(long*)&blendInSpeed;
+                ptr2[18] = *(long*)&blendOutSpeed;
+                ptr2[19] = minOne;
+                ptr2[20] = (int)flags;
+                *ptr2 = one;
+                ptr2[4] = unk1;
+                ptr2[5] = unk1;
+                ptr2[9] = unk1;
+                ptr2[10] = unk1;
+                ptr2[14] = unk1;
+                ptr2[15] = unk1;
+                *ptr1 = one;
+                ptr1[4] = unk1;
+                ptr1[5] = unk1;
+                ptr1[9] = unk1;
+                ptr1[10] = unk1;
+                ptr1[14] = unk1;
+                ptr1[15] = unk1;
+                ptr1[17] = unk2;
+                ptr1[18] = unk2;
+                ptr1[19] = minOne;
+                CallByHash<uint>(0x126EF75F1E17ABE5, ped, ptr2, ptr1, ptr1, 0.5f, 0.5f);
+            }
+            return Task.GetTask(ped, "TASK_SCRIPTED_ANIMATION");
         }
         public static void StopEntityAnimation(this Entity entity, AnimationDictionary animDict, string animName) => Natives.STOP_ENTITY_ANIM(entity, animName, animDict.Name, 0);
         public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM

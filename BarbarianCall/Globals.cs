@@ -85,5 +85,8 @@ namespace BarbarianCall
               new Spawnpoint(new Vector3(1828.68f, 3693.94f, 34.22f), 299.74f),
               new Spawnpoint(new Vector3(-239.51f, 6333.98f, 32.43f), 39.85f)
         };
+        public static string PlayerPedName => LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Game.LocalPlayer.Character).FullName;
+        public static string PlayerPedSurName => LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Game.LocalPlayer.Character).Surname;
+        public static string PlayerPedForeName => LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Game.LocalPlayer.Character).Forename;
     }
 }

@@ -221,7 +221,7 @@ namespace BarbarianCall.Callouts
         {
             while (CalloutRunning)
             {
-                if (Participant.Any(p => p && (p.CanSee(PlayerPed) || PlayerPed.CanSee(p))) || PlayerPed.DistanceTo(SpawnPoint) < 100f)
+                if (Participant.Any(p => p && (p.CanSee(PlayerPed) || PlayerPed.CanSee(p))) || PlayerPed.DistanceToSquared(SpawnPoint) < 10000f)
                 {
 #if DEBUG
                     string[] log =
