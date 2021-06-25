@@ -249,17 +249,7 @@ namespace BarbarianCall
             ped.Metadata.BAR_Entity = ped.IsVisible = true;
             ped.IsInvincible = invincible;
             //$"Set {ped.Model.Name} as mission ped. {ped.Health} - {ped.MaxHealth} - {ped.FatalInjuryHealthThreshold}".ToLog();
-        }       
-        internal enum NotificationIcon
-        {
-            ChatBox = 1,
-            Email,
-            AddFriendRequest,
-            Nothing,
-            RightJumpingArrow = 7,
-            RPIcon,
-            DollarSign
-        }
+        }             
         internal static uint DisplayNotifWithLogo(this string msg, string subtitle = "", string textureDict = "WEB_LOSSANTOSPOLICEDEPT", string textureName = "WEB_LOSSANTOSPOLICEDEPT", string title = "~y~BarbarianCall~s~", 
             bool fadeIn = false, bool blink = false, HudColor? hudColor = null, NotificationIcon icon = NotificationIcon.Nothing)
         {

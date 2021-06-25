@@ -30,7 +30,7 @@ namespace BarbarianCall.Menus
                 WidthOffset = 160,
                 DescriptionSeparatorColor = HudColor.NetPlayer23.GetColor(),
             };
-            Sprite des = new("hei_dlc_orntbankb_txd", "gz_v_bkwood1", Point.Empty, Size.Empty);
+            Sprite des = new("h4_mph4_man_islandx_mansion", "am_villa_brick_1_s", Point.Empty, Size.Empty);
             BarbarianCallMenu.SetBannerType(des);
             Pool.Add(BarbarianCallMenu);
             setting = new("Settings", "Open BarbarianCall Pause Menu Setting");

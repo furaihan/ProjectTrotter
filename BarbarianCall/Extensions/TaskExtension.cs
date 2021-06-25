@@ -103,7 +103,7 @@ namespace BarbarianCall.Extensions
             Natives.TASK_THROW_PROJECTILE(ped, throwPos.X, throwPos.Y, throwPos.Z, 0, 0);
             return Task.GetTask(ped, "TASK_THROW_PROJECTILE");
         }
-        public static Task PlayScenarioAction(this Ped ped, Types.PedScenario pedScenario, bool playEnterAnim)
+        public static Task PlayScenarioAction(this Ped ped, PedScenario pedScenario, bool playEnterAnim)
         {
             string scenarioName = pedScenario.ToString();
             Natives.TASK_START_SCENARIO_IN_PLACE(ped, scenarioName, -1, playEnterAnim);
@@ -125,13 +125,82 @@ namespace BarbarianCall.Extensions
             Natives.TASK_VEHICLE_TEMP_ACTION(ped, vehicle, (int)vehicleManeuver, timeMiliseconds);
             return Task.GetTask(ped, "TASK_VEHICLE_TEMP_ACTION");
         }
+        /// <summary>
+        /// Must have targetVehicle, targetPed, OR destination X/Y/Z set
+        /// <para></para>Will follow targeted vehicle/ped, or fly to destination
+        /// <para></para>Set whichever is not being used to 0
+        /// </summary>
+        /// <param name="pilot">The pilot <see cref="Ped"/></param>
+        /// <param name="heli">The aircraft of the <paramref name="pilot"/> currently in</param>
+        /// <param name="targetVeh">The target <see cref="Vehicle"/>, set to <c>null</c> if not used</param>
+        /// <param name="targetPed">The target <see cref="Ped"/>, set to <c>null</c> if not used</param>
+        /// <param name="destination">The destination, set to <see cref="Vector3.Zero"/> if not used</param>
+        /// <param name="type">the mission flag</param>
+        /// <param name="maxSpeed">Heli will fly at maxSpeed (up to actual maximum speed defined by the model's handling config)</param>
+        /// <param name="radius">Radius affects how closely the heli will follow tracked ped/vehicle, and when circling (mission type 9) sets the radius (in meters) that it will circle the target from</param>
+        /// <param name="targetHeading">Heading is -1.0 for default behavior, which will point the nose of the helicopter towards the destination. 
+        /// Set a heading and the heli will lock to that direction when near its destination/target, 
+        /// but may still turn towards the destination when flying at higher speed from a further distance.</param>
+        /// <param name="maxHeight">If minHeight and maxHeight are set, heli will fly between those specified elevations, relative to ground level and any obstructions/buildings below. 
+        /// You can specify -1 for either if you only want to specify one. Usually it is easiest to leave maxHeight at -1, and specify a reasonable minHeight to ensure clearance over any obstacles. 
+        /// Note this MUST be passed as an INT, not a FLOAT. </param>
+        /// <param name="minHeight">If minHeight and maxHeight are set, heli will fly between those specified elevations, relative to ground level and any obstructions/buildings below. 
+        /// You can specify -1 for either if you only want to specify one. Usually it is easiest to leave maxHeight at -1, and specify a reasonable minHeight to ensure clearance over any obstacles. 
+        /// Note this MUST be passed as an INT, not a FLOAT. </param>
+        /// <param name="behaviorFlags"></param>
+        /// <returns>The <see cref="Task"/> represent this method</returns>
+        /// <remarks>Notes updated by PNWParksFan, May 2021</remarks>
+        public static Task HeliMission(Ped pilot,
+                                       Vehicle heli,
+                                       Vehicle targetVeh,
+                                       Ped targetPed,
+                                       Vector3 destination,
+                                       MissionType type,
+                                       float maxSpeed,
+                                       float radius,
+                                       float targetHeading,
+                                       int maxHeight,
+                                       int minHeight,
+                                       int behaviorFlags)
+        {
+            if (targetPed is null && targetVeh is null && destination == Vector3.Zero)
+            {
+                throw new InvalidOperationException("Must have targetVehicle, targetPed, OR destination set");
+            }
+            uint targetPedHandle = targetPed is null ? 0 : targetPed.Handle;
+            uint targetVehHandle = targetVeh is null ? 0 : targetVeh.Handle;
+            Natives.TASK_HELI_MISSION(pilot, heli, targetVehHandle, targetPedHandle, destination.X, destination.Y, destination.Z, (int)type, maxSpeed, radius, targetHeading, maxHeight, minHeight, 400.0f, behaviorFlags);
+            return Task.GetTask(pilot, "TASK_HELI_MISSION");
+        }
+        public static Task VehicleMission(this Ped ped, Vehicle target, MissionType missionType, float maxSpeed, VehicleDrivingFlags flags, float minDistance, float stoppingRange, bool againstTraffic) =>
+            VehicleMission(ped, ped.CurrentVehicle, target, missionType, maxSpeed, flags, minDistance, stoppingRange, againstTraffic);
+        public static Task VehicleMission(this Ped ped, Vehicle vehicle, Vehicle target, MissionType missionType, float maxSpeed, VehicleDrivingFlags flags, float minDistance, float stoppingRange, bool againstTraffic)
+        {
+            Natives.TASK_VEHICLE_MISSION(ped, vehicle, target, (int)missionType, maxSpeed, (int)flags, minDistance, stoppingRange, againstTraffic);
+            return Task.GetTask(ped, "TASK_VEHICLE_MISSION");
+        }
+        public static Task VehicleMission(this Ped ped, Ped target, MissionType missionType, float maxSpeed, VehicleDrivingFlags flags, float minDistance, float stoppingRange, bool againstTraffic)
+            => VehicleMission(ped, ped.CurrentVehicle, target, missionType, maxSpeed, flags, minDistance, stoppingRange, againstTraffic);
+        public static Task VehicleMission(this Ped ped, Vehicle vehicle, Ped target, MissionType missionType, float maxSpeed, VehicleDrivingFlags flags, float minDistance, float stoppingRange, bool againstTraffic)
+        {
+            Natives.TASK_VEHICLE_MISSION_PED_TARGET(ped, vehicle, target, (int)missionType, maxSpeed, (int)flags, minDistance, stoppingRange, againstTraffic);
+            return Task.GetTask(ped, "TASK_VEHICLE_MISSION_PED_TARGET");
+        }
+        public static Task VehicleMission(this Ped ped, Vector3 target, MissionType missionType, float maxSpeed, VehicleDrivingFlags flags, float minDistance, float stoppingRange, bool againstTraffic)
+            => VehicleMission(ped, ped.CurrentVehicle, target, missionType, maxSpeed, flags, minDistance, stoppingRange, againstTraffic);
+        public static Task VehicleMission(this Ped ped, Vehicle vehicle, Vector3 target, MissionType missionType, float maxSpeed, VehicleDrivingFlags flags, float minDistance, float stoppingRange, bool againstTraffic)
+        {
+            Natives.TASK_VEHICLE_MISSION_COORS_TARGET(ped, vehicle, target.X, target.Y, target.Z, (int)missionType, maxSpeed, (int)flags, minDistance, stoppingRange, againstTraffic);
+            return Task.GetTask(ped, "TASK_VEHICLE_MISSION_COORS_TARGET");
+        }
         public static unsafe Task PlayScriptedAnim(this Ped ped,
                                                    AnimationDictionary animationDictionary,
                                                    string animName,
                                                    AnimationFlags flags,
-                                                   string boneMask,
+                                                   BoneMask boneMask,
                                                    float framePosition = 0.0f)
         {
+            if (!animationDictionary.IsLoaded) animationDictionary.LoadAndWait();
             float fpos = framePosition;
             float blendInSpeed = 8f;
             float blendOutSpeed = -8f;
@@ -139,6 +208,7 @@ namespace BarbarianCall.Extensions
             long one = 1;
             long unk1 = 1065353216;
             long unk2 = 1040187392;
+            string bm = boneMask.ToString();
             long[] longs = new long[32];
             long[] longs1 = new long[32];
             fixed (long* ptr1 = &longs1[0])
@@ -147,7 +217,13 @@ namespace BarbarianCall.Extensions
                 ptr2[1] = Marshal.StringToHGlobalAnsi(animationDictionary).ToInt64();
                 ptr2[2] = Marshal.StringToHGlobalAnsi(animName).ToInt64();
                 ptr2[3] = *(long*)&fpos;
-                ptr2[16] = Game.GetHashKey(boneMask);
+                ptr2[4] = unk1;
+                ptr2[5] = unk1;
+                ptr2[9] = unk1;
+                ptr2[10] = unk1;
+                ptr2[14] = unk1;
+                ptr2[15] = unk1;
+                ptr2[16] = Game.GetHashKey(bm);
                 ptr2[17] = *(long*)&blendInSpeed;
                 ptr2[18] = *(long*)&blendOutSpeed;
                 ptr2[19] = minOne;
@@ -170,19 +246,12 @@ namespace BarbarianCall.Extensions
                 ptr1[18] = unk2;
                 ptr1[19] = minOne;
                 CallByHash<uint>(0x126EF75F1E17ABE5, ped, ptr2, ptr1, ptr1, 0.5f, 0.5f);
+                Natives.FORCE_PED_AI_AND_ANIMATION_UPDATE(ped, false, false);
+                animationDictionary.Dismiss();
             }
             return Task.GetTask(ped, "TASK_SCRIPTED_ANIMATION");
         }
         public static void StopEntityAnimation(this Entity entity, AnimationDictionary animDict, string animName) => Natives.STOP_ENTITY_ANIM(entity, animName, animDict.Name, 0);
-        public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM
-        public enum EscortVehicleMode : int
-        {
-            Behind = -1,
-            Ahead,
-            Left,
-            Right,
-            BackLeft,
-            BackRight
-        }   
+        public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM       
     }
 }

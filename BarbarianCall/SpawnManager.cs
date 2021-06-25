@@ -33,28 +33,7 @@ namespace BarbarianCall
                 e.ToString().ToLog();
             }
             return false;
-        }
-        [Flags]
-        private enum NodeFlags
-        {
-            None = 0,
-            IsDisabled = 1,
-            UnknownBit2 = 2,
-            SlowNormalRoad = 4,
-            MinorRoad = 8,
-            TunnelOrUndergroundParking = 16,
-            UnknownBit32 = 32,
-            Freeway = 64,
-            Junction = 128,
-            StopNode = 256,
-            SpecialStopNode = 512,
-            Unk1024 = 1024,
-            Unk2048 = 2048,
-            Unk4096 = 4096,
-            Unk8192 = 8192,
-            Unk6542 = 6542,
-            Restricted = 19,
-        }
+        }    
         internal static void GetFlags(this Vector3 position)
         {
             var valid = Natives.GetVehicleNodeProperties<bool>(position, out uint density, out uint flag);
@@ -64,13 +43,19 @@ namespace BarbarianCall
                 string flagN = "";
                 foreach (NodeFlags node in Enum.GetValues(typeof(NodeFlags)))
                 {
-                    if (nodeFlags.HasFlag(node)) flagN += node.ToString() + " ";
+                    if (nodeFlags.HasFlag(node))
+                    {
+                        flagN += node.ToString() + " ";
+                    }
                 }
                 position.ToString().ToLog();
                 Peralatan.ToLog($"Density: {density}. Flag: {flag}");
                 Peralatan.ToLog(flagN);
             }
-            else "Unsuccessfull Getting node flag value".ToLog();
+            else
+            {
+                "Unsuccessfull Getting node flag value".ToLog();
+            }
         }
         public static bool IsOnScreen(this Vector3 pos) => Natives.xF9904D11F1ACBEC3<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); //GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION
         private static bool IsSlowRoad(Vector3 position) => CallByHash<bool>(0b10_0010_1101_0111_0010_0111_0101_1010_0111_1001_1111_1110_1000_0010_0001_0101, position.X, position.Y, position.Z, 1, 5, 1077936128, 0f);
@@ -87,27 +72,42 @@ namespace BarbarianCall
             Stopwatch sw = Stopwatch.StartNew();
             var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
             var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
+            List<int> flags = new();
+            int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
+            distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount =  0;
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
             for (int i = 1; i < 900; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 35 == 0) GameFiber.Yield();
+                if (i % 35 == 0)
+                {
+                    GameFiber.Yield();
+                }
+
                 if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
                 {
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
                     {                       
                         NodeFlags nodeFlags = (NodeFlags)flag;
+                        flags.Add(flag);
                         if (bl.Any(x => nodeFlags.HasFlag(x)))
                         {
+                            flagCount++;
                             continue;
                         }
                     }
                     else
                     {
+                        propCount++;
                         continue;
                     }
-                    if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared + 25f) continue;
-                    if (nodeP.TravelDistanceTo(pos) < maximumDistance * 2f && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
+                    if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared + 25f)
+                    {
+                        distanceCount++;
+                        continue;
+                    }
+
+                    if (IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
                     {
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
                         {
@@ -116,10 +116,28 @@ namespace BarbarianCall
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();                            
                             ret.Position.GetFlags();
                             return ret;
-                        }                        
+                        }    
+                        else
+                        {
+                            dirCount++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        screenNode++;
+                        continue;
                     }
                 }
+                else
+                {
+                    nodeCount++;
+                    continue;
+                }
             }
+            var groups = flags.GroupBy(v => v).ToList();
+            groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
+            $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, ScreenNode: {screenNode}, Direction: {dirCount}".ToLog();
             "Vehicle spawn point is not found".ToLog();
             return Spawnpoint.Zero;
         }
@@ -129,7 +147,11 @@ namespace BarbarianCall
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 1; i < 600; i++)
             {
-                if (i % 40 == 0) GameFiber.Yield();
+                if (i % 40 == 0)
+                {
+                    GameFiber.Yield();
+                }
+
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)Math.Abs(minimalDistance), (int)Math.Abs(maximumDistance)));
                 if (Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, (i % 5) + 1, out Vector3 nodeP, out float nodeH, 0, 9, 3.0f, 2.5f))
                 {
@@ -158,7 +180,11 @@ namespace BarbarianCall
             for (int i = 1; i < 2000; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 90 == 0) GameFiber.Yield();
+                if (i % 90 == 0)
+                {
+                    GameFiber.Yield();
+                }
+
                 if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE<bool>(v, i % 5, out Vector3 major, 1, 0f, 0f))
                 {
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(major.X, major.Y, major.Z, out int _, out int flag))
@@ -200,7 +226,10 @@ namespace BarbarianCall
                         distanceList.Add(Vector3.DistanceSquared(major, Game.LocalPlayer.Character));
                     }
                 }
-                else nodeCount++;               
+                else
+                {
+                    nodeCount++;
+                }
             }
             $"Safe coord not found".ToLog();
             $"2000 process took {sw.ElapsedMilliseconds} ms".ToLog();
@@ -231,7 +260,10 @@ namespace BarbarianCall
                         }
                     }
                 }
-                if (i % 30 == 0) GameFiber.Yield();
+                if (i % 30 == 0)
+                {
+                    GameFiber.Yield();
+                }
             }
             string.Format("RoadSide favored Spawnpoint is not found after 600 process").ToLog();
             return Spawnpoint.Zero;
@@ -259,7 +291,10 @@ namespace BarbarianCall
                             }
                         }
                     }
-                    if (i % 30 == 0) GameFiber.Yield();
+                    if (i % 30 == 0)
+                    {
+                        GameFiber.Yield();
+                    }
                 }
             }
             else
@@ -280,7 +315,10 @@ namespace BarbarianCall
                             }
                         }
                     }
-                    if (i % 35 == 0) GameFiber.Yield();
+                    if (i % 35 == 0)
+                    {
+                        GameFiber.Yield();
+                    }
                 }
             }
             for (int i = 1; i < 600; i++)
@@ -299,7 +337,10 @@ namespace BarbarianCall
                         }
                     }
                 }
-                if (i % 40 == 0) GameFiber.Yield();
+                if (i % 40 == 0)
+                {
+                    GameFiber.Yield();
+                }
             }
             $"RoadSide position not found".ToLog();
             $"1200 process took {sw.ElapsedMilliseconds} ms".ToLog();
@@ -319,7 +360,11 @@ namespace BarbarianCall
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 0; i < 0b1110000100; i++)
             {
-                if (i % 40 == 0) GameFiber.Yield();
+                if (i % 40 == 0)
+                {
+                    GameFiber.Yield();
+                }
+
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimumDistance, (int)(maximumDistance + 1)));
                 if (Natives.xE50E52416CCF948B<bool>(v.X, v.Y, v.Z, i % 5, out Vector3 randomNode,true, 0f, 0f))
                 {
@@ -380,7 +425,11 @@ namespace BarbarianCall
             };
             for (int i = 0; i < trys; i++)
             {
-                if (i % shouldYieldAt == 0) GameFiber.Yield();
+                if (i % shouldYieldAt == 0)
+                {
+                    GameFiber.Yield();
+                }
+
                 Vector3 around = playerPos.Around2D(Peralatan.Random.Next(250, 500));
                 if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(around.X, around.Y, around.Z, out Vector3 nodePos, out float nodeHeading, 0, 3, 0, 0))
                 {
@@ -434,7 +483,10 @@ namespace BarbarianCall
                                 nodePosition = new(nodePos, nodeHeading);
                                 return ret;
                             }
-                            else safeCount++;
+                            else
+                            {
+                                safeCount++;
+                            }
                         }
                         else
                         {
@@ -442,7 +494,10 @@ namespace BarbarianCall
                         }
                     }
                 }
-                else nodeCount++;
+                else
+                {
+                    nodeCount++;
+                }
             }
             $"Solicitation spawnpoint was not successfull, {sw.ElapsedMilliseconds} ms".ToLog();
             $"Distance: {distanceCount}, Node: {nodeCount} Flag1: {flagCount}, Flag2: {flag2Count}, Safe: {safeCount}, Prop: {propCount}, Ped Node Distance: {pedDisCount}, Density: {densityCount}".ToLog();

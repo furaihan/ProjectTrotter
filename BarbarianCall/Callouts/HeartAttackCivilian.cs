@@ -20,7 +20,8 @@ namespace BarbarianCall.Callouts
         private Ped Paramedic1;
         private Ped Paramedic2;
         private Vehicle Ambulance;
-        private const VehicleDrivingFlags flags = (VehicleDrivingFlags)1078723134;
+        private const VehicleDrivingFlags flags = (VehicleDrivingFlags)786469;
+        private Blip ambulanceBlip;
         private enum CalloutState
         {
             EnRoute,
@@ -143,7 +144,7 @@ namespace BarbarianCall.Callouts
                     GetClose();
                     if (!CalloutRunning) return;
                     AnimationDictionary dictionary = "anim@amb@machinery@vertical_mill@";
-                    List<Ped> ambient = new List<Ped>();
+                    List<Ped> ambient = new();
                     GameFiber.StartNew(() =>
                     {
                         dictionary.LoadAndWait();
@@ -154,13 +155,17 @@ namespace BarbarianCall.Callouts
                                 x.Tasks.Clear();
                                 CalloutEntities.Add(x);
                                 ambient.Add(x);
-                                x.Tasks.FollowNavigationMeshToPosition(Civilian.Position, 0.5f, 5f, -1).WaitForCompletion(-1);
-                                x.Tasks.PlayAnimation(dictionary, "look_at_object_amy_skater_01", 8.0f, AnimationFlags.Loop | AnimationFlags.RagdollOnCollision | AnimationFlags.SecondaryTask);
+                                x.Tasks.AchieveHeading(x.GetHeadingTowards(Civilian)).WaitForCompletion(1000);
+                                x.Tasks.PlayAnimation(dictionary, "look_at_object_amy_skater_01", 8.0f, AnimationFlags.Loop | AnimationFlags.SecondaryTask);
+                                x.PlayAmbientSpeech(Speech.GENERIC_SHOCKED_HIGH);
                             }
                         });
                     });                 
                     Spawnpoint ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 100, 150);
                     if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 80, 200);
+                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 80, 250);
+                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 80, 300);
+                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = new Spawnpoint(World.GetNextPositionOnStreet(CalloutPosition.Around2D(250)), 0f);
                     if (UltimateBackupRunning)
                     {
                         var ubAmb = UltimateBackupFunc.GetUnit(UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, ambulanceSpawn, 2);
@@ -204,8 +209,15 @@ namespace BarbarianCall.Callouts
                         Ambulance.Mods.ApplyAllMods();
                     }
                     bool isClose = false;
-                    var task1 = Paramedic1.DriveTo(CalloutPosition, 25f, MathExtension.GetRandomFloatInRange(15, 21), VehicleDrivingFlags.Emergency);
-                    "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attack Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.RedDark);
+                    var task1 = Paramedic1.DriveTo(Civilian.Position, 35f, 30f, flags);
+                    ambulanceBlip = new Blip(Ambulance)
+                    {
+                        Sprite = (BlipSprite)489,
+                        Name = "Ambulance",
+                        IsFriendly = true, 
+                    };
+                    CalloutBlips.Add(ambulanceBlip);
+                    "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attack Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.RedDark, icon: NotificationIcon.RightJumpingArrow);
                     StopWatch = new();
                     StopWatch.Start();
                     while (CalloutRunning)
@@ -262,8 +274,8 @@ namespace BarbarianCall.Callouts
                             x.Dismiss();
                         }
                     });
-                    Vector3 hospital = Globals.Hospitals.OrderBy(x => Vector3.DistanceSquared(PlayerPed.Position, x.Position)).FirstOrDefault();
-                    Peralatan.DisplayNotifWithLogo("Please escort this ambulance to the hospital", icon: Peralatan.NotificationIcon.Email, hudColor: RAGENativeUI.HudColor.BlueDark);
+                    Spawnpoint hospital = Globals.Hospitals.OrderBy(x => Vector3.DistanceSquared(PlayerPed.Position, x.Position)).FirstOrDefault();
+                    Peralatan.DisplayNotifWithLogo("Please escort this ambulance to the hospital", icon: NotificationIcon.Email, hudColor: RAGENativeUI.HudColor.BlueDark);
                     if (Blip) Blip.Delete();
                     Blip = new Blip(hospital)
                     {
@@ -283,7 +295,7 @@ namespace BarbarianCall.Callouts
                         PlayerPed.CurrentVehicle.IsSirenOn = true;
                         PlayerPed.CurrentVehicle.IsSirenSilent = false;
                     }
-                    if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, TaskExtension.EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
+                    if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
                     Vehicle cv = PlayerPed.CurrentVehicle;
                     while (CalloutRunning)
                     {
@@ -296,36 +308,40 @@ namespace BarbarianCall.Callouts
                                 GameFiber.Yield();
                                 if (PlayerPed.IsInAnyVehicle(false)) break;
                             }
-                            if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, TaskExtension.EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
+                            if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
                         }                                           
                         if (Ambulance.FrontPosition.DistanceToSquared(cv.RearPosition) < 7f || Ambulance.DistanceToSquared(cv) < 15f)
                         {
                             if (Paramedic1) Paramedic1.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(200);
-                            if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, TaskExtension.EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
+                            if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
                         }
-                        if (PlayerPed.DistanceToSquared(hospital) < 625f)
+                        if (PlayerPed.DistanceToSquared(hospital) < 625f && PlayerPed.IsInAnyVehicle(false))
                         {
                             $"Distance: {PlayerPed.DistanceToSquared(hospital)}".ToLog();
                             break;
                         }
                     }
                     if (!CalloutRunning) return;
+                    Game.LocalPlayer.HasControl = false;
                     PlayerPed.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
                     Paramedic1.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait);
                     Game.FadeScreenOut(3000, true);
-                    Vehicle[] car = World.GetEntities(GetEntitiesFlags.ConsiderGroundVehicles | GetEntitiesFlags.ConsiderCars)
-                    .Where(x => x && x.IsVehicle()).Select(x => x as Vehicle).Where(x => x.IsEmpty && x.Speed < 1f && x.IsCar && !x.CreatedByTheCallingPlugin).ToArray();
-                    Vehicle vehicle = car.Where(x => x && x.DistanceTo(hospital) < 50f).GetRandomElement();
-                    if (!vehicle)
-                    {
-                        vehicle = World.GetAllVehicles().Where(x => x && x.IsEmpty && x.Speed < 2f && x.IsDriveable && x.IsCar && !x.CreatedByTheCallingPlugin).OrderBy(x => Vector3.DistanceSquared(PlayerPed.Position, x.Position)).FirstOrDefault();
-                    }
-                    Spawnpoint sp = new(vehicle.Position, vehicle.Heading);
-                    if (vehicle) vehicle.Delete();
-                    cv = PlayerPed.CurrentVehicle;
-                    PlayerPed.CurrentVehicle.Position = sp;
-                    PlayerPed.CurrentVehicle.Heading = sp;
-                    PlayerPed.WarpIntoVehicle(cv, -1);
+                    World.GetEntities(hospital, 8f, GetEntitiesFlags.ConsiderAllVehicles | GetEntitiesFlags.ConsiderAllPeds).Where(x => x && !x.CreatedByTheCallingPlugin && !x.IsPersistent && x.GetAttachedBlips().Length == 0).ToList().ForEach(x =>
+                     {
+                         if (x && x.IsPed()) x.Position = SpawnManager.GetPedSpawnPoint(x.Position, 30f, 200f);
+                         else if (x && x.IsVehicle())
+                         {
+                             Vehicle v = x as Vehicle;
+                             Spawnpoint spv = SpawnManager.GetVehicleSpawnPoint(x.Position, 50, 300);
+                             if (spv == Spawnpoint.Zero) spv = SpawnManager.GetVehicleSpawnPoint(x.Position, 55f, 350f);
+                             if (spv == Spawnpoint.Zero) spv = SpawnManager.GetVehicleSpawnPoint(x.Position, 60f, 360f);
+                             if (spv == Spawnpoint.Zero) spv = SpawnManager.GetVehicleSpawnPoint(x.Position, 70f, 380f);
+                             x.Position = spv;
+                             x.Heading = spv;
+                             if (v.IsEmpty) v.CreateRandomDriver().Dismiss();
+                         }
+                         if (x) x.Dismiss();
+                     });
                     List<Entity> dismiss = new()
                     {
                         Ambulance, Paramedic1, Paramedic2, Civilian
@@ -337,9 +353,20 @@ namespace BarbarianCall.Callouts
                             x.Position = x.IsVehicle() ? SpawnManager.GetVehicleSpawnPoint(x.Position, 150, 400) : SpawnManager.GetPedSpawnPoint(x, 80, 150);
                             x.Dismiss();
                         }
-                    });                   
+                    });
+                    if (ambulanceBlip) ambulanceBlip.Delete();
+                    if (Blip) Blip.Delete();
+                    if (PlayerPed.IsInAnyVehicle(false))
+                    {
+                        PlayerPed.CurrentVehicle.Position = hospital;
+                        PlayerPed.CurrentVehicle.Heading = hospital;
+                    }
+                    else PlayerPed.Position = hospital;
+                    PlayerPed.Tasks.Clear();
+                    Game.LocalPlayer.HasControl = true;
+                    GameFiber.Wait(1000);
                     Game.FadeScreenIn(3000, true);
-                    "~g~Congratulation~s~ you have saved the patient".DisplayNotifWithLogo(icon: Peralatan.NotificationIcon.Email, hudColor: RAGENativeUI.HudColor.GreenDark);
+                    "~g~Congratulation~s~ you have saved the patient".DisplayNotifWithLogo(icon: NotificationIcon.Email, hudColor: RAGENativeUI.HudColor.GreenDark);
                     if (!CalloutRunning) return;
                     End();
                 }

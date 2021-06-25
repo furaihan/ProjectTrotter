@@ -1,5 +1,96 @@
-﻿namespace BarbarianCall.Types
+﻿using System;
+
+namespace BarbarianCall.Extensions
 {
+    public enum MissionType
+    {
+		None = 0,
+		Cruise = 1,
+		Ram = 2,
+		Block = 3,
+		GoTo = 4,
+		Stop = 5,
+		Attack = 6,
+		Follow = 7,
+		Flee = 8,
+		Circle = 9,
+		Escort = 12,
+		FollowRecording = 15,
+		PoliceBehaviour = 16,
+		Land = 19,
+		Land2 = 20,
+		Crash = 21,
+		PullOver = 22,
+		HeliProtect = 23
+	}
+	public enum EscortVehicleMode : int
+	{
+		Behind = -1,
+		Ahead,
+		Left,
+		Right,
+		BackLeft,
+		BackRight
+	}
+	[Flags]
+	internal enum NodeFlags :uint
+	{
+		None = 0,
+		IsDisabled = 1,
+		UnknownBit2 = 2,
+		SlowNormalRoad = 4,
+		MinorRoad = 8,
+		TunnelOrUndergroundParking = 16,
+		UnknownBit32 = 32,
+		Freeway = 64,
+		Junction = 128,
+		StopNode = 256,
+		SpecialStopNode = 512,
+		Unk1024 = 1024,
+		Unk2048 = 2048,
+		Unk4096 = 4096,
+		Unk8192 = 8192,
+		Unk16384 = 16384,
+		Unk32768 = 32768,
+		Unk65536 = 65536,
+		Unk131072 = 131072,
+		Unk262144 = 262144,
+		Unk524288 = 524288,
+		Unk1048576 = 1048576,
+		Unk2097152 = 2097152,
+		Unk4194304 = 4194304,
+		Unk8388608 = 8388608,
+		Unk16777216 = 16777216,
+		Unk33554432 = 33554432,
+		Unk67108864 = 67108864,
+		Unk134217728 = 134217728,
+		Unk268435456 = 268435456,
+		Unk536870912 = 536870912,
+		Unk1073741824 = 1073741824,
+		Unk2147483648 = 2147483648,
+		Unk6542 = 6542,
+		Restricted = 19,
+	}
+	internal enum BoneMask
+    {
+		BONEMASK_HEAD_NECK_AND_R_ARM,
+		BONEMASK_HEADONLY,
+		BONEMASK_HEAD_NECK_AND_L_ARM,
+		FORCED_BONEMASK_HEADONLY,
+		BONEMASK_HEAD_NECK_AND_ARMS,
+		BONEMASK_ARMONLY_R,
+		BONEMASK_UPPERONLY,
+	}
+    internal enum NotificationIcon
+    {
+        ChatBox = 1,
+        Email,
+        AddFriendRequest,
+        Nothing,
+        RightJumpingArrow = 7,
+        RPIcon,
+        DollarSign
+    }
     public enum PedScenario
     {
         Standing,
