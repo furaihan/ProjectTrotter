@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using Rage;
 using N = Rage.Native.NativeFunction;
 using System.Windows.Forms;
@@ -89,9 +90,9 @@ namespace BarbarianCall
         }
         internal static void RandomiseLicensePlate(this Vehicle vehicle)
         {
-            System.Security.Cryptography.RNGCryptoServiceProvider provider = new();
+            RNGCryptoServiceProvider provider = new();
             byte[] box = new byte[16];
-            provider.GetBytes(box);
+            provider.GetBytes(box);          
             Random plateRandomizerHandler = new(BitConverter.ToInt32(box, 0));
             if (vehicle)
             {

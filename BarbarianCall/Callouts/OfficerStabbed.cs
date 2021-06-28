@@ -47,30 +47,30 @@ namespace BarbarianCall.Callouts
             DeclareVariable();
             
             Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(Path.Combine(FilePath, "TrafficStop.xml")));
-            SpawnPoint = Spawn;
+            Position = Spawn;
             SpawnHeading = Spawn;
-            if (SpawnPoint == Vector3.Zero || SpawnHeading == 0f)
+            if (Position == Vector3.Zero || SpawnHeading == 0f)
             {
                 Peralatan.ToLog("Officer Stabbed callout aborted");
                 Peralatan.ToLog("No nearby location found");
                 return false;
             }           
-            ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 40f);
-            AddMinimumDistanceCheck(30f, SpawnPoint);
+            ShowCalloutAreaBlipBeforeAccepting(Position, 40f);
+            AddMinimumDistanceCheck(30f, Position);
             if (Peralatan.Random.Next() % 10 == 0) susVehModel = Globals.MotorBikesToSelect.GetRandomElement(m => m.IsValid && m.NumberOfSeats == 2, true);
             else susVehModel = Globals.CarsToSelect.GetRandomElement(m => m.IsValid, true);
             susVehModel.LoadAndWait();
-            CalloutPosition = SpawnPoint;
+            CalloutPosition = Position;
             CalloutMessage = "Officer Stabbed";
             CalloutAdvisory = $"Suspect vehicle is {susVehModel.GetDisplayName()}";
-            uint zoneHash = Rage.Native.NativeFunction.Natives.GET_HASH_OF_MAP_AREA_AT_COORDS<uint>(SpawnPoint.X, SpawnPoint.Y, SpawnPoint.Z);
+            uint zoneHash = Rage.Native.NativeFunction.Natives.GET_HASH_OF_MAP_AREA_AT_COORDS<uint>(Position.X, Position.Y, Position.Z);
             if (UltimateBackupRunning)
             {
                 Tuple<Vehicle, Ped> ubApi;
                 int offRand = Peralatan.Random.Next(0, 100);
-                if (offRand <= 60) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalPatrol, SpawnPoint);
-                else if (offRand < 90) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.StatePatrol, SpawnPoint);
-                else ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalSwat, SpawnPoint);
+                if (offRand <= 60) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalPatrol, Position);
+                else if (offRand < 90) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.StatePatrol, Position);
+                else ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalSwat, Position);
                 offVeh = ubApi.Item1;
                 officer = ubApi.Item2;
             }
@@ -79,18 +79,18 @@ namespace BarbarianCall.Callouts
                 if (Game.GetHashKey("city") == zoneHash)
                 {
                     string copCarModel = CityCarModels.GetRandomElement();
-                    offVeh = new Vehicle(copCarModel, SpawnPoint, SpawnHeading);
+                    offVeh = new Vehicle(copCarModel, Position, SpawnHeading);
                 }
                 else
                 {
                     string copCarModel = CountrysideCarModels.GetRandomElement();
-                    offVeh = new Vehicle(copCarModel, SpawnPoint, SpawnHeading);
+                    offVeh = new Vehicle(copCarModel, Position, SpawnHeading);
                 }
                 officer = offVeh.CreateRandomDriver();
             }
             officer.MakeMissionPed();
             offVeh.MakePersistent();
-            PlayScannerWithCallsign("WE_HAVE BAR_CRIME_STABBED IN_OR_ON_POSITION", SpawnPoint);
+            PlayScannerWithCallsign("WE_HAVE BAR_CRIME_STABBED IN_OR_ON_POSITION", Position);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -105,12 +105,12 @@ namespace BarbarianCall.Callouts
             offVeh.RandomiseLicensePlate();
             offVeh.IsVisible = true;
             officer.IsVisible = true;
-            Blip = new Blip(SpawnPoint, 45f);
+            Blip = new Blip(Position, 45f);
             Blip.Color = Color.Yellow;
             Blip.EnableRoute(Color.Yellow);
-            Spawnpoint tempSpawn = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 250f, 350f);
+            Spawnpoint tempSpawn = SpawnManager.GetVehicleSpawnPoint(Position, 250f, 350f);
             if (tempSpawn != Spawnpoint.Zero) SuspectCar = new Vehicle(susVehModel, tempSpawn, tempSpawn);
-            else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(SpawnPoint.Around(300f)));
+            else SuspectCar = new Vehicle(susVehModel, World.GetNextPositionOnStreet(Position.Around(300f)));
             SuspectCar.SetRandomColor();
             SuspectCar.RandomiseLicensePlate();
             SuspectCar.Metadata.BAR_Entity = true;
@@ -125,7 +125,7 @@ namespace BarbarianCall.Callouts
             if (Peralatan.Random.Next(1, 10) > 7)
             {
                 GameFiber.Sleep(1);
-                passenger = new Ped(SpawnPoint, SpawnHeading);
+                passenger = new Ped(Position, SpawnHeading);
                 passenger.WarpIntoVehicle(SuspectCar, 0);
                 passenger.MakeMissionPed();
                 passenger.Metadata.BAR_Entity = true;
@@ -303,7 +303,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    offVeh.Position = SpawnPoint;
+                    offVeh.Position = Position;
                     offVeh.Heading = SpawnHeading;
                     officer.Tasks.LeaveVehicle(LeaveVehicleFlags.None).WaitForCompletion(4000);
                     if (officer.IsInVehicle(offVeh, false)) officer.Position = offVeh.GetOffsetPosition(Vector3.RelativeLeft * 2f);
@@ -316,13 +316,13 @@ namespace BarbarianCall.Callouts
                     "We have send an ambulance to your location".DisplayNotifWithLogo("Officer Stabbed");
                     if (Initialization.IsLSPDFRPluginRunning("BetterEMS"))
                     {
-                        API.BetterEMSFunc.CallAmbulance(SpawnPoint);
+                        API.BetterEMSFunc.CallAmbulance(Position);
                     }
                     else Functions.RequestBackup(officer.Position, LSPD_First_Response.EBackupResponseType.Code3, LSPD_First_Response.EBackupUnitType.Ambulance);
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (Game.LocalPlayer.Character.Position.DistanceToSquared(SpawnPoint) < 169f) break;
+                        if (Game.LocalPlayer.Character.Position.DistanceToSquared(Position) < 169f) break;
                     }
                     if (!CalloutRunning) return;
                     Functions.PlayPlayerRadioAction(Functions.GetPlayerRadioAction(), 5000);
@@ -450,7 +450,7 @@ namespace BarbarianCall.Callouts
                 try
                 {
                     CalloutRunning = true;
-                    offVeh.Position = SpawnPoint;
+                    offVeh.Position = Position;
                     offVeh.Heading = SpawnHeading;
                     SuspectCar.Position = offVeh.Position + offVeh.ForwardVector * 9f;
                     SuspectCar.Heading = SpawnHeading;
@@ -514,7 +514,7 @@ namespace BarbarianCall.Callouts
                     {
                         GameFiber.StartNew(() =>
                         {
-                            if (PlayerPed.LastVehicle.Exists() && PlayerPed.LastVehicle.DistanceTo(SpawnPoint) < 85f)
+                            if (PlayerPed.LastVehicle.Exists() && PlayerPed.LastVehicle.DistanceTo(Position) < 85f)
                             {
                                 passenger.Tasks.FollowNavigationMeshToPosition(PlayerPed.LastVehicle.GetOffsetPosition(Vector3.RelativeBack * 2f), PlayerPed.LastVehicle.Heading - 180f, 10f).WaitForCompletion(-1);
                                 passenger.Tasks.Cower(-1);
@@ -587,7 +587,7 @@ namespace BarbarianCall.Callouts
                     AmbulanceModel.LoadAndWait();
                     NotepadModel.LoadAndWait();
                     CalloutRunning = true;
-                    offVeh.Position = SpawnPoint;
+                    offVeh.Position = Position;
                     offVeh.Heading = SpawnHeading;
                     if (Peralatan.Random.Next(100) % 2 == 0) 
                     { 
@@ -613,14 +613,14 @@ namespace BarbarianCall.Callouts
                     Ambulance.RandomiseLicensePlate();
                     if (UltimateBackupRunning)
                     {
-                        Paramedic1 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
-                        Paramedic2 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, SpawnPoint, SpawnHeading);
+                        Paramedic1 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, Position, SpawnHeading);
+                        Paramedic2 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, Position, SpawnHeading);
                     }
                     else
                     {
                         AmbulancePedModel.LoadAndWait();
-                        Paramedic1 = new Ped(AmbulancePedModel, SpawnPoint, SpawnHeading);
-                        Paramedic2 = new Ped(AmbulancePedModel, SpawnPoint, SpawnHeading);
+                        Paramedic1 = new Ped(AmbulancePedModel, Position, SpawnHeading);
+                        Paramedic2 = new Ped(AmbulancePedModel, Position, SpawnHeading);
                     }
                     Paramedic1.RelationshipGroup = RelationshipGroup.Medic;
                     Paramedic2.RelationshipGroup = RelationshipGroup.Medic;
@@ -686,8 +686,8 @@ namespace BarbarianCall.Callouts
                     GameFiber.WaitUntil(() => !Functions.GetIsAudioEngineBusy(), 5000);
                     if (Suspect.DistanceTo(PlayerPed) > 850f || Suspect.TravelDistanceTo(PlayerPed) > 1250f)
                     {
-                        Spawnpoint closer = SpawnManager.GetVehicleSpawnPoint(SpawnPoint, 350, 650);
-                        if (closer == Spawnpoint.Zero) closer = new Spawnpoint(World.GetNextPositionOnStreet(SpawnPoint.Around(350, 650)), 0f);
+                        Spawnpoint closer = SpawnManager.GetVehicleSpawnPoint(Position, 350, 650);
+                        if (closer == Spawnpoint.Zero) closer = new Spawnpoint(World.GetNextPositionOnStreet(Position.Around(350, 650)), 0f);
                         SuspectCar.Position = closer;
                         SuspectCar.Heading = closer;
                     }
@@ -789,11 +789,11 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {                   
-                    offVeh.Position = SpawnPoint;
+                    offVeh.Position = Position;
                     offVeh.Heading = SpawnHeading;
                     if (!passenger)
                     {
-                        passenger = new Ped(SpawnPoint);
+                        passenger = new Ped(Position);
                         passenger.MakeMissionPed();
                         passenger.SetPedAsWanted();
                         passenger.RelationshipGroup = Suspect.RelationshipGroup;
@@ -842,11 +842,11 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    offVeh.Position = SpawnPoint;
+                    offVeh.Position = Position;
                     offVeh.Heading = SpawnHeading;
                     if (!passenger)
                     {
-                        passenger = new Ped(SpawnPoint);
+                        passenger = new Ped(Position);
                         passenger.MakeMissionPed();
                         passenger.SetPedAsWanted();
                         passenger.RelationshipGroup = Suspect.RelationshipGroup;

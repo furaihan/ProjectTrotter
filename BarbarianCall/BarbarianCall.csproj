@@ -51,7 +51,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="RAGENativeUI, Version=1.8.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\RAGENativeUI.1.8.0-rc7\lib\net472\RAGENativeUI.dll</HintPath>
+      <HintPath>..\packages\RAGENativeUI.1.8.0\lib\net472\RAGENativeUI.dll</HintPath>
     </Reference>
     <Reference Include="RagePluginHook, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\packages\RagePluginHook.1.86.1\lib\net472\RagePluginHook.dll</HintPath>
@@ -94,10 +94,12 @@
     <Compile Include="Callouts\TaxiRefusePay.cs" />
     <Compile Include="Callouts\WantedFelonOnTheLoose.cs" />
     <Compile Include="Commands.cs" />
-    <Compile Include="Extensions\Enums.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="Extensions\MathExtension.cs" />
     <Compile Include="Extensions\SyncSceneTick.cs" />
     <Compile Include="Extensions\XmlExtension.cs" />
+    <Compile Include="Freemode\Outfits.cs" />
+    <Compile Include="Freemode\PedComponentCollection.cs" />
     <Compile Include="Freemode\PedFaceFeature.cs" />
     <Compile Include="Freemode\HeadOverlay.cs" />
     <Compile Include="Freemode\PedHeadOverlay.cs" />
@@ -125,6 +127,7 @@
     <Compile Include="SpawnManager.cs" />
     <Compile Include="SupportUnit\HeliSupport.cs" />
     <Compile Include="SupportUnit\Mechanic.cs" />
+    <Compile Include="SupportUnit\MilitarySupport.cs" />
     <Compile Include="Types\Checkpoint.cs" />
     <Compile Include="Freemode\HeadBlend.cs" />
     <Compile Include="Types\Manusia.cs" />

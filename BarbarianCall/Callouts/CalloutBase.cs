@@ -25,7 +25,7 @@ namespace BarbarianCall.Callouts
         public List<Model> GangModels;
         public Blip Blip;
         public bool CalloutRunning = false;
-        public Vector3 SpawnPoint = Vector3.Zero;
+        public Vector3 Position = Vector3.Zero;
         public float SpawnHeading = 0f;
         public Spawnpoint Spawn = Spawnpoint.Zero;
         public long Timer;

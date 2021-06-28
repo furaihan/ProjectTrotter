@@ -43,14 +43,14 @@ namespace BarbarianCall.Extensions
                     scale.Y, scale.Z, color.R, color.G, color.B, color.A, bobUpAndDown, faceCamera, 2, rotateY, null, null, drawOnEntity);
             }
         }
-        internal static Model GetRandomMaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsMale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
-        internal static Model GetRandomFemaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsFemale && !x.IsFreemodePed()).Select(x => x.Model).GetRandomElement();
+        internal static Model GetRandomMaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsMale && !x.IsFreemodePed() && !L.IsPedACop(x) && !x.CreatedByTheCallingPlugin).Select(x => x.Model).GetRandomElement();
+        internal static Model GetRandomFemaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsFemale && !x.IsFreemodePed() && !L.IsPedACop(x) && !x.CreatedByTheCallingPlugin).Select(x => x.Model).GetRandomElement();
         internal static Model[] GetAudibleVehicleModel()
         {
             IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
             return Model.VehicleModels.Where(m => files.Any(s => s.ToLower().Contains(m.Name.ToLower()))).ToArray();
         }
-        private static bool IsFreemodePed(this Ped ped) => ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8;
+        internal static bool IsFreemodePed(this Ped ped) => ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8;
         internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);        
         internal static string GetVehicleMakeName(Model model) => NativeFunction.Natives.xF7AF4F159FF99F97<string>(model.Hash);
         internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
@@ -62,11 +62,25 @@ namespace BarbarianCall.Extensions
             RelationshipGroup[] bl = { RelationshipGroup.Cop, RelationshipGroup.Medic, RelationshipGroup.Army, RelationshipGroup.PrivateSecurity, RelationshipGroup.Fireman, RelationshipGroup.SecurityGuard };
             return ped && !ped.CreatedByTheCallingPlugin && ped.IsHuman && ped.GetAttachedBlips().Length == 0 && ped.IsOnFoot && !L.IsPedACop(ped) && !bl.Contains(ped.RelationshipGroup) && !ped.IsPlayer;
         }
+        internal static Ped GetRandomHatedPed(this Ped ped)
+        {
+            var pds = ped.GetNearbyPeds(16).Where(x => x && NativeFunction.Natives.GET_RELATIONSHIP_BETWEEN_PEDS<Relationship>(ped, x) == Relationship.Hate);
+            Ped ret = null;
+            if (pds.Any(x => x)) ret = pds.Where(x => x).OrderBy(x => x.DistanceToSquared(ped)).FirstOrDefault();
+            if (ret) return ret;
+            var pds1 = World.GetAllPeds();
+            return pds1.Where(x => x && NativeFunction.Natives.GET_RELATIONSHIP_BETWEEN_PEDS<Relationship>(x, ped) == Relationship.Hate).OrderBy(x => x.DistanceToSquared(ped)).FirstOrDefault();
+        }
+        public static bool IsTaskActive(this Ped ped, PedTask task)
+        {
+            return NativeFunction.Natives.GET_IS_TASK_ACTIVE<bool>(ped, (int)task);
+        }
         internal static bool IsPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
         internal static bool IsVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
         internal static bool IsObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);
-        internal static int GetVehicleLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
-        internal static void SetVehicleLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);  
+        internal static int GetLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
+        internal static void SetLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
+        internal static bool IsStuckOnRoof(this Vehicle vehicle) => NativeFunction.Natives.IS_VEHICLE_STUCK_ON_ROOF<bool>(vehicle);
         internal static string GetCardinalDirection(this Entity e, bool fullform) => GetCardinalDirection(e.Heading, fullform);
         internal static string GetCardinalDirection(this Entity e) => GetCardinalDirection(e.Heading, false);
         /// <summary>
@@ -74,7 +88,7 @@ namespace BarbarianCall.Extensions
         /// </summary>
         /// <param name="vehicle"></param>
         /// <returns>return true if the operation was successful, otherwise false</returns>
-        internal static bool PlaceOnGroundProperly(this Vehicle vehicle) => NativeFunction.Natives.SET_VEHICLE_ON_GROUND_PROPERLY<bool>(vehicle);
+        internal static bool PlaceOnGroundProperly(this Vehicle vehicle) => NativeFunction.Natives.SET_VEHICLE_ON_GROUND_PROPERLY<bool>(vehicle, 5.0f);
         internal static string GetCardinalDirection(float direction, bool fullform)
         {
             float degrees = Math.Abs(direction);

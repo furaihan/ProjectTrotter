@@ -62,7 +62,6 @@
                 headBlendData.shapeThirdID, headBlendData.skinFirstID, headBlendData.skinSecondID,
                 headBlendData.skinThirdID, headBlendData.shapeMix, headBlendData.skinMix, headBlendData.thirdMix,
                 headBlendData.isParent);
-            GameFiber.SleepUntil(() => HasPedHeadBlendFinished(ped), 5000);
         }
 
         public static void UpdatePedHeadBlendData(Ped ped, float shapeMix, float skinMix, float thirdMix)

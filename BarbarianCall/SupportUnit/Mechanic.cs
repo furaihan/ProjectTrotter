@@ -154,8 +154,7 @@ namespace BarbarianCall.SupportUnit
                         if (MechanicPed)
                             MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.GoForwardStraight).WaitForCompletion(500);
                         if (Game.LocalPlayer.Character.IsAlive) Game.LocalPlayer.Character.ToggleMobilePhone();
-                        Task task = MechanicPed.Tasks.DriveToPosition(drivePosition, MaximumSpeed, VehicleDrivingFlags.FollowTraffic
-                            | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowMedianCrossing | VehicleDrivingFlags.YieldToCrossingPedestrians);
+                        Task task = MechanicPed.Tasks.DriveToPosition(drivePosition, MaximumSpeed, (VehicleDrivingFlags)786603);
                         int slow = 0;
                         bool warped = false;
                         bool findRoadSide = false;
@@ -229,7 +228,7 @@ namespace BarbarianCall.SupportUnit
                                     if (MechanicPed) MechanicPed.Tasks.PerformDrivingManeuver(VehicleManeuver.ReverseStraight).WaitForCompletion(1500);
                                     if (MechanicPed)
                                     {
-                                        task = MechanicPed.ParkVehicle(roadSide, roadSide);
+                                        task = MechanicPed.VehicleMission(roadSide, MissionType.PullOver, 8f, VehicleDrivingFlags.Normal, 0.1f, 0.1f, true);
                                         task.WaitForCompletion(20000);
                                         if (task.IsActive)
                                         {
@@ -258,12 +257,11 @@ namespace BarbarianCall.SupportUnit
                         }
                         if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
                         State = EMechanicState.Arrive;
-                        Vector3 ofset = Vector3.Zero;
-                        if (MechanicVehicle) ofset = Extension.GetOffsetFromEntityGivenWorldCoords(MechanicVehicle, MechanicVehicle.RearPosition);
                         if (MechanicPed) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.None).WaitForCompletion(5000);
                         if (MechanicPed && !MechanicPed.IsOnFoot) MechanicPed.Tasks.LeaveVehicle(MechanicVehicle, LeaveVehicleFlags.WarpOut);
                         if (MechanicPed) MechanicPed.PlayAmbientSpeech(Speech.GENERIC_HI);
-                        if (MechanicPed && MechanicVehicle) MechanicPed.FollowToOfsettOfEntity(MechanicVehicle, ofset, 1.5f, 1f, true).WaitForCompletion(12000);
+                        if (MechanicVehicle) MechanicVehicle.IsPositionFrozen = true;
+                        if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.FollowNavigationMeshToPosition(MechanicVehicle.RearPosition, MechanicVehicle.Heading, 1f);
                         if (MechanicPed && MechanicVehicle) MechanicPed.Tasks.AchieveHeading(MechanicPed.GetHeadingTowards(MechanicVehicle)).WaitForCompletion(2000);
                         if (MechanicPed) MechanicPed.Tasks.PlayAnimation("rcmepsilonism8", "bag_handler_close_trunk_walk_left", 4f, AnimationFlags.UpperBodyOnly | AnimationFlags.NoSound1 | AnimationFlags.SecondaryTask);
                         ToolBox1 = new Rage.Object("ch_prop_toolbox_01a", Vector3.Zero);
@@ -274,21 +272,23 @@ namespace BarbarianCall.SupportUnit
                         GameFiber.Wait(2000);
                         if (ToolBox1) ToolBox1.AttachTo(MechanicPed, bone, new(0.24f, -0.050f, -0.050f), new(-99.9999924f, -100.000015f, -1.90734863e-06f));
                         GameFiber.Wait(1000);
-                        if (MechanicPed) MechanicPed.Tasks.ClearImmediately();
+                        if (MechanicPed) MechanicPed.Tasks.Clear();
                         if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
+                        GameFiber.Wait(Peralatan.Random.Next(1000, 2001));
                         State = EMechanicState.GetCloseWithVehicle;
                         Vector3 repairPos = VehicleToFix.FrontPosition + (VehicleToFix.ForwardVector * 0.25f);
                         jc.LoadAndWait();
                         VehicleToFix.IsPositionFrozen = true;
                         var runtask = MechanicPed.Tasks.FollowNavigationMeshToPosition(repairPos, repairPos.GetHeadingTowards(VehicleToFix), 10f);
+                        if (MechanicPed)
+                            JerryCan = MechanicPed.Tasks.PlayAnimation(jc, "run", 4.0f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.Loop);
+                        MechanicPed.KeepTasks = true;
                         runtask.WaitForCompletion(100000);
                         if (MechanicPed.DistanceTo(repairPos) > 15f || runtask.Status == TaskStatus.Interrupted)
                         {
                             MechanicPed.Position = repairPos;
                             MechanicPed.Heading = MechanicPed.GetHeadingTowards(VehicleToFix);
-                        }
-                        if (MechanicPed)
-                            JerryCan = MechanicPed.Tasks.PlayAnimation(jc, "run", 4.0f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask | AnimationFlags.Loop);
+                        }                      
                         if (VehicleToFix)
                             RepairVehicle();
                         else throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
@@ -376,7 +376,7 @@ namespace BarbarianCall.SupportUnit
                 else
                 {
                     OpenHood(VehicleToFix, false);
-                    selectedTalk = "~b~Mechanic~s~: " + "I am sorry sir, i cant fix the vehicle";           
+                    selectedTalk = "~b~Mechanic~s~: " + $"I am sorry {string.Format("{0}", Game.LocalPlayer.Character.IsMale ? "sir" : "maam")}, i cant fix that vehicle";           
                     RepairStatus = ERepairStatus.Failed;
                 }
                 VehicleToFix.IsPositionFrozen = false;

@@ -11,6 +11,7 @@ using Rage.ConsoleCommands.AutoCompleters;
 using Rage.Attributes;
 using BarbarianCall.Extensions;
 using BarbarianCall.Types;
+using BarbarianCall.SupportUnit;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 using LSPD_First_Response.Mod.API;
@@ -140,7 +141,7 @@ namespace BarbarianCall
                 choiceUI.Opacity = 150;
                 choiceUI.BackgroundSize = new Size(520, 680);
                 choiceUI.Point = new Point(30, 40);
-                choiceUI.TextScale = 40;
+                choiceUI.TextScale = 0.40f;
                 choiceUI.Process();
                 Stopwatch sw = Stopwatch.StartNew();
                 string selected = "Timeout";
@@ -179,7 +180,10 @@ namespace BarbarianCall
             GameFiber.StartNew(() =>
             {
                 GameFiber.Wait(20);
-                Stopwatch stopwatch = Stopwatch.StartNew();               
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                NativeFunction.Natives.REQUEST_STREAMED_TEXTURE_DICT("CHAR_TREVOR");
+                NativeFunction.Natives.REQUEST_STREAMED_TEXTURE_DICT("CHAR_FRANKLIN");
+                GameFiber.Wait(2000);
                 NativeFunction.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("");
                 NativeFunction.Natives.END_TEXT_COMMAND_THEFEED_POST_VERSUS_TU("CHAR_TREVOR", "CHAR_TREVOR", 25, "CHAR_FRANKLIN", "CHAR_FRANKLIN", 26, (int)HudColor.TrevorDark, (int)HudColor.FranklinDark);
             });            
@@ -201,6 +205,27 @@ namespace BarbarianCall
             {
                 SyncSceneTick.ChairSit();
             });
+        }
+        private static List<HeliSupport> Helis = new List<HeliSupport>();
+        [ConsoleCommand]
+        private static void Command_CallHeli([ConsoleCommandParameter(AutoCompleterType =typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
+        {
+            if (vehicle)
+            {
+                HeliSupport heli = new(vehicle);
+                Helis.Add(heli);
+            }
+        }
+        [ConsoleCommand]
+        private static void Command_CleanUpHeli()
+        {
+            if (Helis.Any()) Helis.ForEach(x => x?.CleanUp());
+            Helis = new List<HeliSupport>();
+        }
+        [ConsoleCommand]
+        private static void Commad_ModVehicle([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
+        {
+            if (vehicle) vehicle.Mods.ApplyAllMods();
         }
     }
 }

@@ -38,20 +38,20 @@ namespace BarbarianCall.Callouts
             CalloutRunning = false;
             DeclareVariable();
             Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "TrafficStop.xml")));
-            SpawnPoint = Spawn;
+            Position = Spawn;
             SpawnHeading = Spawn;
-            if (SpawnPoint == Vector3.Zero || SpawnHeading == 0f)
+            if (Position == Vector3.Zero || SpawnHeading == 0f)
             {
                 Peralatan.ToLog("Officer Stabbed callout aborted");
                 Peralatan.ToLog("No nearby location found");
                 return false;
             }
-            ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 20f);
-            AddMinimumDistanceCheck(100f, SpawnPoint);
-            CalloutPosition = SpawnPoint;
+            ShowCalloutAreaBlipBeforeAccepting(Position, 20f);
+            AddMinimumDistanceCheck(100f, Position);
+            CalloutPosition = Position;
             CalloutMessage = "Taxi Refuse Pay";
             SuspectStopped = false;
-            PlayScannerWithCallsign("CITIZENS_REPORT BAR_CRIME_CIVILIAN_NEEDING_ASSISTANCE IN_OR_ON_POSITION", SpawnPoint);
+            PlayScannerWithCallsign("CITIZENS_REPORT BAR_CRIME_CIVILIAN_NEEDING_ASSISTANCE IN_OR_ON_POSITION", Position);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -61,7 +61,7 @@ namespace BarbarianCall.Callouts
             TaxiModel.LoadAndWait();
             TaxiRelation = new RelationshipGroup("TAXI");
             CriminalRelation = new RelationshipGroup("CRIMINAL");
-            Taxi = new Vehicle(TaxiModel, SpawnPoint, SpawnHeading);
+            Taxi = new Vehicle(TaxiModel, Position, SpawnHeading);
             Taxi.MakePersistent();
             Taxi.Mods.ApplyAllMods();
             Taxi.RandomiseLicensePlate();
@@ -69,14 +69,14 @@ namespace BarbarianCall.Callouts
             TaxiDriver.MakeMissionPed();
             TaxiDriver.RelationshipGroup = TaxiRelation;
             TaxiDriver.MaxHealth = 1000;
-            Suspect = new Ped(SpawnPoint);
+            Suspect = new Ped(Position);
             Suspect.WarpIntoVehicle(Taxi, 2);
             Suspect.MakeMissionPed();
             Suspect.RelationshipGroup = CriminalRelation;
             Suspect.MaxHealth = 1500;
             Suspect.FatalInjuryHealthThreshold.ToString().ToLog();
             SuspectPersona = Functions.GetPersonaForPed(Suspect);
-            Blip = new Blip(SpawnPoint, 45f);
+            Blip = new Blip(Position, 45f);
             Blip.Color = Color.Yellow;
             Blip.EnableRoute(Color.Yellow);
             Game.SetRelationshipBetweenRelationshipGroups(TaxiRelation, CriminalRelation, Relationship.Hate);
@@ -172,7 +172,7 @@ namespace BarbarianCall.Callouts
         {
             while (CalloutRunning)
             {
-                if (PlayerPed.DistanceToSquared(SpawnPoint) < 2025f)
+                if (PlayerPed.DistanceToSquared(Position) < 2025f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                     if (Menus.PauseMenu.onSceneAudio.Checked)
@@ -193,7 +193,7 @@ namespace BarbarianCall.Callouts
                 {
                     CalloutRunning = true;
                     if (Suspect) Suspect.Delete();
-                    Suspect = new Ped(Extension.GetRandomMaleModel(), SpawnPoint, SpawnHeading);
+                    Suspect = new Ped(Extension.GetRandomMaleModel(), Position, SpawnHeading);
                     Suspect.WarpIntoVehicle(Taxi, 2);
                     SuspectPersona = Functions.GetPersonaForPed(Suspect);
                     GameFiber.Wait(200);
@@ -300,7 +300,7 @@ namespace BarbarianCall.Callouts
                     bool alerted = false;
                     while (CalloutRunning)
                     {
-                        if (PlayerPed.DistanceToSquared(SpawnPoint) < 2025f)
+                        if (PlayerPed.DistanceToSquared(Position) < 2025f)
                         {
                             if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                             if (Menus.PauseMenu.onSceneAudio.Checked)
@@ -311,7 +311,7 @@ namespace BarbarianCall.Callouts
                         }
                         if (DateTime.UtcNow >= Time && !Game.IsPaused && !alerted)
                         {
-                            PlayScannerWithCallsign("WE_HAVE BAR_CRIME_ASSAULT IN_OR_ON_POSITION", SpawnPoint);
+                            PlayScannerWithCallsign("WE_HAVE BAR_CRIME_ASSAULT IN_OR_ON_POSITION", Position);
                             "~b~Dispatch~s~: ~y~We have report that the taxi driver is being held at gunpoint, respond ~r~Code 3~s~".DisplayNotifWithLogo("Taxi Passenger Refuse To Pay");
                             alerted = true;
                             GameFiber.WaitUntil(() => !Functions.GetIsAudioEngineBusy(), 8500);
@@ -458,14 +458,14 @@ namespace BarbarianCall.Callouts
                     Suspect.IsVisible = false;
                     Functions.AddPedContraband(Suspect, ContrabandType.Weapon, "Pistol");
                     if (StopThePedRunning) API.StopThePedFunc.InjectPedItem(Suspect, "~r~Pistol");
-                    Witness = new Ped(SpawnPoint, SpawnHeading);
+                    Witness = new Ped(Position, SpawnHeading);
                     Witness.MakeMissionPed();
                     WitnessCar = new Vehicle(Globals.CarsToSelect.GetRandomElement(m => m.IsValid, true),
                         Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
                     Witness.WarpIntoVehicle(WitnessCar, -1);
                     if (Peralatan.Random.Next() % 5 == 0)
                     {
-                        Ped witnPass = new(SpawnPoint, SpawnHeading);
+                        Ped witnPass = new(Position, SpawnHeading);
                         witnPass.MakeMissionPed();
                         witnPass.WarpIntoVehicle(WitnessCar, 0);
                         CalloutEntities.Add(witnPass);
@@ -499,8 +499,8 @@ namespace BarbarianCall.Callouts
                         }
                     }
                     if (!CalloutRunning) return;
-                    Spawnpoint spawnPoint = SpawnManager.GetPedSpawnPoint(SpawnPoint, 250, 350);
-                    if (spawnPoint.Position == Vector3.Zero) spawnPoint.Position = World.GetNextPositionOnStreet(SpawnPoint.Around(250, 650f));
+                    Spawnpoint spawnPoint = SpawnManager.GetPedSpawnPoint(Position, 250, 350);
+                    if (spawnPoint.Position == Vector3.Zero) spawnPoint.Position = World.GetNextPositionOnStreet(Position.Around(250, 650f));
                     Suspect.Position = spawnPoint;
                     Suspect.IsVisible = true;
                     Suspect.Tasks.Wander();

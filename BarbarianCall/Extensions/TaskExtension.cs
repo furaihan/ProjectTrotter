@@ -150,7 +150,7 @@ namespace BarbarianCall.Extensions
         /// <param name="behaviorFlags"></param>
         /// <returns>The <see cref="Task"/> represent this method</returns>
         /// <remarks>Notes updated by PNWParksFan, May 2021</remarks>
-        public static Task HeliMission(Ped pilot,
+        public static Task HeliMission(this Ped pilot,
                                        Vehicle heli,
                                        Vehicle targetVeh,
                                        Ped targetPed,

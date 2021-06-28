@@ -24,9 +24,9 @@ namespace BarbarianCall.Callouts
             FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
             List<Types.Spawnpoint> spawnPoints = DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "SuspiciousVehicle.xml"));
             Spawn = Peralatan.SelectNearbySpawnpoint(spawnPoints);
-            SpawnPoint = Spawn;
+            Position = Spawn;
             SpawnHeading = Spawn;
-            if (SpawnPoint == Vector3.Zero || SpawnHeading == 0f)
+            if (Position == Vector3.Zero || SpawnHeading == 0f)
             {
                 Peralatan.ToLog("Strange Looking Vehicle callout aborted");
                 Peralatan.ToLog("No nearby location found");
@@ -37,12 +37,12 @@ namespace BarbarianCall.Callouts
             SuspectCar = new Vehicle(CarModel, Spawn, Spawn);
             SuspectCar.MakePersistent();
             SuspectCar.PlaceOnGroundProperly();
-            ShowCalloutAreaBlipBeforeAccepting(SpawnPoint, 15f);
-            AddMinimumDistanceCheck(30f, SpawnPoint);          
-            CalloutPosition = SpawnPoint;
+            ShowCalloutAreaBlipBeforeAccepting(Position, 15f);
+            AddMinimumDistanceCheck(30f, Position);          
+            CalloutPosition = Position;
             CalloutMessage = "Suspicious Vehicle";
             CalloutAdvisory = $"Vehicle is {SuspectCar.GetDisplayName()}";
-            PlayScannerWithCallsign($"CITIZENS_REPORT BAR_SUSPICIOUS_VEHICLE IN_OR_ON_POSITION", SpawnPoint);
+            PlayScannerWithCallsign($"CITIZENS_REPORT BAR_SUSPICIOUS_VEHICLE IN_OR_ON_POSITION", Position);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
@@ -57,7 +57,7 @@ namespace BarbarianCall.Callouts
             SuspectState = ESuspectStates.InAction;
             if (Peralatan.Random.Next() % 4 == 0)
             {
-                Passenger = new Ped(GangModels.GetRandomElement(m=> m.IsValid), SpawnPoint, SpawnHeading);
+                Passenger = new Ped(GangModels.GetRandomElement(m=> m.IsValid), Position, SpawnHeading);
                 CalloutEntities.Add(Passenger);
                 Passenger.WarpIntoVehicle(SuspectCar, 0);
                 Passenger.MakeMissionPed();
@@ -128,7 +128,7 @@ namespace BarbarianCall.Callouts
             while (CalloutRunning)
             {
                 GameFiber.Yield();
-                if (Game.LocalPlayer.Character.DistanceToSquared(SpawnPoint) < 2025f)
+                if (Game.LocalPlayer.Character.DistanceToSquared(Position) < 2025f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);
                     break;

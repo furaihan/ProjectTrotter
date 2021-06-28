@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
-using System.Text;
-using System.Threading.Tasks;
 using Rage;
 using LSPDFR = LSPD_First_Response.Mod.API.Functions;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using BarbarianCall.Extensions;
+using BarbarianCall.SupportUnit;
 using BarbarianCall.Types;
 using BarbarianCall.API;
 
@@ -20,8 +19,9 @@ namespace BarbarianCall.Callouts
         private Ped Paramedic1;
         private Ped Paramedic2;
         private Vehicle Ambulance;
-        private const VehicleDrivingFlags flags = (VehicleDrivingFlags)786469;
+        private const VehicleDrivingFlags flags = VehicleDrivingFlags.DriveAroundPeds | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.AllowWrongWay | VehicleDrivingFlags.AllowMedianCrossing;
         private Blip ambulanceBlip;
+        private HeliSupport heli;
         private enum CalloutState
         {
             EnRoute,
@@ -208,13 +208,14 @@ namespace BarbarianCall.Callouts
                         }
                         Ambulance.Mods.ApplyAllMods();
                     }
-                    bool isClose = false;
-                    var task1 = Paramedic1.DriveTo(Civilian.Position, 35f, 30f, flags);
+                    var task1 = Paramedic1.VehicleMission(Civilian, MissionType.GoTo, 35f, flags, -1f, 35f, true);
                     ambulanceBlip = new Blip(Ambulance)
                     {
                         Sprite = (BlipSprite)489,
                         Name = "Ambulance",
-                        IsFriendly = true, 
+                        IsFriendly = true,
+                        Scale = 1.25f,
+                        Color = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.RadarHealth),
                     };
                     CalloutBlips.Add(ambulanceBlip);
                     "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attack Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.RedDark, icon: NotificationIcon.RightJumpingArrow);
@@ -223,23 +224,18 @@ namespace BarbarianCall.Callouts
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (!task1.IsActive || StopWatch.ElapsedMilliseconds > 60000) 
+                        if (!task1.IsActive || StopWatch.ElapsedMilliseconds > 100000) 
                         {
                             $"Task Status: {task1.Status}, Elapsed: {StopWatch.ElapsedMilliseconds} ms".ToLog();
                             break; 
-                        }
-                        if (Ambulance.DistanceToSquared(Civilian) < 625f && !isClose)
-                        {
-                            if (Paramedic1) Paramedic1.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(500);
-                            task1 = Paramedic1.DriveTo(CalloutPosition, 25f, MathExtension.GetRandomFloatInRange(15, 21), VehicleDrivingFlags.Emergency);
-                            isClose = true;
-                        }
+                        }                        
                     }
                     if (!CalloutRunning) return;
+                    uint speedZone = World.AddSpeedZone(CalloutPosition, 100f, 10f);
                     Vector3 wpos = Civilian.Position + Vector3.RelativeRight;
                     if (Paramedic1) Paramedic1.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
                     if (Paramedic2) Paramedic2.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(10000);
-                    Rage.Task para1Task = null;
+                    Task para1Task = null;
                     if (Paramedic1) para1Task = Paramedic1.Tasks.FollowNavigationMeshToPosition(Civilian.Position + Civilian.RightVector, Paramedic1.GetHeadingTowards(Civilian), 10f);
                     if (Paramedic2) Paramedic2.Tasks.FollowNavigationMeshToPosition(Civilian.Position + Civilian.RightVector * -1f, Paramedic2.GetHeadingTowards(Civilian), 10f).WaitForCompletion(10000);
                     if (para1Task != null) para1Task.WaitForCompletion(10000);
@@ -254,11 +250,12 @@ namespace BarbarianCall.Callouts
                     if (Paramedic2) Paramedic2.Tasks.Clear();
                     if (Civilian) Civilian.Tasks.Clear();
                     GameFiber.Wait(2000);
-                    Rage.Task walkTask = null;
+                    Task walkTask = null;
                     if (Paramedic1) Paramedic1.Tasks.EnterVehicle(Ambulance, 10000, -1, 10f, EnterVehicleFlags.None);
                     if (Civilian) walkTask = Civilian.Tasks.FollowNavigationMeshToPosition(Ambulance.RearPosition + Vector3.RelativeBack, Ambulance.Heading, 0.5f);
                     if (Paramedic2) Paramedic2.OpenVehicleDoor(Ambulance, 10000, 2, 10f).WaitForCompletion();
-                    if (walkTask != null) walkTask.WaitForCompletion(10000);
+                    if (Paramedic2) Paramedic2.Tasks.FollowNavigationMeshToPosition(Ambulance.RearPosition + (Ambulance.ForwardVector * -2), Ambulance.Heading, 0.5f);
+                    if (walkTask != null) walkTask.WaitForCompletion(18000);
                     if (Civilian) Civilian.Tasks.EnterVehicle(Ambulance, 2).WaitForCompletion(10000);
                     if (Paramedic2) Paramedic2.Tasks.EnterVehicle(Ambulance, 0, 10f).WaitForCompletion(10000);
                     if (Paramedic1 && !Paramedic1.IsInVehicle(Ambulance, false)) Paramedic1.WarpIntoVehicle(Ambulance, -1);
@@ -284,18 +281,20 @@ namespace BarbarianCall.Callouts
                         Name = "Hospital",
                     };
                     CalloutBlips.Add(Blip);
+                    heli = new HeliSupport(Ambulance);
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
                         if (PlayerPed.IsInAnyVehicle(false)) break;
                     }
                     if (!CalloutRunning) return;
+                    World.RemoveSpeedZone(speedZone);
                     if (PlayerPed.CurrentVehicle.HasSiren)
                     {
                         PlayerPed.CurrentVehicle.IsSirenOn = true;
                         PlayerPed.CurrentVehicle.IsSirenSilent = false;
                     }
-                    if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
+                    if (Paramedic1) Paramedic1.VehicleMission(PlayerPed.CurrentVehicle, MissionType.Escort, 35f, flags, 8f, 0f, true);
                     Vehicle cv = PlayerPed.CurrentVehicle;
                     while (CalloutRunning)
                     {
@@ -308,12 +307,12 @@ namespace BarbarianCall.Callouts
                                 GameFiber.Yield();
                                 if (PlayerPed.IsInAnyVehicle(false)) break;
                             }
-                            if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
+                            if (Paramedic1) Paramedic1.VehicleMission(PlayerPed.CurrentVehicle, MissionType.Escort, 35f, flags, 8f, 0f, true);
                         }                                           
                         if (Ambulance.FrontPosition.DistanceToSquared(cv.RearPosition) < 7f || Ambulance.DistanceToSquared(cv) < 15f)
                         {
                             if (Paramedic1) Paramedic1.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(200);
-                            if (Paramedic1) Paramedic1.EscortVehicle(PlayerPed.CurrentVehicle, EscortVehicleMode.Behind, 45f, flags, 5f, 3f);
+                            if (Paramedic1) Paramedic1.VehicleMission(PlayerPed.CurrentVehicle, MissionType.Escort, 35f, flags, 8f, 0f, true);
                         }
                         if (PlayerPed.DistanceToSquared(hospital) < 625f && PlayerPed.IsInAnyVehicle(false))
                         {
@@ -342,6 +341,7 @@ namespace BarbarianCall.Callouts
                          }
                          if (x) x.Dismiss();
                      });
+                    if (heli != null) heli?.CleanUp(); 
                     List<Entity> dismiss = new()
                     {
                         Ambulance, Paramedic1, Paramedic2, Civilian
