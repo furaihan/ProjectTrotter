@@ -46,7 +46,7 @@ namespace BarbarianCall.Callouts
             }
             Position = Spawn;
             SpawnHeading = Spawn;
-            CarModel = Globals.CarsToSelect.GetRandomElement(m => m.IsValid && Globals.AudibleCarModel.Contains(m) && m.NumberOfSeats >= 4, true);
+            CarModel = Globals.AudibleCarModel.GetRandomElement(m => m.IsInCdImage && m.IsVehicle && m.IsCar && !m.IsBigVehicle && m.NumberOfSeats >= 4, true);
             CarModel.LoadAndWait();
             SuspectCar = new Vehicle(CarModel, Spawn, Spawn);
             SuspectCar.SetRandomColor();
@@ -244,6 +244,7 @@ namespace BarbarianCall.Callouts
             while (CalloutRunning)
             {
                 Rage.Debug.DrawLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, SuspectCar.FrontPosition, Color.DeepPink);
+                Marker.DrawMarker(SuspectCar, MarkerType.UpsideDownCone, Color.LightSkyBlue, new Vector3(1, 1, 1), 1);
                 GameFiber.Yield();
                 if (!SuspectCar)
                 {
@@ -266,15 +267,16 @@ namespace BarbarianCall.Callouts
                     LSPDFRFunc.PlayScannerAudioUsingPosition(string.Format("SUSPECT_HEADING {0} IN_OR_ON_POSITION", SuspectCar.GetCardinalDirectionLowDetailedAudio()), SuspectCar.Position);
                     StopWatch.Restart();
                 }
-                if (PlayerPed.DistanceToSquared(SuspectCar) < 625f && SuspectCar.IsOnScreen)
+                if (PlayerPed.DistanceToSquared(SuspectCar) < 625f)
                 {
                     if (Blip) Blip.Delete();
                     if (heli != null) heli?.CleanUp();
                     break;
                 }
                 SuspectCar.Repair();
+                SuspectCar.IsDriveable = true;
                 if (SuspectCar.IsUpsideDown) SuspectCar.PlaceOnGroundProperly();
-                if (SuspectCar.IsStuckOnRoof() || SuspectCar.IsInAir || !SuspectCar.IsOnAllWheels)
+                if (SuspectCar.IsStuckOnRoof() || SuspectCar.IsInAir || !SuspectCar.IsOnAllWheels || SuspectCar.IsInWater)
                 {
                     if (stuckTimer.IsRunning)
                     {
@@ -282,13 +284,13 @@ namespace BarbarianCall.Callouts
                     }
                     else stuckTimer.Start();
                 }
-                if (stuckTimer.IsRunning && stuckTimer.ElapsedMilliseconds > 5000 && (SuspectCar.IsStuckOnRoof() || SuspectCar.IsInAir || !SuspectCar.IsOnAllWheels))
+                if (stuckTimer.IsRunning && stuckTimer.ElapsedMilliseconds > 5000 && (SuspectCar.IsStuckOnRoof() || SuspectCar.IsInAir || !SuspectCar.IsOnAllWheels || SuspectCar.IsInWater))
                 {
-                    Spawnpoint sp = SpawnManager.GetVehicleSpawnPoint(SuspectCar.Position, 20.0f, 50.0f);
-                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(SuspectCar.Position, 25.0f, 60.0f);
-                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(SuspectCar.Position, 20.0f, 75.0f);
-                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(SuspectCar.Position, 15.0f, 100.0f);
-                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(SuspectCar.Position, 10.0f, 150.0f);
+                    Spawnpoint sp = SpawnManager.GetVehicleSpawnPoint(curPos, 20.0f, 50.0f);
+                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(curPos, 25.0f, 60.0f);
+                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(curPos, 20.0f, 75.0f);
+                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(curPos, 15.0f, 100.0f);
+                    if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(curPos, 10.0f, 150.0f);
                     if (sp == Spawnpoint.Zero) continue;
                     SuspectCar.Position = sp;
                     SuspectCar.Heading = sp;

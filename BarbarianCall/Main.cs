@@ -38,7 +38,7 @@ namespace BarbarianCall
             sb.AppendLine($"This log started on {DateTime.Now.ToLongDateString()} - {DateTime.Now.ToLongTimeString()}");
             sb.AppendLine(TimeZoneInfo.Local.DisplayName);
             sb.AppendLine(System.Globalization.CultureInfo.CurrentCulture.DisplayName);
-            string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "Log.txt");
+            string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "BarbarianCall.log");
             using (StreamWriter sw = new(path, false))
             {
                 sw.WriteLine(sb.ToString());

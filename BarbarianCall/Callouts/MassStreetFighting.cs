@@ -71,8 +71,6 @@ namespace BarbarianCall.Callouts
             catch (Exception e ) { e.ToString().ToLog(); }
             Gang1Model = Globals.GangPedModels.Values.ToList().GetRandomElement();
             Gang2Model = Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model);
-            Gang1Model.ForEach(m => m.LoadAndWait());
-            Gang2Model.ForEach(m => m.LoadAndWait());
             CalloutPosition = Spawn;
             gangMemberCount = Peralatan.Random.Next(3, 8);
             CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
@@ -82,7 +80,9 @@ namespace BarbarianCall.Callouts
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
-        {            
+        {
+            Gang1Model.ForEach(m => m.LoadAndWait());
+            Gang2Model.ForEach(m => m.LoadAndWait());
             for (int i = 1; i <= gangMemberCount; i++)
             {
                 Ped gangMember = new(Gang1Model.GetRandomElement(), Position.Around2D(3f).ToGround(), Peralatan.Random.Next() % 2 == 0 ? SpawnHeading : Position.GetHeadingTowards(PlayerPed));
@@ -214,7 +214,8 @@ namespace BarbarianCall.Callouts
         private void DisplaySummary()
         {
             if (checkpoint) checkpoint.Delete();
-            $"Suspect Count~s~: {gangMemberCount * 2}~n~Suspect Summary~s~:~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".DisplayNotifWithLogo("Mass Street Fighting");
+            $"Suspect Count~s~: {gangMemberCount * 2}~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".
+                DisplayNotifWithLogo("Mass Street Fighting", hudColor: RAGENativeUI.HudColor.GreenDark);
             End();
         }
         private void GetClose()

@@ -26,13 +26,19 @@ namespace BarbarianCall
         {
             GameFiber.StartNew(delegate
             {
+                $"RAGENativeUi is installed: {IsRageNativeUIInstalled()}".ToLog();               
+                Extension.GetAudibleVehicleModel();
+                $"Model that can be played with police scanner: {Globals.AudibleCarModel.Length}".ToLog();
+                Globals.AudioHash.ToList().ForEach(x =>
+                {
+                    Peralatan.ToLog($"Hash: {x.Key}, Name: {x.Value}, Model: {new Model(x.Key).Name}");
+                });
                 GameFiber.Wait(5600);
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();
                 try { DivisiXml.Deserialization.LoadPoliceStationLocations(); } catch { "Read Police station error".ToLog(); }
-                $"RAGENativeUi is installed: {IsRageNativeUIInstalled()}".ToLog();
-                "Prepering to create pause menu".ToLog();               
-                Menus.PauseMenu.CreatePauseMenu();              
+                "Prepering to create pause menu".ToLog();
+                Menus.PauseMenu.CreatePauseMenu();
             });
             GameFiber.StartNew(delegate
             {

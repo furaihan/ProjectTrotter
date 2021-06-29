@@ -62,7 +62,7 @@ namespace BarbarianCall
             if (LogStopwatch.ElapsedMilliseconds > 20000)
             {
                 LogStopwatch.Restart();
-                string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "Log.txt");
+                string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "BarbarianCall.log");
                 if (File.Exists(path)) File.AppendAllText(path, LogBuilder.ToString());
                 else Game.LogTrivial("Your log file doesnt exist");
                 LogBuilder.Clear();
@@ -123,6 +123,10 @@ namespace BarbarianCall
         internal static string GetPoliceScannerAudio(Vehicle vehicle)
         {
             string makeName = GetMakeName(vehicle);
+            if (Globals.AudioHash.ContainsKey(vehicle.Model.Hash))
+            {
+                return makeName == "Unknown Manufacturer" ? Globals.AudioHash[vehicle.Model.Hash].ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {Globals.AudioHash[vehicle.Model.Hash].ToUpper()}";
+            }
             string modelName = vehicle.Model.Name;
             var audibles = Globals.AudibleCarModel.Select(m => m.Name);
             modelName.Print();

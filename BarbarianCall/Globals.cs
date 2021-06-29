@@ -21,7 +21,8 @@
             "ASEA", "STANIER", "INTRUDER", "PREMIER", "TAILGATER", "WASHINGTON", "ASTEROPE", "EMPEROR", "GLENDALE", "FUGITIVE", "EMPEROR2", "FQ2", "BALLER", "CAVALCADE",
             "SULTAN", "NEON", "KURUMA", "SCHAFTER2", "SCHAFTER3", "BUFFALO", "REVOLTER", "RAIDEN", "ORACLE", "ORACLE2", "JACKAL", "FELON", "FELON2", "F620", "HUNTLEY", "MESA",
             "HABANERO", "LANDSTALKER", "DYNASTY", "FAGALOA", "TULIP", "DILETTANTE", "NEON", "RAPIDGT", "PEYOTE", "MANANA", "TORNADO", "RUMPO", "YOUGA", "SPEEDO", "VOLTIC", "CYCLONE",
-            "TROPOS", "GRANGER", "RADI", "FUGITIVE", "COGNOSCENTI", "INGOT", "SENTINEL", "SANDKING"
+            "TROPOS", "GRANGER", "RADI", "FUGITIVE", "COGNOSCENTI", "INGOT", "SENTINEL", "SANDKING", "DUNE", "FUSILADE", "INTRUDER", "INFERNUS", "BUCCANEER", "BUCCANEER2", "DOMINATOR", "DOMINATOR2",
+            "DOMINATOR3", "DOMINATOR4", "DOMINATOR5", "COMET2", "COMET3", "COMET4", "COMET5", "BANSHEE" 
         };
 
         /// <summary>
@@ -176,7 +177,8 @@
         /// <summary>
         /// Defines the AudibleCarModel.
         /// </summary>
-        public static Model[] AudibleCarModel = Extension.GetAudibleVehicleModel().Where(m => m.IsSuitableCar()).ToArray();
+        public static Model[] AudibleCarModel;
+        public static Dictionary<uint, string> AudioHash = new Dictionary<uint, string>();
 
         /// <summary>
         /// Defines the GangPedModels.

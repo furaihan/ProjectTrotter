@@ -47,8 +47,42 @@ namespace BarbarianCall.Extensions
         internal static Model GetRandomFemaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsFemale && !x.IsFreemodePed() && !L.IsPedACop(x) && !x.CreatedByTheCallingPlugin).Select(x => x.Model).GetRandomElement();
         internal static Model[] GetAudibleVehicleModel()
         {
-            IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL").Select(Path.GetFileNameWithoutExtension);
-            return Model.VehicleModels.Where(m => files.Any(s => s.ToLower().Contains(m.Name.ToLower()))).ToArray();
+            IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL", "*.wav", SearchOption.AllDirectories).Select(Path.GetFileNameWithoutExtension).Where(x => !x.ToLower().StartsWith("0x"));
+            files = files.Select(x => x.Replace("_01", "")).Select(x => x.Replace("_", ""));
+            List<uint> hashes = files.Select(x => Game.GetHashKey(x.ToLower())).ToList();
+            List<Model> ret = Model.VehicleModels.Where(m => hashes.Contains(m.Hash)).ToList();
+            Directory.EnumerateFiles(@"lspdfr\audio\scanner\CAR_MODEL", "*.wav", SearchOption.AllDirectories).Select(Path.GetFileNameWithoutExtension).ToList().ForEach(x =>
+            {
+                if (x.ToLower().StartsWith("0x"))
+                {
+                    if (uint.TryParse(x, out var hash))
+                    {
+                        Model model = new Model(hash);
+                        if (model.IsInCdImage && model.IsValid && !ret.Contains(model))
+                        {
+                            ret.Add(model);
+                        }
+                    }
+                }
+            });
+            IEnumerable<string> fb = Directory.EnumerateFiles(@"lspdfr\audio\scanner\CAR_MODEL", "*.wav", SearchOption.AllDirectories).Select(Path.GetFileNameWithoutExtension);
+            fb.ToList().ForEach(x =>
+            {
+                string file = x.Replace("_01", "");
+                file = file.Replace("_", "").ToLower();
+                Peralatan.ToLog($"Reading car model {file}");
+                for (int i = 2; i < 9; i++)
+                {
+                    Model model = new Model(file + i.ToString());
+                    if (model.IsInCdImage && model.IsValid && !ret.Contains(model))
+                    {
+                        ret.Add(model);
+                        Globals.AudioHash.Add(model.Hash, x.Replace("_01", ""));
+                    }
+                }
+            });
+            Globals.AudibleCarModel = ret.Where(x => x.IsInCdImage && x.IsValid).ToArray();
+            return ret.Where(x => x.IsInCdImage && x.IsValid).ToArray();
         }
         internal static bool IsFreemodePed(this Ped ped) => ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8;
         internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);        
@@ -235,18 +269,6 @@ namespace BarbarianCall.Extensions
             BackLeftDoor = 2,
             Hood = 4,
             Trunk = 5
-        }
-        public enum MarkerType
-        {
-            UpsideDownCone, VerticalCylinder, ThickChevronUp,
-            ThinChevronUp, CheckeredFlagRect,
-            CheckeredFlagCircle, VerticleCircle,
-            PlaneModel, LostMCDark, LostMCLight, Number0,
-            Number1, Number2, Number3, Number4, Number5, Number6, Number7, Number8,
-            Number9, ChevronUpx1, ChevronUpx2, ChevronUpx3, HorizontalCircleFat, ReplayIcon, HorizontalCircleSkinny,
-            HorizontalCircleSkinnyArrow, HorizontalSplitArrowCircle, DebugSphere, DollarSign, HorizontalBars, WolfHead, QuestionMark,
-            PlaneSymbol, HelicopterSymbol, BoatSymbol, CarSymbol, MotorcycleSymbol, BikeSymbol, TruckSymbol, ParachuteSymbol,
-            SawbladeSymbol
-        }
+        }       
     }
 }

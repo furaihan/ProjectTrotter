@@ -107,7 +107,7 @@ namespace BarbarianCall
                         continue;
                     }
 
-                    if (IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
+                    if (IsNodeSafe(nodeP))
                     {
                         if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
                         {
@@ -137,34 +137,160 @@ namespace BarbarianCall
             }
             var groups = flags.GroupBy(v => v).ToList();
             groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
-            $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, ScreenNode: {screenNode}, Direction: {dirCount}".ToLog();
+            $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
             "Vehicle spawn point is not found".ToLog();
             return Spawnpoint.Zero;
         }
-        internal static Spawnpoint GetVehicleSpawnPoint2(Vector3 pos, float minimalDistance, float maximumDistance)
+        internal static Spawnpoint GetVehicleSpawnPoint2(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
         {
             pos.GetFlags();
             Stopwatch sw = Stopwatch.StartNew();
-            for (int i = 1; i < 600; i++)
+            var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
+            var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
+            List<int> flags = new();
+            int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
+            distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
+            NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
+            for (int i = 1; i < 2000; i++)
             {
-                if (i % 40 == 0)
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                if (i % 50 == 0)
                 {
                     GameFiber.Yield();
                 }
 
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)Math.Abs(minimalDistance), (int)Math.Abs(maximumDistance)));
-                if (Natives.x80CA6A8B6C094CC4<bool>(v.X, v.Y, v.Z, (i % 5) + 1, out Vector3 nodeP, out float nodeH, 0, 9, 3.0f, 2.5f))
+                if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z,i % 5 + 1, out Vector3 nodeP, out float nodeH, out uint _, 9, 3.0f, 2.5))
                 {
-                    if (nodeP.DistanceTo(pos) > minimalDistance && nodeP.DistanceTo(pos) < maximumDistance && nodeP.TravelDistanceTo(pos) < maximumDistance * 2 && IsNodeSafe(nodeP) && !IsOnScreen(nodeP))
+                    if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
                     {
-                        Spawnpoint ret = new(nodeP, nodeH);
-                        $"Vehicle Spawn 2 found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
-                        $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
-                        ret.Position.GetFlags();
-                        return ret;
+                        NodeFlags nodeFlags = (NodeFlags)flag;
+                        flags.Add(flag);
+                        if (bl.Any(x => nodeFlags.HasFlag(x)))
+                        {
+                            flagCount++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        propCount++;
+                        continue;
+                    }
+                    if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared + 25f)
+                    {
+                        distanceCount++;
+                        continue;
+                    }
+
+                    if (IsNodeSafe(nodeP))
+                    {
+                        if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
+                        {
+                            Spawnpoint ret = new(nodeP, nodeH);
+                            $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
+                            $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                            ret.Position.GetFlags();
+                            return ret;
+                        }
+                        else
+                        {
+                            dirCount++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        screenNode++;
+                        continue;
                     }
                 }
+                else
+                {
+                    nodeCount++;
+                    continue;
+                }
             }
+            var groups = flags.GroupBy(v => v).ToList();
+            groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
+            $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
+            "Vehicle spawn point is not found".ToLog();
+            return Spawnpoint.Zero;
+        }
+        internal static Spawnpoint GetVehicleSpawnPoint3(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
+        {
+            pos.GetFlags();
+            Stopwatch sw = Stopwatch.StartNew();
+            var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
+            var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
+            List<int> flags = new();
+            int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
+            distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
+            NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
+            for (int i = 1; i < 2000; i++)
+            {
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                if (i % 50 == 0)
+                {
+                    GameFiber.Yield();
+                }
+
+                if (Natives.GET_CLOSEST_ROAD<bool>(v.X, v.Y, v.Z, 1f, 1, out Vector3 road1, out Vector3 road2, out int _, out int _, out float _, Peralatan.Random.Next(2) == 0))
+                {
+                    Vector3 nodeP = Peralatan.Random.Next(2) == 1 ? road1 : road2;
+                    if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
+                    {
+                        NodeFlags nodeFlags = (NodeFlags)flag;
+                        flags.Add(flag);
+                        if (bl.Any(x => nodeFlags.HasFlag(x)))
+                        {
+                            flagCount++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        propCount++;
+                        continue;
+                    }
+                    if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared + 25f)
+                    {
+                        distanceCount++;
+                        continue;
+                    }
+
+                    if (IsNodeSafe(nodeP))
+                    {
+                        if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
+                        {
+                            float nodeH = GetRoadHeading(nodeP);
+                            Spawnpoint ret = new(nodeP, nodeH);
+                            $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
+                            $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                            ret.Position.GetFlags();
+                            return ret;
+                        }
+                        else
+                        {
+                            dirCount++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        screenNode++;
+                        continue;
+                    }
+                }
+                else
+                {
+                    nodeCount++;
+                    continue;
+                }
+            }
+            var groups = flags.GroupBy(v => v).ToList();
+            groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
+            $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
+            "Vehicle spawn point is not found".ToLog();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetPedSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance) => GetPedSpawnPoint(spatial.Position, minimalDistance, maximumDistance);
@@ -518,12 +644,16 @@ namespace BarbarianCall
                 {
                     if (MathExtension.FloatDiff(pos.GetHeadingTowards(nodeP), pos.GetHeadingTowards(Game.LocalPlayer.Character)) > 90f)
                     {
-                        return new Spawnpoint(nodeP, heading);
+                        Spawnpoint ret = new Spawnpoint(nodeP, heading);
+                        Peralatan.ToLog($"Fleeing point is found {ret}");
+                        return ret;
                     }
                     else dirCount++;
                 }
                 else nodeCount++;
             }
+            Peralatan.ToLog($"Fleeing point is not found");
+            Peralatan.ToLog($"Node: {nodeCount}, Direction: {dirCount}");
             return Spawnpoint.Zero;
         }
         public static bool GetSafeCoordForPed(Vector3 pos, bool onFootpath, out Vector3 result, int flag)
