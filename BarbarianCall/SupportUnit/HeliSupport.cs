@@ -14,7 +14,7 @@ namespace BarbarianCall.SupportUnit
         public Vehicle Helicopter { get; private set; }
         public FreemodePed Pilot { get; private set; }
         private Blip Blip { get; set; }
-        public HeliSupport(Entity target)
+        private HeliSupport(Entity target)
         {
             $"Eup Installed: {N.Natives.IS_DLC_PRESENT<bool>(Game.GetHashKey("eup"))} Sup Installed: {N.Natives.IS_DLC_PRESENT<bool>(Game.GetHashKey("sup"))}".ToLog();
             SpawnLocation = FindSpawnPoint(target.Position);
@@ -39,6 +39,12 @@ namespace BarbarianCall.SupportUnit
             Functions.SetPedAsCop(Pilot);
             Functions.SetCopAsBusy(Pilot, true);
             Functions.PlayScannerAudio("HELI_APPROACHING_DISPATCH");
+        }
+        public HeliSupport(Ped targetPed) : this(target: targetPed)
+        {
+        }
+        public HeliSupport(Vehicle vehicle) : this(target: vehicle)
+        {
         }
         private Vector3 FindSpawnPoint(Vector3 targetPos)
         {

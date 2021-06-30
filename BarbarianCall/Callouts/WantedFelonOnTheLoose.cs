@@ -37,16 +37,20 @@ namespace BarbarianCall.Callouts
             DeclareVariable();
             CalloutRunning = false;
             PursuitCreated = false;
-            Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 425, 725, true);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed, 350, 850);
+            Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 425, 725, true);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 425, 725);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 425, 725);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 350, 800);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 350, 800);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 350, 800);
             if (Spawn == Spawnpoint.Zero)
             {
-                Spawn.Position = World.GetNextPositionOnStreet(PlayerPed.Position.Around2D(425, 725));
-                Spawn.Heading = SpawnManager.GetRoadHeading(Spawn.Position);
+                $"{GetType().Name} | Spawnpoint is not found, cancelling the callout".ToLog();
+                return false;
             }
             Position = Spawn;
             SpawnHeading = Spawn;
-            CarModel = Globals.AudibleCarModel.GetRandomElement(m => m.IsInCdImage && m.IsVehicle && m.IsCar && !m.IsBigVehicle && m.NumberOfSeats >= 4, true);
+            CarModel = Globals.AudibleCarModel.GetRandomElement(m => m.IsInCdImage && m.IsVehicle && m.IsCar && !m.IsBigVehicle && m.NumberOfSeats >= 4 && !m.IsLawEnforcementVehicle && !m.IsEmergencyVehicle, true);
             CarModel.LoadAndWait();
             SuspectCar = new Vehicle(CarModel, Spawn, Spawn);
             SuspectCar.SetRandomColor();
@@ -282,7 +286,11 @@ namespace BarbarianCall.Callouts
                     {
                         if (stuckTimer.ElapsedMilliseconds > 6000) stuckTimer.Restart();
                     }
-                    else stuckTimer.Start();
+                    else
+                    {
+                        "Suspect stuck, recalibrating..".ToLog();
+                        stuckTimer.Start();
+                    }
                 }
                 if (stuckTimer.IsRunning && stuckTimer.ElapsedMilliseconds > 5000 && (SuspectCar.IsStuckOnRoof() || SuspectCar.IsInAir || !SuspectCar.IsOnAllWheels || SuspectCar.IsInWater))
                 {

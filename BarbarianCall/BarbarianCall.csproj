@@ -98,7 +98,8 @@
     <Compile Include="Extensions\MathExtension.cs" />
     <Compile Include="Extensions\SyncSceneTick.cs" />
     <Compile Include="Extensions\XmlExtension.cs" />
-    <Compile Include="Freemode\Outfits.cs" />
+    <Compile Include="Freemode\OutfitFemale.cs" />
+    <Compile Include="Freemode\OutfitMale.cs" />
     <Compile Include="Freemode\PedComponentCollection.cs" />
     <Compile Include="Freemode\PedFaceFeature.cs" />
     <Compile Include="Freemode\HeadOverlay.cs" />
@@ -127,7 +128,7 @@
     <Compile Include="SpawnManager.cs" />
     <Compile Include="SupportUnit\HeliSupport.cs" />
     <Compile Include="SupportUnit\Mechanic.cs" />
-    <Compile Include="SupportUnit\MilitarySupport.cs" />
+    <Compile Include="SupportUnit\MilitaryHeliSupport.cs" />
     <Compile Include="Types\Checkpoint.cs" />
     <Compile Include="Freemode\HeadBlend.cs" />
     <Compile Include="Types\Manusia.cs" />
