@@ -41,7 +41,7 @@ namespace BarbarianCall.Callouts
         public Persona SuspectPersona;
         public Ped PlayerPed => Game.LocalPlayer.Character;
         public GameFiber CalloutMainFiber;
-        public readonly System.Drawing.Color Yellow = System.Drawing.Color.Yellow;
+        public readonly System.Drawing.Color Yellow = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Yellow);
         public string FilePath;
         public static readonly uint[] WeaponHashes = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A, 0xBD248B55, 0x13532244, 0x624FE830 };
         protected bool Displayed = true;

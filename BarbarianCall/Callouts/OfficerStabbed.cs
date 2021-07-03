@@ -68,9 +68,9 @@ namespace BarbarianCall.Callouts
             {
                 Tuple<Vehicle, Ped> ubApi;
                 int offRand = Peralatan.Random.Next(0, 100);
-                if (offRand <= 60) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalPatrol, Position);
-                else if (offRand < 90) ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.StatePatrol, Position);
-                else ubApi = API.UltimateBackupFunc.GetUnit(API.UltimateBackupFunc.EUltimateBackupUnitType.LocalSwat, Position);
+                if (offRand <= 60) ubApi = API.UltimateBackupFunc.GetUnit(API.EUltimateBackupUnitType.LocalPatrol, Position);
+                else if (offRand < 90) ubApi = API.UltimateBackupFunc.GetUnit(API.EUltimateBackupUnitType.StatePatrol, Position);
+                else ubApi = API.UltimateBackupFunc.GetUnit(API.EUltimateBackupUnitType.LocalSwat, Position);
                 offVeh = ubApi.Item1;
                 officer = ubApi.Item2;
             }
@@ -613,8 +613,8 @@ namespace BarbarianCall.Callouts
                     Ambulance.RandomiseLicensePlate();
                     if (UltimateBackupRunning)
                     {
-                        Paramedic1 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, Position, SpawnHeading);
-                        Paramedic2 = API.UltimateBackupFunc.GetPed(API.UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, Position, SpawnHeading);
+                        Paramedic1 = API.UltimateBackupFunc.GetPed(API.EUltimateBackupUnitType.Ambulance, Position, SpawnHeading);
+                        Paramedic2 = API.UltimateBackupFunc.GetPed(API.EUltimateBackupUnitType.Ambulance, Position, SpawnHeading);
                     }
                     else
                     {

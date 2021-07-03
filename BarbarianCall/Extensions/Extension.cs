@@ -109,6 +109,13 @@ namespace BarbarianCall.Extensions
         {
             return NativeFunction.Natives.GET_IS_TASK_ACTIVE<bool>(ped, (int)task);
         }
+        public static void SufferCriticalHit(this Ped ped, bool value)
+        {
+            if (ped)
+            {
+                NativeFunction.Natives.SET_PED_SUFFERS_CRITICAL_HITS(ped, value);
+            }
+        }
         internal static bool IsPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
         internal static bool IsVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
         internal static bool IsObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);

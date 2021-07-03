@@ -31,7 +31,7 @@ namespace BarbarianCall.SupportUnit
                 Name = "Heli Support Unit",
             };
             N.Natives.SET_HELI_BLADES_FULL_SPEED(Helicopter);
-            Pilot = new FreemodePed(Vector3.Zero, Peralatan.Random.Next(5) == 1 ? LSPD_First_Response.Gender.Female : LSPD_First_Response.Gender.Male);
+            Pilot = new FreemodePed(Vector3.Zero, Peralatan.Random.Next(5) != 1);
             SetPedPilotComponent();
             Pilot.WarpIntoVehicle(Helicopter, -1);
             Pilot.HeliMission(Helicopter, (Vehicle)(TargetEntity.IsVehicle() ? TargetEntity : null), (Ped)(TargetEntity.IsPed() ? TargetEntity : null), Vector3.Zero, MissionType.Circle, 35f, 30f, -1.0f, -1, 80, 2048);

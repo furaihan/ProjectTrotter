@@ -216,5 +216,49 @@ namespace BarbarianCall.Freemode
 			ped.Wardrobe.Decal = new PedComponent(PedComponent.EComponentID.Decal, 0, 0, 0);
 			ped.Wardrobe.Tops = new PedComponent(PedComponent.EComponentID.Tops, 97, 0, 0);
 		}
+		public static void SetJuggernautComponent(this FreemodePed ped)
+		{
+			int rnd = Peralatan.Random.Next(2, 11);
+			if (ped.IsMale)
+            {
+				ped.Wardrobe.Mask = new PedComponent(PedComponent.EComponentID.Mask, 91, rnd, 0);
+				ped.Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 42, 0, 0);
+				ped.Wardrobe.Leg = new PedComponent(PedComponent.EComponentID.Leg, 84, rnd, 0);
+				ped.Wardrobe.Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 0, 0, 0);
+				ped.Wardrobe.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 33, 0, 0);
+				ped.Wardrobe.Accessories = new PedComponent(PedComponent.EComponentID.Accessories, 0, 0, 0);
+				ped.Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 97, rnd, 0);
+				ped.Wardrobe.BodyArmor = new PedComponent(PedComponent.EComponentID.BodyArmor, 0, 0, 0);
+				ped.Wardrobe.Decal = new PedComponent(PedComponent.EComponentID.Decal, 0, 0, 0);
+				ped.Wardrobe.Tops = new PedComponent(PedComponent.EComponentID.Tops, 186, rnd, 0);
+			}		
+			else if (ped.IsFemale)
+            {
+				ped.Wardrobe.Mask = new PedComponent(PedComponent.EComponentID.Mask, 91, rnd, 0);
+				ped.Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 49, 0, 0);
+				ped.Wardrobe.Leg = new PedComponent(PedComponent.EComponentID.Leg, 86, rnd, 0);
+				ped.Wardrobe.Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 0, 0, 0);
+				ped.Wardrobe.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 1, 16, 0);
+				ped.Wardrobe.Accessories = new PedComponent(PedComponent.EComponentID.Accessories, 0, 0, 0);
+				ped.Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 105, rnd, 0);
+				ped.Wardrobe.BodyArmor = new PedComponent(PedComponent.EComponentID.BodyArmor, 0, 0, 0);
+				ped.Wardrobe.Decal = new PedComponent(PedComponent.EComponentID.Decal, 0, 0, 0);
+				ped.Wardrobe.Tops = new PedComponent(PedComponent.EComponentID.Tops, 188, rnd, 0);
+			}
+		}
+		public static void SetCasual10Component(this FreemodePed ped)
+		{
+			if (!ped.IsMale) return;
+			ped.Wardrobe.Mask = new PedComponent(PedComponent.EComponentID.Mask, 0, 0, 0);
+			ped.Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 11, 0, 0);
+			ped.Wardrobe.Leg = new PedComponent(PedComponent.EComponentID.Leg, 1, 11, 0);
+			ped.Wardrobe.Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 0, 0, 0);
+			ped.Wardrobe.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 38, 1, 0);
+			ped.Wardrobe.Accessories = new PedComponent(PedComponent.EComponentID.Accessories, 0, 0, 0);
+			ped.Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 15, 0, 0);
+			ped.Wardrobe.BodyArmor = new PedComponent(PedComponent.EComponentID.BodyArmor, 0, 0, 0);
+			ped.Wardrobe.Decal = new PedComponent(PedComponent.EComponentID.Decal, 0, 0, 0);
+			ped.Wardrobe.Tops = new PedComponent(PedComponent.EComponentID.Tops, 135, 0, 0);
+		}
 	}
 }

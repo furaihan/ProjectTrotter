@@ -49,7 +49,7 @@ namespace BarbarianCall
         {
             var pos = Game.LocalPlayer.Character.Position + Game.LocalPlayer.Character.ForwardVector * 8f;
             float heading = Game.LocalPlayer.Character.Heading - 180f;
-            Freemode.FreemodePed freemodePed = new(pos, heading, isMale ? LSPD_First_Response.Gender.Male : LSPD_First_Response.Gender.Female);
+            Freemode.FreemodePed freemodePed = new(pos, heading, isMale);
             GameFiber.Wait(2000);
             freemodePed.Dismiss();
         }
@@ -223,9 +223,18 @@ namespace BarbarianCall
             Helis = new List<HeliSupport>();
         }
         [ConsoleCommand]
-        private static void Commad_ModVehicle([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
+        private static void ModVehicle([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
         {
             if (vehicle) vehicle.Mods.ApplyAllMods();
+        }
+        [ConsoleCommand]
+        private static void CallMilitaryHeli([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterPedAliveOnly))] Ped ped,
+                                            MilitarySupportType type)
+        {
+            if (ped)
+            {
+                MilitaryHeliSupport militaryHeliSupport = new MilitaryHeliSupport(ped, type);
+            }
         }
     }
 }

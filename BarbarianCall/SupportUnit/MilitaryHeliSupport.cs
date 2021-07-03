@@ -22,37 +22,52 @@ namespace BarbarianCall.SupportUnit
         public Vector3 SpawnLocation { get; private set; }
         private MilitaryHeliSupport(Entity entity, MilitarySupportType type)
         {
-            _model = type switch
+            GameFiber.StartNew(() =>
             {
-                MilitarySupportType.Annihilator => 0x11962E49,
-                MilitarySupportType.Buzzard => 0x2C75F0DD,
-                MilitarySupportType.Hunter => 0xFD707EDE,
-                MilitarySupportType.Sparrow => 0x494752F7,
-                _ => 0x494752F7,
-            };
-            SpawnLocation = FindSpawnPoint(entity.Position);
-            TargetEntity = entity;
-            _model.LoadAndWait();
-            Vehicle = new Vehicle(_model, SpawnLocation);
-            Vehicle.Mods.ApplyAllMods();
-            Vehicle.IsEngineOn = true;
-            Vehicle.IsPersistent = true;
-            Vehicle.TopSpeed += 50f;
-            Blip = new Blip(Vehicle)
-            {
-                Sprite = (BlipSprite)487,
-                Color = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.RadarArmour),
-                Name = "Heli Support Unit",
-            };
-            N.Natives.SET_HELI_BLADES_FULL_SPEED(Vehicle);
-            Ped = new FreemodePed(Vector3.Zero, Peralatan.Random.Next(5) == 1 ? LSPD_First_Response.Gender.Female : LSPD_First_Response.Gender.Male);
-            SetPedPedComponent();
-            Ped.WarpIntoVehicle(Vehicle, -1);
-            Ped.HeliMission(Vehicle, (Vehicle)(TargetEntity.IsVehicle() ? TargetEntity : null), (Ped)(TargetEntity.IsPed() ? TargetEntity : null), Vector3.Zero, MissionType.Attack, 35f, 30f, -1.0f, -1, 80, 2048);
-            Ped.MakeMissionPed(true);
-            Functions.SetPedAsCop(Ped);
-            Functions.SetCopAsBusy(Ped, true);
-            Functions.PlayScannerAudio("HELI_APPROACHING_DISPATCH");
+                _model = type switch
+                {
+                    MilitarySupportType.Annihilator => 0x11962E49,
+                    MilitarySupportType.Buzzard => 0x2C75F0DD,
+                    MilitarySupportType.Hunter => 0xFD707EDE,
+                    MilitarySupportType.Sparrow => 0x494752F7,
+                    _ => 0x494752F7,
+                };
+                SpawnLocation = FindSpawnPoint(entity.AbovePosition);
+                TargetEntity = entity;
+                _model.LoadAndWait();
+                Vehicle = new Vehicle(_model, SpawnLocation);
+                Vehicle.Mods.ApplyAllMods();
+                Vehicle.IsEngineOn = true;
+                Vehicle.IsPersistent = true;
+                Vehicle.TopSpeed += 50f;
+                Blip = new Blip(Vehicle)
+                {
+                    Sprite = (BlipSprite)487,
+                    Color = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.RadarArmour),
+                    Name = "Heli Support Unit",
+                };
+                N.Natives.SET_HELI_BLADES_FULL_SPEED(Vehicle);
+                Ped = new FreemodePed(Vector3.Zero, Peralatan.Random.Next(5) != 1);
+                SetPedPedComponent();
+                Ped.WarpIntoVehicle(Vehicle, -1);
+                GameFiber.Wait(2500);
+                $"Vehicle has weapon: {N.Natives.DOES_VEHICLE_HAVE_WEAPONS<bool>(Vehicle)}".ToLog();
+                Ped.HeliMission(Vehicle, (Vehicle)(TargetEntity.IsVehicle() ? TargetEntity : null), (Ped)(TargetEntity.IsPed() ? TargetEntity : null), Vector3.Zero, MissionType.Attack, 35f, 30f, -1f, -1, 50, 0);
+                Ped.MakeMissionPed(true);
+                Functions.SetPedAsCop(Ped);
+                Functions.SetCopAsBusy(Ped, true);
+                Functions.PlayScannerAudio("HELI_APPROACHING_DISPATCH");
+                while (true)
+                {
+                    GameFiber.Yield();
+                    if (TargetEntity)
+                    {
+                        if (TargetEntity.IsDead) break;
+                    }
+                    else break;
+                }
+                CleanUp();
+            });          
         }
         public MilitaryHeliSupport(Ped targetPed, MilitarySupportType type) : this(entity: targetPed, type)
         {
@@ -93,6 +108,19 @@ namespace BarbarianCall.SupportUnit
                 }
             }
             else "Ped not exist".ToLog();
+        }
+        public void CleanUp()
+        {
+            if (Ped)
+            {
+                Functions.SetCopAsBusy(Ped, false);
+                Ped.Dismiss();
+            }
+            if (Vehicle)
+            {
+                Vehicle.Dismiss();
+            }
+            if (Blip) Blip.Delete();
         }
     }
 }

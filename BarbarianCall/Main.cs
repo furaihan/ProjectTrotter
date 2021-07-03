@@ -54,7 +54,7 @@ namespace BarbarianCall
             if (onDuty)
             {                
                 Type[] callouts = { typeof(Callouts.SuspiciousVehicle), typeof(Callouts.OfficerStabbed), typeof(Callouts.TaxiRefusePay), typeof(Callouts.WantedFelonOnTheLoose), typeof(Callouts.MassStreetFighting),
-                typeof(Callouts.Prostitution), typeof(Callouts.HeartAttackCivilian)};
+                typeof(Callouts.Prostitution), typeof(Callouts.HeartAttackCivilian), typeof(Callouts.ArmoredPersonInVehicle)};
                 foreach (Type callout in callouts)
                 {
                     Peralatan.ToLog(string.Format("Loading {0} callout", callout.Name));

@@ -426,7 +426,6 @@ namespace BarbarianCall.Callouts
         private bool IsPedStuck(Ped ped)
         {
             if (!ped) return false;
-            if (ped.IsTaskActive(PedTask.DoNothing)) return true;
             if (ped.IsInMeleeCombat) return false;
             if (ped.Tasks.CurrentTaskStatus == TaskStatus.Preparing) return false;
             if (ped.Tasks.CurrentTaskStatus == TaskStatus.InProgress) return false;
@@ -435,6 +434,7 @@ namespace BarbarianCall.Callouts
                 || LSPDFR.IsPedBeingCuffedByPlayer(ped) || LSPDFR.IsPedBeingFriskedByPlayer(ped) || LSPDFR.IsPedBeingGrabbedByPlayer(ped))) return false;
             if (Game.LocalPlayer.IsFreeAimingAtAnyEntity && Game.LocalPlayer.GetFreeAimingTarget() == ped) return false;
             if (StopThePedRunning && StopThePedFunc.IsPedStoppedWithSTP(ped)) return false;
+            if (ped.IsTaskActive(PedTask.DoNothing) || !ped.IsTaskActive(PedTask.CombatClosestTargetInArea)) return true;
             return true;
         }
         private void GetHeadshot()

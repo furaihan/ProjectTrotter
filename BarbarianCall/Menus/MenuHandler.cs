@@ -72,7 +72,7 @@ namespace BarbarianCall.Menus
                     Ped player = Game.LocalPlayer.Character;
                     Vector3 pos = player.Position + player.ForwardVector * 8f;
                     float heading = player.Heading + 180f;
-                    Freemode.FreemodePed ped = new(pos, heading, (selected as UIMenuListScrollerItem<string>).SelectedItem.ToLower() == "male" ? LSPD_First_Response.Gender.Male : LSPD_First_Response.Gender.Female);
+                    Freemode.FreemodePed ped = new(pos, heading, (selected as UIMenuListScrollerItem<string>).SelectedItem.ToLower() == "male");
                     ped.Metadata.BAR_Entity = true;
                     if (ped) ped.Dismiss();
                 }

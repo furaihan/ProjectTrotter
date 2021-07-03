@@ -113,7 +113,7 @@ namespace BarbarianCall.SupportUnit
                         MechanicVehicle.PlaceOnGroundProperly();
                         MechanicVehicle.RandomiseLicensePlate();
 
-                        MechanicPed = new FreemodePed(Position, Heading, LSPD_First_Response.Gender.Male)
+                        MechanicPed = new FreemodePed(Position, Heading, true)
                         {
                             IsExplosionProof = true,
                             MaxHealth = 3000,

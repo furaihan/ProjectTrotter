@@ -592,5 +592,71 @@
             "A_F_Y_VINEWOOD_04_WHITE_MINI_01",
             "A_F_Y_VINEWOOD_04_WHITE_MINI_02",
         };
+        internal static Dictionary<WeaponAsset, List<string>> WeaponMKIIAndItsComponents = new Dictionary<WeaponAsset, List<string>>()
+        {
+            {
+                0x84D6FAFD, new List<string>()
+                {
+                    "COMPONENT_BULLPUPRIFLE_MK2_CLIP_02",
+                    "COMPONENT_AT_AR_SUPP",
+                    "COMPONENT_AT_AR_AFGRIP_02",
+                    "COMPONENT_AT_AR_FLSH",
+                    "COMPONENT_AT_BP_BARREL_02",
+                    "COMPONENT_AT_SCOPE_SMALL_MK2",
+                }
+            },
+            {
+                0x969C3D67, new List<string>()
+                {
+                    "COMPONENT_SPECIALCARBINE_MK2_CLIP_02",
+                    "COMPONENT_AT_AR_FLSH",
+                    "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+                    "COMPONENT_AT_AR_SUPP_02",
+                    "COMPONENT_AT_AR_AFGRIP_02",
+                    "COMPONENT_AT_SC_BARREL_02"
+                }
+            },
+            {
+                0x394F415C, new List<string>()
+                {
+                    "COMPONENT_ASSAULTRIFLE_MK2_CLIP_02",
+                    "COMPONENT_AT_AR_AFGRIP_02",
+                    "COMPONENT_AT_AR_FLSH",
+                    "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+                    "COMPONENT_AT_AR_SUPP_02",
+                    "COMPONENT_AT_AR_BARREL_02",
+                }
+            },
+            {
+                0xFAD1F1C9, new List<string>()
+                {
+                    "COMPONENT_CARBINERIFLE_MK2_CLIP_02",
+                    "COMPONENT_AT_AR_AFGRIP_02",
+                    "COMPONENT_AT_AR_FLSH",
+                    "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+                    "COMPONENT_AT_AR_SUPP",
+                    "COMPONENT_AT_CR_BARREL_02",
+                }
+            },
+            {
+                0x555AF99A, new List<string>()
+                {
+                    "COMPONENT_PUMPSHOTGUN_MK2_CLIP_HOLLOWPOINT",
+                    "COMPONENT_AT_SCOPE_SMALL_MK2",
+                    "COMPONENT_AT_AR_FLSH",
+                    "COMPONENT_AT_SR_SUPP_03",
+                }
+            },
+            {
+                0xDBBD7280, new List<string>()//Combat-MG MK2
+                {
+                    "COMPONENT_COMBATMG_MK2_CLIP_02",
+                    "COMPONENT_AT_AR_AFGRIP_02",
+                    "COMPONENT_AT_SCOPE_MEDIUM_MK2",
+                    "COMPONENT_AT_MUZZLE_07",
+                    "COMPONENT_AT_MG_BARREL_02",
+                }
+            },
+        };
     }
 }

@@ -52,6 +52,16 @@ namespace BarbarianCall
         internal static void Print(this string msg) => Game.Console.Print(msg);
         private static readonly Stopwatch LogStopwatch = new();
         private static readonly StringBuilder LogBuilder = new();
+        internal static void ToLog(this Exception exception)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("=================== BARBARIANCALL EXCEPTION LOG ===================");
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine(exception.Message);
+            sb.AppendLine(exception.StackTrace);
+            sb.AppendLine($"Source: {exception.Source}");
+        }
         internal static void ToLog(this string micin) => ToLog(micin, false);
         internal static void ToLog(this string micin, bool makeUppercase)
         {
@@ -77,9 +87,10 @@ namespace BarbarianCall
             foreach (char c in licensePlate)
             {
                 count++;
-                if (count == 1) lpAudio.Append("BAR_" + c.ToString().ToUpper() + "_HIGH ");
+                if (count == 1) lpAudio.Append("BAR_" + c.ToString().ToUpper() + "_HIGH");
                 else if (count == licensePlate.Length) lpAudio.Append("BAR_" + c.ToString().ToUpper() + "_LOW");
-                else lpAudio.Append("BAR_" + c.ToString().ToUpper() + " ");
+                else lpAudio.Append("BAR_" + c.ToString().ToUpper());
+                lpAudio.Append(' ');
             }
             //Game.Console.Print(audio);
             return lpAudio.ToString();
@@ -88,25 +99,46 @@ namespace BarbarianCall
         {
             return vehicle.GetColor().PrimaryColor.GetPoliceScannerColorAudio();
         }
+        internal static string GetRandomPlateNumber()
+        {
+            StringBuilder plate = new(8);
+            plate.Append(RandomNextSecure(10));
+            plate.Append(RandomNextSecure(10));
+            plate.Append((char)RandomNextSecure(65, 91));
+            plate.Append((char)RandomNextSecure(65, 91));
+            plate.Append((char)RandomNextSecure(65, 91));
+            plate.Append(RandomNextSecure(10));
+            plate.Append(RandomNextSecure(10));
+            plate.Append(RandomNextSecure(10));
+            return plate.ToString();
+        }
         internal static void RandomiseLicensePlate(this Vehicle vehicle)
         {
-            RNGCryptoServiceProvider provider = new();
-            byte[] box = new byte[16];
-            provider.GetBytes(box);          
-            Random plateRandomizerHandler = new(BitConverter.ToInt32(box, 0));
             if (vehicle)
             {
-                string plate =  plateRandomizerHandler.Next(10).ToString() +
-                                plateRandomizerHandler.Next(10).ToString() +
-                                (char)plateRandomizerHandler.Next(65, 91)  +
-                                (char)plateRandomizerHandler.Next(65, 91)  +
-                                (char)plateRandomizerHandler.Next(65, 91)  +
-                                plateRandomizerHandler.Next(10).ToString() +
-                                plateRandomizerHandler.Next(10).ToString() +
-                                plateRandomizerHandler.Next(10).ToString();
-                vehicle.LicensePlate = plate;
-                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), vehicle.LicensePlate));
+                StringBuilder plate = new(8);
+                plate.Append(RandomNextSecure(10));
+                plate.Append(RandomNextSecure(10));
+                plate.Append((char)RandomNextSecure(65, 91));
+                plate.Append((char)RandomNextSecure(65,91));
+                plate.Append((char)RandomNextSecure(65,91));
+                plate.Append(RandomNextSecure(10));
+                plate.Append(RandomNextSecure(10));
+                plate.Append(RandomNextSecure(10));
+                vehicle.LicensePlate = plate.ToString();
+                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate.ToString()));
             }           
+        }
+        internal static int RandomNextSecure(int minValue, int maxValue) => RandomNextSecure(maxValue - minValue) + minValue;
+        internal static int RandomNextSecure(int maxValue)
+        {
+            RNGCryptoServiceProvider provider = new();
+            byte[] box = new byte[4];
+            provider.GetBytes(box);
+            HashAlgorithm provider1 = MD5.Create();
+            var bytes = provider1.ComputeHash(box);
+            var integer = BitConverter.ToInt32(bytes, 0);
+            return Math.Abs(integer % maxValue);
         }
         internal static string GetDisplayName(this Model vehicleModel)
         {
@@ -421,9 +453,10 @@ namespace BarbarianCall
             if (list.Count >= byte.MaxValue)
             {
                 ToLog("ShuffleSecure is not supported on this list");
+                Shuffle(list);
                 return;
             }
-            System.Security.Cryptography.RNGCryptoServiceProvider provider = new();
+            RNGCryptoServiceProvider provider = new();
             int n = list.Count;
             while (n > 1)
             {
@@ -509,7 +542,6 @@ namespace BarbarianCall
         }
         internal static void SetPedAsWanted(this Ped ped, out Persona newPersona)
         {
-            List<Model> a = Globals.GangPedModels.Values.GetRandomElement(m => m.All(mm => mm.IsValid), true);
             Persona pedPersona = Functions.GetPersonaForPed(ped);
             Persona newWantedPersona = new(pedPersona.Forename, pedPersona.Surname, pedPersona.Gender, pedPersona.Birthday)
             {

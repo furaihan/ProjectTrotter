@@ -235,14 +235,14 @@ namespace BarbarianCall.Freemode
             }
         }
         #endregion
-        public FreemodePed(Vector3 position, float heading, Gender gender) : base(gender == Gender.Male ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, heading)
+        public FreemodePed(Vector3 position, float heading, bool isMale) : base(isMale ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, heading)
         {
             MakePersistent();
             RandomizeAppearance();
             Metadata.BAR_FreemodePed = true;
             Metadata.BAR_Entity = true;
         }
-        public FreemodePed(Vector3 position, Gender gender) : base(gender == Gender.Male ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, 0f)
+        public FreemodePed(Vector3 position, bool isMale) : base(isMale ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, 0f)
         {
             MakePersistent();
             RandomizeAppearance();

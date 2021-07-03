@@ -76,10 +76,10 @@ namespace BarbarianCall
             int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
             distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
-            for (int i = 1; i < 2000; i++)
+            for (int i = 1; i <= 2000; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 50 == 0)
+                if (i % 80 == 0)
                 {
                     GameFiber.Yield();
                 }
@@ -151,15 +151,15 @@ namespace BarbarianCall
             int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
             distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
-            for (int i = 1; i < 2000; i++)
+            for (int i = 1; i <= 2000; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 50 == 0)
+                if (i % 80 == 0)
                 {
                     GameFiber.Yield();
                 }
 
-                if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z,i % 5 + 1, out Vector3 nodeP, out float nodeH, out uint _, 9, 3.0f, 2.5))
+                if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z,i % 5 + 1, out Vector3 nodeP, out float nodeH, out uint _, 9, 3.0f, 2.5f))
                 {
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
                     {
@@ -226,10 +226,10 @@ namespace BarbarianCall
             int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
             distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
-            for (int i = 1; i < 2000; i++)
+            for (int i = 1; i <= 2000; i++)
             {
                 Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
-                if (i % 50 == 0)
+                if (i % 80 == 0)
                 {
                     GameFiber.Yield();
                 }

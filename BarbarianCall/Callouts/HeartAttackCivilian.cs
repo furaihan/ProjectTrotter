@@ -162,13 +162,13 @@ namespace BarbarianCall.Callouts
                         });
                     });                 
                     Spawnpoint ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 100, 150);
-                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 80, 200);
-                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 80, 250);
-                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 80, 300);
+                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint2(CalloutPosition, 100, 150);
+                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint3(CalloutPosition, 100, 150);
+                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint3(CalloutPosition, 80, 175);
                     if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = new Spawnpoint(World.GetNextPositionOnStreet(CalloutPosition.Around2D(250)), 0f);
                     if (UltimateBackupRunning)
                     {
-                        var ubAmb = UltimateBackupFunc.GetUnit(UltimateBackupFunc.EUltimateBackupUnitType.Ambulance, ambulanceSpawn, 2);
+                        var ubAmb = UltimateBackupFunc.GetUnit(EUltimateBackupUnitType.Ambulance, ambulanceSpawn, 2);
                         Paramedic1 = ubAmb.Item2.First();
                         Paramedic2 = ubAmb.Item2.Last();
                         Ambulance = ubAmb.Item1;

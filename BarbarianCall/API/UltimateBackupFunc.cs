@@ -55,36 +55,40 @@ namespace BarbarianCall.API
                 case EUltimateBackupCallType.RoadBlock: Func.callRoadBlockBackup(); break;
                 case EUltimateBackupCallType.K9: Func.callK9Backup(false, stateBackup); break;
                 case EUltimateBackupCallType.Female: Func.callFemaleBackup(false, stateBackup); break;
+                case EUltimateBackupCallType.Swat: Func.callCode3SwatBackup(false, false); break;
+                case EUltimateBackupCallType.Noose: Func.callCode3SwatBackup(false, true); break;
                 default: Func.callCode2Backup(); break;
 
             }
         }
-        public static void DissmissAllBackup() => Func.dismissAllBackupUnits();
-        public enum EUltimateBackupUnitType
-        {
-            LocalPatrol,
-            StatePatrol,
-            Ambulance,
-            Coroner,
-            Firetruk,
-            LocalSwat,
-            NOOSESwat,
-            PoliceTransport,
-        }
-        public enum EUltimateBackupCallType
-        {
-            Code2,
-            Code3,
-            Ambulance,
-            Firetruk,
-            Pursuit,
-            TrafficStop,
-            FelonyStop,
-            Panic,
-            SpikeStrips,
-            RoadBlock,
-            K9,
-            Female,
-        }
+        public static void DissmissAllBackup() => Func.dismissAllBackupUnits();        
+    }
+    public enum EUltimateBackupUnitType
+    {
+        LocalPatrol,
+        StatePatrol,
+        Ambulance,
+        Coroner,
+        Firetruk,
+        LocalSwat,
+        NOOSESwat,
+        PoliceTransport,
+    }
+    public enum EUltimateBackupCallType
+    {
+        Code2,
+        Code3,
+        Ambulance,
+        Firetruk,
+        Pursuit,
+        TrafficStop,
+        FelonyStop,
+        Panic,
+        SpikeStrips,
+        RoadBlock,
+        K9,
+        Female,
+        Swat,
+        Noose
     }
 }

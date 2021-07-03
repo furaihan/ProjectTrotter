@@ -187,7 +187,7 @@ namespace BarbarianCall.Callouts
             while (CalloutRunning)
             {
                 GameFiber.Yield();
-                var raycast = World.TraceLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, Hooker.Position, (TraceFlags)(1|2|4|8|16|256));
+                var raycast = World.TraceLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, Hooker.Position, (TraceFlags)511);
                 if (raycast.Hit)
                 {
                     if (raycast.HitEntity && raycast.HitEntity == Hooker)
