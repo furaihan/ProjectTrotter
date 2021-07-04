@@ -363,6 +363,82 @@ namespace BarbarianCall
             $"Distance: Max: {Math.Sqrt(distanceList.Max())}, Mix: {Math.Sqrt(distanceList.Min())}, Avg: {Math.Sqrt(distanceList.Average())}".ToLog();
             return Spawnpoint.Zero;
         }
+        internal static Spawnpoint GetVehicleSpawnPoint4(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
+        {
+            pos.GetFlags();
+            Stopwatch sw = Stopwatch.StartNew();
+            var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
+            var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
+            List<int> flags = new();
+            int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
+            distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
+            NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
+            for (int i = 1; i <= 2000; i++)
+            {
+                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance)).ToGround();
+                if (i % 80 == 0)
+                {
+                    GameFiber.Yield();
+                }
+
+                if (Natives.GET_RANDOM_VEHICLE_NODE<bool>(v.X, v.Y, v.Z, 50f, true, true, true, out Vector3 nodeP, out int _))
+                {
+                    if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
+                    {
+                        NodeFlags nodeFlags = (NodeFlags)flag;
+                        flags.Add(flag);
+                        if (bl.Any(x => nodeFlags.HasFlag(x)))
+                        {
+                            flagCount++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        propCount++;
+                        continue;
+                    }
+                    if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared + 25f)
+                    {
+                        distanceCount++;
+                        continue;
+                    }
+
+                    if (IsNodeSafe(nodeP))
+                    {
+                        if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(nodeP).HeadingDiff(Game.LocalPlayer.Character) < 90)
+                        {
+                            float nodeH = GetRoadHeading(nodeP);
+                            Spawnpoint ret = new(nodeP, nodeH);
+                            $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
+                            $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                            ret.Position.GetFlags();
+                            return ret;
+                        }
+                        else
+                        {
+                            dirCount++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        screenNode++;
+                        continue;
+                    }
+                }
+                else
+                {
+                    nodeCount++;
+                    continue;
+                }
+            }
+            var groups = flags.GroupBy(v => v).ToList();
+            groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
+            $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
+            "Vehicle spawn point is not found".ToLog();
+            return Spawnpoint.Zero;
+        }
         internal static Spawnpoint GetRoadSideSpawnPointFavored(Entity entity, float favoredDistance)
         {
             Stopwatch sw = Stopwatch.StartNew();

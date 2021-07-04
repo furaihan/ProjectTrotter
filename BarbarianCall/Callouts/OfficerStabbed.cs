@@ -36,8 +36,8 @@ namespace BarbarianCall.Callouts
         private readonly Model NotepadModel = new("prop_notepad_02");
         private Rage.Object Notepad;
 
-        private static readonly string[] tendToDeadIdles = { "idle_a", "idle_b", "idle_c" };
-        private static readonly string[] injuredBodyParts = { "Belly", "Right Arm", "Left Arm", "Left Thigh", "Right Thigh", "Left Calf", "Right Calf" };
+        private readonly string[] tendToDeadIdles = { "idle_a", "idle_b", "idle_c" };
+        private readonly string[] injuredBodyParts = { "Belly", "Right Arm", "Left Arm", "Left Thigh", "Right Thigh", "Left Calf", "Right Calf" };
 
         public override bool OnBeforeCalloutDisplayed()
         {

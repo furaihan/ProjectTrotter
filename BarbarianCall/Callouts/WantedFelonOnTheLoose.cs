@@ -32,6 +32,7 @@ namespace BarbarianCall.Callouts
         private bool speedChanged = false;
         private RelationshipGroup Criminal;
         private HeliSupport heli;
+        private bool CheckForPosition = false;
         public override bool OnBeforeCalloutDisplayed()
         {
             DeclareVariable();
@@ -251,6 +252,8 @@ namespace BarbarianCall.Callouts
             Stopwatch stuckTimer = new();
             bool heliCalled = false;
             bool notifDisp = false;
+            CheckForPosition = true;
+            PositionHandler();
             while (CalloutRunning)
             {
                 Rage.Debug.DrawLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, SuspectCar.FrontPosition, Color.DeepPink);
@@ -360,6 +363,7 @@ namespace BarbarianCall.Callouts
                     }
                 }
             }
+            CheckForPosition = false;
         }
         private void DisplayCodeFourMessage()
         {
@@ -608,7 +612,7 @@ namespace BarbarianCall.Callouts
                         {
                             if (x)
                             {
-                                x.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen | LeaveVehicleFlags.BailOut).WaitForCompletion(200);
+                                x.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(200);
                             }
                         });
                         GameFiber.WaitUntil(() => Suspects.All(s => s && s.IsOnFoot), 5000);
@@ -672,18 +676,6 @@ namespace BarbarianCall.Callouts
                     List<FreemodePed> Suspects = new() { Driver, Passenger1, Passenger2, Passenger3 };
                     FreemodePed wanted = Suspects.GetRandomElement(fp => fp);
                     if (wanted) Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
-                    GameFiber.StartNew(() =>
-                    {
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        GameFiber.Sleep(1000);
-                        if (Manusia != null) Manusia.DisplayNotif();
-                        GameFiber.Wait(1500);
-                        LSPDFRFunc.WaitAudioScannerCompletion();
-                        LSPDFRFunc.PlayScannerAudio(string.Format("VEHICLE BAR_IS BAR_A_CONJ {0} {1} BAR_TARGET_PLATE {2}",
-                            SuspectCar.GetColorAudio(), Peralatan.GetPoliceScannerAudio(SuspectCar), Peralatan.GetLicensePlateAudio(SuspectCar)), true);
-                        GameFiber.Wait(2500);
-                        DisplayGPNotif();
-                    });
                     if (Suspects.All(s => s)) Suspects.ForEach(s => s.RelationshipGroup = Criminal);
                     GameFiber.Wait(75);
                     SetRelationship();
@@ -737,6 +729,23 @@ namespace BarbarianCall.Callouts
                     NetExtension.SendError(e);
                     $"{GetType().Name} callout crashed, please send your log".DisplayNotifWithLogo("Officer Stabbed");
                     End();
+                }
+            });
+        }
+        void PositionHandler()
+        {
+            GameFiber.StartNew(() =>
+            {
+                Vector3 position = SuspectCar.Position;
+                while (CheckForPosition)
+                {
+                    if (!SuspectCar) continue;
+                    if (Vector3.DistanceSquared(position, SuspectCar.Position) > 400f)
+                    {
+                        SuspectCar.Position = position;
+                    }
+                    position = SuspectCar.Position;
+                    GameFiber.Yield();
                 }
             });
         }

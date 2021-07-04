@@ -218,7 +218,7 @@ namespace BarbarianCall.Freemode
 		}
 		public static void SetJuggernautComponent(this FreemodePed ped)
 		{
-			int rnd = Peralatan.Random.Next(2, 11);
+			int rnd = Peralatan.RandomNextSecure(2, 11);
 			if (ped.IsMale)
             {
 				ped.Wardrobe.Mask = new PedComponent(PedComponent.EComponentID.Mask, 91, rnd, 0);

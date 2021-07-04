@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Rage;
 using LSPD_First_Response.Engine.Scripting.Entities;
 using LSPDFR = LSPD_First_Response.Mod.API.Functions;
@@ -19,6 +17,7 @@ namespace BarbarianCall.Callouts
     {
         private new FreemodePed Suspect;
         private FreemodePed Passenger;
+        private RelationshipGroup Criminal;
         public override bool OnBeforeCalloutDisplayed()
         {
             DeclareVariable();
@@ -54,11 +53,14 @@ namespace BarbarianCall.Callouts
             VehicleSkin skin = new(CarModel);
             skin.LicensePlate = Peralatan.GetRandomPlateNumber();
             SuspectCar = VehicleSkin.CreateVehicle(skin, CalloutPosition, Spawn.Heading);
+            CalloutEntities.Add(SuspectCar);
             SuspectCar.IsPersistent = true;
             SuspectCar.Mods.ApplyAllMods();
             SuspectCar.IsStolen = Peralatan.Random.Next() % 4 == 1;
             Suspect = new FreemodePed(Position, Peralatan.Random.Next() % 2 == 1);
+            CalloutEntities.Add(Suspect);
             Passenger = new FreemodePed(Position, Peralatan.Random.Next() % 2 == 1);
+            CalloutEntities.Add(Passenger);
             Suspect.MakeMissionPed();
             Passenger.MakeMissionPed();
             Suspect.MaxHealth = Peralatan.Random.Next(2750, 3750);
@@ -77,6 +79,9 @@ namespace BarbarianCall.Callouts
             LSPDFR.SetPedCantBeArrestedByPlayer(Passenger, true);
             Suspect.SetPedAsWanted();
             Passenger.SetPedAsWanted();
+            Criminal = new RelationshipGroup("CRIMINAL");
+            Suspect.RelationshipGroup = Criminal;
+            Passenger.RelationshipGroup = Criminal;
             Suspect.WarpIntoVehicle(SuspectCar, -1);
             Passenger.WarpIntoVehicle(SuspectCar, 0);
             Suspect.Tasks.CruiseWithVehicle(35f, (VehicleDrivingFlags)20);
@@ -88,6 +93,19 @@ namespace BarbarianCall.Callouts
             };
             Logical();
             CalloutMainFiber.Start();
+            GameFiber.StartNew(() =>
+            {
+                Ped wanted = (new[] { Suspect, Passenger}).GetRandomElement();
+                Manusia = new Manusia(wanted, LSPDFRFunc.GetPedPersona(wanted), SuspectCar);
+                LSPDFRFunc.WaitAudioScannerCompletion();
+                GameFiber.Sleep(1000);
+                Manusia.DisplayNotif();
+                GameFiber.Wait(1500);
+                LSPDFRFunc.WaitAudioScannerCompletion();
+                LSPDFRFunc.PlayScannerAudio($"SUSPECT_IS DRIVING_A {SuspectCar.GetColorAudio()} {Peralatan.GetPoliceScannerAudio(SuspectCar)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}", true);
+                GameFiber.Wait(2500);
+                DisplayGPNotif();
+            });
             return base.OnCalloutAccepted();
         }
 
@@ -98,6 +116,8 @@ namespace BarbarianCall.Callouts
         public override void End()
         {
             if (Blip) Blip.Delete();
+            RelationshipGroup? group = Criminal;
+            if (group.HasValue) Extension.DeleteRelationshipGroup(group.Value);
             base.End();
         }
 
@@ -112,11 +132,13 @@ namespace BarbarianCall.Callouts
             while (CalloutRunning)
             {
                 GameFiber.Yield();
+                Rage.Debug.DrawLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, SuspectCar.Position, Yellow);
+                Marker.DrawMarker(MarkerType.UpsideDownCone, SuspectCar.AbovePosition, Yellow);
                 if (StopWatch.ElapsedMilliseconds > 20000 && SuspectCar.DistanceToSquared(curPos) > 2500f)
                 {
                     curPos = SuspectCar.Position;
                     if (Blip) Blip.Delete();
-                    Blip = new Blip(SuspectCar.Position.Around2D(20f), 150f)
+                    Blip = new Blip(SuspectCar.Position.Around2D(20f), 80f)
                     {
                         Color = Yellow,
                         IsRouteEnabled = true,
@@ -134,13 +156,25 @@ namespace BarbarianCall.Callouts
                 }
             }
         }
+        void SetRelationship()
+        {
+            Criminal.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
+            Criminal.SetRelationshipWith(RelationshipGroup.Medic, Relationship.Hate);
+            Criminal.SetRelationshipWith(RelationshipGroup.Fireman, Relationship.Hate);
+            Criminal.SetRelationshipWith(RelationshipGroup.Player, Relationship.Hate);
+            Criminal.SetRelationshipWith(PlayerPed.RelationshipGroup, Relationship.Hate);
+            RelationshipGroup.Cop.SetRelationshipWith(Criminal, Relationship.Hate);
+            RelationshipGroup.Fireman.SetRelationshipWith(Criminal, Relationship.Hate);
+            RelationshipGroup.Medic.SetRelationshipWith(Criminal, Relationship.Hate);
+        }
         void Logical()
         {
-            CalloutMainFiber = GameFiber.StartNew(() =>
+            CalloutMainFiber = new(() =>
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new List<FreemodePed>() { Suspect, Passenger, };                 
+                    List<FreemodePed> Suspects = new List<FreemodePed>() { Suspect, Passenger, };
+                    SetRelationship();
                     GetClose();
                     if (!CalloutRunning) return;
                     Blip = new(Suspect)
@@ -166,10 +200,11 @@ namespace BarbarianCall.Callouts
                             s.Inventory.GiveNewWeapon(weapon, -1, true);
                             var components = Globals.WeaponMKIIAndItsComponents[weapon];
                             components.ForEach(x => s.Inventory.AddComponentToWeapon(weapon, x));
-                            s.FiringPattern = FiringPattern.SingleShot;
+                            s.FiringPattern = FiringPattern.BurstFireShortBursts;
                             s.Tasks.FightAgainstClosestHatedTarget(1000f);
                         }
                     });
+                    bool explode = false;
                     while(CalloutRunning)
                     {
                         GameFiber.Yield();
@@ -178,6 +213,11 @@ namespace BarbarianCall.Callouts
                             if (s && (s.IsTaskActive(PedTask.DoNothing) || !s.IsTaskActive(PedTask.CombatClosestTargetInArea)) && s.IsAlive) s.Tasks.FightAgainstClosestHatedTarget(1000f);
                         });
                         if (Suspects.All(s => (s && s.IsDead) || !s)) break;
+                        if (!explode && SuspectCar && PlayerPed.DistanceToSquared(SuspectCar) < 8f && Suspects.All(x => x && x.DistanceToSquared(SuspectCar) > 625f))
+                        {
+                            SuspectCar.Explode(true);
+                            explode = true;
+                        }
                     }
                     if (!CalloutRunning) return;
                     End();

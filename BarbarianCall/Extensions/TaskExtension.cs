@@ -161,7 +161,8 @@ namespace BarbarianCall.Extensions
                                        float targetHeading,
                                        int maxHeight,
                                        int minHeight,
-                                       int behaviorFlags)
+                                       int behaviorFlags,
+                                       float unk3 = 400.0f)
         {
             if (targetPed is null && targetVeh is null && destination == Vector3.Zero)
             {
@@ -169,7 +170,7 @@ namespace BarbarianCall.Extensions
             }
             uint targetPedHandle = targetPed is null ? 0 : targetPed.Handle;
             uint targetVehHandle = targetVeh is null ? 0 : targetVeh.Handle;
-            Natives.TASK_HELI_MISSION(pilot, heli, targetVehHandle, targetPedHandle, destination.X, destination.Y, destination.Z, (int)type, maxSpeed, radius, targetHeading, maxHeight, minHeight, 400.0f, behaviorFlags);
+            Natives.TASK_HELI_MISSION(pilot, heli, targetVehHandle, targetPedHandle, destination.X, destination.Y, destination.Z, (int)type, maxSpeed, radius, targetHeading, maxHeight, minHeight, unk3, behaviorFlags);
             return Task.GetTask(pilot, "TASK_HELI_MISSION");
         }
         public static Task VehicleMission(this Ped ped, Vehicle target, MissionType missionType, float maxSpeed, VehicleDrivingFlags flags, float minDistance, float stoppingRange, bool againstTraffic) =>

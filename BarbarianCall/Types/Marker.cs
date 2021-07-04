@@ -50,7 +50,7 @@
         {
             if (!entity) return;
 
-            DrawMarker(type, entity.AbovePosition + Vector3.WorldUp * ((scale.Z * 0.5f) - extraZ), scale, color);
+            DrawMarker(type, entity.AbovePosition + Vector3.WorldUp * ((scale.Z * 0.5f) + extraZ), scale, color);
         }
 
         public static void DrawMarker(MarkerType type, Vector3 position, Vector3 direction, Rotator rotation, Vector3 scale, Color color)

@@ -165,6 +165,8 @@ namespace BarbarianCall.Callouts
                     try
                     {
                         var sp = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 100, 300);
+                        if (sp == Spawnpoint.Zero) SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 100, 300);
+                        if (sp == Spawnpoint.Zero) SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 100, 300);
                         if (sp == Spawnpoint.Zero) continue;
                         GameFiber.Wait(Peralatan.Random.Next(3000, 15001));
                         var rv = new Vehicle(m => m.IsSuitableCar() && Globals.AudibleCarModel.Contains(m) && m.IsValid, sp.Position, sp.Heading);

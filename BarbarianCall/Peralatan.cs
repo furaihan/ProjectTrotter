@@ -364,6 +364,8 @@ namespace BarbarianCall
                 try
                 {
                     "Attempting to register ped headshot".ToLog();
+                    ped.GetVariation(1, out int draw, out int tex);
+                    ped.SetVariation(1, 0, 0);
                     uint headshotHandle = N.Natives.RegisterPedheadshot<uint>(ped);
                     var timer = new TimeSpan(0, 0, 10);
                     Stopwatch stopwatch = Stopwatch.StartNew();
@@ -378,6 +380,7 @@ namespace BarbarianCall
                         if (stopwatch.Elapsed > timer) break;
                     }
                     string txd = N.Natives.GetPedheadshotTxdString<string>(headshotHandle);
+                    ped.SetVariation(1, draw, tex);
                     Game.DisplayNotification(txd, txd, title, subtitle, text);
                     //GameFiber.Wait(200);
                     Globals.RegisteredPedHeadshot.Add(headshotHandle);
