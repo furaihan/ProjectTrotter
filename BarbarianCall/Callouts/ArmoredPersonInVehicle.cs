@@ -9,6 +9,7 @@ using BarbarianCall.Freemode;
 using BarbarianCall.Extensions;
 using System.Diagnostics;
 using BarbarianCall.API;
+using RAGENativeUI.Elements;
 
 namespace BarbarianCall.Callouts
 {
@@ -129,11 +130,17 @@ namespace BarbarianCall.Callouts
         {
             var curPos = SuspectCar.Position;
             StopWatch = Stopwatch.StartNew();
+            ResText resText = new ResText("SUSPECT", new(0, 0), 0.75f, Yellow, RAGENativeUI.Common.EFont.ChaletLondon, ResText.Alignment.Centered);
             while (CalloutRunning)
             {
                 GameFiber.Yield();
                 Rage.Debug.DrawLine(PlayerPed.IsInAnyVehicle(false) ? PlayerPed.CurrentVehicle.FrontPosition : PlayerPed.FrontPosition, SuspectCar.Position, Yellow);
-                Marker.DrawMarker(MarkerType.UpsideDownCone, SuspectCar.AbovePosition, Yellow);
+                Vector3 pos = SuspectCar.AbovePosition + new Vector3(0f, 0f, 1f);
+                if (Rage.Native.NativeFunction.Natives.GET_SCREEN_COORD_FROM_WORLD_COORD<bool>(pos.X, pos.Y, pos.Z, out float xs, out float ys))
+                {
+                    resText.Position = new(Convert.ToInt32(xs), Convert.ToInt32(ys));
+                    resText.Draw();
+                }
                 if (StopWatch.ElapsedMilliseconds > 20000 && SuspectCar.DistanceToSquared(curPos) > 2500f)
                 {
                     curPos = SuspectCar.Position;
@@ -166,6 +173,30 @@ namespace BarbarianCall.Callouts
             RelationshipGroup.Cop.SetRelationshipWith(Criminal, Relationship.Hate);
             RelationshipGroup.Fireman.SetRelationshipWith(Criminal, Relationship.Hate);
             RelationshipGroup.Medic.SetRelationshipWith(Criminal, Relationship.Hate);
+        }
+        void DisplayCasualities()
+        {
+            int civilianDead = 0;
+            int copsDead = 0;
+            int vehicleExplodes = 0;
+            foreach(Ped ped in World.GetAllPeds())
+            {
+                if (ped)
+                {
+                    if (ped.IsHuman && ped.IsDead)
+                    {
+                        if (LSPDFR.IsPedACop(ped)) copsDead++;
+                        else if (ped.RelationshipGroup != Criminal) civilianDead++;
+                    }
+                }
+            }
+            foreach (Vehicle vehicle in World.GetAllVehicles())
+            {
+                if (vehicle && (vehicle.IsCar || vehicle.IsBike || vehicle.IsBicycle))
+                {
+                    if (vehicle.IsDead) vehicleExplodes++;
+                }
+            }
         }
         void Logical()
         {
