@@ -90,6 +90,7 @@
     <Compile Include="Callouts\MassStreetFighting.cs" />
     <Compile Include="Callouts\OfficerStabbed.cs" />
     <Compile Include="Callouts\Prostitution.cs" />
+    <Compile Include="Callouts\StolenBoatTrailer.cs" />
     <Compile Include="Callouts\SuspiciousVehicle.cs" />
     <Compile Include="Callouts\TaxiRefusePay.cs" />
     <Compile Include="Callouts\WantedFelonOnTheLoose.cs" />
