@@ -194,64 +194,6 @@ namespace BarbarianCall.Extensions
             Natives.TASK_VEHICLE_MISSION_COORS_TARGET(ped, vehicle, target.X, target.Y, target.Z, (int)missionType, maxSpeed, (int)flags, minDistance, stoppingRange, againstTraffic);
             return Task.GetTask(ped, "TASK_VEHICLE_MISSION_COORS_TARGET");
         }
-        public static unsafe Task PlayScriptedAnim(this Ped ped,
-                                                   AnimationDictionary animationDictionary,
-                                                   string animName,
-                                                   AnimationFlags flags,
-                                                   BoneMask boneMask,
-                                                   float framePosition = 0.0f)
-        {
-            if (!animationDictionary.IsLoaded) animationDictionary.LoadAndWait();
-            float fpos = framePosition;
-            float blendInSpeed = 8f;
-            float blendOutSpeed = -8f;
-            long minOne = -1;
-            long one = 1;
-            long unk1 = 1065353216;
-            long unk2 = 1040187392;
-            string bm = boneMask.ToString();
-            long[] longs = new long[32];
-            long[] longs1 = new long[32];
-            fixed (long* ptr1 = &longs1[0])
-                fixed (long* ptr2 = &longs[0])
-            {
-                ptr2[1] = Marshal.StringToHGlobalAnsi(animationDictionary).ToInt64();
-                ptr2[2] = Marshal.StringToHGlobalAnsi(animName).ToInt64();
-                ptr2[3] = *(long*)&fpos;
-                ptr2[4] = unk1;
-                ptr2[5] = unk1;
-                ptr2[9] = unk1;
-                ptr2[10] = unk1;
-                ptr2[14] = unk1;
-                ptr2[15] = unk1;
-                ptr2[16] = Game.GetHashKey(bm);
-                ptr2[17] = *(long*)&blendInSpeed;
-                ptr2[18] = *(long*)&blendOutSpeed;
-                ptr2[19] = minOne;
-                ptr2[20] = (int)flags;
-                *ptr2 = one;
-                ptr2[4] = unk1;
-                ptr2[5] = unk1;
-                ptr2[9] = unk1;
-                ptr2[10] = unk1;
-                ptr2[14] = unk1;
-                ptr2[15] = unk1;
-                *ptr1 = one;
-                ptr1[4] = unk1;
-                ptr1[5] = unk1;
-                ptr1[9] = unk1;
-                ptr1[10] = unk1;
-                ptr1[14] = unk1;
-                ptr1[15] = unk1;
-                ptr1[17] = unk2;
-                ptr1[18] = unk2;
-                ptr1[19] = minOne;
-                CallByHash<uint>(0x126EF75F1E17ABE5, ped, ptr2, ptr1, ptr1, 0.5f, 0.5f);
-                Natives.FORCE_PED_AI_AND_ANIMATION_UPDATE(ped, false, false);
-                animationDictionary.Dismiss();
-            }
-            return Task.GetTask(ped, "TASK_SCRIPTED_ANIMATION");
-        }
         public static void StopEntityAnimation(this Entity entity, AnimationDictionary animDict, string animName) => Natives.STOP_ENTITY_ANIM(entity, animName, animDict.Name, 0);
         public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM       
     }
