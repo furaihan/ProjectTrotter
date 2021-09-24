@@ -52,7 +52,7 @@ namespace BarbarianCall.SupportUnit
                 SetPedPedComponent();
                 Ped.WarpIntoVehicle(Vehicle, -1);
                 GameFiber.Wait(2500);
-                $"Vehicle has weapon: {N.Natives.DOES_VEHICLE_HAVE_WEAPONS<bool>(Vehicle)}".ToLog();
+                $"Vehicle has weapon : {N.Natives.DOES_VEHICLE_HAVE_WEAPONS<bool>(Vehicle)}".ToLog();
                 Ped.HeliMission(Vehicle, (Vehicle)(TargetEntity.IsVehicle() ? TargetEntity : null), (Ped)(TargetEntity.IsPed() ? TargetEntity : null), Vector3.Zero, MissionType.Attack, 70f, 15f, -1.0f, 0, 80, 0, -1.0f);
                 Ped.MakeMissionPed(true);
                 Functions.SetPedAsCop(Ped);
