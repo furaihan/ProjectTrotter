@@ -167,7 +167,7 @@ namespace BarbarianCall.Extensions
             int sampleRoom = (int)Math.Pow(2, numberOfBoolean);
             for (int i = 0; i < sampleRoom; i++)
             {
-                List<bool> bools = new List<bool>();
+                List<bool> bools = new();
                 for (int j = 0; j < numberOfBoolean; j++)
                 {
                     bools.Add((i & (1 << j)) != 0);
@@ -180,6 +180,15 @@ namespace BarbarianCall.Extensions
         public static float DistanceToSquared(this ISpatial spatial, Vector3 to) => Vector3.DistanceSquared(spatial.Position, to);
         public static float DistanceToSquared(this Vector3 vector3, ISpatial spatial) => Vector3.DistanceSquared(vector3, spatial.Position);
         public static float DistanceToSquared(this ISpatial spatial, ISpatial to) => Vector3.DistanceSquared(spatial.Position, to.Position);
+        public static float DistanceToSquared2D(this Vector3 vector3, Vector3 to)
+        {
+            Vector3 from2D = new(vector3.X, vector3.Y, 0.0f);
+            Vector3 to2D = new(to.X, to.Y, 0.0f);
+            return Vector3.DistanceSquared(from2D, to2D);
+        }
+        public static float DistanceToSquared2D(this ISpatial spatial, Vector3 to) => DistanceToSquared2D(spatial.Position, to);
+        public static float DistanceToSquared2D(this Vector3 vector3, ISpatial spatial) => DistanceToSquared2D(vector3, spatial.Position);
+        public static float DistanceToSquared2D(this ISpatial spatial, ISpatial to) => DistanceToSquared2D(spatial.Position, to.Position);
         internal static float GetRandomFloatInRange(float startRange, float endRange) => Natives.GET_RANDOM_FLOAT_IN_RANGE<float>(startRange, endRange);
         internal static float FloatDiff(this float first, float second) => Math.Abs(first - second);
         internal static float HeightDiff(this ISpatial first, ISpatial second) => first.Position.Z.FloatDiff(second.Position.Z);

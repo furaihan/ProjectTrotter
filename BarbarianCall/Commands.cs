@@ -233,7 +233,7 @@ namespace BarbarianCall
         {
             if (ped)
             {
-                MilitaryHeliSupport militaryHeliSupport = new MilitaryHeliSupport(ped, type);
+                MilitaryHeliSupport militaryHeliSupport = new MilitaryHeliSupport();
             }
         }
     }

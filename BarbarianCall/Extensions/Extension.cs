@@ -105,6 +105,15 @@ namespace BarbarianCall.Extensions
             var pds1 = World.GetAllPeds();
             return pds1.Where(x => x && NativeFunction.Natives.GET_RELATIONSHIP_BETWEEN_PEDS<Relationship>(x, ped) == Relationship.Hate).OrderBy(x => x.DistanceToSquared(ped)).FirstOrDefault();
         }
+        internal static Relationship GetRelationshipAgainst(this Ped ped, Ped target)
+        {
+            int relationship = NativeFunction.Natives.GET_RELATIONSHIP_BETWEEN_PEDS<int>(ped, target);
+            return (Relationship)relationship;
+        }
+        public static Ped Clone(this Ped ped, bool copyHeadblend)
+        {
+            return NativeFunction.Natives.CLONE_PED<Ped>(ped, false, false, copyHeadblend);
+        }
         public static bool IsTaskActive(this Ped ped, PedTask task)
         {
             return NativeFunction.Natives.GET_IS_TASK_ACTIVE<bool>(ped, (int)task);

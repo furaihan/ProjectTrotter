@@ -209,5 +209,19 @@ namespace BarbarianCall.Freemode
             target.Wardrobe.Torso = Torso;
             target.Wardrobe.UnderShirt = UnderShirt;
         }
+        public void CopyFromPed(FreemodePed ped, bool includeHairstyle = false)
+        {
+            Accessories = ped.Wardrobe.Accessories;
+            BodyArmor = ped.Wardrobe.BodyArmor;
+            Decal = ped.Wardrobe.Decal;
+            if (includeHairstyle) HairStyle = ped.Wardrobe.HairStyle;
+            Leg = ped.Wardrobe.Leg;
+            Mask = ped.Wardrobe.Mask;
+            Parachute = ped.Wardrobe.Parachute;
+            Shoes = ped.Wardrobe.Shoes;
+            Tops = ped.Wardrobe.Tops;
+            Torso = ped.Wardrobe.Torso;
+            UnderShirt = ped.Wardrobe.UnderShirt;
+        }
     }
 }
