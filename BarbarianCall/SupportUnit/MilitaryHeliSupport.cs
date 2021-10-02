@@ -23,7 +23,7 @@ namespace BarbarianCall.SupportUnit
         private Model _model;
         public Vehicle Helicopter { get; private set; }
         public Ped Pilot { get; private set; }
-        public List<FreemodePed> Passengers { get; private set; }
+        public List<FreemodePed> Passengers { get; private set; } = new List<FreemodePed>();
         public Blip Blip { get; private set; }
         public Ped CurrentTargetPed{ get; private set; }
         public Vector3 SpawnLocation { get; private set; }
@@ -127,6 +127,7 @@ namespace BarbarianCall.SupportUnit
                 catch (System.Exception e)
                 {
                     e.ToString().ToLog();
+                    CleanUp();
                 }              
             });          
         }
@@ -153,13 +154,13 @@ namespace BarbarianCall.SupportUnit
                 if (noosePed && noosePed.IsFreemodePed())
                 {
                     "MilitaryHeliSupport | Found a male occupant".ToLog();
-                    noosePed.Position = Game.LocalPlayer.Character.AbovePosition + Game.LocalPlayer.Character.UpVector * 5f;
+                    noosePed.Position = Vector3.RelativeLeft;
                     noosePed.Opacity = 0.0f;
                     noosePed.IsPositionFrozen = true;
                     noosePed.IsCollisionEnabled = false;
                     foreach (Ped ped in noose.Occupants)
                     {
-                        if (ped) ped.Delete();
+                        if (ped && ped != noosePed) ped.Delete();
                     }
                     if (noose) noose.Delete();
                     break;
@@ -180,7 +181,7 @@ namespace BarbarianCall.SupportUnit
                 FreemodePed pass = new(Vector3.Zero, true);
                 pass.IsPersistent = true;
                 pass.BlockPermanentEvents = true;
-                pass.Wardrobe.CopyFromPed(noosePed as FreemodePed);
+                pass.Wardrobe.CopyFromPed(FreemodePed.FromRegularPed(noosePed));
                 N.Natives.GIVE_DELAYED_WEAPON_TO_PED(pass, 0xDBBD7280, -1, true);
                 pass.WarpIntoVehicle(Helicopter, i);
                 N.Natives.SET_PED_COMBAT_ATTRIBUTES(pass, 5, true);
@@ -203,7 +204,8 @@ namespace BarbarianCall.SupportUnit
                 pass.CanBeTargetted = false;
                 Passengers.Add(pass);
             }
-            return false;
+            if (noosePed) noosePed.Delete();
+            return true;
         }
         private Ped FindTarget()
         {

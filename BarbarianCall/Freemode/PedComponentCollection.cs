@@ -211,6 +211,7 @@ namespace BarbarianCall.Freemode
         }
         public void CopyFromPed(FreemodePed ped, bool includeHairstyle = false)
         {
+            $"Aks = {Accessories} Aks = {ped.Wardrobe.Accessories} Ped exist: {ped.Exists()}".ToLog();
             Accessories = ped.Wardrobe.Accessories;
             BodyArmor = ped.Wardrobe.BodyArmor;
             Decal = ped.Wardrobe.Decal;

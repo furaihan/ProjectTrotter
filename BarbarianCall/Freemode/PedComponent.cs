@@ -16,9 +16,9 @@
         }
         public static PedComponent GetPedComponent(FreemodePed ped, EComponentID componentID)
         {
-            int draw = NativeFunction.Natives.GET_PED_DRAWABLE_VARIATION<int>(ped, componentID);
-            int tex = NativeFunction.Natives.GET_PED_TEXTURE_VARIATION<int>(ped, componentID);
-            int pal = NativeFunction.Natives.GET_PED_PALETTE_VARIATION<int>(ped, componentID);
+            int draw = NativeFunction.Natives.GET_PED_DRAWABLE_VARIATION<int>(ped, (int)componentID);
+            int tex = NativeFunction.Natives.GET_PED_TEXTURE_VARIATION<int>(ped, (int)componentID);
+            int pal = NativeFunction.Natives.GET_PED_PALETTE_VARIATION<int>(ped, (int)componentID);
             return new PedComponent(componentID, draw, tex, pal);
         }
         public static void SetPedComponent(FreemodePed ped, PedComponent pedComponent)
