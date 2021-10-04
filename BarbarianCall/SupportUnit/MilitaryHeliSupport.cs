@@ -11,6 +11,8 @@ namespace BarbarianCall.SupportUnit
 {
     public class MilitaryHeliSupport
     {
+        private static int _activeNumber = 0;
+        public static bool IsAnyMilitaryHeliSupportActive => _activeNumber > 0;
         private readonly List<Model> heliModels = new List<Model>()
         {
             "BUZZARD",
@@ -25,8 +27,9 @@ namespace BarbarianCall.SupportUnit
         public Ped Pilot { get; private set; }
         public List<FreemodePed> Passengers { get; private set; } = new List<FreemodePed>();
         public Blip Blip { get; private set; }
-        public Ped CurrentTargetPed{ get; private set; }
+        public Ped CurrentTargetPed { get; private set; }
         public Vector3 SpawnLocation { get; private set; }
+        private bool cleaned = false;
         public MilitaryHeliSupport()
         {
             GameFiber.StartNew(() =>
@@ -48,8 +51,11 @@ namespace BarbarianCall.SupportUnit
                         Color = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.RadarArmour),
                         Name = "Heli Support Unit",
                     };
+                    UpgradeHeli();
                     N.Natives.SET_HELI_BLADES_FULL_SPEED(Helicopter);
                     Pilot = new Ped("s_m_y_pilot_01", Vector3.Zero, 0f);
+                    Pilot.IsPersistent = true;
+                    Pilot.BlockPermanentEvents = true;
                     bool success = PreparePed();
                     if (!success)
                     {
@@ -59,8 +65,14 @@ namespace BarbarianCall.SupportUnit
                     }
                     Pilot.WarpIntoVehicle(Helicopter, -1);
                     Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, 50, 10, 0, -1.0f);
+                    if (N.Natives.xE43701C36CAFF1A4<bool>(Helicopter))
+                    {
+                        N.Natives.CONTROL_LANDING_GEAR(Helicopter, 1);
+                    }
+                    Functions.PlayScannerAudio("HELI_APPROACHING_DISPATCH");
                     bool targetFind = false;
                     Stopwatch notFoundTarget = new();
+                    _activeNumber++;
                     while (true)
                     {
                         GameFiber.Yield();
@@ -72,7 +84,12 @@ namespace BarbarianCall.SupportUnit
                                 if (target)
                                 {
                                     $"{GetType().Name} | Target found: {target.Model.Name}".ToLog();
-                                    if (notFoundTarget.IsRunning) notFoundTarget.Reset();
+                                    if (notFoundTarget.IsRunning)
+                                    {
+                                        $"{GetType().Name} | Resetting stopwatch".ToLog();
+                                        notFoundTarget.Reset();
+                                    }
+
                                     foreach (Ped ped in Passengers)
                                     {
                                         if (ped)
@@ -83,13 +100,19 @@ namespace BarbarianCall.SupportUnit
                                             ped.KeepTasks = true;
                                         }
                                     }
+                                    Pilot.HeliMission(Helicopter, null, target, Vector3.Zero, MissionType.Circle, 8f, 10f, MathExtension.GetRandomFloatInRange(1f, 359f), 50, 30, 25280, -1.0f);
                                     targetFind = true;
                                     CurrentTargetPed = target;
                                 }
                                 else
                                 {
-                                    if (!notFoundTarget.IsRunning) notFoundTarget.Start();
-                                    GameFiber.Sleep(500);
+                                    if (!notFoundTarget.IsRunning)
+                                    {
+                                        $"{GetType().Name} Starting stopwatch".ToLog();
+                                        notFoundTarget.Start();
+                                    }
+                                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.Follow, 50f, 5f, -1.0f, 100, 50, 25280, 400.0f);
+                                    GameFiber.Wait(500);
                                     continue;
                                 }
                             }
@@ -104,7 +127,7 @@ namespace BarbarianCall.SupportUnit
                                     }
                                 }
                             }
-                            if (!targetFind && notFoundTarget.IsRunning && notFoundTarget.ElapsedMilliseconds > 120000)
+                            if (!targetFind && notFoundTarget.IsRunning && notFoundTarget.ElapsedMilliseconds > 100000)
                             {
                                 break;
                             }
@@ -113,10 +136,17 @@ namespace BarbarianCall.SupportUnit
                         {
                             if (Pilot.Tasks.CurrentTaskStatus != TaskStatus.InProgress || Pilot.Tasks.CurrentTaskStatus != TaskStatus.Preparing)
                             {
-                                Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, 50, 20, 0, -1.0f);
+                                Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, 50, 20, 0);
                             }
+                            N.Natives.SET_​DRIVE_​TASK_​CRUISE_​SPEED(Pilot, 40f);
                         }
-                        if ((Helicopter && (Helicopter.IsDead || Helicopter.IsInBurnout)) || Passengers.All(x => x && x.IsDead) || !Helicopter || (Helicopter && Helicopter.Occupants.All(x => !x)))
+                        if (
+                        (Helicopter &&
+                        (Helicopter.IsDead || Helicopter.IsInBurnout || (!Helicopter.IsInAir && Helicopter.Speed < 0.95f) ||
+                        N.Natives.GET_HELI_TAIL_ROTOR_HEALTH<float>(Helicopter) < 5f ||
+                        N.Natives.GET_HELI_MAIN_ROTOR_HEALTH<float>(Helicopter) < 5f ||
+                        Helicopter.EngineHealth < 200.0f))
+                        || Passengers.All(x => x && x.IsDead) || !Helicopter || (Pilot && Pilot.IsDead))
                         {
                             Functions.PlayScannerAudio("HELI_MAYDAY_DISPATCH");
                             break;
@@ -126,10 +156,15 @@ namespace BarbarianCall.SupportUnit
                 }
                 catch (System.Exception e)
                 {
+                    if (!cleaned)
+                    {
+                        _activeNumber--;
+                        cleaned = true;
+                    }
                     e.ToString().ToLog();
                     CleanUp();
-                }              
-            });          
+                }
+            });
         }
         private Vector3 FindSpawnPoint(Vector3 targetPos)
         {
@@ -142,7 +177,7 @@ namespace BarbarianCall.SupportUnit
             return vector3;
         }
         private bool PreparePed()
-        {           
+        {
             Ped noosePed;
             Stopwatch sw = Stopwatch.StartNew();
             while (true)
@@ -174,13 +209,20 @@ namespace BarbarianCall.SupportUnit
                 {
                     return false;
                 }
-            }        
-            for (int i = 0; i < N.Natives.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS<int>(Helicopter) -1; i++)
+            }
+            for (int i = 0; i < N.Natives.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS<int>(Helicopter); i++)
             {
                 $"{GetType().Name} | Creating passenger {i + 1}".ToLog();
-                FreemodePed pass = new(Vector3.Zero, true);
-                pass.IsPersistent = true;
-                pass.BlockPermanentEvents = true;
+                FreemodePed pass = new(Vector3.Zero, true)
+                {
+                    IsPersistent = true,
+                    BlockPermanentEvents = true,
+                    Accuracy = Peralatan.Random.Next(95, 101),
+                    MaxHealth = 1500,
+                    Health = 1500,
+                    RelationshipGroup = Game.LocalPlayer.Character.RelationshipGroup,
+                    CanBeTargetted = false
+                };
                 pass.Wardrobe.CopyFromPed(FreemodePed.FromRegularPed(noosePed));
                 N.Natives.GIVE_DELAYED_WEAPON_TO_PED(pass, 0xDBBD7280, -1, true);
                 pass.WarpIntoVehicle(Helicopter, i);
@@ -196,12 +238,6 @@ namespace BarbarianCall.SupportUnit
                 N.Natives.SET_PED_SEEING_RANGE(pass, 5 + 100f);
                 N.Natives.SET_PED_VISUAL_FIELD_PERIPHERAL_RANGE(pass, 400f);
                 N.Natives.SET_COMBAT_FLOAT(pass, 10, 400f);
-                pass.Accuracy = N.Natives.xF2D49816A804D134<int>(95, 100);
-                pass.MaxHealth = 1500;
-                pass.Health = 1500;
-                pass.Armor = 1000;
-                pass.RelationshipGroup = Game.LocalPlayer.Character.RelationshipGroup;
-                pass.CanBeTargetted = false;
                 Passengers.Add(pass);
             }
             if (noosePed) noosePed.Delete();
@@ -221,6 +257,35 @@ namespace BarbarianCall.SupportUnit
             $"{GetType().Name} Target not found".ToLog();
             return null;
         }
+        private void UpgradeHeli()
+        {
+            int[] mods = { 11, 12, 15, 16, 18 };
+            if (Helicopter)
+            {
+                foreach(int i in mods)
+                {
+                    try
+                    {
+                        int maxMods = N.Natives.GET_NUM_VEHICLE_MODS<int>(Helicopter, i);
+                        if (maxMods <= 0) continue;
+                        N.Natives.SET_VEHICLE_MOD(Helicopter, i, maxMods, false);
+                    }
+                    catch (System.Exception e)
+                    {
+                        e.ToString().ToLog();
+                        continue;
+                    }
+                }
+                try
+                {
+
+                }
+                catch (System.Exception e)
+                {
+                    e.ToString().ToLog();
+                }
+            }
+        }
         public void CleanUp()
         {
             if (Pilot)
@@ -238,6 +303,11 @@ namespace BarbarianCall.SupportUnit
                 if (ped) ped.Dismiss();
             }
             _model.Dismiss();
+            if (!cleaned)
+            {
+                _activeNumber--;
+                cleaned = true;
+            }
         }
     }
 }
