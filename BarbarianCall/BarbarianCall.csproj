@@ -128,6 +128,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sound\Stream.cs" />
     <Compile Include="SpawnManager.cs" />
+    <Compile Include="SupportUnit\CargobobServices.cs" />
     <Compile Include="SupportUnit\HeliSupport.cs" />
     <Compile Include="SupportUnit\Mechanic.cs" />
     <Compile Include="SupportUnit\MilitaryHeliSupport.cs" />
