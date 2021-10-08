@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using BarbarianCall.Extensions;
 
-namespace BarbarianCall.Peralatan
+namespace BarbarianCall.SupportUnit
 {
     public class CargobobServices
     {
@@ -80,7 +80,7 @@ namespace BarbarianCall.Peralatan
                         {
                             gotoTask = Pilot.HeliMission(Cargobob, TargetVehicle, null, Vector3.Zero, MissionType.Follow, 50f, 0f, -1.0f, -1, 80, 0, -1.0f);
                         }
-                        if (Cargobob.DistanceTo2D(TargetVehicle) < 25f)
+                        if (Cargobob.DistanceToSquared2D(TargetVehicle) < 625f)
                         {
                             break;
                         }
@@ -177,7 +177,8 @@ namespace BarbarianCall.Peralatan
                     }
                     if (!successHook)
                     {
-                        Game.DisplayNotification("Sorry, it seems our pilot can't reach the vehicle at this moment, feel free to contact us again to rearrange the pickup");
+                        "Sorry, it seems our pilot can't reach the vehicle at this moment, feel free to contact us again to rearrange the pickup".
+                        DisplayNotifWithLogo(title: "Mors Mutual Insurance", subtitle: "Cargobob Services", textureDict: "CHAR_MP_MORS_MUTUAL", textureName: "CHAR_MP_MORS_MUTUAL");
                     }
                     Cargobob.MakePersistent();
                     GameFiber.Wait(2500);
@@ -213,7 +214,7 @@ namespace BarbarianCall.Peralatan
             Vector3 v3 = targetPos.Around2D(800.0f) + Vector3.WorldUp * 450.0f;
             while (Vector3.Distance2D(Game.LocalPlayer.Character.Position, v3) < 400.0f)
             {
-                v3 = targetPos.Around(800.0f) + Vector3.WorldUp * 450.0f;
+                v3 = targetPos.Around2D(800.0f) + Vector3.WorldUp * 450.0f;
                 GameFiber.Yield();
             }
             return v3;
@@ -261,6 +262,10 @@ namespace BarbarianCall.Peralatan
                 NativeFunction.Natives.xAF03011701811146(Cargobob, TargetVehicle);
                 NativeFunction.Natives.DETACH_ENTITY(TargetVehicle, true, true);
             }
+        }
+        internal static List<Vehicle> GetVehicles()
+        {
+            return Game.LocalPlayer.Character.GetNearbyVehicles(16).Where(x => x.IsCar && !x.IsBig && !queueVehicle.Contains(x) && !vehicleTaken.Contains(x) && x.IsEmpty).OrderBy(x => x.DistanceToSquared(Game.LocalPlayer.Character)).ToList();
         }
     }
 }

@@ -174,20 +174,7 @@ namespace BarbarianCall
                 Game.DisplaySubtitle($"Selected: {selected}");
             });
         }
-        [ConsoleCommand(Name = "DisplayVersusNotification", Description = "This is a native test")]
-        private static void DrawVersusNotif()
-        {
-            GameFiber.StartNew(() =>
-            {
-                GameFiber.Wait(20);
-                Stopwatch stopwatch = Stopwatch.StartNew();
-                NativeFunction.Natives.REQUEST_STREAMED_TEXTURE_DICT("CHAR_TREVOR");
-                NativeFunction.Natives.REQUEST_STREAMED_TEXTURE_DICT("CHAR_FRANKLIN");
-                GameFiber.Wait(2000);
-                NativeFunction.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("");
-                NativeFunction.Natives.END_TEXT_COMMAND_THEFEED_POST_VERSUS_TU("CHAR_TREVOR", "CHAR_TREVOR", 25, "CHAR_FRANKLIN", "CHAR_FRANKLIN", 26, (int)HudColor.TrevorDark, (int)HudColor.FranklinDark);
-            });            
-        }
+        /*
         [ConsoleCommand(Name = "ActivatePlaceEditor", Description = "Activate place editor menu")]
         private static void ActivatePlaceEditor()
         {
@@ -198,6 +185,7 @@ namespace BarbarianCall
                 Menus.PlaceEditor.CreateMenu();
             });
         }
+        */
         [ConsoleCommand(Name = "ActivateSitAnywhere")]
         private static void ActivateSofaOnTick()
         {

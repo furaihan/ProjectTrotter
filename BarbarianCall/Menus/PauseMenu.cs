@@ -98,6 +98,10 @@ namespace BarbarianCall.Menus
                 {
                     MainMenu.BarbarianCallMenu.Visible = !MainMenu.BarbarianCallMenu.Visible;
                 }
+                if (MainMenu.BarbarianCallMenu.Visible && MainMenu.cargobobServices.Selected && MainMenu.cargobobServices.SelectedItem)
+                {
+                    Types.Marker.DrawMarker(MarkerType.UpsideDownCone, MainMenu.cargobobServices.SelectedItem.AbovePosition, System.Drawing.Color.Orange);
+                }
             }
         }
     }

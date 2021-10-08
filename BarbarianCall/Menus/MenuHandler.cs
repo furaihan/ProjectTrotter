@@ -66,6 +66,13 @@ namespace BarbarianCall.Menus
                         else Game.DisplayHelp("No nearby vehicle found to repair");
                     }
                 }
+                else if (selected == MainMenu.cargobobServices)
+                {
+                    if (MainMenu.cargobobServices.SelectedItem)
+                    {
+                        CargobobServices cargobobServices = new(MainMenu.cargobobServices.SelectedItem);
+                    }
+                }
 #if DEBUG
                 else if (selected == MainMenu.spawnFreemode)
                 {
@@ -274,6 +281,20 @@ namespace BarbarianCall.Menus
                     PlaceEditor.PlaceList.SelectedItem.PedExits.Add(new Spawnpoint(PlayerPed.Position, PlayerPed.Heading));
                     $"Successfully added {selected.Text.ToLower()}".DisplayNotifWithLogo(selected.Text, "DESKTOP_PC", "FOLDER", "Place Editor", hudColor: HudColor.Gold);
                 }
+            }
+        }
+        internal static void MenuOpenHandler(UIMenu sender)
+        {
+            if (sender == MainMenu.BarbarianCallMenu)
+            {
+                var vehicles = CargobobServices.GetVehicles();
+                if (!vehicles.Any() || vehicles.All(x=> !x))
+                {
+                    MainMenu.cargobobServices.Enabled = false;
+                    MainMenu.cargobobServices.Items = new List<Vehicle>();
+                    MainMenu.cargobobServices.Description = "No suitable vehicle found";
+                }
+                MainMenu.cargobobServices.Items = vehicles;
             }
         }
     }
