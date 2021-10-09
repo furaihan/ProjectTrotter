@@ -30,6 +30,7 @@ namespace BarbarianCall.SupportUnit
         public Ped CurrentTargetPed { get; private set; }
         public Vector3 SpawnLocation { get; private set; }
         private bool cleaned = false;
+        private bool added = false;
         public MilitaryHeliSupport()
         {
             GameFiber.StartNew(() =>
@@ -72,7 +73,12 @@ namespace BarbarianCall.SupportUnit
                     Functions.PlayScannerAudio("HELI_APPROACHING_DISPATCH");
                     bool targetFind = false;
                     Stopwatch notFoundTarget = new();
-                    _activeNumber++;
+                    if (!added)
+                    {
+                        _activeNumber++;
+                        added = true;
+                    }
+
                     while (true)
                     {
                         GameFiber.Yield();
@@ -100,7 +106,7 @@ namespace BarbarianCall.SupportUnit
                                             ped.KeepTasks = true;
                                         }
                                     }
-                                    Pilot.HeliMission(Helicopter, null, target, Vector3.Zero, MissionType.Circle, 8f, 10f, MathExtension.GetRandomFloatInRange(1f, 359f), 50, 30, 25280, -1.0f);
+                                    Pilot.HeliMission(Helicopter, null, target, Vector3.Zero, MissionType.Circle, 8f, 10f, MathExtension.GetRandomFloatInRange(1f, 359f), 50, 30, 0, -1.0f);
                                     targetFind = true;
                                     CurrentTargetPed = target;
                                 }
@@ -111,7 +117,7 @@ namespace BarbarianCall.SupportUnit
                                         $"{GetType().Name} Starting stopwatch".ToLog();
                                         notFoundTarget.Start();
                                     }
-                                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.Follow, 50f, 5f, -1.0f, 100, 50, 25280, 400.0f);
+                                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.Follow, 50f, 5f, -1.0f, 100, 50, 0, 400.0f);
                                     GameFiber.Wait(500);
                                     continue;
                                 }
@@ -231,7 +237,7 @@ namespace BarbarianCall.SupportUnit
                 N.Natives.SET_PED_COMBAT_ATTRIBUTES(pass, 3, false);
                 N.Natives.SET_PED_COMBAT_MOVEMENT(pass, 2);
                 N.Natives.SET_PED_COMBAT_ABILITY(pass, 2);
-                N.Natives.SET_PED_COMBAT_RANGE(pass, 2);
+                N.Natives.SET_PED_COMBAT_RANGE(pass, 4);
                 N.Natives.SET_PED_TARGET_LOSS_RESPONSE(pass, 1);
                 N.Natives.SET_PED_HIGHLY_PERCEPTIVE(pass, true);
                 N.Natives.SET_PED_CAN_BE_TARGETTED(pass, true);
@@ -254,7 +260,7 @@ namespace BarbarianCall.SupportUnit
                     if (Game.LocalPlayer.Character.HasBeenDamagedBy(ped) && ped.GetRelationshipAgainst(Game.LocalPlayer.Character) == Relationship.Hate) return ped;
                 }
             }
-            $"{GetType().Name} Target not found".ToLog();
+            //$"{GetType().Name} Target not found".ToLog();
             return null;
         }
         private void UpgradeHeli()
