@@ -297,5 +297,20 @@ namespace BarbarianCall.Menus
                 MainMenu.cargobobServices.Items = vehicles;
             }
         }
+        internal static void MenuItemIndexChangeHandler(UIMenuScrollerItem sender, int oldIndex, int newIndex)
+        {
+            if (sender == MainMenu.cargobobServices)
+            {
+                var x = sender as UIMenuListScrollerItem<Vehicle>;
+                sender.Description = 
+                    x.SelectedItem ?
+                    $"Call a cargobob to tow the selected vehicle. Selected vehicle is {x.SelectedItem.GetMakeName() + " " + x.SelectedItem.GetDisplayName()}. " + $"({x.SelectedItem.DistanceTo(Game.LocalPlayer.Character):0.00} meters from local player)" :
+                    "Selected vehicle does not exist";
+            }
+            else if (sender == MainMenu.mechanic)
+            {
+                MainMenu.mechanic.Description = $"Call mechanic to repair ~y~{MainMenu.mechanic.SelectedItem}~s~";
+            }
+        }
     }
 }

@@ -37,12 +37,12 @@ namespace BarbarianCall.Menus
             Pool.Add(BarbarianCallMenu);
             setting = new("Settings", "Open BarbarianCall Pause Menu Setting");
             mechanic = new("Call Mechanic", "Call mechanic to repair ~y~My Vehicle", new[] { "My Vehicle", "Nearby Vehicle" });
-            mechanic.IndexChanged += (a, i, u) => mechanic.Description = $"Call mechanic to repair ~y~{mechanic.SelectedItem}~s~";
+            mechanic.IndexChanged += MenuHandler.MenuItemIndexChangeHandler;
             cargobobServices = new UIMenuListScrollerItem<Vehicle>("Cargobob Services", "Call a cargobob to tow the selected vehicle.")
             {
                 Formatter = x => x ? x.GetMakeName() + " " + x.GetDisplayName() : string.Empty
             };
-            cargobobServices.IndexChanged += CargobobServices_IndexChanged;
+            cargobobServices.IndexChanged += MenuHandler.MenuItemIndexChangeHandler;
             insurance = new("Call Insurance Company", "Call Insurance company to pickup nearest vehicle");
 #if DEBUG
             spawnFreemode = new("[DEBUG] Spawn Freemode Ped", "", new[] { "Male", "Female" });
@@ -106,19 +106,12 @@ namespace BarbarianCall.Menus
 #endif
             BarbarianCallMenu.OnItemSelect += MenuHandler.ItemSelectHandler;
             BarbarianCallMenu.OnMenuOpen += MenuHandler.MenuOpenHandler;
-            BarbarianCallMenu.AddItems(mechanic, insurance, setting);
+            BarbarianCallMenu.AddItems(mechanic, insurance, cargobobServices, setting);
 #if DEBUG
             BarbarianCallMenu.AddItems(spawnFreemode, notif, checkNode);
             BarbarianCallMenu.AddItem(new UIMenuCheckboxItem("[DEBUG] Get Gameplay Cam Raycast", false));
             BarbarianCallMenu.AddItem(new UIMenuItem("[DEBUG] Get Solicitation SpawnPoint"));
 #endif
-        }
-
-        private static void CargobobServices_IndexChanged(UIMenuScrollerItem sender, int oldIndex, int newIndex)
-        {
-            var x = sender as UIMenuListScrollerItem<Vehicle>;
-            sender.Description = $"Call a cargobob to tow the selected vehicle. Selected vehicle is {(x.SelectedItem ? x.SelectedItem.GetMakeName() + " " + x.SelectedItem.GetDisplayName(): string.Empty)}. " +
-                $"({(x.SelectedItem ? x.SelectedItem.DistanceTo(Game.LocalPlayer.Character).ToString() : "NULL")} meters from local player)";
         }
     }
 }
