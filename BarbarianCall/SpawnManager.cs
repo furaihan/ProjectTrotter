@@ -78,7 +78,7 @@ namespace BarbarianCall
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
             for (int i = 1; i <= 2000; i++)
             {
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 80 == 0)
                 {
                     GameFiber.Yield();
@@ -153,7 +153,7 @@ namespace BarbarianCall
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
             for (int i = 1; i <= 2000; i++)
             {
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 80 == 0)
                 {
                     GameFiber.Yield();
@@ -228,7 +228,7 @@ namespace BarbarianCall
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
             for (int i = 1; i <= 2000; i++)
             {
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 80 == 0)
                 {
                     GameFiber.Yield();
@@ -305,7 +305,7 @@ namespace BarbarianCall
             var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
             for (int i = 1; i < 2000; i++)
             {
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance));
                 if (i % 90 == 0)
                 {
                     GameFiber.Yield();
@@ -375,7 +375,7 @@ namespace BarbarianCall
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
             for (int i = 1; i <= 2000; i++)
             {
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance)).ToGround();
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance)).ToGround();
                 if (i % 80 == 0)
                 {
                     GameFiber.Yield();
@@ -439,6 +439,91 @@ namespace BarbarianCall
             "Vehicle spawn point is not found".ToLog();
             return Spawnpoint.Zero;
         }
+        internal static Spawnpoint GetVehicleSpawnPoint5(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
+        {
+            pos.GetFlags();
+            Stopwatch sw = Stopwatch.StartNew();
+            var minimalDistanceSquared = (float)Math.Pow(minimalDistance, 2);
+            var maximumDistanceSquared = (float)Math.Pow(maximumDistance, 2);
+            List<int> flags = new();
+            int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
+            distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
+            NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
+            for (int i = 1; i <= 2000; i++)
+            {
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance)).ToGround();
+                if (i % 80 == 0)
+                {
+                    GameFiber.Yield();
+                }
+                Vector3 output = Vector3.Zero;
+                Vector3 desiredPos = pos + new Vector3(MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, 0f);
+                bool closestNode = Natives.GET_​CLOSEST_​VEHICLE_​NODE<bool>(pos, out Vector3 closestNodeVector, 1, 3.0f, 0.0f);
+                bool majorNode = Natives.GET_​CLOSEST_​MAJOR_​VEHICLE_​NODE<bool>(pos, out Vector3 majorNodeVector, 3.0f, 0.0f);
+                bool closestNodeHeading = Natives.GET_​CLOSEST_​VEHICLE_​NODE_​WITH_​HEADING<bool>(pos, out Vector3 closestNodeHeadingVector, out float _, 1, 3.0f, 0.0f);
+                bool nthClosestNode = Natives.GET_​NTH_​CLOSEST_​VEHICLE_​NODE<bool>(pos, 1 % 5, out Vector3 nthClosestNodeVector, 1, 3.0f, 0.0f);
+                bool nthClosestNodeHeading = Natives.GET_​NTH_​CLOSEST_​VEHICLE_​NODE_​WITH_​HEADING<bool>(pos, i % 5, out Vector3 nthClosestNodeHeadingVector, out float _, out int _, 1, 3.0f, 2.5f);
+                bool nthClosectNodeFavourDirection = Natives.GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION<bool>(pos, desiredPos, i % 5, out Vector3 nthClosectNodeFavourDirectionVector, out float _, 1, 3.0f, 0);
+                Dictionary<bool, Vector3> results = new()
+                {
+                    {closestNode, closestNodeVector },
+                    {majorNode, majorNodeVector },
+                    {closestNodeHeading, closestNodeHeadingVector },
+                    {nthClosestNode, nthClosestNodeVector },
+                    {nthClosestNodeHeading, nthClosestNodeHeadingVector },
+                    {nthClosectNodeFavourDirection, nthClosectNodeFavourDirectionVector },
+                };
+                output = results.Where(x => x.Key).Select(x => x.Value).GetRandomElement();
+                if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(output.X, output.Y, output.Z, out int _, out int flag))
+                    {
+                    NodeFlags nodeFlags = (NodeFlags)flag;
+                    flags.Add(flag);
+                    if (bl.Any(x => nodeFlags.HasFlag(x)))
+                    {
+                        flagCount++;
+                        continue;
+                    }
+                }
+                else
+                {
+                    propCount++;
+                    continue;
+                }
+                if (output.DistanceToSquared(pos) < minimalDistanceSquared || output.DistanceToSquared(pos) > maximumDistanceSquared + 25f)
+                {
+                    distanceCount++;
+                    continue;
+                }
+
+                if (IsNodeSafe(output))
+                {
+                    if (!considerDirection || Game.LocalPlayer.Character.GetHeadingTowards(output).HeadingDiff(Game.LocalPlayer.Character) < 90)
+                    {
+                        float nodeH = GetRoadHeading(output);
+                        Spawnpoint ret = new(output, nodeH);
+                        $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
+                        $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
+                        ret.Position.GetFlags();
+                        return ret;
+                    }
+                    else
+                    {
+                        dirCount++;
+                        continue;
+                    }
+                }
+                else
+                {
+                    screenNode++;
+                    continue;
+                }
+            }
+            var groups = flags.GroupBy(v => v).ToList();
+            groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
+            $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
+            "Vehicle spawn point is not found".ToLog();
+            return Spawnpoint.Zero;
+        }
         internal static Spawnpoint GetRoadSideSpawnPointFavored(Entity entity, float favoredDistance)
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -479,7 +564,7 @@ namespace BarbarianCall
             {
                 for (int i = 1; i < 600; i++)
                 {
-                    Vector3 v = pos.Around2D(Peralatan.Random.Next(1, 6));
+                    Vector3 v = pos.AroundPosition(Peralatan.Random.Next(1, 6));
                     if (Natives.xA0F8A7517A273C05<bool>(v.X, v.Y, v.Z, heading.Value, out Vector3 rsPos)) //_GET_ROAD_SIDE_POINT_WITH_HEADING
                     {
                         if (Natives.xFF071FB798B803B0<bool>(rsPos.X, rsPos.Y, rsPos.Z, out Vector3 _, out float nodeHeading, 5, 3.0f, 0))
@@ -503,7 +588,7 @@ namespace BarbarianCall
             {
                 for (int i = 1; i < 600; i++)
                 {
-                    Vector3 v = pos.Around2D(Peralatan.Random.Next(5, 15), Peralatan.Random.Next(20, 35));
+                    Vector3 v = pos.AroundPosition(Peralatan.Random.Next(5, 15), Peralatan.Random.Next(20, 35));
                     if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodePos, out float nodeHeading, 5, 3.0f, 0))
                     {
                         if (Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //_GET_ROAD_SIDE_POINT_WITH_HEADING
@@ -525,7 +610,7 @@ namespace BarbarianCall
             }
             for (int i = 1; i < 600; i++)
             {
-                Vector3 v = pos.Around2D(Peralatan.Random.Next(25));
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next(25));
                 if (Natives.x16F46FB18C8009E4<bool>(v.X, v.Y, v.Z, 0, out Vector3 roadSide)) //_GET_POINT_ON_ROAD_SIDE
                 {
                     if (Natives.xFF071FB798B803B0<bool>(roadSide.X, roadSide.Y, roadSide.Z, out Vector3 nodePos, out float nodeHeading, 12, 0x40400000, 0))
@@ -567,7 +652,7 @@ namespace BarbarianCall
                     GameFiber.Yield();
                 }
 
-                Vector3 v = pos.Around2D(Peralatan.Random.Next((int)minimumDistance, (int)(maximumDistance + 1)));
+                Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimumDistance, (int)(maximumDistance + 1)));
                 if (Natives.xE50E52416CCF948B<bool>(v.X, v.Y, v.Z, i % 5, out Vector3 randomNode, true, 0f, 0f))
                 {
                     int nodeId = Natives.x22D7275A79FE8215<int>(randomNode.X, randomNode.Y, randomNode.Z, 1, 11077936128f, 0f);

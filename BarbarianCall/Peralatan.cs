@@ -146,12 +146,12 @@ namespace BarbarianCall
             return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? N.Natives.x7B5280EBA9840C72<string>(text) : "CARNOTFOUND";
         }
         internal static string GetDisplayName(this Vehicle vehicle) => GetDisplayName(vehicle.Model);
-        internal static string GetMakeName(this Model vehicleModel)
+        internal static string GetMakeName(this Model vehicleModel, string emptyReturn = "Unknown Manufacturer")
         {
             string text = N.Natives.xF7AF4F159FF99F97<string>(vehicleModel.Hash);
-            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? N.Natives.x7B5280EBA9840C72<string>(text) : "Unknown Manufacturer";
+            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? N.Natives.x7B5280EBA9840C72<string>(text) : emptyReturn;
         }
-        internal static string GetMakeName(this Vehicle vehicle) => GetMakeName(vehicle.Model);
+        internal static string GetMakeName(this Vehicle vehicle, string emptyReturn = "Unknown Manufacturer") => GetMakeName(vehicle.Model, emptyReturn);
         internal static string GetPoliceScannerAudio(Vehicle vehicle)
         {
             string makeName = GetMakeName(vehicle);
@@ -366,7 +366,7 @@ namespace BarbarianCall
                     "Attempting to register ped headshot".ToLog();
                     ped.GetVariation(1, out int draw, out int tex);
                     ped.SetVariation(1, 0, 0);
-                    uint headshotHandle = N.Natives.RegisterPedheadshot<uint>(ped);
+                    uint headshotHandle = N.Natives.xBA8805A1108A2515<uint>(ped);
                     var timer = new TimeSpan(0, 0, 10);
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     while (true)

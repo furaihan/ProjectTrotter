@@ -38,6 +38,9 @@ namespace BarbarianCall.Extensions
             float zz = MathHelper.ConvertRadiansToDegrees((float)Math.Atan2(direction.X, direction.Y));
             return new Vector3(xx, yy, zz).ToRotator();
         }
+        /// <summary>
+        /// Source: <a href="https://github.com/Guad/MissionCreator/blob/master/ContentCreatorMain/Util.cs#L156">Github</a>
+        /// </summary>
         private static Vector3 ScreenToWorldUsingGameplayCamera(Vector2 screeenCoord)
         {
             Vector3 camPos = Natives.GET_GAMEPLAY_CAM_COORD<Vector3>();
@@ -120,42 +123,26 @@ namespace BarbarianCall.Extensions
             float y = Peralatan.Random.NextDouble() > 0.5 ? GetRandomFloatInRange(minDistance, maxDistance) : -GetRandomFloatInRange(minDistance, maxDistance);
             return vector3 + new Vector3(x, y, 0.0f);
         }
+        public static float ToHeading(this Vector3 v) => (float)((Math.Atan2(v.X, -v.Y) + Math.PI) * (180.0 / Math.PI));
+        public static Vector3 AroundPosition(this Vector3 v ,float radius)
+        {
+            return v + new Vector3(GetRandomFloatInRange(-radius, radius), GetRandomFloatInRange(-radius, radius), 0.0f);
+        }
+        public static Vector3 ForwardVector(this Vector3 vector, float yaw)
+        {
+            Vector3 right;
+            float cos = (float)Math.Cos(yaw + Math.PI / 2.0f);
+            right.X = (180f / (float)Math.PI) * cos;
+            right.Y = 0f;
+            float sin = (float)Math.Sin(yaw + Math.PI / 2.0f);
+            right.Z = (180f / (float)Math.PI) * sin;
+            return Vector3.Cross(vector, right);
+        }
         public static bool IsHeadingTowards(this Entity entity, Entity otherEntity, float degreeTolerance)
         {
             float heading1 = entity.Heading;
             float heading2 = entity.GetHeadingTowards(otherEntity);
             return Math.Abs(heading1 - heading2) <= degreeTolerance;
-        }
-        public static bool IsAheadPositionWithTolerance(this Vector3 vector3, Vector3 targetVector, Vector3 direction, float tolerance)
-        {
-            direction.Normalize();
-            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
-            float heading2 = targetVector.GetHeadingTowards(vector3);
-            return Math.Abs(heading1 - heading2) <= tolerance;
-        }
-        public static bool IsBehindPositionWithTolerance(this Vector3 vector3, Vector3 targetVector, Vector3 direction, float tolerance)
-        {
-            direction.Normalize();
-            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
-            float heading2 = targetVector.GetHeadingTowards(vector3);
-            heading1 -= 180;
-            return Math.Abs(heading1 - heading2) <= tolerance;
-        }
-        public static bool IsAheadPosition(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => IsAheadPosition(spatial.Position, targetSpatial.Position, direction);
-        public static bool IsAheadPosition(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
-        {
-            direction.Normalize();
-            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
-            float heading2 = targetVector.GetHeadingTowards(vector3);
-            return Math.Abs(heading1 - heading2) <= 15f;
-        }
-        public static bool IsBehindPosition(this ISpatial spatial, ISpatial targetSpatial, Vector3 direction) => IsBehindPosition(spatial.Position, targetSpatial.Position, direction);
-        public static bool IsBehindPosition(this Vector3 vector3, Vector3 targetVector, Vector3 direction)
-        {
-            direction.Normalize();
-            float heading1 = MathHelper.ConvertDirectionToHeading(direction);
-            float heading2 = vector3.GetHeadingTowards(targetVector);
-            return Math.Abs(heading1 - heading2) <= 15f;
         }
         /// <summary>
         /// Find all possible <see cref="bool"/> combination

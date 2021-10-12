@@ -133,6 +133,7 @@ namespace BarbarianCall.SupportUnit
                         {
                             Game.LogTrivial("Hook success");
                             successHook = true;
+                            vehicleTaken.Add(TargetVehicle);
                             break;
                         }
                         Vector3 hookPos = NativeFunction.Natives.xCBDB9B923CACC92D<Vector3>(Cargobob);
@@ -179,6 +180,7 @@ namespace BarbarianCall.SupportUnit
                     {
                         "Sorry, it seems our pilot can't reach the vehicle at this moment, feel free to contact us again to rearrange the pickup".
                         DisplayNotifWithLogo(title: "Mors Mutual Insurance", subtitle: "Cargobob Services", textureDict: "CHAR_MP_MORS_MUTUAL", textureName: "CHAR_MP_MORS_MUTUAL");
+                        if (queueVehicle.Contains(TargetVehicle)) if (queueVehicle.Remove(TargetVehicle)) $"{GetType().Name} | Vehicle removed from queue".ToLog(); else $"{GetType().Name} | Failed to remove vehicle from queue".ToLog();
                     }
                     Cargobob.MakePersistent();
                     GameFiber.Wait(2500);
@@ -193,7 +195,6 @@ namespace BarbarianCall.SupportUnit
                     {
                         TargetVehicle.IsCollisionProof = false;
                         TargetVehicle.IsCollisionEnabled = true;
-                        vehicleTaken.Add(TargetVehicle);
                         TargetVehicle.Dismiss();
                     }
                     if (Cargobob) Cargobob.Dismiss();
@@ -233,6 +234,8 @@ namespace BarbarianCall.SupportUnit
         {
             if (vehicle)
             {
+                if (vehicle.Model.Hash == 0x2EA68690) return true;
+                if (vehicle.Class == VehicleClass.Van) return true;
                 if (queueVehicle.Contains(vehicle) || vehicleTaken.Contains(vehicle)) return false;
                 if (!vehicle.IsCar) return false;
                 if (vehicle.IsBig) return false;
@@ -250,11 +253,11 @@ namespace BarbarianCall.SupportUnit
                 TargetVehicle.Heading = Cargobob.Heading;
                 Vector3 v = GetHookOffset(Cargobob.Heading);
                 Vector3 offset = Cargobob.Position - new Vector3(3.5f, 0f, 0f) + v * 1.6f;
-                offset = hookPosition;
+                offset = new Vector3(hookPosition.X, hookPosition.Y, hookPosition.Z - 1f);
                 NativeFunction.Natives.SET_ENTITY_COORDS_NO_OFFSET(TargetVehicle, offset, false, false, true);
                 TargetVehicle.IsCollisionProof = true;
                 TargetVehicle.IsCollisionEnabled = false;
-                NativeFunction.Natives.xA1DD82F3CCF9A01E(Cargobob, TargetVehicle, -1, 0f, 0f, -3f);
+                NativeFunction.Natives.xA1DD82F3CCF9A01E(Cargobob, TargetVehicle, -1, 0f, 0f, 0f);
                 NativeFunction.Natives.STABILISE_ENTITY_ATTACHED_TO_HELI(Cargobob, TargetVehicle, -0.1f);
             }
             else

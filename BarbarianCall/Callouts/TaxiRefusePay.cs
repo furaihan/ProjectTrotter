@@ -247,7 +247,7 @@ namespace BarbarianCall.Callouts
                         }
                         if (StopThePedRunning)
                         {
-                            if (API.StopThePedFunc.IsPedStoppedWithSTP(Suspect) && !SuspectStopped)
+                            if (API.StopThePedFunc.IsPedStoppedWithSTP(Suspect) == true && !SuspectStopped)
                             {
                                 Suspect.Tasks.Clear();
                                 TaxiDriver.Tasks.Clear();

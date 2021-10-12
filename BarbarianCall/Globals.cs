@@ -5,6 +5,7 @@
     using Rage;
     using System.Collections.Generic;
     using System.Drawing;
+    using System;
     using System.Linq;
 
     //Variable-Only class
@@ -48,6 +49,7 @@
             Color.Aqua, Color.Beige, Color.Black, Color.Blue, Color.Brown, Color.DarkBlue, Color.DarkGreen, Color.DarkOrange, Color.DarkRed, Color.Gold, Color.Green,
             Color.LightBlue, Color.LightGreen, Color.LightYellow, Color.Maroon, Color.Orange, Color.Pink, Color.Purple, Color.Red, Color.Silver, Color.White, Color.Yellow
         };
+        public static TimeZoneInfo MyTimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
         /// <summary>
         /// Defines the DangerousVehicleItems.

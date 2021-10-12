@@ -68,6 +68,7 @@ namespace BarbarianCall.Menus
                 }
                 else if (selected == MainMenu.cargobobServices)
                 {
+                    sender.Close(false);
                     if (MainMenu.cargobobServices.SelectedItem)
                     {
                         CargobobServices cargobobServices = new(MainMenu.cargobobServices.SelectedItem);
@@ -291,10 +292,15 @@ namespace BarbarianCall.Menus
                 if (!vehicles.Any() || vehicles.All(x=> !x))
                 {
                     MainMenu.cargobobServices.Enabled = false;
-                    MainMenu.cargobobServices.Items = new List<Vehicle>();
+                    MainMenu.cargobobServices.Items = new List<Vehicle>() { null };
                     MainMenu.cargobobServices.Description = "No suitable vehicle found";
+                    return;
                 }
                 MainMenu.cargobobServices.Items = vehicles;
+                MainMenu.cargobobServices.Enabled = true;
+                MainMenu.cargobobServices.Index = 0;
+                var x = MainMenu.cargobobServices.SelectedItem;
+                MainMenu.cargobobServices.Description = $"Call a cargobob to tow the selected vehicle. Selected vehicle is {x.GetMakeName() + " " + x.GetDisplayName()}. " + $"({x.DistanceTo(Game.LocalPlayer.Character):0.00} meters from local player)";
             }
         }
         internal static void MenuItemIndexChangeHandler(UIMenuScrollerItem sender, int oldIndex, int newIndex)

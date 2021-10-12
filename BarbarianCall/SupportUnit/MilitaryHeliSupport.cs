@@ -3,6 +3,7 @@ using BarbarianCall.Extensions;
 using LSPD_First_Response.Mod.API;
 using Rage;
 using N = Rage.Native.NativeFunction;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
@@ -106,7 +107,7 @@ namespace BarbarianCall.SupportUnit
                                             ped.KeepTasks = true;
                                         }
                                     }
-                                    Pilot.HeliMission(Helicopter, null, target, Vector3.Zero, MissionType.Circle, 8f, 10f, MathExtension.GetRandomFloatInRange(1f, 359f), 50, 30, 0, -1.0f);
+                                    Pilot.HeliMission(Helicopter, null, target, Vector3.Zero, MissionType.Circle, 8f, 10f, -1.0f, 50, 30, 0, -1.0f);
                                     targetFind = true;
                                     CurrentTargetPed = target;
                                 }
@@ -117,7 +118,7 @@ namespace BarbarianCall.SupportUnit
                                         $"{GetType().Name} Starting stopwatch".ToLog();
                                         notFoundTarget.Start();
                                     }
-                                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.Follow, 50f, 5f, -1.0f, 100, 50, 0, 400.0f);
+                                    if (Helicopter && Helicopter.GetActiveMissionType() != MissionType.HeliProtect) Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.Follow, 20f, 10f, -1.0f, 100, 50, 0, -1.0f);
                                     GameFiber.Wait(500);
                                     continue;
                                 }
@@ -133,17 +134,14 @@ namespace BarbarianCall.SupportUnit
                                     }
                                 }
                             }
-                            if (!targetFind && notFoundTarget.IsRunning && notFoundTarget.ElapsedMilliseconds > 100000)
+                            if (!targetFind && notFoundTarget.IsRunning && notFoundTarget.ElapsedMilliseconds > 60000)
                             {
                                 break;
                             }
                         }
                         else
                         {
-                            if (Pilot.Tasks.CurrentTaskStatus != TaskStatus.InProgress || Pilot.Tasks.CurrentTaskStatus != TaskStatus.Preparing)
-                            {
-                                Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, 50, 20, 0);
-                            }
+                            if (Helicopter && Helicopter.GetActiveMissionType() != MissionType.HeliProtect) Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, 50, 20, 0);
                             N.Natives.SET_​DRIVE_​TASK_​CRUISE_​SPEED(Pilot, 40f);
                         }
                         if (
@@ -155,6 +153,7 @@ namespace BarbarianCall.SupportUnit
                         || Passengers.All(x => x && x.IsDead) || !Helicopter || (Pilot && Pilot.IsDead))
                         {
                             Functions.PlayScannerAudio("HELI_MAYDAY_DISPATCH");
+                            if (Helicopter) $"Tail Rotor: {N.Natives.GET_HELI_TAIL_ROTOR_HEALTH<float>(Helicopter)}. Main Rotor: {N.Natives.GET_HELI_MAIN_ROTOR_HEALTH<float>(Helicopter)}".ToLog();
                             break;
                         }
                     }

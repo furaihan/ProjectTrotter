@@ -84,6 +84,7 @@ namespace BarbarianCall
                 "",
                 "",
                 "VERSION INFO",
+                $"BarbarianCall Version {Assembly.GetExecutingAssembly().GetName().Version} compiled on {GetCompileTime():F}",
                 $"Game Version: {Game.ProductVersion}",
                 $"LSPD First Response : {Extension.GetFileVersion(@"Plugins/LSPD First Response.dll")}",
                 $"RAGENativeUI : {Extension.GetFileVersion("RAGENativeUI.dll")}",
@@ -98,6 +99,14 @@ namespace BarbarianCall
             };
             log.ForEach(Peralatan.ToLog);
         }
-        internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");      
+        internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");
+        internal static DateTime GetCompileTime()
+        {
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            DateTime compileTime = new(2000, 1, 1);
+            compileTime = compileTime.AddDays(version.Build);
+            compileTime = compileTime.AddSeconds(version.Revision * 2);
+            return compileTime;
+        }
     }
 }

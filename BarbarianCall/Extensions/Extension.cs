@@ -131,6 +131,15 @@ namespace BarbarianCall.Extensions
         internal static int GetLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
         internal static void SetLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
         internal static bool IsStuckOnRoof(this Vehicle vehicle) => NativeFunction.Natives.IS_VEHICLE_STUCK_ON_ROOF<bool>(vehicle);
+        internal static MissionType GetActiveMissionType(this Vehicle vehicle)
+        {
+            if (vehicle)
+            {
+                var missionType = NativeFunction.Natives.GET_ACTIVE_VEHICLE_MISSION_TYPE<int>(vehicle);
+                return (MissionType)missionType;
+            }
+            return (MissionType)(-1);
+        }
         internal static string GetCardinalDirection(this Entity e, bool fullform) => GetCardinalDirection(e.Heading, fullform);
         internal static string GetCardinalDirection(this Entity e) => GetCardinalDirection(e.Heading, false);
         /// <summary>

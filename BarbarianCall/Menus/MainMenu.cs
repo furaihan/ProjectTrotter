@@ -38,11 +38,12 @@ namespace BarbarianCall.Menus
             setting = new("Settings", "Open BarbarianCall Pause Menu Setting");
             mechanic = new("Call Mechanic", "Call mechanic to repair ~y~My Vehicle", new[] { "My Vehicle", "Nearby Vehicle" });
             mechanic.IndexChanged += MenuHandler.MenuItemIndexChangeHandler;
-            cargobobServices = new UIMenuListScrollerItem<Vehicle>("Cargobob Services", "Call a cargobob to tow the selected vehicle.")
+            cargobobServices = new UIMenuListScrollerItem<Vehicle>("Cargobob Services", "")
             {
-                Formatter = x => x ? x.GetMakeName() + " " + x.GetDisplayName() : string.Empty
+                Formatter = x => !x || x is null ? "NULL" : $"{(string.IsNullOrEmpty(x.GetMakeName(string.Empty)) ? x.GetDisplayName() : x.GetMakeName()) + " " + x.GetDisplayName()}",
             };
             cargobobServices.IndexChanged += MenuHandler.MenuItemIndexChangeHandler;
+            cargobobServices.Items = new List<Vehicle>() { null };
             insurance = new("Call Insurance Company", "Call Insurance company to pickup nearest vehicle");
 #if DEBUG
             spawnFreemode = new("[DEBUG] Spawn Freemode Ped", "", new[] { "Male", "Female" });

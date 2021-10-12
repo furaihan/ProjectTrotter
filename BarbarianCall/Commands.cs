@@ -128,6 +128,31 @@ namespace BarbarianCall
                 if (checkpoint) checkpoint.Delete();
             });
         }
+        [ConsoleCommand]
+        private static void GetSpawnPoint(int durationMillisecond)
+        {
+            var ppos = Game.LocalPlayer.Character.Position;
+            Spawnpoint[] spawnpoints =
+            {
+                SpawnManager.GetVehicleSpawnPoint(ppos, 100, 500),
+                SpawnManager.GetVehicleSpawnPoint2(ppos, 100, 500),
+                SpawnManager.GetVehicleSpawnPoint3(ppos, 100, 500),
+                SpawnManager.GetVehicleSpawnPoint4(ppos, 100, 500),
+                SpawnManager.GetVehicleSpawnPoint5(ppos, 100, 500),
+            };
+            List<Checkpoint> checkpoints = new List<Checkpoint>(); 
+            for (int i = 0; i < spawnpoints.Length; i++)
+            {
+                Spawnpoint v = spawnpoints[i];
+                if (v != Spawnpoint.Zero)
+                {
+                    checkpoints.Add(new Checkpoint(CheckpointIcon.CylinderTripleArrow, v.Position, 5f, 60f, HudColor.Blue.GetColor(), HudColor.PureWhite.GetColor(), false));
+                }
+                else $"Spawnpoint number {i + 1} is not found".ToLog();
+            }
+            GameFiber.Wait(durationMillisecond);
+            checkpoints.ForEach(x => x.Delete());
+        }
         [ConsoleCommand(Name = "DisplayUIChoice", Description = "Display AssortedCallout-Like UI")]
         private static void DisplayUI(int timeoutMilisecond)
         {
