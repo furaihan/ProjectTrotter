@@ -101,6 +101,7 @@
     <Compile Include="Extensions\XmlExtension.cs" />
     <Compile Include="Freemode\OutfitFemale.cs" />
     <Compile Include="Freemode\OutfitMale.cs" />
+    <Compile Include="Freemode\PedCombatProperty.cs" />
     <Compile Include="Freemode\PedComponentCollection.cs" />
     <Compile Include="Freemode\PedFaceFeature.cs" />
     <Compile Include="Freemode\HeadOverlay.cs" />
@@ -108,7 +109,6 @@
     <Compile Include="Globals.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />
-    <Compile Include="AmbientEvent\DispatchCall.cs" />
     <Compile Include="Extensions\BlipExtension.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\TaskExtension.cs" />
@@ -121,8 +121,6 @@
     <Compile Include="Menus\MenuUtil.cs" />
     <Compile Include="Menus\PauseMenu.cs" />
     <Compile Include="Extensions\NetExtension.cs" />
-    <Compile Include="Menus\PlaceEditor.cs" />
-    <Compile Include="Menus\PlaceXmlMenu.cs" />
     <Compile Include="Menus\VehicleMenu.cs" />
     <Compile Include="Peralatan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

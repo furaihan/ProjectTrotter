@@ -47,53 +47,49 @@ namespace BarbarianCall.DivisiXml
                         Convert.ToSingle(coordinate.ChildNodes[0].InnerText));
                     ret.Add(spawnpoint);
                 }
-                Peralatan.ToLog(string.Format("Found total {0} locations from {1}", ret.Count, Path.GetFileName(filename)));
+                Peralatan.ToLog(string.Format("Deserialized {0} locations from {1}", ret.Count, Path.GetFileName(filename)));
                 Peralatan.ToLog(string.Format("Reading this XML file took {0} ms", sw.ElapsedMilliseconds));
                 return ret;
             }
             catch (Exception e)
             {
-                Peralatan.ToLog(string.Format("Get spawn point data from XML error: {0}", e.Message));
+                Peralatan.ToLog(string.Format("Failed to deserialize {0} : {1}", Path.GetFullPath(filename), e.Message));
                 e.ToString().ToLog();
             }
             return new List<Spawnpoint>();
         }
-        internal static List<Spawnpoint> LoadPoliceStationLocations()
+        private const string PedDecalXml = @"Plugins\LSPDFR\BarbarianCall\PedDecalBadgeTorso.xml";
+        internal static List<Tuple<string, string>> GetBadgeFromXml()
         {
-            int nodeCount = 0;
             try
             {
+                Peralatan.ToLog(string.Format("Reading XML File {0}", Path.GetFullPath(PedDecalXml)));
                 Stopwatch sw = Stopwatch.StartNew();
-                var stationXmls = Directory.EnumerateFiles(@"lspdfr\data\custom\").Select(Path.GetFullPath).Where(s => s.ToLower().Contains("stations")).ToList();
-                stationXmls.Add(@"lspdfr\data\stations.xml");
-                stationXmls.ForEach(Peralatan.ToLog);
-                if (File.Exists(@"lspdfr\data\stations.xml"))
+                List<Tuple<string, string>> ret = new();
+                XmlDocument xmlDocument = new XmlDocument();
+                xmlDocument.Load(PedDecalXml);
+                foreach (XmlNode node in xmlDocument.DocumentElement.SelectNodes("/BarbarianCall/DecalCollection"))
                 {
-                    Peralatan.ToLog(string.Format("Attempting to read stations.xml file located in {0}", Path.GetFullPath(@"lspdfr\data\stations.xml")));
-                    List<Spawnpoint> stations = new();
-                    XmlDocument xml = new();
-                    xml.Load(@"lspdfr\data\stations.xml");
-                    foreach (XmlNode station in xml.SelectNodes("/PoliceStations/Station"))
+                    string collectionName = node.Attributes["name"].Value;
+                    foreach (XmlNode node2 in node.ChildNodes)
                     {
-                        string vectorString = station.ChildNodes[3].InnerText.Replace("f", string.Empty);
-                        var v = vectorString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(s => Convert.ToSingle(s)).ToList();
-                        float heading = Convert.ToSingle(station.ChildNodes[4].InnerText.Replace("f", string.Empty));
-                        Spawnpoint sp = new(v[0], v[1], v[2], heading);
-                        Peralatan.ToLog($"Found a station location {sp} with name {station.ChildNodes[0].InnerText}");
-                        stations.Add(sp);
-                        nodeCount++;
+                        if (node2.Attributes["gender"].Value == "any")
+                        {
+                            string decalName = node2.InnerText;
+                            ret.Add(new Tuple<string, string>(collectionName, decalName));
+                        }
                     }
-                    $"Reading stations.xml is took {sw.ElapsedMilliseconds} ms".ToLog();
-                    return stations;
                 }
-                else Peralatan.ToLog("File stations.xml doesn't exist, make sure you have installed LSPDFR correctly");
+                Peralatan.ToLog(string.Format("Deserialized {0} decal from {1}", ret.Count, Path.GetFileName(PedDecalXml)));
+                Peralatan.ToLog(string.Format("Reading this XML file took {0} ms", sw.ElapsedMilliseconds));
+                return ret;
             }
             catch (Exception e)
             {
-                Peralatan.ToLog(string.Format("Cannot read stations.xml file {0}. Num: {1}", e.Message, nodeCount));
                 e.ToString().ToLog();
-            }           
-            return new List<Spawnpoint>();
+            }
+            return new List<Tuple<string, string>>();
         }
+
     }
 }

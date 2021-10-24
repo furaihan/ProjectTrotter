@@ -7,6 +7,7 @@ using Rage.Native;
 using System.Diagnostics;
 using System.IO;
 using BarbarianCall.Types;
+using BarbarianCall.Freemode;
 using L = LSPD_First_Response.Mod.API.Functions;
 
 namespace BarbarianCall.Extensions
@@ -51,6 +52,7 @@ namespace BarbarianCall.Extensions
             files = files.Select(x => x.Replace("_01", "")).Select(x => x.Replace("_", ""));
             List<uint> hashes = files.Select(x => Game.GetHashKey(x.ToLower())).ToList();
             List<Model> ret = Model.VehicleModels.Where(m => hashes.Contains(m.Hash)).ToList();
+            int c = 0;
             Directory.EnumerateFiles(@"lspdfr\audio\scanner\CAR_MODEL", "*.wav", SearchOption.AllDirectories).Select(Path.GetFileNameWithoutExtension).ToList().ForEach(x =>
             {
                 if (x.ToLower().StartsWith("0x"))
@@ -61,6 +63,8 @@ namespace BarbarianCall.Extensions
                         if (model.IsInCdImage && model.IsValid && !ret.Contains(model))
                         {
                             ret.Add(model);
+                            c++;
+                            if (c % 10 == 0) GameFiber.Yield();
                         }
                     }
                 }
@@ -70,7 +74,7 @@ namespace BarbarianCall.Extensions
             {
                 string file = x.Replace("_01", "");
                 file = file.Replace("_", "").ToLower();
-                Peralatan.ToLog($"Reading car model {file}");
+                //Peralatan.ToLog($"Reading car model {file}");
                 for (int i = 2; i < 9; i++)
                 {
                     Model model = new Model(file + i.ToString());
@@ -80,9 +84,33 @@ namespace BarbarianCall.Extensions
                         Globals.AudioHash.Add(model.Hash, x.Replace("_01", ""));
                     }
                 }
+                c++;
+                if (c % 10 == 0) GameFiber.Yield();
             });
             Globals.AudibleCarModel = ret.Where(x => x.IsInCdImage && x.IsValid).ToArray();
             return ret.Where(x => x.IsInCdImage && x.IsValid).ToArray();
+        }
+        /// <summary>
+        /// Gets the token used to display the sprite of <paramref name="blip"/> in formatted scaleform text (i.e. the scaleform uses the game function `SET_FORMATTED_TEXT_WITH_ICONS`).
+        /// <para>
+        /// Example:
+        /// <code>
+        /// Blip myBlip = ...;<br />
+        /// Game.DisplayHelp($"Go to ~{myBlip.GetIconToken()}~.");<br />
+        /// Game.DisplayHelp($"Go to ~{HudColor.Red.GetName()}~~{myBlip.GetIconToken()}~~s~."); // with a different color
+        /// </code>
+        /// </para>
+        /// </summary>
+        /// <param name="blip">The blip to get the sprite from.</param>
+        /// <returns>The <see cref="string"/> with the icon token for the sprite of the given blip.</returns>
+        /// <remarks>Source: <a href="https://github.com/alexguirre/RAGENativeUI/blob/master/Source/BlipExtensions.cs">RAGENativeUI by alexguirre</a></remarks>
+        internal static string GetIconToken(this Blip blip, bool withColor)
+        {
+            if (withColor)
+            {
+                return $"<font color=\"{ColorTranslator.ToHtml(blip.Color)}\">~BLIP_{(int)blip.Sprite}~</font>";
+            }
+            return $"~BLIP_{(int)blip.Sprite}";
         }
         internal static bool IsFreemodePed(this Ped ped) => ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8;
         internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);        
@@ -125,6 +153,22 @@ namespace BarbarianCall.Extensions
                 NativeFunction.Natives.SET_PED_SUFFERS_CRITICAL_HITS(ped, value);
             }
         }
+        public static void SetRandomOutfit(this FreemodePed ped)
+        {
+            if (ped)
+            {
+                Random random = new Random(MathExtension.GetRandomFloatInRange(10.250f, 5000.350f).GetHashCode());
+                if (ped.IsMale)
+                {
+                    
+                }
+                else
+                {
+
+                }
+            }
+        }
+        public static PedCombatProperty GetCombatProperty(this Ped ped) => new PedCombatProperty(ped);
         internal static bool IsPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
         internal static bool IsVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
         internal static bool IsObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);

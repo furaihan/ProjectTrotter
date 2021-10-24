@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
+using System.Diagnostics;
 using Rage;
 using LSPDFR = LSPD_First_Response.Mod.API.Functions;
 using LSPD_First_Response.Engine.Scripting.Entities;
@@ -208,7 +209,7 @@ namespace BarbarianCall.Callouts
                         }
                         Ambulance.Mods.ApplyAllMods();
                     }
-                    var task1 = Paramedic1.VehicleMission(Civilian, MissionType.GoTo, 35f, flags, -1f, 35f, true);
+                    var task1 = Paramedic1.VehicleMission(Civilian, MissionType.GoTo, 35f, flags, 5f, 35f, true);
                     ambulanceBlip = new Blip(Ambulance)
                     {
                         Sprite = (BlipSprite)489,
@@ -228,10 +229,15 @@ namespace BarbarianCall.Callouts
                         {
                             $"Task Status: {task1.Status}, Elapsed: {StopWatch.ElapsedMilliseconds} ms".ToLog();
                             break; 
-                        }                        
+                        }
+                        if (Ambulance.DistanceToSquared(CalloutPosition) < 225f)
+                        {
+                            Paramedic1.VehicleMission(CalloutPosition, MissionType.Stop, 5f, VehicleDrivingFlags.None, -1.0f, -1.0f, true).WaitForCompletion(500);
+                            break;
+                        }
                     }
                     if (!CalloutRunning) return;
-                    uint speedZone = World.AddSpeedZone(CalloutPosition, 100f, 10f);
+                    uint speedZone = World.AddSpeedZone(CalloutPosition, 200f, 10f);
                     Vector3 wpos = Civilian.Position + Vector3.RelativeRight;
                     if (Paramedic1) Paramedic1.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
                     if (Paramedic2) Paramedic2.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(10000);
@@ -296,6 +302,7 @@ namespace BarbarianCall.Callouts
                     }
                     if (Paramedic1) Paramedic1.VehicleMission(PlayerPed.CurrentVehicle, MissionType.Escort, 35f, flags, 8f, 0f, true);
                     Vehicle cv = PlayerPed.CurrentVehicle;
+                    
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
@@ -311,7 +318,7 @@ namespace BarbarianCall.Callouts
                         }                                           
                         if (Ambulance.FrontPosition.DistanceToSquared(cv.RearPosition) < 7f || Ambulance.DistanceToSquared(cv) < 15f)
                         {
-                            if (Paramedic1) Paramedic1.Tasks.PerformDrivingManeuver(VehicleManeuver.Wait).WaitForCompletion(200);
+                            if (Paramedic1) Paramedic1.VehicleMission(PlayerPed, MissionType.Stop, 1f, VehicleDrivingFlags.None, -1.0f, -1.0f, true).WaitForCompletion(250);
                             if (Paramedic1) Paramedic1.VehicleMission(PlayerPed.CurrentVehicle, MissionType.Escort, 35f, flags, 8f, 0f, true);
                         }
                         if (PlayerPed.DistanceToSquared(hospital) < 625f && PlayerPed.IsInAnyVehicle(false))

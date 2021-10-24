@@ -449,31 +449,23 @@ namespace BarbarianCall
             int distanceCount, nodeCount, propCount, flagCount, screenNode, dirCount;
             distanceCount = nodeCount = propCount = flagCount = screenNode = dirCount = 0;
             NodeFlags[] bl = { NodeFlags.Junction, NodeFlags.TunnelOrUndergroundParking, NodeFlags.StopNode, NodeFlags.SpecialStopNode, NodeFlags.MinorRoad };
-            for (int i = 1; i <= 2000; i++)
+            for (int i = 1; i <= 1000; i++)
             {
                 Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance)).ToGround();
-                if (i % 80 == 0)
+                if (i % 40 == 0)
                 {
                     GameFiber.Yield();
                 }
                 Vector3 output = Vector3.Zero;
-                Vector3 desiredPos = pos + new Vector3(MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, 0f);
-                bool closestNode = Natives.GET_​CLOSEST_​VEHICLE_​NODE<bool>(pos, out Vector3 closestNodeVector, 1, 3.0f, 0.0f);
-                bool majorNode = Natives.GET_​CLOSEST_​MAJOR_​VEHICLE_​NODE<bool>(pos, out Vector3 majorNodeVector, 3.0f, 0.0f);
-                bool closestNodeHeading = Natives.GET_​CLOSEST_​VEHICLE_​NODE_​WITH_​HEADING<bool>(pos, out Vector3 closestNodeHeadingVector, out float _, 1, 3.0f, 0.0f);
-                bool nthClosestNode = Natives.GET_​NTH_​CLOSEST_​VEHICLE_​NODE<bool>(pos, 1 % 5, out Vector3 nthClosestNodeVector, 1, 3.0f, 0.0f);
-                bool nthClosestNodeHeading = Natives.GET_​NTH_​CLOSEST_​VEHICLE_​NODE_​WITH_​HEADING<bool>(pos, i % 5, out Vector3 nthClosestNodeHeadingVector, out float _, out int _, 1, 3.0f, 2.5f);
-                bool nthClosectNodeFavourDirection = Natives.GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION<bool>(pos, desiredPos, i % 5, out Vector3 nthClosectNodeFavourDirectionVector, out float _, 1, 3.0f, 0);
-                Dictionary<bool, Vector3> results = new()
-                {
-                    {closestNode, closestNodeVector },
-                    {majorNode, majorNodeVector },
-                    {closestNodeHeading, closestNodeHeadingVector },
-                    {nthClosestNode, nthClosestNodeVector },
-                    {nthClosestNodeHeading, nthClosestNodeHeadingVector },
-                    {nthClosectNodeFavourDirection, nthClosectNodeFavourDirectionVector },
-                };
-                output = results.Where(x => x.Key).Select(x => x.Value).GetRandomElement();
+                Vector3 desiredPos = v + new Vector3(MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, 0f);
+                bool closestNode = Natives.GET_​CLOSEST_​VEHICLE_​NODE<bool>(v, out Vector3 closestNodeVector, 1, 3.0f, 0.0f);
+                bool majorNode = Natives.GET_​CLOSEST_​MAJOR_​VEHICLE_​NODE<bool>(v, out Vector3 majorNodeVector, 3.0f, 0.0f);
+                bool closestNodeHeading = Natives.GET_​CLOSEST_​VEHICLE_​NODE_​WITH_​HEADING<bool>(v, out Vector3 closestNodeHeadingVector, out float _, 1, 3.0f, 0.0f);
+                bool nthClosestNode = Natives.GET_​NTH_​CLOSEST_​VEHICLE_​NODE<bool>(v, 1 % 5, out Vector3 nthClosestNodeVector, 1, 3.0f, 0.0f);
+                bool nthClosestNodeHeading = Natives.GET_​NTH_​CLOSEST_​VEHICLE_​NODE_​WITH_​HEADING<bool>(v, i % 5, out Vector3 nthClosestNodeHeadingVector, out float _, out int _, 1, 3.0f, 2.5f);
+                bool nthClosectNodeFavourDirection = Natives.GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION<bool>(v, desiredPos, i % 5, out Vector3 nthClosectNodeFavourDirectionVector, out float _, 1, 3.0f, 0);
+                Vector3[] vectors = { closestNodeVector, majorNodeVector, closestNodeHeadingVector, nthClosestNodeVector, nthClosestNodeHeadingVector, nthClosectNodeFavourDirectionVector };
+                output = vectors.Where(x => x != Vector3.Zero).GetRandomElement();
                 if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(output.X, output.Y, output.Z, out int _, out int flag))
                     {
                     NodeFlags nodeFlags = (NodeFlags)flag;

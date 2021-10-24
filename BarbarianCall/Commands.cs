@@ -12,6 +12,7 @@ using Rage.Attributes;
 using BarbarianCall.Extensions;
 using BarbarianCall.Types;
 using BarbarianCall.SupportUnit;
+using BarbarianCall.DivisiXml;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 using LSPD_First_Response.Mod.API;
@@ -20,77 +21,23 @@ namespace BarbarianCall
 {
     public static class Commands
     {
-        [ConsoleCommand(Name = "BCGetVehicleColor", Description = "Gets the selected vehicle color and play the scanner audio")]
-        public static void BCGetVehicleColor([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
+        [ConsoleCommand]
+        public static void GetDecalMale()
         {
-            if (vehicle)
+            Deserialization.GetBadgeFromXml().ForEach(x =>
             {
-                VehicleColor vehicleColor = vehicle.GetColor();
-                List<string> log = new()
-                {
-                    $"Vehicle: {vehicle.GetDisplayName()}",
-                    $"Manufacturer: {vehicle.GetMakeName()}",
-                    $"Primary Color:",
-                    $"     Name: {vehicleColor.PrimaryColorName}",
-                    $"     RGBA: {vehicleColor.PrimaryColorRGBA}",
-                    $"Secondary Color:",
-                    $"     Name: {vehicleColor.SecondaryColorName}",
-                    $"     RGBA: {vehicleColor.SecondaryColorRGBA}",
-                };
-                log.ForEach(Game.LogTrivial);
-                Game.DisplaySubtitle($"Primary: <font color=\"{ColorTranslator.ToHtml(vehicleColor.PrimaryColorRGBA)}\">{vehicleColor.PrimaryColorName}</font>," +
-                    $" Secondary: <font color=\"{ColorTranslator.ToHtml(vehicleColor.SecondaryColorRGBA)}\">{vehicleColor.SecondaryColorName}</font>");
-                Functions.PlayScannerAudioUsingPosition(VehiclePaintExtensions.GetPoliceScannerColorAudio(vehicleColor.PrimaryColor), Game.LocalPlayer.Character.Position);
-            }
-            else Game.LogTrivial("Vehicle doesn't exist");
+                $"{x.Item1} - {x.Item2}".ToLog();
+            });
         }
         [ConsoleCommand(Name = "SpawnFreemodePed", Description = "Spawn the freemode ped and the randomise their appearance")]
-        public static void SpawnFreemode([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterBoolean))] bool isMale)
+        public static void SpawnFreemode(bool isMale)
         {
             var pos = Game.LocalPlayer.Character.Position + Game.LocalPlayer.Character.ForwardVector * 8f;
             float heading = Game.LocalPlayer.Character.Heading - 180f;
             Freemode.FreemodePed freemodePed = new(pos, heading, isMale);
             GameFiber.Wait(2000);
             freemodePed.Dismiss();
-        }
-        [ConsoleCommand(Name = "SaveHairColor", Description = "Save hair color of freemode ped")]
-        public static void SaveHairColor([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandParameterAutoCompleter))]string filename)
-        {
-            int num = Freemode.HeadBlend.GetNumberOfPedHairColors();
-            StringBuilder @string = new();
-            @string.AppendLine($"This file created in {DateTime.Now.ToLongDateString()} - {DateTime.Now.ToLongTimeString()}");
-            List<string> vs = new();
-            for (int i = 0; i < num; i++)
-            {
-                Color color = Freemode.HeadBlend.GetHairColor(i);
-                var str = $"{i}+{255}+{color.R}+{color.G}+{color.B}";
-                @string.AppendLine(str);
-                vs.Add($"<font color=\"{ColorTranslator.ToHtml(color)}\">{i}</font>");
-            }
-            string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", filename);
-            File.WriteAllText(path, @string.ToString());
-            GameFiber.StartNew(() =>
-            {
-                int i = 0;
-                StringBuilder sb = new();
-                GameFiber.Wait(20);
-                vs.ForEach(x =>
-                {
-                    i++;
-                    sb.Append(x + " ");
-                    if (i == 10)
-                    {
-                        Game.DisplaySubtitle(sb.ToString());
-                        Game.DisplayHelp($"Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.J)} to continue");
-                        sb.Clear();
-                        i = 0;
-                        GameFiber.WaitUntil(() => Game.IsKeyDownRightNow(System.Windows.Forms.Keys.J));
-                        GameFiber.Wait(500);
-                    }
-                    
-                });
-            });
-        }
+        }       
         [ConsoleCommand(Name = "GetPlayerPosFlags", Description = "Gets the flags of the player position")]
         public static void GetFlags()
         {
@@ -134,11 +81,11 @@ namespace BarbarianCall
             var ppos = Game.LocalPlayer.Character.Position;
             Spawnpoint[] spawnpoints =
             {
-                SpawnManager.GetVehicleSpawnPoint(ppos, 100, 500),
-                SpawnManager.GetVehicleSpawnPoint2(ppos, 100, 500),
-                SpawnManager.GetVehicleSpawnPoint3(ppos, 100, 500),
-                SpawnManager.GetVehicleSpawnPoint4(ppos, 100, 500),
-                SpawnManager.GetVehicleSpawnPoint5(ppos, 100, 500),
+                SpawnManager.GetVehicleSpawnPoint(ppos, 300, 500),
+                SpawnManager.GetVehicleSpawnPoint2(ppos, 300, 500),
+                SpawnManager.GetVehicleSpawnPoint3(ppos, 300, 500),
+                SpawnManager.GetVehicleSpawnPoint4(ppos, 300, 500),
+                SpawnManager.GetVehicleSpawnPoint5(ppos, 300, 500),
             };
             List<Checkpoint> checkpoints = new List<Checkpoint>(); 
             for (int i = 0; i < spawnpoints.Length; i++)
@@ -146,7 +93,9 @@ namespace BarbarianCall
                 Spawnpoint v = spawnpoints[i];
                 if (v != Spawnpoint.Zero)
                 {
-                    checkpoints.Add(new Checkpoint(CheckpointIcon.CylinderTripleArrow, v.Position, 5f, 60f, HudColor.Blue.GetColor(), HudColor.PureWhite.GetColor(), false));
+                    Checkpoint cp = new Checkpoint(CheckpointIcon.CylinderTripleArrow, v.Position, v.Position.ForwardVector(v.Heading), 5f, 60f, HudColor.Blue.GetColor(), HudColor.PureWhite.GetColor(), false);
+                    checkpoints.Add(cp);
+                    $"{i + 1}. {v}".ToLog();
                 }
                 else $"Spawnpoint number {i + 1} is not found".ToLog();
             }
@@ -199,18 +148,6 @@ namespace BarbarianCall
                 Game.DisplaySubtitle($"Selected: {selected}");
             });
         }
-        /*
-        [ConsoleCommand(Name = "ActivatePlaceEditor", Description = "Activate place editor menu")]
-        private static void ActivatePlaceEditor()
-        {
-            Game.LogTrivial("Press PageUp to open place editor menu");
-            GameFiber.Wait(20);
-            GameFiber.StartNew(delegate
-            {
-                Menus.PlaceEditor.CreateMenu();
-            });
-        }
-        */
         [ConsoleCommand(Name = "ActivateSitAnywhere")]
         private static void ActivateSofaOnTick()
         {
@@ -241,13 +178,16 @@ namespace BarbarianCall
             if (vehicle) vehicle.Mods.ApplyAllMods();
         }
         [ConsoleCommand]
-        private static void CallMilitaryHeli([ConsoleCommandParameter(AutoCompleterType = typeof(ConsoleCommandAutoCompleterPedAliveOnly))] Ped ped,
-                                            MilitarySupportType type)
+        private static void CallMilitaryHeli()
         {
-            if (ped)
-            {
-                MilitaryHeliSupport militaryHeliSupport = new MilitaryHeliSupport();
-            }
+            MilitaryHeliSupport militaryHeliSupport = new MilitaryHeliSupport();
+        }
+        [ConsoleCommand]
+        private static void GetGameTimer()
+        {
+            $"Game Timer: {Globals.GameTimer}".ToLog();
+            GameFiber.Wait(5000);
+            $"Game Timer: {Globals.GameTimer}".ToLog();
         }
     }
 }

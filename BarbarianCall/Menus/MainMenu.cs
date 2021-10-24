@@ -40,7 +40,7 @@ namespace BarbarianCall.Menus
             mechanic.IndexChanged += MenuHandler.MenuItemIndexChangeHandler;
             cargobobServices = new UIMenuListScrollerItem<Vehicle>("Cargobob Services", "")
             {
-                Formatter = x => !x || x is null ? "NULL" : $"{(string.IsNullOrEmpty(x.GetMakeName(string.Empty)) ? x.GetDisplayName() : x.GetMakeName()) + " " + x.GetDisplayName()}",
+                Formatter = x => !x || x is null ? "NULL" : $"{(string.IsNullOrEmpty(x.GetMakeName(string.Empty)) ? x.GetDisplayName() : x.GetMakeName() + " " + x.GetDisplayName())}",
             };
             cargobobServices.IndexChanged += MenuHandler.MenuItemIndexChangeHandler;
             cargobobServices.Items = new List<Vehicle>() { null };

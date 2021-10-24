@@ -30,7 +30,10 @@ namespace BarbarianCall.API
         {
             return Func.getVehicleInsuranceStatus(veh);
         }
-
+        public delegate void VehicleEvent(Rage.Vehicle vehicle);
+        public delegate void PedEvent(Rage.Ped ped);
+        public delegate void STPEvent();
+        public static event VehicleEvent OnVehicleSearch;
         public static STPVehicleStatus GetVehicleInsurance(Rage.Vehicle veh)
         {
             return Func.getVehicleInsuranceStatus(veh);
@@ -158,9 +161,17 @@ namespace BarbarianCall.API
             Expired = 1,
             Valid = 2,
         }
+        private static bool eventAdded = false;
         static StopThePedFunc()
         {
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+            "Executing static wrapper class for STP".ToLog();
+            if (IsValid && !eventAdded)
+            {
+                "Adding STPEvent".ToLog();
+                Events.searchVehicleEvent += (v) => OnVehicleSearch?.Invoke(v);
+                eventAdded = true;
+            }
         }
         private static System.Reflection.Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {

@@ -1,14 +1,12 @@
 ﻿namespace BarbarianCall
 {
-    using BarbarianCall.Extensions;
     using BarbarianCall.Types;
     using Rage;
+    using Rage.Native;
     using System.Collections.Generic;
     using System.Drawing;
     using System;
-    using System.Linq;
 
-    //Variable-Only class
     /// <summary>
     /// Defines the <see cref="Globals" />.
     /// </summary>
@@ -20,36 +18,19 @@
         public static Model[] CarsToSelect =
         {
             "ASEA", "STANIER", "INTRUDER", "PREMIER", "TAILGATER", "WASHINGTON", "ASTEROPE", "EMPEROR", "GLENDALE", "FUGITIVE", "EMPEROR2", "FQ2", "BALLER", "CAVALCADE",
-            "SULTAN", "NEON", "KURUMA", "SCHAFTER2", "SCHAFTER3", "BUFFALO", "REVOLTER", "RAIDEN", "ORACLE", "ORACLE2", "JACKAL", "FELON", "FELON2", "F620", "HUNTLEY", "MESA",
+            "SULTAN", "NEON", "KURUMA", "BUFFALO", "REVOLTER", "RAIDEN", "ORACLE", "JACKAL", "FELON", "F620", "HUNTLEY", "MESA", "JESTER4", "SULTAN3",
             "HABANERO", "LANDSTALKER", "DYNASTY", "FAGALOA", "TULIP", "DILETTANTE", "NEON", "RAPIDGT", "PEYOTE", "MANANA", "TORNADO", "RUMPO", "YOUGA", "SPEEDO", "VOLTIC", "CYCLONE",
-            "TROPOS", "GRANGER", "RADI", "FUGITIVE", "COGNOSCENTI", "INGOT", "SENTINEL", "SANDKING", "DUNE", "FUSILADE", "INTRUDER", "INFERNUS", "BUCCANEER", "BUCCANEER2", "DOMINATOR", "DOMINATOR2",
-            "DOMINATOR3", "DOMINATOR4", "DOMINATOR5", "COMET2", "COMET3", "COMET4", "COMET5", "BANSHEE", "CALICO", "GROWLER", "CYPHER", "REMUS", "VECTRE", "EUROS", "ZR350" 
+            "TROPOS", "GRANGER", "RADI", "FUGITIVE", "COGNOSCENTI", "INGOT", "SENTINEL", "SANDKING", "DUNE", "FUSILADE", "INTRUDER", "INFERNUS", "BUCCANEER", "BUCCANEER2", "DOMINATOR",
+            "DOMINATOR7", "COMET6", "BANSHEE", "CALICO", "GROWLER", "CYPHER", "REMUS", "VECTRE", "EUROS", "ZR350" 
         };
 
         /// <summary>
         /// Defines the MotorBikesToSelect.
         /// </summary>
-        public static Model[] MotorBikesToSelect = { "AKUMA", "HEXER", "BAGGER", "BATI", "PCJ", "NEMESIS", "VINDICATOR", "THRUST", "FAGGIO", "VADER", "HAKUCHOU", "DOUBLE", "BF400", "hakuchou",
-        "FAGGIO", "LECTRO", "INNOVATION"};
+        public static Model[] MotorBikesToSelect = { "AKUMA", "HEXER", "BAGGER", "BATI", "PCJ", "NEMESIS", "VINDICATOR", "THRUST", "FAGGIO", "VADER", "HAKUCHOU", "DOUBLE", "BF400",
+        "FAGGIO", "LECTRO", "INNOVATION", "MANCHEZ2"};
 
-        /// <summary>
-        /// Defines the CommonUnderstandableColor.
-        /// </summary>
-        public static Color[] CommonUnderstandableColor =
-        {
-            Color.Purple, Color.Yellow, Color.LimeGreen, Color.Red, Color.Blue, Color.Green, Color.Pink, Color.Gray, Color.Aqua, Color.Magenta, Color.Black, Color.Cyan,
-            Color.Brown, Color.Chocolate, Color.Gold, Color.HotPink, Color.Violet, Color.Lavender
-        };
-
-        /// <summary>
-        /// Defines the AudibleColor.
-        /// </summary>
-        public static Color[] AudibleColor =
-        {
-            Color.Aqua, Color.Beige, Color.Black, Color.Blue, Color.Brown, Color.DarkBlue, Color.DarkGreen, Color.DarkOrange, Color.DarkRed, Color.Gold, Color.Green,
-            Color.LightBlue, Color.LightGreen, Color.LightYellow, Color.Maroon, Color.Orange, Color.Pink, Color.Purple, Color.Red, Color.Silver, Color.White, Color.Yellow
-        };
-        public static TimeZoneInfo MyTimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        public static TimeZoneInfo MyTimeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("Jakarta Standard Time", new TimeSpan(TimeSpan.TicksPerHour * 7), "Waktu Indonesia Barat", "Waktu Indonesia Barat");
 
         /// <summary>
         /// Defines the DangerousVehicleItems.
@@ -206,6 +187,11 @@
         /// Defines the Normal.
         /// </summary>
         public static VehicleDrivingFlags Normal = (VehicleDrivingFlags)786603;
+        public static VehicleDrivingFlags AvoidTraffic = (VehicleDrivingFlags)786468;
+        public static VehicleDrivingFlags IgnoreLights = (VehicleDrivingFlags)2883621;
+        public static VehicleDrivingFlags AvoidTrafficExtremely = (VehicleDrivingFlags)6;
+        public static VehicleDrivingFlags Rushed = (VehicleDrivingFlags)1074528293;
+        public static VehicleDrivingFlags Rushed2 = VehicleDrivingFlags.DriveAroundPeds | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowWrongWay | VehicleDrivingFlags.AllowMedianCrossing;
 
         /// <summary>
         /// Defines the Hospitals.
@@ -236,6 +222,10 @@
         /// Gets the PlayerPedForeName.
         /// </summary>
         public static string PlayerPedForeName=> LSPD_First_Response.Mod.API.Functions.GetPersonaForPed(Game.LocalPlayer.Character).Forename;
+        /// <summary>
+        /// Gets the game timer
+        /// </summary>
+        internal static int GameTimer => NativeFunction.Natives.GET_GAME_TIMER<int>();
 
         /// <summary>
         /// Defines the MaleVoiceName.

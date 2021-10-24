@@ -54,13 +54,14 @@ namespace BarbarianCall
             if (onDuty)
             {                
                 Type[] callouts = { typeof(Callouts.SuspiciousVehicle), typeof(Callouts.OfficerStabbed), typeof(Callouts.TaxiRefusePay), typeof(Callouts.WantedFelonOnTheLoose), typeof(Callouts.MassStreetFighting),
-                typeof(Callouts.Prostitution), typeof(Callouts.HeartAttackCivilian), typeof(Callouts.ArmoredPersonInVehicle)};
+                typeof(Callouts.Prostitution), typeof(Callouts.HeartAttackCivilian), typeof(Callouts.ArmoredPersonInVehicle), typeof(Callouts.StolenBoatTrailer)};
                 foreach (Type callout in callouts)
                 {
-                    Peralatan.ToLog(string.Format("Loading {0} callout", callout.Name));
+                    Peralatan.ToLog(string.Format("Registering {0} callout", callout.Name));
                     Functions.RegisterCallout(callout);
-                    Peralatan.ToLog(string.Format("{0} has been loaded successfully", callout.Name));
+                    Peralatan.ToLog(string.Format("{0} has been registered successfully", callout.Name));
                 }
+                $"Adding Console Command".ToLog();
                 Game.AddConsoleCommands(new[] { typeof(Commands) });
                 Initialization.Initialize();
             }          

@@ -1,0 +1,387 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<BarbarianCall>
+  <Coordinate X="-2468.24" Y="1049.11" Z="190.76">
+    <Heading>78.399</Heading>
+  </Coordinate>
+  <Coordinate X="-905.81" Y="-2398.61" Z="12.94">
+    <Heading>148.99</Heading>
+  </Coordinate>
+  <Coordinate X="105.53" Y="-1412.59" Z="28.23">
+    <Heading>228.994</Heading>
+  </Coordinate>
+  <Coordinate X="-1265.71" Y="-1359.07" Z="3.21">
+    <Heading>199.995</Heading>
+  </Coordinate>
+  <Coordinate X="-70.73" Y="2780.27" Z="55.66">
+    <Heading>272.744</Heading>
+  </Coordinate>
+  <Coordinate X="1377.96" Y="4376.11" Z="43.08">
+    <Heading>272.336</Heading>
+  </Coordinate>
+  <Coordinate X="2750.92" Y="3444.13" Z="55.1">
+    <Heading>157.34</Heading>
+  </Coordinate>
+  <Coordinate X="-477.93" Y="2999.44" Z="25.77">
+    <Heading>150.998</Heading>
+  </Coordinate>
+  <Coordinate X="-1917.18" Y="332.95" Z="88.04">
+    <Heading>97.787</Heading>
+  </Coordinate>
+  <Coordinate X="976.24" Y="-1036.89" Z="39.88">
+    <Heading>269.997</Heading>
+  </Coordinate>
+  <Coordinate X="1106.54" Y="3389.12" Z="33.43">
+    <Heading>6.538</Heading>
+  </Coordinate>
+  <Coordinate X="30.18" Y="-1714.7" Z="28.3">
+    <Heading>293.195</Heading>
+  </Coordinate>
+  <Coordinate X="-1013.21" Y="200.92" Z="64.76">
+    <Heading>268.597</Heading>
+  </Coordinate>
+  <Coordinate X="-319.7" Y="-1102.73" Z="22.03">
+    <Heading>249.794</Heading>
+  </Coordinate>
+  <Coordinate X="-817.91" Y="5411.17" Z="33.11">
+    <Heading>86.596</Heading>
+  </Coordinate>
+  <Coordinate X="1133.74" Y="-1459.16" Z="33.68">
+    <Heading>270.592</Heading>
+  </Coordinate>
+  <Coordinate X="341.04" Y="3579.45" Z="32.34">
+    <Heading>159.131</Heading>
+  </Coordinate>
+  <Coordinate X="-1111.85" Y="-1727.03" Z="3.18">
+    <Heading>304.796</Heading>
+  </Coordinate>
+  <Coordinate X="1296.56" Y="-1728.09" Z="52.8">
+    <Heading>115.791</Heading>
+  </Coordinate>
+  <Coordinate X="1107.46" Y="-3229.14" Z="4.9">
+    <Heading>0.999</Heading>
+  </Coordinate>
+  <Coordinate X="1682.07" Y="-1554.27" Z="111.64">
+    <Heading>71.191</Heading>
+  </Coordinate>
+  <Coordinate X="-1170.66" Y="927.52" Z="195.87">
+    <Heading>86.198</Heading>
+  </Coordinate>
+  <Coordinate X="1234.82" Y="2700.91" Z="37.01">
+    <Heading>269.543</Heading>
+  </Coordinate>
+  <Coordinate X="-169.2" Y="-56.45" Z="51.81">
+    <Heading>160.592</Heading>
+  </Coordinate>
+  <Coordinate X="3261.16" Y="5163.94" Z="18.69">
+    <Heading>172.935</Heading>
+  </Coordinate>
+  <Coordinate X="511.8" Y="-1124.38" Z="28.29">
+    <Heading>179.799</Heading>
+  </Coordinate>
+  <Coordinate X="2003.43" Y="3123.25" Z="45.82">
+    <Heading>142.542</Heading>
+  </Coordinate>
+  <Coordinate X="1899.7" Y="-1014.48" Z="77.84">
+    <Heading>325.79</Heading>
+  </Coordinate>
+  <Coordinate X="-1766.52" Y="-507.1" Z="37.83">
+    <Heading>296.991</Heading>
+  </Coordinate>
+  <Coordinate X="1541.33" Y="860.54" Z="76.45">
+    <Heading>331.588</Heading>
+  </Coordinate>
+  <Coordinate X="-1555.85" Y="1385.62" Z="125.3">
+    <Heading>314.142</Heading>
+  </Coordinate>
+  <Coordinate X="-2229.19" Y="4319.08" Z="47.42">
+    <Heading>152.335</Heading>
+  </Coordinate>
+  <Coordinate X="-252.5" Y="6220.08" Z="30.49">
+    <Heading>135.397</Heading>
+  </Coordinate>
+  <Coordinate X="-510.2" Y="-970.41" Z="22.58">
+    <Heading>87.994</Heading>
+  </Coordinate>
+  <Coordinate X="1569.11" Y="3700.63" Z="33.37">
+    <Heading>294.74</Heading>
+  </Coordinate>
+  <Coordinate X="-988.85" Y="-2698.46" Z="12.83">
+    <Heading>60.59</Heading>
+  </Coordinate>
+  <Coordinate X="429.19" Y="-646.42" Z="27.5">
+    <Heading>180.397</Heading>
+  </Coordinate>
+  <Coordinate X="275.93" Y="-3148.39" Z="4.79">
+    <Heading>0.789</Heading>
+  </Coordinate>
+  <Coordinate X="-271.17" Y="3948.25" Z="41.62">
+    <Heading>218.335</Heading>
+  </Coordinate>
+  <Coordinate X="1459.08" Y="-2593.97" Z="47.51">
+    <Heading>344.991</Heading>
+  </Coordinate>
+  <Coordinate X="-1069.97" Y="4367.12" Z="12.07">
+    <Heading>256.2</Heading>
+  </Coordinate>
+  <Coordinate X="-112.22" Y="-2012.87" Z="17.02">
+    <Heading>81.993</Heading>
+  </Coordinate>
+  <Coordinate X="-19.71" Y="-2662.14" Z="5">
+    <Heading>358.389</Heading>
+  </Coordinate>
+  <Coordinate X="-3140.89" Y="1146.64" Z="19.83">
+    <Heading>246.596</Heading>
+  </Coordinate>
+  <Coordinate X="-1507.25" Y="5020.77" Z="61.55">
+    <Heading>316.796</Heading>
+  </Coordinate>
+  <Coordinate X="-986.2" Y="-2090.67" Z="9.82">
+    <Heading>134.59</Heading>
+  </Coordinate>
+  <Coordinate X="104.75" Y="-1070.02" Z="28.19">
+    <Heading>67.998</Heading>
+  </Coordinate>
+  <Coordinate X="416.7" Y="3090.28" Z="41.91">
+    <Heading>87.138</Heading>
+  </Coordinate>
+  <Coordinate X="-1388.82" Y="7.41" Z="52.27">
+    <Heading>11.59</Heading>
+  </Coordinate>
+  <Coordinate X="599.68" Y="775.67" Z="201.99">
+    <Heading>255.8</Heading>
+  </Coordinate>
+  <Coordinate X="3512.23" Y="3766.38" Z="28.91">
+    <Heading>80.999</Heading>
+  </Coordinate>
+  <Coordinate X="718.39" Y="1720.68" Z="182.12">
+    <Heading>69.998</Heading>
+  </Coordinate>
+  <Coordinate X="-1461.31" Y="-583.93" Z="29.94">
+    <Heading>215.398</Heading>
+  </Coordinate>
+  <Coordinate X="346.46" Y="4468.46" Z="61.56">
+    <Heading>6.936</Heading>
+  </Coordinate>
+  <Coordinate X="-3003.66" Y="86.18" Z="10.61">
+    <Heading>59.797</Heading>
+  </Coordinate>
+  <Coordinate X="2372.25" Y="4920.4" Z="41.02">
+    <Heading>135.338</Heading>
+  </Coordinate>
+  <Coordinate X="784.13" Y="-728.83" Z="26.87">
+    <Heading>0.991</Heading>
+  </Coordinate>
+  <Coordinate X="-413.73" Y="1196.91" Z="324.64">
+    <Heading>164.998</Heading>
+  </Coordinate>
+  <Coordinate X="44.93" Y="-605.16" Z="30.63">
+    <Heading>250.397</Heading>
+  </Coordinate>
+  <Coordinate X="191.21" Y="60.23" Z="82.62">
+    <Heading>69.596</Heading>
+  </Coordinate>
+  <Coordinate X="1343.98" Y="6515.76" Z="18.55">
+    <Heading>272.598</Heading>
+  </Coordinate>
+  <Coordinate X="383.97" Y="-81.05" Z="66.51">
+    <Heading>250.398</Heading>
+  </Coordinate>
+  <Coordinate X="-841.14" Y="-752.75" Z="21.75">
+    <Heading>89.597</Heading>
+  </Coordinate>
+  <Coordinate X="2598.11" Y="5304.62" Z="43.54">
+    <Heading>14.999</Heading>
+  </Coordinate>
+  <Coordinate X="978.72" Y="175.68" Z="79.83">
+    <Heading>140.198</Heading>
+  </Coordinate>
+  <Coordinate X="-1886.27" Y="2017.61" Z="139.86">
+    <Heading>167.795</Heading>
+  </Coordinate>
+  <Coordinate X="983.17" Y="-2450.67" Z="27.54">
+    <Heading>174.791</Heading>
+  </Coordinate>
+  <Coordinate X="290.98" Y="-341.02" Z="43.92">
+    <Heading>160.796</Heading>
+  </Coordinate>
+  <Coordinate X="-387.08" Y="-2798.63" Z="5">
+    <Heading>355.789</Heading>
+  </Coordinate>
+  <Coordinate X="-1612.24" Y="-968.49" Z="12.02">
+    <Heading>319.788</Heading>
+  </Coordinate>
+  <Coordinate X="2569.25" Y="334.95" Z="107.46">
+    <Heading>90.788</Heading>
+  </Coordinate>
+  <Coordinate X="738.74" Y="-2124.2" Z="28.29">
+    <Heading>266.192</Heading>
+  </Coordinate>
+  <Coordinate X="529.24" Y="-2934.11" Z="5.04">
+    <Heading>269.788</Heading>
+  </Coordinate>
+  <Coordinate X="-986.81" Y="2742.71" Z="24.09">
+    <Heading>288.395</Heading>
+  </Coordinate>
+  <Coordinate X="-529.28" Y="-322.22" Z="34.21">
+    <Heading>29.992</Heading>
+  </Coordinate>
+  <Coordinate X="-1020.82" Y="-1127.57" Z="1.1">
+    <Heading>299.994</Heading>
+  </Coordinate>
+  <Coordinate X="420.37" Y="6585.8" Z="26.09">
+    <Heading>177.598</Heading>
+  </Coordinate>
+  <Coordinate X="771.36" Y="-1404.84" Z="25.56">
+    <Heading>269.999</Heading>
+  </Coordinate>
+  <Coordinate X="549.43" Y="2623.51" Z="41.81">
+    <Heading>9.199</Heading>
+  </Coordinate>
+  <Coordinate X="-2362.27" Y="283.42" Z="167.18">
+    <Heading>24.198</Heading>
+  </Coordinate>
+  <Coordinate X="593.01" Y="-2714.56" Z="5.06">
+    <Heading>360.188</Heading>
+  </Coordinate>
+  <Coordinate X="-1123.89" Y="-317.92" Z="36.67">
+    <Heading>85.397</Heading>
+  </Coordinate>
+  <Coordinate X="1299.31" Y="1419.49" Z="99.6">
+    <Heading>356.944</Heading>
+  </Coordinate>
+  <Coordinate X="1936.3" Y="598.16" Z="174.93">
+    <Heading>328.996</Heading>
+  </Coordinate>
+  <Coordinate X="2368.91" Y="2417.85" Z="61.21">
+    <Heading>233.199</Heading>
+  </Coordinate>
+  <Coordinate X="763.91" Y="605.57" Z="124.78">
+    <Heading>249.589</Heading>
+  </Coordinate>
+  <Coordinate X="-1478.39" Y="2786.34" Z="19.71">
+    <Heading>286.541</Heading>
+  </Coordinate>
+  <Coordinate X="862.52" Y="-1659.07" Z="28.7">
+    <Heading>86.398</Heading>
+  </Coordinate>
+  <Coordinate X="202.79" Y="383.88" Z="106.51">
+    <Heading>259.392</Heading>
+  </Coordinate>
+  <Coordinate X="-124.89" Y="-2419.04" Z="5">
+    <Heading>180.389</Heading>
+  </Coordinate>
+  <Coordinate X="-780.04" Y="-1286.94" Z="4">
+    <Heading>260.995</Heading>
+  </Coordinate>
+  <Coordinate X="-709.27" Y="5773.91" Z="16.33">
+    <Heading>64.597</Heading>
+  </Coordinate>
+  <Coordinate X="2065.15" Y="3845.72" Z="32.87">
+    <Heading>119.141</Heading>
+  </Coordinate>
+  <Coordinate X="628.71" Y="74.69" Z="88.75">
+    <Heading>159.599</Heading>
+  </Coordinate>
+  <Coordinate X="-324.65" Y="-697.66" Z="31.99">
+    <Heading>0.596</Heading>
+  </Coordinate>
+  <Coordinate X="-2529.19" Y="3638.12" Z="11.66">
+    <Heading>335.395</Heading>
+  </Coordinate>
+  <Coordinate X="1509.9" Y="2017.76" Z="97.95">
+    <Heading>177.999</Heading>
+  </Coordinate>
+  <Coordinate X="276.28" Y="-2640.02" Z="5">
+    <Heading>88.189</Heading>
+  </Coordinate>
+  <Coordinate X="-66.39" Y="1886.09" Z="195.59">
+    <Heading>174.135</Heading>
+  </Coordinate>
+  <Coordinate X="-738.66" Y="2290.91" Z="73.14">
+    <Heading>38.999</Heading>
+  </Coordinate>
+  <Coordinate X="1301.85" Y="-714.43" Z="63.76">
+    <Heading>63.191</Heading>
+  </Coordinate>
+  <Coordinate X="-648.82" Y="-1723.65" Z="23.57">
+    <Heading>2.794</Heading>
+  </Coordinate>
+  <Coordinate X="-517.06" Y="273.61" Z="82.08">
+    <Heading>174.192</Heading>
+  </Coordinate>
+  <Coordinate X="233.06" Y="-2964.06" Z="4.85">
+    <Heading>90.789</Heading>
+  </Coordinate>
+  <Coordinate X="1676.81" Y="-1952.33" Z="111.41">
+    <Heading>82.597</Heading>
+  </Coordinate>
+  <Coordinate X="1115.51" Y="-2943.77" Z="4.9">
+    <Heading>89.399</Heading>
+  </Coordinate>
+  <Coordinate X="3702.44" Y="4444.56" Z="21.21">
+    <Heading>26.799</Heading>
+  </Coordinate>
+  <Coordinate X="2677.55" Y="1525.8" Z="23.51">
+    <Heading>359.944</Heading>
+  </Coordinate>
+  <Coordinate X="-180.27" Y="-1506.2" Z="31.64">
+    <Heading>319.196</Heading>
+  </Coordinate>
+  <Coordinate X="797.93" Y="2202.55" Z="50.67">
+    <Heading>66.543</Heading>
+  </Coordinate>
+  <Coordinate X="160.87" Y="774.89" Z="208.54">
+    <Heading>315.597</Heading>
+  </Coordinate>
+  <Coordinate X="461.87" Y="-1948.91" Z="23.63">
+    <Heading>25.193</Heading>
+  </Coordinate>
+  <Coordinate X="917.35" Y="-263.96" Z="67.35">
+    <Heading>54.398</Heading>
+  </Coordinate>
+  <Coordinate X="415.47" Y="-1561.18" Z="28.15">
+    <Heading>139.4</Heading>
+  </Coordinate>
+  <Coordinate X="2550.18" Y="2636.69" Z="36.95">
+    <Heading>269.343</Heading>
+  </Coordinate>
+  <Coordinate X="2989.12" Y="3507.52" Z="70.38">
+    <Heading>298.399</Heading>
+  </Coordinate>
+  <Coordinate X="-1396.22" Y="-1025.75" Z="3.39">
+    <Heading>304.996</Heading>
+  </Coordinate>
+  <Coordinate X="-626.66" Y="-2319.06" Z="12.83">
+    <Heading>138.99</Heading>
+  </Coordinate>
+  <Coordinate X="2713.78" Y="4366.75" Z="46.02">
+    <Heading>339.938</Heading>
+  </Coordinate>
+  <Coordinate X="1090.11" Y="3590.04" Z="32.36">
+    <Heading>360.195</Heading>
+  </Coordinate>
+  <Coordinate X="808.03" Y="-3126.98" Z="4.9">
+    <Heading>1.4</Heading>
+  </Coordinate>
+  <Coordinate X="1678.16" Y="6404.18" Z="30.06">
+    <Heading>75.198</Heading>
+  </Coordinate>
+  <Coordinate X="1702.1" Y="4798.69" Z="40.83">
+    <Heading>90.136</Heading>
+  </Coordinate>
+  <Coordinate X="-1439.32" Y="454.27" Z="110.39">
+    <Heading>336.397</Heading>
+  </Coordinate>
+  <Coordinate X="1294.11" Y="-1980.72" Z="43.06">
+    <Heading>133.391</Heading>
+  </Coordinate>
+  <Coordinate X="22.81" Y="6658.29" Z="30.52">
+    <Heading>182.598</Heading>
+  </Coordinate>
+  <Coordinate X="-2579.17" Y="2319.43" Z="32.06">
+    <Heading>97.396</Heading>
+  </Coordinate>
+  <Coordinate X="239.78" Y="1160.12" Z="224.46">
+    <Heading>13.999</Heading>
+  </Coordinate>
+</BarbarianCall>

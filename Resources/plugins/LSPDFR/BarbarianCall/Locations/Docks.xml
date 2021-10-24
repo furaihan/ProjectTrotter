@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<BarbarianCall>
+  <Coordinate X="3363.85" Y="5581.77" Z="15.71">
+    <Heading>8.59</Heading>
+  </Coordinate>
+  <Coordinate X="-3059.84" Y="3434.97" Z="2.37">
+    <Heading>123.03</Heading>
+  </Coordinate>
+  <Coordinate X="3330.23" Y="5170.13" Z="18.44">
+    <Heading>324.014</Heading>
+  </Coordinate>
+  <Coordinate X="2871.51" Y="1572.97" Z="24.64">
+    <Heading>258.781</Heading>
+  </Coordinate>
+  <Coordinate X="-3242.41" Y="1200.03" Z="2.98">
+    <Heading>171.572</Heading>
+  </Coordinate>
+  <Coordinate X="1379.66" Y="6569.71" Z="14.07">
+    <Heading>140.896</Heading>
+  </Coordinate>
+  <Coordinate X="-1609.82" Y="-1102.95" Z="4.16">
+    <Heading>139.651</Heading>
+  </Coordinate>
+  <Coordinate X="-786.95" Y="5632.98" Z="25.87">
+    <Heading>163.892</Heading>
+  </Coordinate>
+  <Coordinate X="207.04" Y="-3331.11" Z="5.86">
+    <Heading>86.573</Heading>
+  </Coordinate>
+  <Coordinate X="1277.16" Y="-3198.43" Z="5.97">
+    <Heading>179.631</Heading>
+  </Coordinate>
+  <Coordinate X="-1578.45" Y="5165.15" Z="19.69">
+    <Heading>31.984</Heading>
+  </Coordinate>
+  <Coordinate X="-831.45" Y="-1323.41" Z="5.07">
+    <Heading>18.017</Heading>
+  </Coordinate>
+  <Coordinate X="-20.25" Y="-2679.67" Z="6.07">
+    <Heading>179.664</Heading>
+  </Coordinate>
+  <Coordinate X="447.23" Y="-2984.32" Z="6.08">
+    <Heading>2.637</Heading>
+  </Coordinate>
+  <Coordinate X="-1007.71" Y="-1425.63" Z="5.11">
+    <Heading>288.466</Heading>
+  </Coordinate>
+  <Coordinate X="-208.43" Y="6552.56" Z="11.17">
+    <Heading>134.631</Heading>
+  </Coordinate>
+  <Coordinate X="3808.84" Y="4461.77" Z="4.4">
+    <Heading>267.629</Heading>
+  </Coordinate>
+  <Coordinate X="1209.95" Y="-2968.06" Z="5.94">
+    <Heading>0.769</Heading>
+  </Coordinate>
+  <Coordinate X="-179.46" Y="-2630.84" Z="6.08">
+    <Heading>89.179</Heading>
+  </Coordinate>
+  <Coordinate X="2770.4" Y="-711.64" Z="7.22">
+    <Heading>272.497</Heading>
+  </Coordinate>
+</BarbarianCall>

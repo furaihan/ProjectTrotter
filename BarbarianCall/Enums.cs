@@ -841,5 +841,26 @@ namespace BarbarianCall
 		VehicleTransformToSubmarine = 529,
 		AnimatedFallback = 530
 	};
-
+	public enum CombatMovement
+    {
+		Stationary,
+		Defensive,
+		WillAdvance,
+		WillRetreat,
+    }
+	public enum CombatRange
+    {
+		Near,
+		Medium,
+		Far,
+		VeryFar,
+		NumRanges,
+    }
+	public enum CombatAbility
+    {
+		Poor,
+		Average,
+		Professional,
+		NumTypes,
+    }
 }

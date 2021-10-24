@@ -274,11 +274,9 @@ namespace BarbarianCall.Callouts
         }
         private void GetClose()
         {
-            int counter = 0;
             while (CalloutRunning)
             {
                 GameFiber.Yield();
-                counter++;
                 if (officer && Game.LocalPlayer.Character.DistanceToSquared(officer) < 2025f)
                 {
                     if (GrammarPoliceRunning) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.OnScene);

@@ -29,6 +29,7 @@ namespace BarbarianCall.SupportUnit
             0xF63DE8E1,
             0x864ED68E,
         };
+        private const string IniPath = @"Plugins\LSPDFR\BarbarianCall\SupportUnit\Cargobob.ini";
         internal static List<Vehicle> queueVehicle = new();
         internal static List<Vehicle> vehicleTaken = new();
         Task gotoTask = null;

@@ -23,7 +23,6 @@ namespace BarbarianCall
         public static Random Random = new(N.Natives.xF2D49816A804D134<int>(1000, 90080));
         public static System.Globalization.CultureInfo CultureInfo = System.Globalization.CultureInfo.CurrentCulture;
         private static Ped PlayerPed => Game.LocalPlayer.Character;
-
         internal static Spawnpoint SelectNearbySpawnpoint(List<Spawnpoint> spawnPoints, float maxDistance = 800f, float minDistance = 300f)
         {
             float max = maxDistance * maxDistance;
@@ -140,6 +139,7 @@ namespace BarbarianCall
             var integer = BitConverter.ToInt32(bytes, 0);
             return Math.Abs(integer % maxValue);
         }
+        internal static string GetLabelText(string gxtEntry) => !string.IsNullOrEmpty(gxtEntry) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(gxtEntry) ? N.Natives.x7B5280EBA9840C72<string>(gxtEntry) : string.Empty;
         internal static string GetDisplayName(this Model vehicleModel)
         {
             string text = N.Natives.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL<string>(vehicleModel.Hash);

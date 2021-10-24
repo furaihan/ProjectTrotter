@@ -100,7 +100,8 @@ namespace BarbarianCall.Menus
                 }
                 if (MainMenu.BarbarianCallMenu.Visible && MainMenu.cargobobServices.Selected && MainMenu.cargobobServices.SelectedItem)
                 {
-                    Types.Marker.DrawMarker(MarkerType.UpsideDownCone, MainMenu.cargobobServices.SelectedItem.AbovePosition, System.Drawing.Color.Orange);
+                    Vehicle x = MainMenu.cargobobServices.SelectedItem;
+                    Types.Marker.DrawMarker(MarkerType.UpsideDownCone, x.Position + new Vector3(0f, 0f, x.Height / 2), System.Drawing.Color.Orange);
                 }
             }
         }

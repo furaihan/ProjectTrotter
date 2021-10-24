@@ -13,35 +13,18 @@ namespace BarbarianCall.Freemode
     public class FreemodePed : Ped
     {
         private PedComponentCollection _wardrobe;
+        private PedCombatProperty _combatProperty;
         public HeadBlendData HeadBlendData
         {
-            get
-            {
-                return HB.GetDataFromPed(this);
-            }
-            set
-            {
-                HB.SetPedHeadBlendData(this, value);
-            }
+            get => HB.GetDataFromPed(this);
+            set => HB.SetPedHeadBlendData(this, value);
         }
-        public EyeColor EyeColor 
-        { 
-            get
-            {
-                return HB.GetPedEyeColor(this);
-            } 
-            set
-            {
-                HB.SetPedEyeColor(this, value);
-            }
+        public EyeColor EyeColor
+        {
+            get => HB.GetPedEyeColor(this);
+            set => HB.SetPedEyeColor(this, value);
         }
-        public Gender Gender 
-        { 
-            get 
-            {
-                return Model.Hash == 0x705E61F2 ? Gender.Male : Gender.Female;
-            } 
-        }
+        public Gender Gender => Model.Hash == 0x705E61F2 ? Gender.Male : Gender.Female;
         /// <summary>
         /// Gets a value that indicates whether this <see cref="FreemodePed"/> is male
         /// </summary>
@@ -53,13 +36,11 @@ namespace BarbarianCall.Freemode
         /// <value><c>true</c> if this <see cref="FreemodePed"/> is female, otherwise <c>false</c></value>
         public new bool IsFemale => Model == 0x9C9EFFD8;
         public PedComponentCollection Wardrobe => _wardrobe ??= new PedComponentCollection(this);
+        public PedCombatProperty CombatProperty => _combatProperty ??= new PedCombatProperty(this);
         #region COMPONENT
         public PedComponent Torso
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Torso);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Torso);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Torso) Peralatan.ToLog("Wrong componentID");
@@ -71,10 +52,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Head
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Head);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Head);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Head) Peralatan.ToLog("Wrong componentID");
@@ -86,10 +64,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Mask
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Mask);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Mask);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Mask) Peralatan.ToLog("Wrong componentID");
@@ -101,10 +76,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Shoes
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Shoes);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Shoes);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Shoes) Peralatan.ToLog("Wrong componentID");
@@ -116,10 +88,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Leg
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Leg);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Leg);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Leg) Peralatan.ToLog("Wrong componentID");
@@ -131,10 +100,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Parachute
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Parachute);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Parachute);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Parachute) Peralatan.ToLog("Wrong componentID");
@@ -146,10 +112,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Decal
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Decal);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Decal);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Decal) Peralatan.ToLog("Wrong componentID");
@@ -161,10 +124,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent UnderShirt
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.UnderShirt);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.UnderShirt);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.UnderShirt) Peralatan.ToLog("Wrong componentID");
@@ -176,10 +136,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent HairStyle
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.HairStyle);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.HairStyle);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.HairStyle) Peralatan.ToLog("Wrong componentID");
@@ -191,10 +148,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent BodyArmor
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.BodyArmor);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.BodyArmor);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.BodyArmor) Peralatan.ToLog("Wrong componentID");
@@ -206,10 +160,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Tops
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Tops);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Tops);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Tops) Peralatan.ToLog("Wrong componentID");
@@ -221,10 +172,7 @@ namespace BarbarianCall.Freemode
         }
         public PedComponent Accessories
         {
-            get
-            {
-                return PedComponent.GetPedComponent(this, PedComponent.EComponentID.Accessories);
-            }
+            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Accessories);
             set
             {
                 if (value.ComponentID != PedComponent.EComponentID.Accessories) Peralatan.ToLog("Wrong componentID");
