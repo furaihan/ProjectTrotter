@@ -2,6 +2,7 @@
 using System.Linq;
 using Rage;
 using LSPD_First_Response;
+using BarbarianCall.Extensions;
 using HB = BarbarianCall.Freemode.HeadBlend;
 using N = Rage.Native.NativeFunction;
 using System.Collections.Generic;
@@ -205,14 +206,7 @@ namespace BarbarianCall.Freemode
         /// </summary>
         /// <param name="ped"></param>
         /// <returns>return the ped instance as freemode ped, if it failed, then will return <c>null</c></returns>
-        public static FreemodePed FromRegularPed(Ped ped)
-        {
-            if (ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8)
-            {
-                return new FreemodePed(ped.Handle);
-            }
-            return null;
-        }
+        public static FreemodePed FromRegularPed(Ped ped) => new(ped.Handle);
         public void RandomizeAppearance()
         {
             byte[] box = new byte[4];
@@ -349,38 +343,60 @@ namespace BarbarianCall.Freemode
             }
             HeadBlendData.ToString().ToLog();
         }
-        public void RandomizeTextureFromCurrentDrawable()
+        public void RandomizeOutfit()
         {
-            List<PedComponent> components = new List<PedComponent>()
+            Random random = new(MathExtension.GetRandomFloatInRange(2500f, 98506f).GetHashCode());
+            bool jaketan = random.Next() % 2 == 0;
+            if (IsMale)
             {
-                Torso,
-                Leg,
-                Parachute,
-                Shoes,
-                Accessories,
-                UnderShirt,
-                BodyArmor,
-                Decal,
-                Tops
-            };
-            components.ForEach(c =>
-            {
-                int textureMax = N.Natives.GET_NUMBER_OF_PED_TEXTURE_VARIATIONS<int>(this, (int)c.ComponentID, c.DrawableID);
-                PedComponent dump = new(c.ComponentID, c.DrawableID, Peralatan.Random.Next(textureMax));
-                PedComponent.SetPedComponent(this, dump);
-            });
-        }
-        internal void SetRobberComponent()
-        {
-            if (Gender == Gender.Female) return;
-            Torso = new PedComponent(PedComponent.EComponentID.Torso, 0, 0, 0);
-            Leg = new PedComponent(PedComponent.EComponentID.Leg, 34, 0, 0);
-            Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 45, 0, 0);
-            Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 24, 0, 0);
-            Accessories = new PedComponent(PedComponent.EComponentID.Accessories, 40, 0);
-            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, -1, 0);
-            Tops = new PedComponent(PedComponent.EComponentID.Tops, 241, Peralatan.Random.Next(5), 0);
-        }
+                var selectedTops = Globals.AtasanCowokPolos.GetRandomElement();
+                var selectedBottoms = Globals.BawahanCowok.GetRandomElement();
+                var selectedShoes = Globals.AlasKaki.GetRandomElement();
+                var topTex = selectedTops.Value.GetRandomElement();
+                var botTex = selectedBottoms.Value.GetRandomElement();
+                var shoTex = selectedShoes.Value.GetRandomElement();
+                if (jaketan)
+                {
+                    $"Jaketan".ToLog();
+                    selectedTops = Globals.JaketCowok.GetRandomElement();
+                    botTex = selectedTops.Value.GetRandomElement();
+                    var selectedUndershirt = Globals.UndershirtMale.GetRandomElement();
+                    var usTex = selectedUndershirt.Value.GetRandomElement();
+                    $"UNDERSHIRT | Draw: {selectedUndershirt.Key}. Tex: {usTex}".ToLog();
+                    Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, selectedUndershirt.Key, usTex);
+                    if (random.Next() % 5 != 0) Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 184, 0, 0);
+                    else Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 180, random.Next(7));
+                }
+                $"TOP | Draw: {selectedTops.Key}. Tex: {topTex}".ToLog();
+                $"BOTTOM | Draw: {selectedBottoms.Key}. Tex: {botTex}".ToLog();
+                $"SHOES | Draw: {selectedShoes.Key}. Tex: {shoTex}".ToLog();
+                Wardrobe.Tops = new PedComponent(PedComponent.EComponentID.Tops, selectedTops.Key, topTex);
+                Wardrobe.Leg = new PedComponent(PedComponent.EComponentID.Leg, selectedBottoms.Key, botTex);
+                Wardrobe.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, selectedShoes.Key, shoTex);
+                Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, -1, 0);
+                if (selectedTops.Key == 238 && !jaketan) Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 2, 0);
+                if (random.Next() % 2 == 0)
+                {
+                    var kcmt = Globals.KacamataCowok.GetRandomElement();
+                    N.Natives.SET_PED_PROP_INDEX(this, 1, kcmt.Key, kcmt.Value.GetRandomElement(), true);
+                }
+                if (random.Next() % 2 == 0)
+                {
+                    var topi = Globals.TopiCowok.GetRandomElement();
+                    N.Natives.SET_PED_PROP_INDEX(this, 0, topi.Key, topi.Value.GetRandomElement(), true);
+                }
+                if (random.Next() % 2 == 0)
+                {
+                    int maxWatch = N.Natives.GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS<int>(this, 6);
+                    int selected = random.Next(maxWatch);
+                    int maxTex = N.Natives.GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS<int>(this, 6, selected);
+                    N.Natives.SET_PED_PROP_INDEX(this, 6, selected, random.Next(maxTex), true);
+                }
+            }
+            var decal = Globals.DecalBadge.GetRandomElement();
+            $"DECAL | Collection: {decal.Item1}, Decal: {decal.Item2}".ToLog();
+            N.Natives.ADD_​PED_​DECORATION_​FROM_​HASHES(this, Game.GetHashKey(decal.Item1), Game.GetHashKey(decal.Item2));
+        }               
         internal void SetMechanicComponent()
         {
             if (Gender == Gender.Female) return;

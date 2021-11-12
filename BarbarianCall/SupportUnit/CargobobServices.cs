@@ -98,20 +98,10 @@ namespace BarbarianCall.SupportUnit
                     NativeFunction.Natives.CREATE_​PICK_​UP_​ROPE_​FOR_​CARGOBOB(Cargobob, 0);
                     NativeFunction.Natives.SET_PICKUP_ROPE_LENGTH_FOR_CARGOBOB(Cargobob, 3f, 3f, true);
                     float hookDistance = 8f;
-                    RAGENativeUI.Elements.TextTimerBar bar = new("Distance", "");
-                    RAGENativeUI.Elements.TextTimerBar bar2 = new("Accepted", "");
-                    RAGENativeUI.Elements.TextTimerBar bar3 = new("Used Offset", "");
-                    RAGENativeUI.Elements.TimerBarPool pool = new()
-                    {
-                        bar,
-                        bar2,
-                        bar3,
-                    };
-                    string[] poss = { "Front", "Rear", "Left", "Right", "Above", "RegularPos", "RearDim", "FrontDim" };
                     bool successHook = false;
                     moveCloser = Pilot.HeliMission(Cargobob, null, null, TargetVehicle.Position + TargetVehicle.ForwardVector * -2f, MissionType.GoTo, 20f, 0f, TargetVehicle.Heading, -1, -1, 0, -1.0f);
                     Game.LogTrivial("Moving closer to pick the veh");
-                    Stopwatch taskStopwatch = Stopwatch.StartNew();
+                    int gameTimer = Globals.GameTimer;
                     Stopwatch distanceMonitor = new();
                     Vector3 currentTargetPos = TargetVehicle.Position;
                     TargetVehicle.Model.GetDimensions(out var rearDimensions, out var frontDimensions);
@@ -124,7 +114,7 @@ namespace BarbarianCall.SupportUnit
                             Cleanup();
                             return;
                         }
-                        if (taskStopwatch.ElapsedMilliseconds > 80000)
+                        if (Globals.GameTimer - gameTimer > 80000)
                         {
                             Game.LogTrivial("Timeout Waiting");
                             break;
@@ -140,17 +130,11 @@ namespace BarbarianCall.SupportUnit
                         Vector3 hookPos = NativeFunction.Natives.xCBDB9B923CACC92D<Vector3>(Cargobob);
                         Vector3[] positionToChecks = {  TargetVehicle.FrontPosition, TargetVehicle.RearPosition, TargetVehicle.LeftPosition, TargetVehicle.RightPosition, TargetVehicle.AbovePosition,
                                                     TargetVehicle.Position, TargetVehicle.Position + rearDimensions, TargetVehicle.Position + frontDimensions };
-                        float[] distances = positionToChecks.Select(x => Vector3.DistanceSquared(x, hookPos)).ToArray();
-                        float distanceSquared = distances.OrderBy(x => x).FirstOrDefault();
-                        int index = Array.IndexOf(distances, distanceSquared);
-                        bar.Text = distanceSquared.ToString();
+                        float distanceSquared = positionToChecks.Select(x => Vector3.DistanceSquared(x, hookPos)).OrderBy(x => x).FirstOrDefault();
                         if (distanceSquared < hookDistance || (hookProp && NativeFunction.Natives.IS_ENTITY_TOUCHING_ENTITY<bool>(hookProp, TargetVehicle)))
                         {
                             AttachToCargobob(hookProp && hookProp.DistanceTo(Cargobob) < 8f ? hookProp.Position : hookPos, true);
                         }
-                        if (distanceSquared < 20f) bar.Highlight = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Green);
-                        else if (distanceSquared > 1000f) bar.Highlight = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Red);
-                        else bar.Highlight = null;
                         if (distanceSquared < 30f && !distanceMonitor.IsRunning)
                         {
                             distanceMonitor.Start();
@@ -167,15 +151,12 @@ namespace BarbarianCall.SupportUnit
                             while (true)
                             {
                                 GameFiber.Yield();
-                                if (TargetVehicle.Speed < 2f || taskStopwatch.ElapsedMilliseconds > 80000) break;
+                                if (TargetVehicle.Speed < 2f || Globals.GameTimer - gameTimer > 80000) break;
                             }
                             Pilot.Tasks.Clear();
                             moveCloser = Pilot.HeliMission(Cargobob, null, null, TargetVehicle.Position + TargetVehicle.ForwardVector * -2f, MissionType.GoTo, 20f, 0f, TargetVehicle.Heading, -1, -1, 0, -1.0f);
                             currentTargetPos = TargetVehicle.Position;
                         }
-                        bar2.Text = hookDistance.ToString();
-                        bar3.Text = poss[index];
-                        pool.Draw();
                     }
                     if (!successHook)
                     {

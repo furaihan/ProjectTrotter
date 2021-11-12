@@ -29,13 +29,14 @@ namespace BarbarianCall
                 $"{x.Item1} - {x.Item2}".ToLog();
             });
         }
-        [ConsoleCommand(Name = "SpawnFreemodePed", Description = "Spawn the freemode ped and the randomise their appearance")]
+        [ConsoleCommand(Name = "BAR_SpawnFreemodePed", Description = "Spawn the freemode ped and the randomise their appearance")]
         public static void SpawnFreemode(bool isMale)
         {
             var pos = Game.LocalPlayer.Character.Position + Game.LocalPlayer.Character.ForwardVector * 8f;
             float heading = Game.LocalPlayer.Character.Heading - 180f;
             Freemode.FreemodePed freemodePed = new(pos, heading, isMale);
             GameFiber.Wait(2000);
+            freemodePed.RandomizeOutfit();
             freemodePed.Dismiss();
         }       
         [ConsoleCommand(Name = "GetPlayerPosFlags", Description = "Gets the flags of the player position")]
@@ -87,13 +88,13 @@ namespace BarbarianCall
                 SpawnManager.GetVehicleSpawnPoint4(ppos, 300, 500),
                 SpawnManager.GetVehicleSpawnPoint5(ppos, 300, 500),
             };
-            List<Checkpoint> checkpoints = new List<Checkpoint>(); 
+            List<Checkpoint> checkpoints = new(); 
             for (int i = 0; i < spawnpoints.Length; i++)
             {
                 Spawnpoint v = spawnpoints[i];
                 if (v != Spawnpoint.Zero)
                 {
-                    Checkpoint cp = new Checkpoint(CheckpointIcon.CylinderTripleArrow, v.Position, v.Position.ForwardVector(v.Heading), 5f, 60f, HudColor.Blue.GetColor(), HudColor.PureWhite.GetColor(), false);
+                    Checkpoint cp = new(CheckpointIcon.CylinderTripleArrow, v.Position, v.Position.ForwardVector(v.Heading), 5f, 60f, HudColor.Blue.GetColor(), HudColor.PureWhite.GetColor(), false);
                     checkpoints.Add(cp);
                     $"{i + 1}. {v}".ToLog();
                 }
@@ -156,7 +157,7 @@ namespace BarbarianCall
                 SyncSceneTick.ChairSit();
             });
         }
-        private static List<HeliSupport> Helis = new List<HeliSupport>();
+        private static List<HeliSupport> Helis = new();
         [ConsoleCommand]
         private static void Command_CallHeli([ConsoleCommandParameter(AutoCompleterType =typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)
         {
@@ -180,7 +181,12 @@ namespace BarbarianCall
         [ConsoleCommand]
         private static void CallMilitaryHeli()
         {
-            MilitaryHeliSupport militaryHeliSupport = new MilitaryHeliSupport();
+            MilitaryHeliSupport militaryHeliSupport = new();
+        }
+        [ConsoleCommand]
+        private static void DissmisAllMilitaryHeli()
+        {
+            MilitaryHeliSupport.InternalList.ForEach(x => x.CleanUp());
         }
         [ConsoleCommand]
         private static void GetGameTimer()

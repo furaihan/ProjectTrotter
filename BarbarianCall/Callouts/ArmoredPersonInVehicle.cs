@@ -27,9 +27,8 @@ namespace BarbarianCall.Callouts
             Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 425, 725, true);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 425, 725);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 425, 725);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 350, 800);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 350, 800);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 350, 800);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint4(PlayerPed.Position, 425, 725);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 425, 725);
             if (Spawn == Spawnpoint.Zero)
             {
                 $"{GetType().Name} | Spawnpoint is not found, cancelling the callout".ToLog();
@@ -85,7 +84,7 @@ namespace BarbarianCall.Callouts
             Passenger.RelationshipGroup = Criminal;
             Suspect.WarpIntoVehicle(SuspectCar, -1);
             Passenger.WarpIntoVehicle(SuspectCar, 0);
-            Suspect.Tasks.CruiseWithVehicle(35f, (VehicleDrivingFlags)20);
+            Suspect.VehicleMission(PlayerPed, MissionType.Flee, 35f, Globals.Sheeesh, -1.0f, -1.0f, true);
             Blip = new Blip(SuspectCar.Position, 80f)
             {
                 Color = Yellow,
@@ -130,7 +129,7 @@ namespace BarbarianCall.Callouts
         {
             var curPos = SuspectCar.Position;
             StopWatch = Stopwatch.StartNew();
-            ResText resText = new ResText("SUSPECT", new(0, 0), 0.75f, Yellow, RAGENativeUI.Common.EFont.ChaletLondon, ResText.Alignment.Centered);
+            ResText resText = new("SUSPECT", new(0, 0), 0.75f, Yellow, RAGENativeUI.Common.EFont.ChaletLondon, ResText.Alignment.Centered);
             while (CalloutRunning)
             {
                 GameFiber.Yield();
@@ -204,7 +203,7 @@ namespace BarbarianCall.Callouts
             {
                 try
                 {
-                    List<FreemodePed> Suspects = new List<FreemodePed>() { Suspect, Passenger, };
+                    List<FreemodePed> Suspects = new() { Suspect, Passenger, };
                     SetRelationship();
                     GetClose();
                     if (!CalloutRunning) return;
@@ -215,7 +214,7 @@ namespace BarbarianCall.Callouts
                         Name = "Armored Person",
                     };
                     CalloutBlips.Add(Blip);
-                    Blip passBlip = new Blip(Passenger)
+                    Blip passBlip = new(Passenger)
                     {
                         Scale = 0.75f,
                         Color = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Red),
@@ -262,6 +261,10 @@ namespace BarbarianCall.Callouts
                     End();
                 }
             });
+        }
+        void Logical2()
+        {
+
         }
     }
 }

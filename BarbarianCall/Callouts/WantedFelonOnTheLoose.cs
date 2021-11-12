@@ -305,7 +305,7 @@ namespace BarbarianCall.Callouts
                 {
                     if (SuspectCar.IsStuckOnRoof() || SuspectCar.IsInAir || SuspectCar.IsInWater || SuspectCar.Speed == 0)
                     {
-                        List<string> log = new List<string>()
+                        List<string> log = new()
                         {
                             $"Sucpect vehicle is stuck",
                             $"On roof: {SuspectCar.IsStuckOnRoof()}",

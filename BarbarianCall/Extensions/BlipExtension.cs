@@ -37,5 +37,27 @@ namespace BarbarianCall.Extensions
             BothMapSelectable = 2,
             NoDisplay = 0
         }
+        /// <summary>
+        /// Gets the token used to display the sprite of <paramref name="blip"/> in formatted scaleform text (i.e. the scaleform uses the game function `SET_FORMATTED_TEXT_WITH_ICONS`).
+        /// <para>
+        /// Example:
+        /// <code>
+        /// Blip myBlip = ...;<br />
+        /// Game.DisplayHelp($"Go to ~{myBlip.GetIconToken()}~.");<br />
+        /// Game.DisplayHelp($"Go to ~{HudColor.Red.GetName()}~~{myBlip.GetIconToken()}~~s~."); // with a different color
+        /// </code>
+        /// </para>
+        /// </summary>
+        /// <param name="blip">The blip to get the sprite from.</param>
+        /// <returns>The <see cref="string"/> with the icon token for the sprite of the given blip.</returns>
+        /// <remarks>Source: <a href="https://github.com/alexguirre/RAGENativeUI/blob/master/Source/BlipExtensions.cs">RAGENativeUI by alexguirre</a></remarks>
+        internal static string GetIconToken(this Blip blip, bool withColor)
+        {
+            if (withColor)
+            {
+                return $"<font color=\"{ColorTranslator.ToHtml(blip.Color)}\">~BLIP_{(int)blip.Sprite}~</font>";
+            }
+            return $"~BLIP_{(int)blip.Sprite}";
+        }
     }
 }

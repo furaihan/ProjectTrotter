@@ -109,7 +109,7 @@ namespace BarbarianCall.Extensions
                 Heading = head;
             }
         }
-        private static List<Seat> Seats = new List<Seat>()
+        private static List<Seat> Seats = new()
         {
             new Seat("prop_bench_01a", "PROP_HUMAN_SEAT_BENCH", new Vector3(0f, 0f, 0.5f), 180),
             new Seat("prop_bench_01b", "PROP_HUMAN_SEAT_BENCH", new Vector3(0f, 0f, 0.5f), 180),

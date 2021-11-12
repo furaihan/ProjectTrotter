@@ -114,7 +114,7 @@ namespace BarbarianCall.Types
 
         public float TravelDistanceTo(ISpatial spatialObject)
             => Natives.CALCULATE_TRAVEL_DISTANCE_BETWEEN_POINTS<float>(Position.X, Position.Y, Position.Z, spatialObject.Position.X, spatialObject.Position.Y, spatialObject.Position.Z);
-        internal static List<SynchronizedScene> InternalList = new List<SynchronizedScene>();
+        internal static List<SynchronizedScene> InternalList = new();
         public static Vector3 GetAnimationInitialOffsettPosition(AnimationDictionary dictionary, string animName, Vector3 pos, Rotator rotator)
         {
             dictionary.LoadAndWait();

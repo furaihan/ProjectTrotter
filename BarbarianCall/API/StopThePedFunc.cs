@@ -10,7 +10,7 @@ namespace BarbarianCall.API
     internal static class StopThePedFunc
     {
         private const string DllPath = @"Plugins/LSPDFR/StopThePed.dll";
-        private static readonly bool IsValid = File.Exists(DllPath);
+        private static readonly bool IsValid = File.Exists(DllPath) && Initialization.IsLSPDFRPluginRunning("StopThePed", null, false);
         public static void CallService(EStopThePedUnitServices serviceType)
         {
             if (IsValid)
@@ -34,6 +34,9 @@ namespace BarbarianCall.API
         public delegate void PedEvent(Rage.Ped ped);
         public delegate void STPEvent();
         public static event VehicleEvent OnVehicleSearch;
+        public static event PedEvent OnPedSearch;
+        public static event PedEvent OnPedBreathalyzerTest;
+        public static event PedEvent OnPedDrugSwapTest;
         public static STPVehicleStatus GetVehicleInsurance(Rage.Vehicle veh)
         {
             return Func.getVehicleInsuranceStatus(veh);
@@ -161,16 +164,17 @@ namespace BarbarianCall.API
             Expired = 1,
             Valid = 2,
         }
-        private static bool eventAdded = false;
+
         static StopThePedFunc()
         {
             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-            "Executing static wrapper class for STP".ToLog();
-            if (IsValid && !eventAdded)
+            if (!IsValid) return;
+            if (IsValid)
             {
-                "Adding STPEvent".ToLog();
                 Events.searchVehicleEvent += (v) => OnVehicleSearch?.Invoke(v);
-                eventAdded = true;
+                Events.patDownPedEvent += (p) => OnPedSearch?.Invoke(p);
+                Events.breathalyzerTestEvent += (p) => OnPedBreathalyzerTest?.Invoke(p);
+                Events.drugSwabTestEvent += (p) => OnPedDrugSwapTest?.Invoke(p);
             }
         }
         private static System.Reflection.Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)

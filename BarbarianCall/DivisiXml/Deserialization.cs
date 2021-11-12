@@ -59,21 +59,24 @@ namespace BarbarianCall.DivisiXml
             return new List<Spawnpoint>();
         }
         private const string PedDecalXml = @"Plugins\LSPDFR\BarbarianCall\PedDecalBadgeTorso.xml";
-        internal static List<Tuple<string, string>> GetBadgeFromXml()
+        /// <summary>
+        /// Valid <paramref name="gender"/> are (male, female, and any)
+        /// </summary>
+        internal static List<Tuple<string, string>> GetBadgeFromXml(string gender = "any")
         {
             try
             {
                 Peralatan.ToLog(string.Format("Reading XML File {0}", Path.GetFullPath(PedDecalXml)));
                 Stopwatch sw = Stopwatch.StartNew();
                 List<Tuple<string, string>> ret = new();
-                XmlDocument xmlDocument = new XmlDocument();
+                XmlDocument xmlDocument = new();
                 xmlDocument.Load(PedDecalXml);
                 foreach (XmlNode node in xmlDocument.DocumentElement.SelectNodes("/BarbarianCall/DecalCollection"))
                 {
                     string collectionName = node.Attributes["name"].Value;
                     foreach (XmlNode node2 in node.ChildNodes)
                     {
-                        if (node2.Attributes["gender"].Value == "any")
+                        if (node2.Attributes["gender"].Value == gender.ToLower())
                         {
                             string decalName = node2.InnerText;
                             ret.Add(new Tuple<string, string>(collectionName, decalName));

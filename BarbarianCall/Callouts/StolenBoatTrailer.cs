@@ -16,16 +16,16 @@ namespace BarbarianCall.Callouts
     public class StolenBoatTrailer : CalloutBase
     {
         private readonly Model longfinModel = "h4_prop_h4_p_boat_01a";
-        private readonly Vector3 attachOfsett = new Vector3(-0.0360000134f, -0.578999758f, 0.180000067f);
-        private readonly Rotator attachRotation = new Rotator(0f, -2.97000074f, 88.9999924f);
+        private readonly Vector3 attachOfsett = new(-0.0360000134f, -0.578999758f, 0.180000067f);
+        private readonly Rotator attachRotation = new(0f, -2.97000074f, 88.9999924f);
         private Spawnpoint Dock = Spawnpoint.Zero;
-        private readonly List<Model> truckModels = new List<Model>()
+        private readonly List<Model> truckModels = new()
         {
             "PHANTOM", "PHANTOM2", "PHANTOM3", "HAULER", "HAULER2", "PACKER"
         };
         private readonly Model trailerModel = "TRFLAT";
         private Model truckModel = "PHANTOM2";
-        readonly List<List<string>> weaponLoadouts = new List<List<string>>()
+        readonly List<List<string>> weaponLoadouts = new()
         {
             new List<string>() { "WT_SG_ASL", "WT_MACHPIST", "WT_MACHETE", "WT_GNADE" },
             new List<string>() { "WT_MLTRYRFL", "WTU_PIST_50", "WT_KNUCKLE", "WT_GNADE_STK" },
@@ -36,7 +36,7 @@ namespace BarbarianCall.Callouts
         private FreemodePed Driver;
         private const string XmlPath = @"Plugins\LSPDFR\BarbarianCall\Locations\TruckSpawn.xml";
         private const string XmlDocks = @"Plugins\LSPDFR\BarbarianCall\Locations\Docks.xml";
-        private List<FreemodePed> Associates = new List<FreemodePed>();
+        private List<FreemodePed> Associates = new();
         private Vehicle truck;
         private Vehicle trailer;
         private Rage.Object boat;
@@ -71,7 +71,7 @@ namespace BarbarianCall.Callouts
                 IsCollisionEnabled = false,
                 IsInvincible = true,
             };
-            truck.Trailer = trailer;
+            truck.Trailer = trailer;           
             boat.AttachTo(trailer, -1, attachOfsett, attachRotation);
             CalloutEntities.Add(truck);
             CalloutEntities.Add(trailer);
@@ -84,10 +84,11 @@ namespace BarbarianCall.Callouts
             Driver.WarpIntoVehicle(truck, -1);
             OutfitMale.Casual.GetRandomElement()(Driver);
             CalloutEntities.Add(Driver);
-            for (int i = 0; i < NativeFunction.Natives.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS<int>(truck); i++)
+            for (int i = 0; i < truck.PassengerCapacity; i++)
             {
+                if (i > 2) continue;
                 $"{GetType().Name} Creating passenger {i}".ToLog();
-                FreemodePed ped = new FreemodePed(Position, true);
+                FreemodePed ped = new(Position, true);
                 PreparePed(ped);
                 ped.WarpIntoVehicle(truck, i);
                 Associates.Add(ped);
@@ -132,15 +133,19 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     if (Blip) Blip.Delete();
                     Dock = GetDockPoint();
-                    driveTask = Driver.VehicleMission(Dock.Position, MissionType.GoTo, truck.TopSpeed, (VehicleDrivingFlags)1107573356, -1.0f, 10f, true);
+                    driveTask = Driver.VehicleMission(Dock.Position, MissionType.GoTo, truck.TopSpeed, Globals.Sheeesh, -1.0f, 10f, true);
                     GameFiber.Wait(5000);
                     if (StopThePedRunning)
                     {
                         StopThePedFunc.OnVehicleSearch += SearchVehicleHandler;
                         stpEventAdded = true;
                     }
+                    if (StopThePedRunning)
+                    {
+                        StopThePedFunc.InjectVehicleItem(truck, StopThePedFunc.EStopThePedVehicleSearch.SearchDriver, "briefcase");
+                    }
                     SetRelationship();
-                    GetHandlingData(truck);
+                    //GetHandlingData(truck);
                     SetupPursuit();
                     Associates.ForEach(x =>
                     {
@@ -148,9 +153,8 @@ namespace BarbarianCall.Callouts
                     });
                     bool arrive = false;
                     bool leave = false;
-                    float force = truck.DriveForce;
                     GameFiber.Sleep(2000);
-                    GetHandlingData(truck);
+                    //GetHandlingData(truck);
                     while (CalloutRunning)
                     {
                         foreach (Ped associate in Associates)
@@ -172,7 +176,7 @@ namespace BarbarianCall.Callouts
                         {
                             if (truck.GetActiveMissionType() != MissionType.GoTo)
                             {
-                                driveTask = Driver.VehicleMission(Dock.Position, MissionType.GoTo, truck.TopSpeed, (VehicleDrivingFlags)1107573356, -1.0f, 10f, true);
+                                driveTask = Driver.VehicleMission(truck, Dock.Position, MissionType.GoTo, truck.TopSpeed, Globals.Sheeesh, -1.0f, 10f, true);
                                 GameFiber.Wait(2000);
                             }
 
@@ -188,11 +192,6 @@ namespace BarbarianCall.Callouts
                             Driver.CombatAgainstHatedTargetAroundPed(500f);
                             Associates.Add(Driver);
                             leave = true;
-                        }
-                        if (truck.DriveForce != force)
-                        {
-                            $"Drive force changed".ToLog();
-                            truck.DriveForce = force;
                         }
                     }
                     End();
@@ -215,12 +214,8 @@ namespace BarbarianCall.Callouts
                 if (searched) return;
                 List<string> selectedLoadout = weaponLoadouts.GetRandomElement();
                 string text = $"Items inside briefcase:~n~";
-                int count = 1;
-                foreach (string element in selectedLoadout)
-                {
-                    text = text + $"{count}. " + Peralatan.GetLabelText(element) + "~n~";
-                    count++;
-                }
+                int count = 0;
+                text += string.Join("", selectedLoadout.Select(x => $"{count++}. {Game.GetLocalizedString(x)}~n~").ToArray());
                 text.DisplayNotifWithLogo(GetType().Name, title: "Briefcase Inspect", hudColor: RAGENativeUI.HudColor.Red);
                 searched = true;
             }
@@ -251,7 +246,7 @@ namespace BarbarianCall.Callouts
             while (true)
             {
                 GameFiber.Yield();
-                bool usingSiren = PlayerPed.IsInAnyVehicle(false) && PlayerPed.CurrentVehicle.HasSiren && !PlayerPed.CurrentVehicle.IsSirenSilent;
+                bool usingSiren = PlayerPed.IsInAnyVehicle(false) && PlayerPed.CurrentVehicle.HasSiren && PlayerPed.CurrentVehicle.IsSirenOn && !PlayerPed.CurrentVehicle.IsSirenSilent;
                 if (PlayerPed.DistanceToSquared(Spawn) < (usingSiren ? 2500f : 625f)) break;
             }
         }
@@ -287,29 +282,6 @@ namespace BarbarianCall.Callouts
             RelationshipGroup.Cop.SetRelationshipWith(Criminal, Relationship.Hate);
             RelationshipGroup.Medic.SetRelationshipWith(Criminal, Relationship.Hate);
             RelationshipGroup.Fireman.SetRelationshipWith(Criminal, Relationship.Hate);
-        }
-        private unsafe void GetHandlingData(Vehicle vehicle)
-        {
-            try
-            {
-                var props = vehicle.HandlingData.GetType().GetProperties();
-                foreach (var prop in props)
-                {
-                    try
-                    {
-                        $"{prop.Name}={prop.GetValue(vehicle.HandlingData, null)}".ToLog();
-                    }
-                    catch (Exception e)
-                    {
-                        e.ToString().ToLog();
-                        continue;
-                    }                   
-                }
-            }
-            catch (Exception e)
-            {
-                e.ToString().ToLog();
-            }           
         }
         private Spawnpoint GetDockPoint()
         {

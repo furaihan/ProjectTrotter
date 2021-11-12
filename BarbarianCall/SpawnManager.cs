@@ -797,7 +797,7 @@ namespace BarbarianCall
                 {
                     if (MathExtension.FloatDiff(pos.GetHeadingTowards(nodeP), pos.GetHeadingTowards(Game.LocalPlayer.Character)) > 90f)
                     {
-                        Spawnpoint ret = new Spawnpoint(nodeP, heading);
+                        Spawnpoint ret = new(nodeP, heading);
                         Peralatan.ToLog($"Fleeing point is found {ret}");
                         return ret;
                     }

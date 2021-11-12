@@ -8,7 +8,7 @@ namespace BarbarianCall.Freemode
 {
     public static class OutfitMale
     {
-		internal static List<Action<FreemodePed>> Casual = new List<Action<FreemodePed>>()
+		internal static List<Action<FreemodePed>> Casual = new()
 		{
 			SetCasual1Component,
 			SetCasual2Component,

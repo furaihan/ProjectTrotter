@@ -4,7 +4,7 @@
     using Rage;
     using Rage.Native;
     using System.Collections.Generic;
-    using System.Drawing;
+    using System.Linq;
     using System;
 
     /// <summary>
@@ -161,7 +161,7 @@
         /// Defines the AudibleCarModel.
         /// </summary>
         public static Model[] AudibleCarModel;
-        public static Dictionary<uint, string> AudioHash = new Dictionary<uint, string>();
+        public static Dictionary<uint, string> AudioHash = new();
 
         /// <summary>
         /// Defines the GangPedModels.
@@ -177,7 +177,82 @@
             { "Armenian", new List<Model>() { "g_m_m_armboss_01", "g_m_m_armgoon_01", "g_m_y_armgoon_02", "g_m_m_armlieut_01" } },
             { "The Lost MC", new List<Model>() { "g_m_y_lost_01", "g_m_y_lost_02", "g_m_y_lost_03" } },
         };
-
+        internal static Dictionary<int, List<int>> AtasanCowokPolos = new()
+        {
+            {351, new List<int>() {0,1,2,3,4} },
+            {345, new List<int>() {0,1,2,3,4,5,6,7 } },
+            {0, new List<int>() {0,1,2,3,4,5,7,8,11} },
+            {1, new List<int>() {0, 1, 3,4,5,6,7,8,11,12,14} },
+            {8, new List<int>() {0, 10, 13, 14} },
+            {238, new List<int>() {0, 1,2,4,5} },
+            {241, new List<int>() {0,1,2,3,4,5} },
+            {242, new List<int>() {0,1,2,3,4,5} },
+            {22, new List<int>() {0,1,2} },
+            {44, new List<int>() {0,1,2,3} },
+            {80, new List<int>() {0,1,2} },
+            {146, Enumerable.Range(0,8).ToList() },
+        };
+        internal static Dictionary<int, List<int>> JaketCowok = new()
+        {
+            {3, Enumerable.Range(0, 15).ToList() },
+            {7, Enumerable.Range(0, 15).ToList() },
+            {59, Enumerable.Range(0,3).ToList() },
+            {355, Enumerable.Range(0, 25).ToList() },
+            {347, Enumerable.Range(0, 25).ToList() },
+            {346, Enumerable.Range(0, 25).ToList() },
+            {70, Enumerable.Range(0, 11).ToList() },
+            {88, Enumerable.Range(0, 11).ToList() },
+            {151, Enumerable.Range(0, 5).ToList() },
+            {240, Enumerable.Range(0, 5).ToList() },
+            {388, Enumerable.Range(0, 5).ToList() },
+            {376, Enumerable.Range(0, 2).ToList() },
+        };
+        internal static Dictionary<int, List<int>> UndershirtMale = new()
+        {
+            {0, new List<int>() {0,1,2,3,4,5,7,8,11 } },
+            {1, new List<int>() {0,1,3,4,5,6,7,8,11,12,14,15 } },
+            {41, Enumerable.Range(0, 4).ToList() },
+        };
+        internal static Dictionary<int, List<int>> BawahanCowok = new()
+        {
+            {7, new List<int>() {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14, 15 } },
+            {8, new List<int>() {0, 3,4, 14 } },
+            {10, new List<int>() {0,1,2 } },
+            {9, new List<int>() {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15} },
+            {15, Enumerable.Range(0,15).ToList() },
+            {23, Enumerable.Range(0, 12).ToList() },
+            {105, Enumerable.Range(0, 11).ToList() }
+        };
+        internal static Dictionary<int, List<int>> KacamataCowok = new()
+        {
+            {1, new List<int>() {0,1,2,3,4,5,6,7} },
+            {7, new List<int>() {0,1,2,3,4,5,6,7,8,9} },
+            {15, new List<int>() {0,1,2,3,4,5,6,7,8,9} },
+            {17, new List<int>() {0,1,2,3,4,5,6,7,8,9} },
+        };
+        internal static Dictionary<int, List<int>> TopiCowok = new()
+        {
+            {7, new List<int>() {0,1,2,3,4,5,6,7} },
+            {142, Enumerable.Range(0, 25).ToList() },
+            {143, Enumerable.Range(0, 25).ToList() },
+            {151, Enumerable.Range(0, 7).ToList() },
+            {152, Enumerable.Range(0, 7).ToList() },
+            {15, Enumerable.Range(0, 7).ToList() },
+            {94, Enumerable.Range(0, 9).ToList() },
+            {95, Enumerable.Range(0, 9).ToList() },
+        };
+        internal static Dictionary<int, List<int>> AlasKaki = new()
+        {
+            {1, Enumerable.Range(0,14).ToList() },
+            {3, Enumerable.Range(0,15).ToList() },
+            {5, new List<int>() {0,1,2,3 } },
+            {16, Enumerable.Range(0,11).ToList() },
+            {40, Enumerable.Range(0,11).ToList() }
+        };
+        private static List<Tuple<string, string>> _decalBadge;
+        private static List<Tuple<string, string>> _decalBadgeFemale;
+        internal static List<Tuple<string, string>> DecalBadge => _decalBadge ??= DivisiXml.Deserialization.GetBadgeFromXml();
+        internal static List<Tuple<string, string>> DecalBadgeFemale => _decalBadgeFemale ??= DivisiXml.Deserialization.GetBadgeFromXml("female");
         /// <summary>
         /// Defines the RegisteredPedHeadshot.
         /// </summary>
@@ -191,7 +266,8 @@
         public static VehicleDrivingFlags IgnoreLights = (VehicleDrivingFlags)2883621;
         public static VehicleDrivingFlags AvoidTrafficExtremely = (VehicleDrivingFlags)6;
         public static VehicleDrivingFlags Rushed = (VehicleDrivingFlags)1074528293;
-        public static VehicleDrivingFlags Rushed2 = VehicleDrivingFlags.DriveAroundPeds | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowWrongWay | VehicleDrivingFlags.AllowMedianCrossing;
+        internal static VehicleDrivingFlags Rushed2 = VehicleDrivingFlags.DriveAroundPeds | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowWrongWay | VehicleDrivingFlags.AllowMedianCrossing;
+        internal static VehicleDrivingFlags Sheeesh = (VehicleDrivingFlags)1107573356;
 
         /// <summary>
         /// Defines the Hospitals.
@@ -230,7 +306,7 @@
         /// <summary>
         /// Defines the MaleVoiceName.
         /// </summary>
-        public static List<string> MaleVoiceName = new List<string>()
+        public static List<string> MaleVoiceName = new()
         {
             "A_M_M_AFRIAMER_01_BLACK_FULL_01",
             "A_M_M_BEACH_01_BLACK_MINI_01",
@@ -444,7 +520,7 @@
             "A_M_Y_VINEWOOD_04_WHITE_MINI_01",
             "JEROME",
         };
-        public static List<string> FemaleVoiceName = new List<string>()
+        public static List<string> FemaleVoiceName = new()
         {
             "A_F_M_BEACH_01_WHITE_FULL_01",
             "S_F_Y_AIRHOSTESS_01_BLACK_FULL_01",
@@ -584,7 +660,7 @@
             "A_F_Y_VINEWOOD_04_WHITE_MINI_01",
             "A_F_Y_VINEWOOD_04_WHITE_MINI_02",
         };
-        internal static Dictionary<WeaponAsset, List<string>> WeaponMKIIAndItsComponents = new Dictionary<WeaponAsset, List<string>>()
+        internal static Dictionary<WeaponAsset, List<string>> WeaponMKIIAndItsComponents = new()
         {
             {
                 0x84D6FAFD, new List<string>()

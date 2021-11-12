@@ -53,7 +53,7 @@ namespace BarbarianCall
         private static readonly StringBuilder LogBuilder = new();
         internal static void ToLog(this Exception exception)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.AppendLine("=================== BARBARIANCALL EXCEPTION LOG ===================");
             sb.AppendLine();
             sb.AppendLine();
@@ -115,17 +115,8 @@ namespace BarbarianCall
         {
             if (vehicle)
             {
-                StringBuilder plate = new(8);
-                plate.Append(RandomNextSecure(10));
-                plate.Append(RandomNextSecure(10));
-                plate.Append((char)RandomNextSecure(65, 91));
-                plate.Append((char)RandomNextSecure(65,91));
-                plate.Append((char)RandomNextSecure(65,91));
-                plate.Append(RandomNextSecure(10));
-                plate.Append(RandomNextSecure(10));
-                plate.Append(RandomNextSecure(10));
-                vehicle.LicensePlate = plate.ToString();
-                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate.ToString()));
+                string plate = GetRandomPlateNumber();
+                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate));
             }           
         }
         internal static int RandomNextSecure(int minValue, int maxValue) => RandomNextSecure(maxValue - minValue) + minValue;
@@ -159,13 +150,30 @@ namespace BarbarianCall
             {
                 return makeName == "Unknown Manufacturer" ? Globals.AudioHash[vehicle.Model.Hash].ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {Globals.AudioHash[vehicle.Model.Hash].ToUpper()}";
             }
-            string modelName = vehicle.Model.Name;
-            var audibles = Globals.AudibleCarModel.Select(m => m.Name);
-            modelName.Print();
-            if (!audibles.Any(st => st.Equals(modelName, StringComparison.OrdinalIgnoreCase)) && char.IsDigit(modelName.Last()) && !modelName.StartsWith("0X", StringComparison.OrdinalIgnoreCase))
-                modelName = modelName.Remove(modelName.Length - 1);
-            modelName.Print();
-            return makeName == "Unknown Manufacturer" ? vehicle.Model.Name.ToUpper() : $"MANUFACTURER_{makeName.ToUpper()} {modelName.ToUpper()}";
+            string vehClass = vehicle.Class switch
+            {
+                VehicleClass.Sport => "VEHICLE_CATEGORY_SPORTS_CAR",
+                VehicleClass.SportClassic => "VEHICLE_CATEGORY_SPORTS_CAR",
+                VehicleClass.Super => "VEHICLE_CATEGORY_PERFORMANCE_CAR",
+                VehicleClass.Boat => "VEHICLE_CATEGORY_BOAT",
+                VehicleClass.Commercial => "VEHICLE_CATEGORY_TRUCK",
+                VehicleClass.Coupe => "VEHICLE_CATEGORY_COUPE",
+                VehicleClass.Cycle => "VEHICLE_CATEGORY_BICYCLE",
+                VehicleClass.Emergency => "VEHICLE_CATEGORY_POLICE_CAR",
+                VehicleClass.Helicopter => "VEHICLE_CATEGORY_HELICOPTER",
+                VehicleClass.Industrial => "VEHICLE_CATEGORY_INDUSTRIAL_VEHICLE",
+                VehicleClass.Military => "VEHICLE_CATEGORY_MILITARY_VEHICLE",
+                VehicleClass.Motorcycle => "VEHICLE_CATEGORY_MOTORCYCLE",
+                VehicleClass.Muscle => "VEHICLE_CATEGORY_MUSCLE_CAR",
+                VehicleClass.OffRoad => "VEHICLE_CATEGORY_OFF_ROAD_VEHICLE",
+                VehicleClass.Sedan => "VEHICLE_CATEGORY_SEDAN",
+                VehicleClass.Service => "VEHICLE_CATEGORY_SERVICE_VEHICLE",
+                VehicleClass.SUV => "VEHICLE_CATEGORY_SUV",
+                VehicleClass.Utility => "VEHICLE_CATEGORY_UTILITY_VEHICLE",
+                VehicleClass.Van => "VEHICLE_CATEGORY_VAN",
+                _ => ""
+            };
+            return makeName == "Unknown Manufacturer" ? vehClass : $"{makeName} {vehClass}";
         }
         internal static string GetZoneName(this ISpatial spatial) => GetZoneName(spatial.Position);
         internal static string GetZoneName(this Vector3 pos)

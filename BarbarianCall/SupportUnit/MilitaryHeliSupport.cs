@@ -15,7 +15,8 @@ namespace BarbarianCall.SupportUnit
     {
         private static int _activeNumber = 0;
         public static bool IsAnyMilitaryHeliSupportActive => _activeNumber > 0;
-        private readonly List<Model> heliModels = new List<Model>()
+        internal static List<MilitaryHeliSupport> InternalList = new();
+        private readonly List<Model> heliModels = new()
         {
             "BUZZARD",
             "BUZZARD2",
@@ -33,8 +34,9 @@ namespace BarbarianCall.SupportUnit
         public Vector3 SpawnLocation { get; private set; }
         private bool cleaned = false;
         private bool added = false;
-        TimerBarPool MyPool = new TimerBarPool();
-        TextTimerBar TimerBar = new TextTimerBar("Mission Type", "");
+        TimerBarPool MyPool = new();
+        TextTimerBar TimerBar = new("Mission Type", "");
+        TextTimerBar targetDistance = new("Target", "");
         public MilitaryHeliSupport()
         {
             GameFiber.StartNew(() =>
@@ -76,7 +78,7 @@ namespace BarbarianCall.SupportUnit
                     }
                     Functions.PlayScannerAudio("HELI_APPROACHING_DISPATCH");
                     bool targetFind = false;
-                    Stopwatch notFoundTarget = new();
+                    InternalList.Add(this);
                     if (!added)
                     {
                         _activeNumber++;
@@ -98,86 +100,79 @@ namespace BarbarianCall.SupportUnit
                         }
                     }
                     MyPool.Add(TimerBar);
+                    MyPool.Add(targetDistance);
+                    GetClose();
+                    int gameTimer = Globals.GameTimer;
                     while (true)
                     {
                         GameFiber.Yield();
-                        if (Helicopter.DistanceToSquared2D(Game.LocalPlayer.Character) < 2500)
+                        if (!targetFind)
                         {
-                            if (!targetFind)
+                            Ped target = FindTarget();
+                            if (target != null)
                             {
-                                Ped target = FindTarget();
-                                if (target)
+                                $"{GetType().Name} | Target found: {target.Model.Name}".ToLog();
+                                $"{GetType().Name} | Resetting stopwatch".ToLog();
+                                gameTimer = Globals.GameTimer;
+                                foreach (Ped ped in Passengers)
                                 {
-                                    $"{GetType().Name} | Target found: {target.Model.Name}".ToLog();
-                                    if (notFoundTarget.IsRunning)
+                                    if (ped)
                                     {
-                                        $"{GetType().Name} | Resetting stopwatch".ToLog();
-                                        notFoundTarget.Reset();
-                                    }
-                                    foreach (Ped ped in Passengers)
-                                    {
-                                        if (ped)
+                                        if (ped.Metadata.BAR_HELI_WEAPON != null && ped.Inventory.Weapons.Contains(ped.Metadata.BAR_HELI_WEAPON))
                                         {
-                                            if (ped.Metadata.BAR_HELI_WEAPON != null && ped.Inventory.Weapons.Contains(ped.Metadata.BAR_HELI_WEAPON))
-                                            {
-                                                $"Ped equip weapon".ToLog();
-                                                ped.Inventory.EquippedWeapon = ped.Metadata.BAR_HELI_WEAPON;
-                                            }
-                                            $"Tasking {Functions.GetPersonaForPed(ped).FullName} to attack {Functions.GetPersonaForPed(target).FullName}".ToLog();
-                                            ped.Tasks.Clear();
-                                            N.Natives.REGISTER_​TARGET(ped, target);
-                                            N.Natives.TASK_COMBAT_PED(ped, target, 0, 16);
-                                            ped.KeepTasks = true;
+                                            $"Ped equip weapon".ToLog();
+                                            ped.Inventory.EquippedWeapon = ped.Metadata.BAR_HELI_WEAPON;
                                         }
+                                        $"Tasking {Functions.GetPersonaForPed(ped).FullName} to attack {Functions.GetPersonaForPed(target).FullName}".ToLog();
+                                        ped.Tasks.Clear();
+                                        N.Natives.REGISTER_​TARGET(ped, target);
+                                        N.Natives.TASK_COMBAT_PED(ped, target, 0, 16);
+                                        ped.KeepTasks = true;
                                     }
-                                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, (int)Math.Ceiling(GetHeight()), 10, 0, -1.0f);
-                                    targetFind = true;
-                                    CurrentTargetPed = target;
                                 }
-                                else
-                                {
-                                    if (!notFoundTarget.IsRunning)
-                                    {
-                                        $"{GetType().Name} Starting stopwatch".ToLog();
-                                        notFoundTarget.Start();
-                                    }
-                                    if (Helicopter && Helicopter.GetActiveMissionType() != MissionType.HeliProtect)
-                                    {
-                                        Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 50f, 80f, -1.0f, (int)Math.Ceiling(GetHeight()), 50, 0);
-                                    }
-
-                                    targetFind = false;
-                                }
+                                Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, (int)Math.Ceiling(GetHeight()), 10, 0, -1.0f);
+                                targetFind = true;
+                                CurrentTargetPed = target;
                             }
                             else
                             {
-                                if (CurrentTargetPed && targetFind)
-                                {
-                                    if ((CurrentTargetPed && CurrentTargetPed.IsDead) || !CurrentTargetPed.Exists())
-                                    {
-                                        CurrentTargetPed = null;
-                                        targetFind = false;
-                                    }
-                                }
+                                //$"{GetType().Name} Starting stopwatch".ToLog();
                                 if (Helicopter && Helicopter.GetActiveMissionType() != MissionType.HeliProtect)
                                 {
-                                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, (int)Math.Ceiling(GetHeight()), 10, 0, -1.0f);
+                                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 50f, 80f, -1.0f, (int)Math.Ceiling(GetHeight()), 50, 0);
                                 }
+                                targetFind = false;
                             }
-                            if (!targetFind && notFoundTarget.IsRunning && notFoundTarget.ElapsedMilliseconds > 60000)
-                            {
-                                break;
-                            }
+                            targetDistance.Text = "Not Found";
                         }
                         else
                         {
-                            if (Helicopter && Helicopter.GetActiveMissionType() != MissionType.HeliProtect) Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, 50, 20, 0);
+                            if (CurrentTargetPed && targetFind)
+                            {
+                                if ((CurrentTargetPed && (CurrentTargetPed.IsDead || CurrentTargetPed.DistanceToSquared2D(Helicopter) > 62500)) || !CurrentTargetPed.Exists())
+                                {
+                                    CurrentTargetPed = null;
+                                    targetFind = false;
+                                }
+                            }
+                            if (Helicopter && Helicopter.GetActiveMissionType() != MissionType.HeliProtect)
+                            {
+                                Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.HeliProtect, 20f, 40f, -1.0f, (int)Math.Ceiling(GetHeight()), 10, 0, -1.0f);
+                            }
+                            gameTimer = Globals.GameTimer;
+                            if (CurrentTargetPed) Types.Marker.DrawMarker(MarkerType.UpsideDownCone, CurrentTargetPed.Position + new Vector3(0f, 0f, CurrentTargetPed.Height / 2), RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Red));
+                            if (CurrentTargetPed) targetDistance.Text = CurrentTargetPed.DistanceToSquared(Helicopter).ToString();
+                            else targetDistance.Text = "Not Found";
+                        }
+                        if (!targetFind && Globals.GameTimer - gameTimer > 60000)
+                        {
+                            break;
                         }
                         if (
                         (Helicopter &&
                         (Helicopter.IsDead || Helicopter.IsInBurnout || (!Helicopter.IsEngineOn && Helicopter.Speed < 0.5f) ||
-                        N.Natives.GET_HELI_TAIL_ROTOR_HEALTH<float>(Helicopter) < 5f ||
-                        N.Natives.GET_HELI_MAIN_ROTOR_HEALTH<float>(Helicopter) < 5f ||
+                        N.Natives.GET_HELI_TAIL_ROTOR_HEALTH<float>(Helicopter) < 10f ||
+                        N.Natives.GET_HELI_MAIN_ROTOR_HEALTH<float>(Helicopter) < 10f ||
                         Helicopter.EngineHealth < 200.0f))
                         || Passengers.All(x => x && x.IsDead) || !Helicopter || (Pilot && Pilot.IsDead))
                         {
@@ -218,6 +213,22 @@ namespace BarbarianCall.SupportUnit
                 GameFiber.Yield();
             }
             return vector3;
+        }
+        private void GetClose()
+        {
+            while (true)
+            {
+                GameFiber.Yield();
+                if (Helicopter.DistanceToSquared2D(Game.LocalPlayer.Character) < 2500f)
+                {
+                    $"{GetType().Name} | Close enough".ToLog();
+                    break;
+                }
+                if (Helicopter.GetActiveMissionType() != MissionType.Follow)
+                {
+                    Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.Follow, Helicopter.TopSpeed, 40f, -1.0f, 50, 10, 0, -1.0f);
+                }
+            }
         }
         private bool PreparePed()
         {
@@ -272,6 +283,7 @@ namespace BarbarianCall.SupportUnit
                 {
                     if (ped.IsDead || Functions.IsPedACop(ped) || Functions.IsPedArrested(ped) || !ped.IsHuman) continue;
                     if (ped.CombatTarget == Game.LocalPlayer.Character) return ped;
+                    if (ped.CombatTarget != null && ped.CombatTarget.RelationshipGroup == RelationshipGroup.Cop) return ped;
                     if (Game.LocalPlayer.Character.HasBeenDamagedBy(ped) && ped.GetRelationshipAgainst(Game.LocalPlayer.Character) == Relationship.Hate) return ped;
                 }
             }
