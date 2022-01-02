@@ -224,14 +224,14 @@ namespace BarbarianCall.Freemode
                 54, 55, 56, 58, 59, 60, 65, 74, 75, 76 };
             int[] normalHairColor = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 28, 29, 55, 56, 57, 58, 59, 60, 61, 62, 63 };
             int[] hairHighlightColor = { 0, 1, 2, 11, 12, 20, 21, 22, 33, 34, 29, 36, 35, 40, 41, 53, 52, 51, 47, 45, 62, 63 };
-            int firstID = mothers.GetRandomElement();
-            int secondID = fathers.GetRandomElement();
-            int thirdID = random.Next(10) == 0 ? IsMale ? fathers.GetRandomElement() : mothers.GetRandomElement() : 0;
+            int firstID = mothers.GetRandomElement(true);
+            int secondID = fathers.GetRandomElement(true);
+            int thirdID = random.Next(10) == 0 ? IsMale ? fathers.GetRandomElement(true) : mothers.GetRandomElement(true) : 0;
             float thirdMix = (float)(thirdID == 0 ? 0.0f : random.NextDouble());
             float resemblance = (float)(IsFemale ? random.NextDouble() * 2 * 0.077 : random.NextDouble() * 2 * 0.785);
             resemblance = MathHelper.Clamp(resemblance, 0.0f, 1.0f);
             float skinTone = (float)random.NextDouble();
-            int hairColor = normalHairColor.GetRandomElement();
+            int hairColor = normalHairColor.GetRandomElement(true);
             OverlayId[] headOverlays = Enum.GetValues(typeof(OverlayId)).Cast<OverlayId>().ToArray();
             OverlayId[] selectedOverlayIds = headOverlays.OrderBy(x => random.Next(25)).Take(random.Next(3, headOverlays.Length)).ToArray();
             OverlayId[] forbiddenForFemale = { OverlayId.FacialHair, OverlayId.ChestHair, OverlayId.SunDamage, OverlayId.Ageing, OverlayId.Freckles };
@@ -271,8 +271,8 @@ namespace BarbarianCall.Freemode
                     break;
                 }
             }
-            EyeColor = normalEyeColors.GetRandomElement();
-            HB.SetPedHairColor(this, hairColor, random.Next(10) == 0 ? hairHighlightColor.GetRandomElement() : hairColor);
+            EyeColor = normalEyeColors.GetRandomElement(true);
+            HB.SetPedHairColor(this, hairColor, random.Next(10) == 0 ? hairHighlightColor.GetRandomElement(true) : hairColor);
             N.Natives.FinalizeHeadBlend(this);
             foreach (FaceFeature faceFeature in selectedFaceFeatures)
             {
@@ -281,8 +281,8 @@ namespace BarbarianCall.Freemode
             }
             if (IsMale)
             {
-                Voice = Globals.MaleVoiceName.GetRandomElement();
-                HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, maleHairModel.GetRandomElement(), 0, 0);
+                Voice = Globals.MaleVoiceName.GetRandomElement(true);
+                HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, maleHairModel.GetRandomElement(true), 0, 0);
                 foreach (OverlayId headOverlay in selectedOverlayIds)
                 {
                     int index = headOverlay switch
@@ -311,7 +311,7 @@ namespace BarbarianCall.Freemode
             else if (IsFemale)
             {
                 Voice = Globals.FemaleVoiceName.GetRandomElement();
-                HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, femaleHairModel.GetRandomElement(), 0, 0);
+                HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, femaleHairModel.GetRandomElement(true), 0, 0);
                 foreach (OverlayId headOverlay in selectedOverlayIds)
                 {
                     int index = headOverlay switch

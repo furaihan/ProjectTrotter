@@ -86,6 +86,7 @@
     <Compile Include="API\UltimateBackupFunc.cs" />
     <Compile Include="Callouts\ArmoredPersonInVehicle.cs" />
     <Compile Include="Callouts\CalloutBase.cs" />
+    <Compile Include="Callouts\DriveByInProgress.cs" />
     <Compile Include="Callouts\HeartAttackCivilian.cs" />
     <Compile Include="Callouts\MassStreetFighting.cs" />
     <Compile Include="Callouts\OfficerStabbed.cs" />
