@@ -41,6 +41,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dependencies\BetterEMS.dll</HintPath>
     </Reference>
+    <Reference Include="CalloutInterface">
+      <HintPath>..\Dependencies\CalloutInterface.dll</HintPath>
+    </Reference>
     <Reference Include="GrammarPolice, Version=1.4.2.2, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dependencies\GrammarPolice.dll</HintPath>
@@ -79,6 +82,7 @@
     <Compile Include="AmbientEvent\FreemodePedSpawner.cs" />
     <Compile Include="AmbientEvent\IAmbientEvent.cs" />
     <Compile Include="API\BetterEMSFunc.cs" />
+    <Compile Include="API\CalloutInterfaceFunc.cs" />
     <Compile Include="API\Functions.cs" />
     <Compile Include="API\GrammarPoliceFunc.cs" />
     <Compile Include="API\LSPDFRFunc.cs" />

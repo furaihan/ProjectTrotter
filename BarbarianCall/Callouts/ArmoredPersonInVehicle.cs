@@ -91,6 +91,7 @@ namespace BarbarianCall.Callouts
                 IsRouteEnabled = true,
                 RouteColor = Yellow,
             };
+            SendCIMessage("Suspect is highly armored");
             Logical();
             CalloutMainFiber.Start();
             GameFiber.StartNew(() =>
@@ -234,6 +235,9 @@ namespace BarbarianCall.Callouts
                             s.Tasks.FightAgainstClosestHatedTarget(1000f);
                         }
                     });
+                    SendCIMessage("Shots Fired!!");
+                    LSPDFR.RequestBackup(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Code3, LSPD_First_Response.EBackupUnitType.SwatTeam);
+                    SendCIMessage("SWAT unit dispatced");
                     bool explode = false;
                     while(CalloutRunning)
                     {

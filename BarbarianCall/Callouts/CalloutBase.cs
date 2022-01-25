@@ -35,9 +35,10 @@ namespace BarbarianCall.Callouts
         public LHandle Pursuit;
         public LHandle PullOver;
         public bool PursuitCreated = false;
-        public bool GrammarPoliceRunning => Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2));
-        public bool StopThePedRunning => Initialization.IsLSPDFRPluginRunning("StopThePed", new Version(4, 9, 4, 4));
-        public bool UltimateBackupRunning => Initialization.IsLSPDFRPluginRunning("UltimateBackup", new Version(1, 8, 5, 4));
+        protected bool GrammarPoliceRunning => Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2));
+        protected bool StopThePedRunning => Initialization.IsLSPDFRPluginRunning("StopThePed", new Version(4, 9, 4, 4));
+        protected bool UltimateBackupRunning => Initialization.IsLSPDFRPluginRunning("UltimateBackup", new Version(1, 8, 5, 4));
+        protected bool CalloutInterfaceRunning => Initialization.IsLSPDFRPluginRunning("CalloutInterface", new Version(1, 2, 0, 0));
         public Persona SuspectPersona;
         public Ped PlayerPed => Game.LocalPlayer.Character;
         public GameFiber CalloutMainFiber;
@@ -175,6 +176,13 @@ namespace BarbarianCall.Callouts
             if (Initialization.IsLSPDFRPluginRunning("GrammarPolice", new Version(1, 4, 2, 2)))
                 Functions.PlayScannerAudioUsingPosition("DISPATCH_TO " + API.GrammarPoliceFunc.GetCallsignAudio() + " " + audio, position);
             else Functions.PlayScannerAudioUsingPosition($"ATTENTION_ALL_UNITS {audio}", position);
+        }
+        protected void SendCIMessage(string message)
+        {
+            if (CalloutInterfaceRunning)
+            {
+                API.CalloutInterfaceFunc.SendMessage(this, message);
+            }
         }
         protected void DeclareVariable()
         {
