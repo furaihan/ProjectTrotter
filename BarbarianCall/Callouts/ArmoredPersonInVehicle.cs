@@ -154,6 +154,7 @@ namespace BarbarianCall.Callouts
                     };
                     Blip.EnableRoute(Yellow);
                     LSPDFRFunc.PlayScannerAudioUsingPosition(string.Format("SUSPECT_HEADING {0} IN_OR_ON_POSITION", SuspectCar.GetCardinalDirectionLowDetailedAudio()), SuspectCar.Position);
+                    SendCIMessage($"Suspect last seen in {LSPDFR.GetZoneAtPosition(SuspectCar.Position).GameName} driving with {MathHelper.ConvertMetersPerSecondToKilometersPerHourRounded(SuspectCar.Speed)} KM/H");
                     StopWatch.Restart();
                 }
                 if (PlayerPed.DistanceToSquared(SuspectCar) < 625f)

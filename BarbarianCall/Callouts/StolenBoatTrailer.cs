@@ -239,6 +239,7 @@ namespace BarbarianCall.Callouts
                 }
             });
             LSPDFR.SetPursuitIsActiveForPlayer(Pursuit, true);
+            SendCIMessage("Suspect is fleeing");
             PursuitCreated = true;
         }
         private void GetClose()

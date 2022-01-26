@@ -261,13 +261,13 @@
         /// <summary>
         /// Defines the Normal.
         /// </summary>
-        public static VehicleDrivingFlags Normal = (VehicleDrivingFlags)786603;
-        public static VehicleDrivingFlags AvoidTraffic = (VehicleDrivingFlags)786468;
-        public static VehicleDrivingFlags IgnoreLights = (VehicleDrivingFlags)2883621;
-        public static VehicleDrivingFlags AvoidTrafficExtremely = (VehicleDrivingFlags)6;
-        public static VehicleDrivingFlags Rushed = (VehicleDrivingFlags)1074528293;
-        internal static VehicleDrivingFlags Rushed2 = VehicleDrivingFlags.DriveAroundPeds | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowWrongWay | VehicleDrivingFlags.AllowMedianCrossing;
-        internal static VehicleDrivingFlags Sheeesh = (VehicleDrivingFlags)1107573356;
+        public const VehicleDrivingFlags Normal = (VehicleDrivingFlags)786603;
+        public const VehicleDrivingFlags AvoidTraffic = (VehicleDrivingFlags)786468;
+        public const VehicleDrivingFlags IgnoreLights = (VehicleDrivingFlags)2883621;
+        public const VehicleDrivingFlags AvoidTrafficExtremely = (VehicleDrivingFlags)6;
+        public const VehicleDrivingFlags Rushed = (VehicleDrivingFlags)1074528293;
+        internal const VehicleDrivingFlags Rushed2 = VehicleDrivingFlags.DriveAroundPeds | VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundObjects | VehicleDrivingFlags.AllowWrongWay | VehicleDrivingFlags.AllowMedianCrossing;
+        internal const VehicleDrivingFlags Sheeesh = (VehicleDrivingFlags)1107573356;
 
         /// <summary>
         /// Defines the Hospitals.
