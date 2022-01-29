@@ -79,21 +79,28 @@ namespace BarbarianCall
                 LogBuilder.Clear();
             }
         }
+        internal static string GetRandomUnitNumber()
+        {
+            List<string> list = new List<string>()
+            {
+                "adam", "boy", "charles", "david", "edward", "frank", "george", "henry", "ida", "john", "king",
+                "lincoln", "mary", "noah", "ocean", "paul", "queen", "robert", "sam", "tom", "union", "victor",
+                "william", "xray", "young", "zebra"
+            };
+            return $"{Random.Next(1, 11)}-{list.GetRandomElement()}-{Random.Next(1, 25)}";
+        }
         internal static string GetLicensePlateAudio(Vehicle veh) => GetLicensePlateAudio(veh.LicensePlate);
         internal static string GetLicensePlateAudio(string licensePlate)
         {
             int count = 0;
 
             StringBuilder lpAudio = new(56, 100);
-            foreach (char c in licensePlate)
+            foreach (char c in licensePlate.ToUpper())
             {
                 count++;
-                if (count == 1) lpAudio.Append("BAR_" + c.ToString().ToUpper() + "_HIGH");
-                else if (count == licensePlate.Length) lpAudio.Append("BAR_" + c.ToString().ToUpper() + "_LOW");
-                else lpAudio.Append("BAR_" + c.ToString().ToUpper());
+                lpAudio.Append($"BAR_{c}{(count == 1 ? "_HIGH" : count == licensePlate.Length ? "_LOW" : string.Empty)}");             
                 lpAudio.Append(' ');
             }
-            //Game.Console.Print(audio);
             return lpAudio.ToString();
         }
         internal static string GetColorAudio(this Vehicle vehicle)
@@ -182,6 +189,12 @@ namespace BarbarianCall
         {
             string gameName = N.Natives.GET_NAME_OF_ZONE<string>(pos.X, pos.Y, pos.Z);
             return Game.GetLocalizedString(gameName);
+        }
+        internal static string GetZoneNameLSPDFR(this ISpatial spatial) => GetZoneNameLSPDFR(spatial.Position);
+        internal static string GetZoneNameLSPDFR(this Vector3 pos)
+        {
+            var zone = Functions.GetZoneAtPosition(pos);
+            return zone.RealAreaName;
         }
         public static string GetCardinalDirectionLowDetailedAudio(this Entity e)
         {

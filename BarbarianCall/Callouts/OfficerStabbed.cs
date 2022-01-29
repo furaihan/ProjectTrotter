@@ -312,6 +312,7 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     officer.SetPositionZ(World.GetGroundZ(officer.Position, false, false) ?? officer.Position.Z);
                     "We have send an ambulance to your location".DisplayNotifWithLogo("Officer Stabbed");
+                    SendCIMessage("Ambulance is en route to the scene");
                     if (Initialization.IsLSPDFRPluginRunning("BetterEMS"))
                     {
                         API.BetterEMSFunc.CallAmbulance(Position);
@@ -332,6 +333,7 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.CruiseWithVehicle(18f, VehicleDrivingFlags.AllowMedianCrossing | VehicleDrivingFlags.DriveAroundPeds |
                 VehicleDrivingFlags.DriveAroundVehicles | VehicleDrivingFlags.DriveAroundVehicles);
                     PlayScannerWithCallsign($"BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)} SUSPECT_LAST_SEEN IN_OR_ON_POSITION", Suspect.Position);
+                    SendCIMessage($"Suspect is driving a {susVehColor} {SuspectCar.GetDisplayName()} with license plate {SuspectCar.LicensePlate}");
                     if (Blip) Blip.Delete();
                     Blip = new Blip(SuspectCar.Position.Around(20f), 80f);
                     Blip.Color = Color.Yellow;
@@ -340,6 +342,7 @@ namespace BarbarianCall.Callouts
                     Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     Manusia = new Manusia(Suspect, SuspectPersona, SuspectCar);
                     Manusia.DisplayNotif();
+                    SendCIMessage($"Suspect is spotted near {Suspect.GetZoneNameLSPDFR()}");
                     GameFiber.StartNew(() =>
                     {
                         GameFiber.Wait(5000);
@@ -376,6 +379,7 @@ namespace BarbarianCall.Callouts
                             }
                             if (chaseScenario % 2 == 0)
                             {
+                                SendCIMessage("Suspect is fleeing");
                                 Pursuit = Functions.CreatePursuit();
                                 Functions.AddPedToPursuit(Pursuit, Suspect);
                                 if (passenger && passenger.IsInVehicle(SuspectCar, false))
@@ -384,7 +388,9 @@ namespace BarbarianCall.Callouts
                                     Functions.AddPedToPursuit(Pursuit, passenger);
                                 }
                                 Functions.SetPursuitIsActiveForPlayer(Pursuit, true);
+                                SendCIMessage("Warning nearby units to help");
                                 Functions.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.LocalUnit);
+                                SendCIMessage($"Unit {Peralatan.GetRandomUnitNumber()} is responding");
                                 PursuitCreated = true;
                             }
                             else
@@ -420,7 +426,9 @@ namespace BarbarianCall.Callouts
                             {
                                 PullOver = Functions.GetCurrentPullover();
                                 if (Functions.GetPulloverSuspect(PullOver) == Suspect)
+                                {
                                     break;
+                                }
                             }
                             if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 12000L)
                             {
@@ -463,6 +471,7 @@ namespace BarbarianCall.Callouts
                     officer.SetPositionZ(World.GetGroundZ(officer.Position, false, false) ?? officer.Position.Z);
                     if (!CalloutRunning) return;
                     "We have send an ambulance to your location".DisplayNotifWithLogo("Officer Stabbed");
+                    SendCIMessage("Ambulance is en route to the scene");
                     if (Initialization.IsLSPDFRPluginRunning("BetterEMS"))
                     {
                         API.BetterEMSFunc.SetPedDeathDetails(officer, injuredBodyParts.GetRandomElement(), "Stabbed with a knife", deathTime, 0.8f);
@@ -673,6 +682,7 @@ namespace BarbarianCall.Callouts
                     };
                     float amb1Heading = Paramedic1.Heading;
                     Peralatan.HandleSpeech(ambulanceConversation, Paramedic1);
+                    SendCIMessage($"Suspect is driving a {susVehColor} {SuspectCar.GetDisplayName()} with license plate {SuspectCar.LicensePlate}");
                     PlayScannerWithCallsign($"BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
                     GameFiber.StartNew(() =>
                     {
@@ -821,6 +831,7 @@ namespace BarbarianCall.Callouts
                     else passenger.Inventory.GiveNewWeapon(new WeaponAsset(WeaponHashes.GetRandomElement()), -1, true);
                     Suspect.Tasks.FightAgainst(PlayerPed);
                     passenger.Tasks.FightAgainst(PlayerPed);
+                    SendCIMessage("Shots Fired!!");
                     GameFiber.Wait(2000);
                     Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS BAR_CODE_99 IN_OR_ON_POSITION", PlayerPed.Position);
                 }

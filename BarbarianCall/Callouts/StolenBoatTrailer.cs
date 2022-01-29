@@ -56,6 +56,7 @@ namespace BarbarianCall.Callouts
             CalloutMessage = "Stolen Boat Trailer";
             Criminal = new RelationshipGroup("CRIMINAL");
             ShowCalloutAreaBlipBeforeAccepting(CalloutPosition, 25f);
+            PlayScannerWithCallsign($"CITIZENS_REPORT BAR_SUSPICIOUS_VEHICLE IN_OR_ON_POSITION", Position);
             return base.OnBeforeCalloutDisplayed(); 
         }
         public override bool OnCalloutAccepted()
@@ -153,8 +154,30 @@ namespace BarbarianCall.Callouts
                     });
                     bool arrive = false;
                     bool leave = false;
-                    GameFiber.Sleep(2000);
-                    //GetHandlingData(truck);
+                    GameFiber.StartNew(() =>
+                    {
+                        SendCIMessage("Shots Fired!!");
+                        GameFiber.Wait(1000);
+                        SendCIMessage("Warning all nearby unit");
+                        GameFiber.Wait(Peralatan.Random.Next(500, 1500));
+                        if (CalloutRunning)
+                        {
+                            LSPDFR.RequestBackup(truck.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
+                            SendCIMessage($"unit ${Peralatan.GetRandomUnitNumber()} is responding to the scene");
+                        }                      
+                        if (Peralatan.Random.Next(2) == 1 && CalloutRunning)
+                        {
+                            GameFiber.Wait(Peralatan.Random.Next(500, 1500));
+                            LSPDFR.RequestBackup(truck.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
+                            SendCIMessage($"unit ${Peralatan.GetRandomUnitNumber()} is responding to the scene");
+                        }
+                        if (Peralatan.Random.Next(10) == 1 && CalloutRunning)
+                        {
+                            GameFiber.Wait(Peralatan.Random.Next(500, 1500));
+                            LSPDFR.RequestBackup(truck.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
+                            SendCIMessage($"unit ${Peralatan.GetRandomUnitNumber()} is responding to the scene");
+                        }
+                    }, "[BarbarianCall] : Additional Callout Fiber");                  
                     while (CalloutRunning)
                     {
                         foreach (Ped associate in Associates)

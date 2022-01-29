@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using Func = StopThePed.API.Functions;
 using StopThePed.API;
+using Rage;
 
 namespace BarbarianCall.API
 {
@@ -25,6 +26,24 @@ namespace BarbarianCall.API
                     default: throw new NotSupportedException("Selected services is not supported by StopThePed");
                 }
             }            
+        }
+        public static void AddPedItem(Ped ped, string item)
+        {
+            if (ped.Exists())
+            {
+                StopThePed.API.Functions.injectPedSearchItems(ped);
+                if (ped.Metadata.searchPed != null)
+                {
+                    var items = (ped.Metadata.searchPed as string).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    items.Add(item);
+                    items.Shuffle();
+                    ped.Metadata.searchPed = string.Join(", ", items);
+                }
+                else
+                {
+                    Game.LogTrivial("Metadata is null");
+                }
+            }
         }
         public static STPVehicleStatus GetVehicleRegistration(Rage.Vehicle veh)
         {
