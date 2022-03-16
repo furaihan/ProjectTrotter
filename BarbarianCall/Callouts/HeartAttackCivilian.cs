@@ -220,6 +220,7 @@ namespace BarbarianCall.Callouts
                     };
                     CalloutBlips.Add(ambulanceBlip);
                     "~g~Ambulance~s~ is en route to your current location".DisplayNotifWithLogo("Heart Attack Civilian", fadeIn: true, blink: true, hudColor: RAGENativeUI.HudColor.RedDark, icon: NotificationIcon.RightJumpingArrow);
+                    SendCIMessage("Test");
                     StopWatch = new();
                     StopWatch.Start();
                     while (CalloutRunning)
