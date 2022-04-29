@@ -20,10 +20,14 @@ jobs:
       
       - name: Build Release Library
         run:  msbuild BarbarianCall.sln /p:Configuration=Debug
+        
+      - name: Setting Date Variable
+        id: date
+        run: echo "::set-output name=today::$(date +'%d%m%y-%H%M%S')"
                 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3.0.0
         with:
-          name: BarbarianCall 
+          name: BarbarianCall_${{ steps.date.outputs.today }}
           path: Resources\
           retention-days: 2
