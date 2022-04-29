@@ -115,6 +115,7 @@ namespace BarbarianCall
                             $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                             ret.Position.GetFlags();
+                            flags.Clear();
                             return ret;
                         }
                         else
@@ -139,6 +140,8 @@ namespace BarbarianCall
             groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
             $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
             "Vehicle spawn point is not found".ToLog();
+            flags.Clear();
+            groups.Clear();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetVehicleSpawnPoint2(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
@@ -190,6 +193,7 @@ namespace BarbarianCall
                             $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                             ret.Position.GetFlags();
+                            flags.Clear();
                             return ret;
                         }
                         else
@@ -214,6 +218,8 @@ namespace BarbarianCall
             groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
             $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
             "Vehicle spawn point is not found".ToLog();
+            flags.Clear();
+            groups.Clear();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetVehicleSpawnPoint3(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
@@ -267,6 +273,7 @@ namespace BarbarianCall
                             $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                             ret.Position.GetFlags();
+                            flags.Clear();
                             return ret;
                         }
                         else
@@ -291,6 +298,8 @@ namespace BarbarianCall
             groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
             $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
             "Vehicle spawn point is not found".ToLog();
+            flags.Clear();
+            groups.Clear();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetPedSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance) => GetPedSpawnPoint(spatial.Position, minimalDistance, maximumDistance);
@@ -413,6 +422,7 @@ namespace BarbarianCall
                             $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
                             $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                             ret.Position.GetFlags();
+                            flags.Clear();
                             return ret;
                         }
                         else
@@ -437,6 +447,8 @@ namespace BarbarianCall
             groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
             $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
             "Vehicle spawn point is not found".ToLog();
+            flags.Clear();
+            groups.Clear();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetVehicleSpawnPoint5(Vector3 pos, float minimalDistance, float maximumDistance, bool considerDirection = false)
@@ -496,6 +508,7 @@ namespace BarbarianCall
                         $"Vehicle Spawn found {ret}. Distance: {ret.Position.DistanceTo(pos):0.00}".ToLog();
                         $"{i} Process took {sw.ElapsedMilliseconds} ms".ToLog();
                         ret.Position.GetFlags();
+                        flags.Clear();
                         return ret;
                     }
                     else
@@ -514,6 +527,7 @@ namespace BarbarianCall
             groups.ForEach(g => Peralatan.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
             $"Distance: {distanceCount}, Node: {nodeCount} Flag: {flagCount}, Prop: {propCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
             "Vehicle spawn point is not found".ToLog();
+            flags.Clear();
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetRoadSideSpawnPointFavored(Entity entity, float favoredDistance)

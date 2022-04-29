@@ -74,6 +74,9 @@ namespace BarbarianCall.Callouts
             //CalloutMainFiber?.Abort();
             Manusia.CurrentManusia = null;
             Functions.PlayScannerAudio("BAR_AI_RESPOND");
+            CalloutBlips.Clear();
+            CalloutEntities.Clear();
+            CalloutCheckpoints.Clear();
             if (Finalizer != null) Finalizer.Dispose();
             base.OnCalloutNotAccepted();
         }
@@ -129,9 +132,9 @@ namespace BarbarianCall.Callouts
             {
                 if (c) c.Delete();
             });
-            CalloutBlips = new List<Blip>();
-            CalloutEntities = new List<Entity>();
-            CalloutCheckpoints = new List<Checkpoint>();
+            CalloutBlips.Clear();
+            CalloutEntities.Clear();
+            CalloutCheckpoints.Clear();
             if (CarModel.IsLoaded) CarModel.Dismiss();
             if (Finalizer != null) Finalizer.Dispose();
             //CalloutMainFiber?.Abort();

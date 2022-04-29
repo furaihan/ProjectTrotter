@@ -14,14 +14,14 @@ namespace BarbarianCall.Callouts
     [CalloutInfo("Mass Street Fighting", CalloutProbability.High)]
     class MassStreetFighting : CalloutBase
     {
-        private List<Ped> Participant;
-        private List<Ped> Gang1;
-        private List<Ped> Gang2;
-        private List<Ped> pursuitPeds;
+        private List<Ped> Participant = new List<Ped>();
+        private List<Ped> Gang1 = new List<Ped>();
+        private List<Ped> Gang2 = new List<Ped>();
+        private List<Ped> pursuitPeds = new List<Ped>();
         public bool CanEnd = false;
-        private List<Model> Gang1Model;
-        private List<Model> Gang2Model;
-        private Dictionary<Ped, SuspectProperty> SuspectParameters;
+        private List<Model> Gang1Model = new List<Model>();
+        private List<Model> Gang2Model = new List<Model>();
+        private Dictionary<Ped, SuspectProperty> SuspectParameters = new Dictionary<Ped, SuspectProperty>();
         private Spawnpoint spawn2;
         int gangMemberCount;
         private int deadCount = 0;
@@ -39,11 +39,6 @@ namespace BarbarianCall.Callouts
             deadCount = 0;
             arrestedCount = 0;
             escapedCount = 0;
-            Participant = new List<Ped>();
-            SuspectParameters = new Dictionary<Ped, SuspectProperty>();
-            Gang1 = new List<Ped>();
-            Gang2 = new List<Ped>();
-            pursuitPeds = new List<Ped>();
             gang1Relationship = new RelationshipGroup("SIJI");
             gang2Relationship = new RelationshipGroup("LORO");
             DeclareVariable();
@@ -192,6 +187,17 @@ namespace BarbarianCall.Callouts
             }
             base.Process();
         }
+        public override void OnCalloutNotAccepted()
+        {
+            Gang1.Clear();
+            Gang2.Clear();
+            Gang1Model.Clear();
+            Gang2Model.Clear();
+            Participant.Clear();
+            pursuitPeds.Clear();
+            SuspectParameters.Clear();
+            base.OnCalloutNotAccepted();
+        }
         public override void End()
         {
             if (endSuccessfully)
@@ -209,6 +215,13 @@ namespace BarbarianCall.Callouts
             if (checkpoint) checkpoint.Delete();
             Extension.DeleteRelationshipGroup(gang1Relationship);
             Extension.DeleteRelationshipGroup(gang2Relationship);
+            Gang1.Clear();
+            Gang2.Clear();
+            Gang1Model.Clear();
+            Gang2Model.Clear();
+            Participant.Clear();
+            pursuitPeds.Clear();
+            SuspectParameters.Clear();
             base.End();
         }
         protected override void CleanUp()
