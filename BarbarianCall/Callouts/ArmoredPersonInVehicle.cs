@@ -121,7 +121,10 @@ namespace BarbarianCall.Callouts
             if (group.HasValue) Extension.DeleteRelationshipGroup(group.Value);
             base.End();
         }
-
+        protected override void CleanUp()
+        {
+            // TODO: implement CleanUp()
+        }
         public override void Process()
         {
             base.Process();

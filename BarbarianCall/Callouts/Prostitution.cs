@@ -118,6 +118,10 @@ namespace BarbarianCall.Callouts
             });
             base.End();
         }
+        protected override void CleanUp()
+        {
+            // TODO: implement CleanUp()
+        }
         private void DisplayHookerAwarenessBar()
         {
             GameFiber.StartNew(() =>

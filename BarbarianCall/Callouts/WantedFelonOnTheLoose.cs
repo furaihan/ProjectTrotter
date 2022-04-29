@@ -244,6 +244,10 @@ namespace BarbarianCall.Callouts
             if (heli != null) heli?.CleanUp();
             base.End();
         }
+        protected override void CleanUp()
+        {
+            // TODO: implement CleanUp()
+        }
         public void GetClose()
         {
             var curPos = SuspectCar.Position;

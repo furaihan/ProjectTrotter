@@ -211,6 +211,10 @@ namespace BarbarianCall.Callouts
             Extension.DeleteRelationshipGroup(gang2Relationship);
             base.End();
         }
+        protected override void CleanUp()
+        {
+            // TODO: implement CleanUp()
+        }
         private void DisplaySummary()
         {
             if (checkpoint) checkpoint.Delete();

@@ -108,6 +108,10 @@ namespace BarbarianCall.Callouts
             }
             base.End();
         }
+        protected override void CleanUp()
+        {
+            // TODO: implement CleanUp()
+        }
         public override void OnCalloutNotAccepted()
         {
             base.OnCalloutNotAccepted();
