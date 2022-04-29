@@ -115,10 +115,10 @@ namespace BarbarianCall.Callouts
             Participant.ForEach(p => p.SetPedAsWanted());
             gang1Relationship.SetRelationshipWith(gang2Relationship, Relationship.Hate);
             gang1Relationship.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
-            gang1Relationship.SetRelationshipWith(RelationshipGroup.Player, Relationship.Hate);
+            gang1Relationship.SetRelationshipWith(PlayerPed.RelationshipGroup, Relationship.Hate);
             gang2Relationship.SetRelationshipWith(gang1Relationship, Relationship.Hate);
             gang2Relationship.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
-            gang2Relationship.SetRelationshipWith(RelationshipGroup.Player, Relationship.Hate);
+            gang2Relationship.SetRelationshipWith(PlayerPed.RelationshipGroup, Relationship.Hate);
             Blip = new(Spawn, 50f)
             {
                 Color = Yellow

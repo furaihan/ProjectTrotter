@@ -10,6 +10,7 @@ namespace BarbarianCall
 {
     public class Main : Plugin
     {
+        private static StaticFinalizer Finalizer;
         public override void Finally()
         {
             foreach (Entity entity in World.GetAllEntities().Where(e=> e.CreatedByTheCallingPlugin))
@@ -28,11 +29,12 @@ namespace BarbarianCall
                 }
             }
             Globals.RegisteredPedHeadshot.ForEach(Peralatan.UnregisterPedHeadshot);
-            "Unloaded successfully".ToLog();
+            "Unloaded successfully".ToLog();           
         }
 
         public override void Initialize()
         {
+            Finalizer = new StaticFinalizer(Finally);
             StringBuilder sb = new();
             sb.AppendLine("BarbarianCall - An LSPDFR Callout Plugins, Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
             sb.AppendLine($"This log started on {DateTime.Now.ToLongDateString()} - {DateTime.Now.ToLongTimeString()}");
