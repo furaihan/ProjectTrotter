@@ -22,7 +22,7 @@ namespace BarbarianCall.Callouts
         public Vehicle SuspectCar;
         public Manusia Manusia;
         public Model CarModel;
-        public List<Model> GangModels;
+        public List<Model> GangModels = new List<Model>();
         public Blip Blip;
         public bool CalloutRunning = false;
         public Vector3 Position = Vector3.Zero;
@@ -77,6 +77,7 @@ namespace BarbarianCall.Callouts
             CalloutBlips.Clear();
             CalloutEntities.Clear();
             CalloutCheckpoints.Clear();
+            GangModels.Clear();
             if (Finalizer != null) Finalizer.Dispose();
             base.OnCalloutNotAccepted();
         }
