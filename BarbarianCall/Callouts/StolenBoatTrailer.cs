@@ -316,6 +316,7 @@ namespace BarbarianCall.Callouts
             List<Spawnpoint> spawnpoints = DivisiXml.Deserialization.GetSpawnPointFromXml(XmlDocks);
             Spawnpoint ret = spawnpoints.OrderByDescending(x => x.Position.DistanceToSquared(CalloutPosition)).Take(4).GetRandomElement();
             $"Docks located in {ret.Position.GetZoneName()} {World.GetStreetName(ret.Position)}".ToLog();
+            spawnpoints.Clear();
             return ret;
         }
     }

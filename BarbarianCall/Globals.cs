@@ -41,8 +41,8 @@
             "an automatic rifle",
             "a small bag with 250 grams of cocain inside",
             "a bottle crates with full of molotov cocktail",
-            "an USB with several hacking software",
-            "an USB that contains a collection of child pornography videos",
+            "a USB with several hacking software",
+            "a USB that contains a collection of child pornography videos",
             "a withcraft doll",
             "a withcraft doll and a photo of the mayor of Los Santos",
             "a heavvy sniper mk2",
@@ -79,84 +79,6 @@
             "a sickle",
             "a folded money containing an unknown white powder"
         };
-
-        /// <summary>
-        /// Defines the SuspiciousItems.
-        /// </summary>
-        public static List<string> SuspiciousItems = new()
-        {
-            "an underwear",
-            "a pair of socks and an underwear",
-            "suppressor sniper",
-            "machete",
-            "a stun gun",
-            "survival knife",
-            "an airsoft gun",
-            "a hacking book",
-            "a bag with several photos of different people",
-            "a note with several phone numbers",
-            "a pirated music album",
-            "an USB with several pirated software",
-            "severeal jewelry",
-            "a bottle crates full of empty bottle",
-            "several car keys",
-            "several IFruit phones",
-            "a hacking book",
-            "a map of los santos with some heist-related note",
-            "a map of vangelico jewelry store with some suspicious mark",
-            "several surgical tools",
-            "several bag of blood",
-            "some mystical stuff",
-            "several nails wrapped with newspaper",
-            "several medicine"
-        };
-
-        /// <summary>
-        /// Defines the CommonItems.
-        /// </summary>
-        public static List<string> CommonItems = new()
-        {
-            "speaker",
-            "religion-related book",
-            "a portable fan",
-            "a nail clipper",
-            "a car key",
-            "a remote",
-            "a barbie doll",
-            "an eraser",
-            "a ballpoint",
-            "a pencil",
-            "several pencil",
-            "several ballpoint",
-            "a bandage",
-            "several bandage",
-            "first aid kit",
-            "a sunglasses",
-            "several sunglasses",
-            "a pair of socks",
-            "a pair of shoes",
-            "a programming tutorial book",
-            "a recipe book",
-            "some journal",
-            "today's newspaper",
-            "some old newspaper",
-            "yesterday's newspaper",
-            "a medicated oil",
-            "hand sanitizer",
-            "a medicine",
-            "a candy",
-            "a pack of candy",
-            " an ID card"
-        };
-
-        /// <summary>
-        /// Defines the DonutModel.
-        /// </summary>
-        public static string[] DonutModel =
-        {
-            "prop_donut_01", "prop_donut_02", "prop_donut_02b", "prop_amb_donut"
-        };
-
         /// <summary>
         /// Defines the AudibleCarModel.
         /// </summary>

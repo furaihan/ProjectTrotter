@@ -20,15 +20,6 @@ namespace BarbarianCall.DivisiXml
             reader.Close();
             return XmlData;
         }
-        public static List<Spawnpoint> GetSpawnPointFromXml2(string filename)
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-            Peralatan.ToLog("Reading XML file " + filename);
-            List<Coordinate> coordinates = Deserialize(filename);
-            List<Spawnpoint> ret = coordinates.Select(c => new Spawnpoint(c.AxisX, c.AxisY, c.AxisZ, c.Heading)).ToList();
-            Peralatan.ToLog(string.Format("Reading xml file is took {0} ms", sw.ElapsedMilliseconds));
-            return ret;
-        }
         public static List<Spawnpoint> GetSpawnPointFromXml(string filename)
         {
             try

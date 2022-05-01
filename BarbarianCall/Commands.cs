@@ -148,15 +148,7 @@ namespace BarbarianCall
                 }
                 Game.DisplaySubtitle($"Selected: {selected}");
             });
-        }
-        [ConsoleCommand(Name = "ActivateSitAnywhere")]
-        private static void ActivateSofaOnTick()
-        {
-            GameFiber.StartNew(delegate
-            {
-                SyncSceneTick.ChairSit();
-            });
-        }
+        }       
         private static List<HeliSupport> Helis = new();
         [ConsoleCommand]
         private static void Command_CallHeli([ConsoleCommandParameter(AutoCompleterType =typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)

@@ -29,6 +29,7 @@ namespace BarbarianCall.Callouts
         private int arrestedCount = 0;
         private int escapedCount = 0;
         private List<Ped> suspectInAction = new List<Ped>();
+        private List<Ped> allSuspect = new List<Ped>();
         private Model model1;
         private Model model2;
         private Spawnpoint spawn2;
@@ -43,7 +44,8 @@ namespace BarbarianCall.Callouts
         private int updatePositionTime;
         public override bool OnBeforeCalloutDisplayed()
         {
-            var carModelPool = World.EnumerateVehicles().Where(x=> x.IsCar && x.Model.NumberOfSeats >= 4).Select(x=> x.Model).ToList();
+            var carModelPool = World.EnumerateVehicles().Where(x=> x.IsCar && !x.IsBig && !x.Model.IsBigVehicle && 
+            !x.Model.IsLawEnforcementVehicle && x.Model.NumberOfSeats >= 4).Select(x=> x.Model).Distinct().ToList();
             if (!carModelPool.Any())
             {
                 $"{GetType().Name} | Cannot find suitable car model".ToLog();
@@ -51,7 +53,8 @@ namespace BarbarianCall.Callouts
             }
             model1 = carModelPool.GetRandomElement();
             model2 = carModelPool.GetRandomElement();
-            Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 425, 725, true);
+            $"Car Model: {model1.Name} & {model2.Name}".ToLog();
+            Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 500, 725, true);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 425, 825);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 420, 850);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 325, 875);
@@ -60,28 +63,36 @@ namespace BarbarianCall.Callouts
                 $"{GetType().Name} | Spawnpoint is not found, cancelling the callout".ToLog();
                 return false;
             }
-            var tempSp = World.GetNextPositionOnStreet(Spawn.Position);
+            var tempSp = World.GetNextPositionOnStreet(Spawn.Position.Around2D(25f));
             var tempH = SpawnManager.GetRoadHeading(tempSp);
             spawn2 = new Spawnpoint(tempSp, tempH);
             Gang1Model = Globals.GangPedModels.Values.ToList().GetRandomElement();
             Gang2Model = Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model);
+            Gang1Model.ForEach(x => x.LoadAndWait());
+            Gang2Model.ForEach(x => x.LoadAndWait());
             Position = Spawn;
             SpawnHeading = Spawn;
-            CalloutAdvisory = "";
+            CalloutAdvisory = "Shots Fired!";
             CalloutMessage = "Drive-By In Progress";
             FriendlyName = "Drive-By In Progress";
             PlayScannerWithCallsign("WE_HAVE CRIME_GUNFIRE IN_OR_ON_POSITION", Spawn);
+            ShowCalloutAreaBlipBeforeAccepting(Spawn.Position, 125);
             return base.OnBeforeCalloutDisplayed();
         }
         public override bool OnCalloutAccepted()
         {
             veh1 = new Vehicle(model1, Spawn, Spawn);
             veh2 = new Vehicle(model2, spawn2, spawn2);
+            veh1.MakePersistent();
+            veh2.MakePersistent();
+            SetHealth(veh1, 5000);
+            SetHealth(veh2, 5000);
             FillVehicle(veh1, Gang1Model, RelationshipGroup.Gang1);
             FillVehicle(veh2, Gang2Model, RelationshipGroup.Gang2);
             uint[] heliModelsToChooseFrom = { 0x2F03547B, 0x2C75F0DD, 0x1517D4D9 };
             chasingHeli = new Vehicle(heliModelsToChooseFrom.GetRandomElement(), (Spawn.Position + new Vector3(0, 0, 650)).Around2D(Peralatan.Random.Next(350, 500)));
             chasingHeli.CreateRandomDriver();
+            chasingHeli.MakePersistent();
             RelationshipGroup.Gang1.SetRelationshipWith(RelationshipGroup.Gang2, Relationship.Hate);
             RelationshipGroup.Gang1.SetRelationshipWith(RelationshipGroup.Cop, Relationship.Hate);
             RelationshipGroup.Gang1.SetRelationshipWith(PlayerPed.RelationshipGroup, Relationship.Hate);
@@ -93,10 +104,12 @@ namespace BarbarianCall.Callouts
             L.SetPedAsCop(chasingHeli.Driver);
             L.SetCopAsBusy(chasingHeli.Driver, true);
             searchingBlip = new Blip(veh1.Position.Around2D(50f), 125f);
+            searchingBlip.EnableRoute(Yellow);
             CalloutBlips.Add(searchingBlip);
             CalloutEntities.AddRange(new Entity[] { veh1, veh2, chasingHeli, chasingHeli.Driver });
             lastPositionRevealed = veh1.Position;
             updatePositionTime = Globals.GameTimer;
+            suspectInAction = new List<Ped>(allSuspect);
             LogikaInformatika();
             CalloutMainFiber.Start();
             return base.OnCalloutAccepted();
@@ -111,6 +124,10 @@ namespace BarbarianCall.Callouts
         }
         public override void End()
         {
+            Gang1Model.ForEach(x => x.Dismiss());
+            Gang2Model.ForEach(x => x.Dismiss());
+            model1.Dismiss();
+            model2.Dismiss();
             Gang1Model.Clear();
             Gang2Model.Clear();
             base.End();
@@ -119,12 +136,18 @@ namespace BarbarianCall.Callouts
         {
             CalloutMainFiber = new GameFiber(() =>
             {
+                GameFiber.Sleep(1000);
                 Tasker();
+                var statusMonitor = status;
                 while (true)
                 {
                     GameFiber.Yield();
                     switch (status)
                     {
+                        case 0:
+                            "Started callout logic".ToLog();
+                            status = 1;
+                            break;
                         case 1:
                             var dis1 = PlayerPed.DistanceToSquared(veh1);
                             var dis2 = PlayerPed.DistanceToSquared(veh2);
@@ -141,8 +164,11 @@ namespace BarbarianCall.Callouts
                                 L.PlayScannerAudioUsingPosition(string.Format("SUSPECT_HEADING {0} IN_OR_ON_POSITION",
                                     SuspectCar.GetCardinalDirectionLowDetailedAudio()), SuspectCar.Position);
                                 searchingBlip.Position = veh1.Position.Around2D(50f);
+                                searchingBlip.Color = Yellow;
+                                searchingBlip.Alpha = 0.80f;
+                                searchingBlip.EnableRoute(Yellow);
                             }
-                            bool taskMonitor = veh1.GetActiveMissionType() == MissionType.Flee && veh2.GetActiveMissionType() != MissionType.Escort && 
+                            bool taskMonitor = veh1.GetActiveMissionType() == MissionType.GoTo && veh2.GetActiveMissionType() != MissionType.Escort && 
                             chasingHeli.GetActiveMissionType() != MissionType.Circle;
                             if (!taskMonitor) Tasker();
                             break;
@@ -155,14 +181,17 @@ namespace BarbarianCall.Callouts
                                 L.SetPursuitDisableAIForPed(ped, true);
                             }
                             L.SetPursuitIsActiveForPlayer(Pursuit, true);
+                            L.SetPursuitAsCalledIn(Pursuit);
+                            L.AddCopToPursuit(Pursuit, chasingHeli.Driver);
                             L.RequestBackup(veh1.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
                             status = 3;
                             break;
                         case 3:
-                            foreach (Ped ped in suspectInAction)
+                            foreach (Ped ped in allSuspect)
                             {
                                 if (ped)
                                 {
+                                    if (!suspectInAction.Contains(ped)) continue;
                                     if (ped.IsDead)
                                     {
                                         deadCount++;
@@ -186,6 +215,12 @@ namespace BarbarianCall.Callouts
                             DisplaySummary();
                             break;
                     }
+                    if (statusMonitor != status)
+                    {
+                        $"Switching to case {status}".ToLog();
+                        statusMonitor = status;
+                    }
+                    if (status == 4) break;
                 }              
             });
         }
@@ -202,31 +237,57 @@ namespace BarbarianCall.Callouts
 
         void FillVehicle(Vehicle vehicle, List<Model> models, RelationshipGroup relationshipGroup)
         {
+            uint[] drivebyWeapon = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0xBFD21232, 0xD205520E, 0x83839C4, 0x2B5EF5EC, 0x13532244, 0xDB1AA450, 0xBD248B55 };
             if (vehicle)
             {
-                while (vehicle.FreeSeatsCount > 0)
+                for (int i = -1; i < vehicle.FreeSeatsCount - 1; i++)
                 {
-                    Ped ped = new Ped(models.GetRandomElement(), Spawn, spawn2);
+                    Model model = models.GetRandomElement();
+#if DEBUG
+                    $"Model: {model.Name}".ToLog();
+#endif
+                    Ped ped = new Ped(model, Spawn.Position, Spawn.Heading);
                     ped.MakeMissionPed();
                     ped.RelationshipGroup = relationshipGroup;
                     ped.MaxHealth = 750;
                     ped.Health = 750;
+                    ped.Inventory.GiveNewWeapon(drivebyWeapon.GetRandomElement(), -1, true);
                     involved++;
-                    suspectInAction.Add(ped);
+                    allSuspect.Add(ped);
                     CalloutEntities.Add(ped);
-                    NativeFunction.Natives.TASK_WARP_PED_INTO_VEHICLE(ped, vehicle, -2);
+                    NativeFunction.Natives.TASK_WARP_PED_INTO_VEHICLE(ped, vehicle, i);
                 }
             }
         }
         void Tasker()
         {
-            veh1.Driver.VehicleMission(veh2, MissionType.Flee, veh1.TopSpeed, Globals.Sheeesh, 35f, 5f, true);
+            
+            veh1.Driver.VehicleMission(GetDockPoint(), MissionType.GoTo, veh1.TopSpeed, Globals.Sheeesh, 1000f, 5f, true);
             veh2.Driver.VehicleMission(veh1, MissionType.Escort, veh2.TopSpeed, Globals.Sheeesh, 10f, 5f, true);
             chasingHeli.Driver.HeliMission(chasingHeli, veh1, null, Vector3.Zero, MissionType.Circle, 50f, 20f, -1.0f, 50, 30, 0);
             foreach (Ped ped in veh1.Passengers.Concat(veh2.Passengers))
             {
                 ped.CombatAgainstHatedTargetAroundPed(350f);
             }
+        }
+        void SetHealth(Vehicle vehicle, int amount)
+        {
+            if (vehicle)
+            {
+                vehicle.MaxHealth = amount;
+                vehicle.Health = amount;
+                vehicle.EngineHealth = amount;
+                vehicle.FuelTankHealth = amount;
+            }
+        }
+        private const string path = @"Plugins\LSPDFR\BarbarianCall\Locations\Docks.xml";
+        private Spawnpoint GetDockPoint()
+        {
+            List<Spawnpoint> spawnpoints = DivisiXml.Deserialization.GetSpawnPointFromXml(path);
+            Spawnpoint ret = spawnpoints.OrderByDescending(x => x.Position.DistanceToSquared(CalloutPosition)).Take(4).GetRandomElement();
+            $"Docks located in {ret.Position.GetZoneName()} {World.GetStreetName(ret.Position)}".ToLog();
+            spawnpoints.Clear();
+            return ret;
         }
     }
 }
