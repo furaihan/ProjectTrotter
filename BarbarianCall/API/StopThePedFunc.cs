@@ -186,10 +186,10 @@ namespace BarbarianCall.API
 
         static StopThePedFunc()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             if (!IsValid) return;
             if (IsValid)
             {
+                AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
                 Events.searchVehicleEvent += (v) => OnVehicleSearch?.Invoke(v);
                 Events.patDownPedEvent += (p) => OnPedSearch?.Invoke(p);
                 Events.breathalyzerTestEvent += (p) => OnPedBreathalyzerTest?.Invoke(p);

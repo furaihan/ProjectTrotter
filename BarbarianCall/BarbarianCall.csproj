@@ -108,7 +108,6 @@
     <Compile Include="Freemode\PedCombatProperty.cs" />
     <Compile Include="Freemode\PedComponentCollection.cs" />
     <Compile Include="Freemode\PedFaceFeature.cs" />
-    <Compile Include="Freemode\HeadOverlay.cs" />
     <Compile Include="Freemode\PedHeadOverlay.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />

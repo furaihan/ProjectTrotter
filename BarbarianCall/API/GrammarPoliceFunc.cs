@@ -8,7 +8,7 @@ namespace BarbarianCall.API
     internal static class GrammarPoliceFunc
     {
         private const string DllPath = @"Plugins\LSPDFR\GrammarPolice.dll";
-        private static readonly bool IsValid = File.Exists(DllPath);
+        private static readonly bool IsValid = File.Exists(DllPath) && Initialization.IsLSPDFRPluginRunning("GrammarPolice");
         public static void SetStatus(EGrammarPoliceStatusType statusType) => SetStatus(statusType, false, false);
         public static void SetStatus(EGrammarPoliceStatusType statusType, bool displayNotification, bool playSound )
         {
@@ -71,7 +71,7 @@ namespace BarbarianCall.API
         }
         static GrammarPoliceFunc()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+            if (IsValid) AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
         }
         private static System.Reflection.Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
