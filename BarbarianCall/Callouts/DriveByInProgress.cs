@@ -54,7 +54,7 @@ namespace BarbarianCall.Callouts
             model1 = carModelPool.GetRandomElement();
             model2 = carModelPool.GetRandomElement();
             $"Car Model: {model1.Name} & {model2.Name}".ToLog();
-            Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 500, 725, true);
+            Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 500, 725);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 425, 825);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 420, 850);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 325, 875);
@@ -66,8 +66,8 @@ namespace BarbarianCall.Callouts
             var tempSp = World.GetNextPositionOnStreet(Spawn.Position.Around2D(25f));
             var tempH = SpawnManager.GetRoadHeading(tempSp);
             spawn2 = new Spawnpoint(tempSp, tempH);
-            Gang1Model = Globals.GangPedModels.Values.ToList().GetRandomElement();
-            Gang2Model = Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model);
+            Gang1Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement());
+            Gang2Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model));
             Gang1Model.ForEach(x => x.LoadAndWait());
             Gang2Model.ForEach(x => x.LoadAndWait());
             Position = Spawn;
@@ -140,9 +140,10 @@ namespace BarbarianCall.Callouts
             {
                 GameFiber.Sleep(1000);
                 Tasker();
-                var statusMonitor = status;
+                var statusLog = status;
+                var previousStatus = status;
                 while (true)
-                {
+                {                  
                     GameFiber.Yield();
                     switch (status)
                     {
@@ -175,8 +176,8 @@ namespace BarbarianCall.Callouts
                                 var speed = MathHelper.ConvertMetersPerSecondToKilometersPerHourRounded((veh1.Speed + veh2.Speed) / 2);
                                 SendCIMessage($"Suspect last seen: {L.GetZoneAtPosition(veh1.Position).RealAreaName}. Speed is: {speed}");
                             }
-                            bool taskMonitor = veh1.GetActiveMissionType() == MissionType.GoTo && veh2.GetActiveMissionType() != MissionType.Escort && 
-                            chasingHeli.GetActiveMissionType() != MissionType.Circle;
+                            bool taskMonitor = veh1.GetActiveMissionType() == MissionType.GoTo && veh2.GetActiveMissionType() == MissionType.Escort && 
+                            chasingHeli.GetActiveMissionType() == MissionType.Circle;
                             if (!taskMonitor) Tasker();
                             break;
                         case 2:
@@ -227,11 +228,24 @@ namespace BarbarianCall.Callouts
                             DisplaySummary();
                             status = -1;
                             break;
+                        case 5:
+                            veh1.Driver.VehicleMission(GetGotoPoint(), MissionType.GoTo, veh1.TopSpeed, Globals.Sheeesh, 1000f, 5f, true);
+                            veh2.Driver.VehicleMission(veh1, MissionType.Escort, veh2.TopSpeed, Globals.Sheeesh, 10f, 5f, true);
+                            chasingHeli.Driver.HeliMission(chasingHeli, veh1, null, Vector3.Zero, MissionType.Circle, 50f, 20f, -1.0f, 50, 30, 0);
+                            status = previousStatus;
+                            break;
+                        case 6:
+                            foreach (Ped ped in veh1.Passengers.Concat(veh2.Passengers))
+                            {
+                                ped.CombatAgainstHatedTargetAroundPed(350f);
+                            }
+                            status = previousStatus;
+                            break;
                     }
-                    if (statusMonitor != status)
+                    if (statusLog != status)
                     {
                         $"Switching to case {status}".ToLog();
-                        statusMonitor = status;
+                        statusLog = status;
                     }
                     if (status == -1) break;
                 }
@@ -274,8 +288,7 @@ namespace BarbarianCall.Callouts
             }
         }
         void Tasker()
-        {
-            
+        {         
             veh1.Driver.VehicleMission(GetGotoPoint(), MissionType.GoTo, veh1.TopSpeed, Globals.Sheeesh, 1000f, 5f, true);
             veh2.Driver.VehicleMission(veh1, MissionType.Escort, veh2.TopSpeed, Globals.Sheeesh, 10f, 5f, true);
             chasingHeli.Driver.HeliMission(chasingHeli, veh1, null, Vector3.Zero, MissionType.Circle, 50f, 20f, -1.0f, 50, 30, 0);

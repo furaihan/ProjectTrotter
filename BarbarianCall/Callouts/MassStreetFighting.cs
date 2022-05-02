@@ -64,8 +64,8 @@ namespace BarbarianCall.Callouts
                 PlayerPed.RelationshipGroup.Name.ToLog();
             }
             catch (Exception e ) { e.ToString().ToLog(); }
-            Gang1Model = Globals.GangPedModels.Values.ToList().GetRandomElement();
-            Gang2Model = Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model);
+            Gang1Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement());
+            Gang2Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement(m => m != Gang1Model));
             CalloutPosition = Spawn;
             gangMemberCount = Peralatan.Random.Next(3, 8);
             CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
