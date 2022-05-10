@@ -32,6 +32,7 @@ namespace BarbarianCall.Callouts
         private RelationshipGroup gang2Relationship;
         private Checkpoint checkpoint;
         private bool endSuccessfully = true;
+        private int status = 0;
         public override bool OnBeforeCalloutDisplayed()
         {
             CalloutRunning = false;
@@ -411,6 +412,56 @@ namespace BarbarianCall.Callouts
                     End($"exception: {e.Message}");
                 }              
             });          
+        }
+        private void TawuranRewrite()
+        {
+            CalloutMainFiber = new GameFiber(() =>
+            {
+                try
+                {
+                    while (CalloutRunning)
+                    {
+                        switch (status)
+                        {
+                            case 0:
+                                $"Started callout logic".ToLog();
+                                status = 1;
+                                break;
+                            case 1:
+                                if (Participant.Any(p => p && (p.CanSee(PlayerPed) || PlayerPed.CanSee(p))) || PlayerPed.DistanceToSquared(Position) < 10000f)
+                                {
+#if DEBUG
+                                    string[] log =
+                                    {
+                                        $"Distance: {PlayerPed.DistanceTo(Position)}",
+                                        $"Player see suspect: {Participant.Any(p=> PlayerPed.CanSee(p))}",
+                                        $"Suspect see player: {Participant.Any(p=> p.CanSee(PlayerPed))}",
+                                        $"Suspect is on screen: {Participant.Any(predicate => predicate.IsOnScreen)}"
+                                    };
+                                    log.ToList().ForEach(Peralatan.ToLog);
+#endif
+                                    status = 2;
+                                }
+                                Ped ran = Participant.GetRandomElement();
+                                if (ran) ran.Tasks.AchieveHeading(ran.GetHeadingTowards(PlayerPed));
+                                break;
+                            case 2:
+
+                                break;
+                        }
+                        GameFiber.Yield();
+                    }
+                }
+                catch (Exception e)
+                {
+                    $"{GetType().Name} callout crashes".ToLog();
+                    e.ToString().ToLog();
+                    NetExtension.SendError(e);
+                    $"{GetType().Name} callout crashed, please send your log".DisplayNotifWithLogo("Mass Street Fighting");
+                    endSuccessfully = false;
+                    End($"exception: {e.Message}");
+                }
+            });
         }
         private void SituationTrapped()
         {

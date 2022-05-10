@@ -53,15 +53,17 @@ namespace BarbarianCall
         internal static void Print(this string msg) => Game.Console.Print(msg);
         private static readonly Stopwatch LogStopwatch = new();
         private static readonly StringBuilder LogBuilder = new();
-        internal static void ToLog(this Exception exception)
+        internal static void ToLogDebug(this string micin)
         {
-            StringBuilder sb = new();
-            sb.AppendLine("=================== BARBARIANCALL EXCEPTION LOG ===================");
-            sb.AppendLine();
-            sb.AppendLine();
-            sb.AppendLine(exception.Message);
-            sb.AppendLine(exception.StackTrace);
-            sb.AppendLine($"Source: {exception.Source}");
+#if DEBUG
+            ToLog(micin);
+#endif
+        }
+        internal static void ToLogDebug(this string micin, bool makeUppercase)
+        {
+#if DEBUG
+            ToLog(micin, makeUppercase);
+#endif
         }
         internal static void ToLog(this string micin) => ToLog(micin, false);
         internal static void ToLog(this string micin, bool makeUppercase)

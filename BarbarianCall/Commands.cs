@@ -187,5 +187,15 @@ namespace BarbarianCall
             GameFiber.Wait(5000);
             $"Game Timer: {Globals.GameTimer}".ToLog();
         }
+        [ConsoleCommand(Description = "Make you and your current vehicle invincible", Name = "GodModeIsTrue")]
+        private static void Jangkrik()
+        {
+            if (Game.LocalPlayer.Character.CurrentVehicle)
+            {
+                Game.LocalPlayer.Character.CurrentVehicle.IsInvincible = !Game.LocalPlayer.IsInvincible;
+            }
+            Game.LocalPlayer.IsInvincible = !Game.LocalPlayer.IsInvincible;
+            Game.LogTrivial($"Godmode is set to: {Game.LocalPlayer.IsInvincible}");
+        }
     }
 }

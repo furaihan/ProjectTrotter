@@ -125,6 +125,7 @@
     <Compile Include="Menus\PauseMenu.cs" />
     <Compile Include="Extensions\NetExtension.cs" />
     <Compile Include="Menus\VehicleMenu.cs" />
+    <Compile Include="MyRandom.cs" />
     <Compile Include="Peralatan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnManager.cs" />
