@@ -197,5 +197,24 @@ namespace BarbarianCall
             Game.LocalPlayer.IsInvincible = !Game.LocalPlayer.IsInvincible;
             Game.LogTrivial($"Godmode is set to: {Game.LocalPlayer.IsInvincible}");
         }
+        [ConsoleCommand(Description = "In 1942, the Kraton Guards were dissolved by the Japanese government, but in 1970, " +
+            "they were restored at the orders of Sultan Hamengkubuwono IX. Ten companies were officially reactivated with " +
+            "some changes in their structure. Originally, 13 companies formed the Kraton Guard Regiment. The changes in the " +
+            "newer version include changes to dress uniforms, ceremonial weapons, the number of personnel and recruitment " +
+            "techniques.", Name = "Randku")]
+        private static void MyRand()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 50; i++)
+            {
+                int a = MyRandom.Next();
+                double b = Math.Round((double)a / int.MaxValue, 8);              
+                sb.Append(b.ToString().PadRight(10, '0') + "  ");
+                if (b > 1) sb.Append("AAAAAAAAAAAAAAAAAA");
+                if ((i + 1) % 5 == 0)
+                  sb.AppendLine();
+            }
+            Game.LogTrivial(sb.ToString());
+        }
     }
 }

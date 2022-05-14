@@ -691,19 +691,7 @@ namespace BarbarianCall
             int distanceCount, safeCount, nodeCount, pedDisCount, propCount, flagCount, flag2Count, densityCount;
             bool log = false;
             distanceCount = safeCount = nodeCount = pedDisCount = propCount = flagCount = flag2Count = densityCount = 0;
-            List<int> flags = new();
-            try
-            {
-                ulong totalMem = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory / 1048576;
-                $"Total Memory: {totalMem} Mb".ToLog();
-                if (totalMem > 16000)
-                {
-                    trys = 2000;
-                    shouldYieldAt = 110;
-                }
-            }
-            catch (System.ComponentModel.Win32Exception e) { (e.ToString() + " " + e.NativeErrorCode.ToString()).ToLog(); }
-
+            List<int> flags = new();           
             nodePosition = Spawnpoint.Zero;
             roadSidePosition = Spawnpoint.Zero;
             Stopwatch sw = Stopwatch.StartNew();
