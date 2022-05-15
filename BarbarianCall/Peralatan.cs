@@ -470,10 +470,8 @@ namespace BarbarianCall
             int n = list.Count;
             while (n > 1)
             {
-                int k = Random.Next(n--);
-                T temp = list[n];
-                list[n] = list[k];
-                list[k] = temp;
+                int k = MyRandom.Next(n--);
+                (list[k], list[n]) = (list[n], list[k]);
             }
         }
         public static void ShuffleSecure<T>(this IList<T> list)
@@ -505,7 +503,7 @@ namespace BarbarianCall
                 return default;
 
             if (shuffle) list.Shuffle();
-            return list[Random.Next(list.Count)];
+            return list[MyRandom.Next(list.Count)];
         }
 
         public static T GetRandomElement<T>(this IEnumerable<T> enumarable, bool shuffle = false)

@@ -213,7 +213,6 @@ namespace BarbarianCall.Freemode
             RNGCryptoServiceProvider provider = new();
             provider.GetNonZeroBytes(box);
             SHA512CryptoServiceProvider sHA512 = new();
-            Random random = new(BitConverter.ToInt32(sHA512.ComputeHash(box), 0));
             //https://s.id/BkZuh
             #region local variable
             int[] mothers = { 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45 };
@@ -226,18 +225,18 @@ namespace BarbarianCall.Freemode
             int[] hairHighlightColor = { 0, 1, 2, 11, 12, 20, 21, 22, 33, 34, 29, 36, 35, 40, 41, 53, 52, 51, 47, 45, 62, 63 };
             int firstID = mothers.GetRandomElement(true);
             int secondID = fathers.GetRandomElement(true);
-            int thirdID = random.Next(10) == 0 ? IsMale ? fathers.GetRandomElement(true) : mothers.GetRandomElement(true) : 0;
-            float thirdMix = (float)(thirdID == 0 ? 0.0f : random.NextDouble());
-            float resemblance = (float)(IsFemale ? random.NextDouble() * 2 * 0.077 : random.NextDouble() * 2 * 0.785);
+            int thirdID = MyRandom.Next(10) == 0 ? IsMale ? fathers.GetRandomElement(true) : mothers.GetRandomElement(true) : 0;
+            float thirdMix = (float)(thirdID == 0 ? 0.0f : MyRandom.NextDouble());
+            float resemblance = (float)(IsFemale ? MyRandom.NextDouble() * 2 * 0.077 : MyRandom.NextDouble() * 2 * 0.785);
             resemblance = MathHelper.Clamp(resemblance, 0.0f, 1.0f);
-            float skinTone = (float)random.NextDouble();
+            float skinTone = (float)MyRandom.NextDouble();
             int hairColor = normalHairColor.GetRandomElement(true);
             OverlayId[] headOverlays = Enum.GetValues(typeof(OverlayId)).Cast<OverlayId>().ToArray();
-            OverlayId[] selectedOverlayIds = headOverlays.OrderBy(x => random.Next(25)).Take(random.Next(3, headOverlays.Length)).ToArray();
+            OverlayId[] selectedOverlayIds = headOverlays.OrderBy(x => MyRandom.Next(25)).Take(MyRandom.Next(3, headOverlays.Length)).ToArray();
             OverlayId[] forbiddenForFemale = { OverlayId.FacialHair, OverlayId.ChestHair, OverlayId.SunDamage, OverlayId.Ageing, OverlayId.Freckles };
             OverlayId[] forbiddenForMale = { OverlayId.Lipstick, OverlayId.Makeup, OverlayId.Blush, };
             FaceFeature[] faceFeatures = Enum.GetValues(typeof(FaceFeature)).Cast<FaceFeature>().ToArray();
-            FaceFeature[] selectedFaceFeatures = faceFeatures.OrderBy(x => random.Next(25)).Take(random.Next(5, headOverlays.Length)).ToArray();
+            FaceFeature[] selectedFaceFeatures = faceFeatures.OrderBy(x => MyRandom.Next(25)).Take(MyRandom.Next(5, headOverlays.Length)).ToArray();
             EyeColor[] normalEyeColors = Enumerable.Range(0, 8).Cast<EyeColor>().ToArray();
             //https://s.id/Bx6sU
             Dictionary<OverlayId, float> opacityMultiplier = new()
@@ -272,11 +271,11 @@ namespace BarbarianCall.Freemode
                 }
             }
             EyeColor = normalEyeColors.GetRandomElement(true);
-            HB.SetPedHairColor(this, hairColor, random.Next(10) == 0 ? hairHighlightColor.GetRandomElement(true) : hairColor);
+            HB.SetPedHairColor(this, hairColor, MyRandom.Next(10) == 0 ? hairHighlightColor.GetRandomElement(true) : hairColor);
             N.Natives.FinalizeHeadBlend(this);
             foreach (FaceFeature faceFeature in selectedFaceFeatures)
             {
-                float scale = (float)Math.Round(random.Next(2) == 1 ? random.NextDouble() : random.NextDouble() * -1, 3, MidpointRounding.ToEven);
+                float scale = (float)Math.Round(MyRandom.Next(2) == 1 ? MyRandom.NextDouble() : MyRandom.NextDouble() * -1, 3, MidpointRounding.ToEven);
                 HB.SetPedFaceFeature(this, faceFeature, scale);
             }
             if (IsMale)
@@ -288,13 +287,13 @@ namespace BarbarianCall.Freemode
                     int index = headOverlay switch
                     {
                         _ when forbiddenForMale.Contains(headOverlay) => 255,
-                        _ => random.Next(HB.GetNumHeadOverlayValues(headOverlay))
+                        _ => MyRandom.Next(HB.GetNumHeadOverlayValues(headOverlay))
                     };
                     float opacity = headOverlay switch
                     {
                         _ when forbiddenForMale.Contains(headOverlay) => 0.0f,
-                        _ when opacityMultiplier.ContainsKey(headOverlay) => (float)(random.NextDouble() * 2 * opacityMultiplier[headOverlay]),
-                        _ => (float)Math.Round(random.NextDouble(), 5, MidpointRounding.ToEven),
+                        _ when opacityMultiplier.ContainsKey(headOverlay) => (float)(MyRandom.NextDouble() * 2 * opacityMultiplier[headOverlay]),
+                        _ => (float)Math.Round(MyRandom.NextDouble(), 5, MidpointRounding.ToEven),
                     };
                     HB.SetPedHeadOverlay(this, headOverlay, index, opacity);
                     switch (headOverlay)
@@ -316,16 +315,16 @@ namespace BarbarianCall.Freemode
                 {
                     int index = headOverlay switch
                     {
-                        OverlayId.Blush => random.Next(10) == 0 ? random.Next(1, 6) : 255,
-                        OverlayId.Makeup => random.Next(4) == 1 ? random.Next(1, 16) : 255,
+                        OverlayId.Blush => MyRandom.Next(10) == 0 ? MyRandom.Next(1, 6) : 255,
+                        OverlayId.Makeup => MyRandom.Next(4) == 1 ? MyRandom.Next(1, 16) : 255,
                         _ when forbiddenForFemale.Contains(headOverlay) => 255,
-                        _ => random.Next(HB.GetNumHeadOverlayValues(headOverlay)),
+                        _ => MyRandom.Next(HB.GetNumHeadOverlayValues(headOverlay)),
                     };
                     float opacity = headOverlay switch
                     {
                         _ when forbiddenForFemale.Contains(headOverlay) => 0.0f,
-                        _ when opacityMultiplier.ContainsKey(headOverlay) => (float)(random.NextDouble() * 2 * opacityMultiplier[headOverlay]),
-                        _ => (float)Math.Round(random.NextDouble(), 5, MidpointRounding.ToEven),
+                        _ when opacityMultiplier.ContainsKey(headOverlay) => (float)(MyRandom.NextDouble() * 2 * opacityMultiplier[headOverlay]),
+                        _ => (float)Math.Round(MyRandom.NextDouble(), 5, MidpointRounding.ToEven),
                     };
                     HB.SetPedHeadOverlay(this, headOverlay, index, opacity);
                     switch (headOverlay)
@@ -335,7 +334,7 @@ namespace BarbarianCall.Freemode
                             break;
                         case OverlayId.Blush:
                         case OverlayId.Lipstick:
-                            HB.SetPedHeadOverlayColor(this, headOverlay, ColorType.BlushLipstick , random.Next(26), 0);
+                            HB.SetPedHeadOverlayColor(this, headOverlay, ColorType.BlushLipstick , MyRandom.Next(26), 0);
                             break;
                         default: break;
                     }
@@ -345,8 +344,7 @@ namespace BarbarianCall.Freemode
         }
         public void RandomizeOutfit()
         {
-            Random random = new(MathExtension.GetRandomFloatInRange(2500f, 98506f).GetHashCode());
-            bool jaketan = random.Next() % 2 == 0;
+            bool jaketan = MyRandom.Next() % 2 == 0;
             if (IsMale)
             {
                 var selectedTops = Globals.AtasanCowokPolos.GetRandomElement();
@@ -364,8 +362,8 @@ namespace BarbarianCall.Freemode
                     var usTex = selectedUndershirt.Value.GetRandomElement();
                     $"UNDERSHIRT | Draw: {selectedUndershirt.Key}. Tex: {usTex}".ToLog();
                     Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, selectedUndershirt.Key, usTex);
-                    if (random.Next() % 5 != 0) Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 184, 0, 0);
-                    else Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 180, random.Next(7));
+                    if (MyRandom.Next() % 5 != 0) Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 184, 0, 0);
+                    else Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 180, MyRandom.Next(7));
                 }
                 $"TOP | Draw: {selectedTops.Key}. Tex: {topTex}".ToLog();
                 $"BOTTOM | Draw: {selectedBottoms.Key}. Tex: {botTex}".ToLog();
@@ -375,22 +373,22 @@ namespace BarbarianCall.Freemode
                 Wardrobe.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, selectedShoes.Key, shoTex);
                 Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, -1, 0);
                 if (selectedTops.Key == 238 && !jaketan) Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 2, 0);
-                if (random.Next() % 2 == 0)
+                if (MyRandom.Next() % 2 == 0)
                 {
                     var kcmt = Globals.KacamataCowok.GetRandomElement();
                     N.Natives.SET_PED_PROP_INDEX(this, 1, kcmt.Key, kcmt.Value.GetRandomElement(), true);
                 }
-                if (random.Next() % 2 == 0)
+                if (MyRandom.Next() % 2 == 0)
                 {
                     var topi = Globals.TopiCowok.GetRandomElement();
                     N.Natives.SET_PED_PROP_INDEX(this, 0, topi.Key, topi.Value.GetRandomElement(), true);
                 }
-                if (random.Next() % 2 == 0)
+                if (MyRandom.Next() % 2 == 0)
                 {
                     int maxWatch = N.Natives.GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS<int>(this, 6);
-                    int selected = random.Next(maxWatch);
+                    int selected = MyRandom.Next(maxWatch);
                     int maxTex = N.Natives.GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS<int>(this, 6, selected);
-                    N.Natives.SET_PED_PROP_INDEX(this, 6, selected, random.Next(maxTex), true);
+                    N.Natives.SET_PED_PROP_INDEX(this, 6, selected, MyRandom.Next(maxTex), true);
                 }
             }
             var decal = Globals.DecalBadge.GetRandomElement();

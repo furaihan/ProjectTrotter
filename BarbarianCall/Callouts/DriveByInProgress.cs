@@ -16,13 +16,6 @@ namespace BarbarianCall.Callouts
     [CalloutInfo("Drive-By In Progress", CalloutProbability.High)]
     public class DriveByInProgress : CalloutBase
     {
-        /*
-         * 1 = 
-         * 2 = 
-         * 3 = 
-         * 4 = 
-         * 5 = 
-         */
         private int status = 0;
         private int involved = 0;
         private int deadCount = 0;
@@ -70,16 +63,17 @@ namespace BarbarianCall.Callouts
             var tempSp = World.GetNextPositionOnStreet(Spawn.Position.Around2D(25f));
             var tempH = SpawnManager.GetRoadHeading(tempSp);
             spawn2 = new Spawnpoint(tempSp, tempH);
-            Gang1Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement());
-            Gang2Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement(m=> m != Gang1Model));
-            Gang1Model.ForEach(x => x.LoadAndWait());
-            Gang2Model.ForEach(x => x.LoadAndWait());
+            var tmp = Globals.GangPedModels.Values.GetRandomNumberOfElements(3);
+            Gang1Model = new List<Model>(tmp.First().Where(x => x.IsInCdImage));
+            Gang2Model = new List<Model>(tmp.Last().Where(x => x.IsInCdImage));
+            Gang1Model.ForEach(m => m.LoadAndWait());
+            Gang2Model.ForEach(m => m.LoadAndWait());
             Position = Spawn;
             SpawnHeading = Spawn;
             CalloutAdvisory = "Shots Fired!";
             CalloutMessage = "Drive-By In Progress";
             FriendlyName = "Drive-By In Progress";
-            PlayScannerWithCallsign("WE_HAVE CRIME_GUNFIRE IN_OR_ON_POSITION", Spawn);
+            PlayScannerWithCallsign("WE_HAVE CRIME_GUNFIRE IN_OR_ON_POSITION UNIT_RESPOND_CODE_99", Spawn);
             ShowCalloutAreaBlipBeforeAccepting(Spawn.Position, 80);
             return base.OnBeforeCalloutDisplayed();
         }
@@ -91,6 +85,8 @@ namespace BarbarianCall.Callouts
             veh2.MakePersistent();
             veh1.RandomiseLicensePlate();
             veh2.RandomiseLicensePlate();
+            veh2.CanTiresBurst = false;
+            veh2.Mods.ApplyAllMods();
             SetHealth(veh1, 5000);
             SetHealth(veh2, 5000);        
             FillVehicle(veh1, Gang1Model, RelationshipGroup.Gang1);
@@ -203,6 +199,7 @@ namespace BarbarianCall.Callouts
                                 L.SetPursuitIsActiveForPlayer(Pursuit, true);
                                 L.SetPursuitAsCalledIn(Pursuit);
                                 L.AddCopToPursuit(Pursuit, chasingHeli.Driver);
+                                L.SetPursuitDisableAIForPed(pilot, true);
                                 L.RequestBackup(veh1.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
                                 SendCIMessage($"Unit {Peralatan.GetRandomUnitNumber()} is dispatching");
                                 GameFiber.StartNew(() =>
@@ -367,7 +364,7 @@ namespace BarbarianCall.Callouts
                     involved++;
                     allSuspect.Add(ped);
                     CalloutEntities.Add(ped);
-                    NativeFunction.Natives.TASK_WARP_PED_INTO_VEHICLE(ped, vehicle, i);
+                    ped.WarpIntoVehicle(vehicle, i);
                 }
             }
         }

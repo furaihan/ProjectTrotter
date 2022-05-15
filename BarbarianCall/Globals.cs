@@ -97,7 +97,7 @@
             { "Chinese", new List<Model>() { "g_m_m_chigoon_01", "g_m_m_chigoon_02", "g_m_m_chicold_01", "g_m_m_chiboss_01" } },
             { "Korean", new List<Model>() { "g_m_y_korean_01", "g_m_y_korean_02", "g_m_y_korlieut_01", "g_m_m_korboss_01" } },
             { "Armenian", new List<Model>() { "g_m_m_armboss_01", "g_m_m_armgoon_01", "g_m_y_armgoon_02", "g_m_m_armlieut_01" } },
-            { "The Lost MC", new List<Model>() { "g_m_y_lost_01", "g_m_y_lost_02", "g_m_y_lost_03" } },
+            { "The Lost MC", new List<Model>() { "g_m_y_lost_01", "g_m_y_lost_02", "g_m_y_lost_03" } }
         };
         internal static Dictionary<int, List<int>> AtasanCowokPolos = new()
         {

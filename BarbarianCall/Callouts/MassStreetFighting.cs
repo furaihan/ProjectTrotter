@@ -28,10 +28,10 @@ namespace BarbarianCall.Callouts
         private int deadCount = 0;
         private int arrestedCount = 0;
         private int escapedCount = 0;
+        private int stuckCount = 0;
         private static readonly uint[] meleeWeapon = { 0x92A27487, 0x958A4A8F, 0xF9E6AA4B, 0x84BD7BFD, 0x4E875F73, 0xF9DCBF2D, 0xD8DF3C3C, 0x99B507EA, 0xDD5DF8D9, 0xDFE37640, 0x19044EE0, 0xCD274149, 0x3813FC08 };
         private RelationshipGroup gang1Relationship;
         private RelationshipGroup gang2Relationship;
-        private Checkpoint checkpoint;
         private bool endSuccessfully = true;
         private int status = 0;
         public override bool OnBeforeCalloutDisplayed()
@@ -52,22 +52,20 @@ namespace BarbarianCall.Callouts
             }
             Position = Spawn;
             SpawnHeading = Spawn;
-            spawn2 = SpawnManager.GetSlowRoadSpawnPoint(Spawn.Position, 30, 50);
-            if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetSlowRoadSpawnPoint(Spawn.Position, 50, 80);
+            spawn2 = SpawnManager.GetSlowRoadSpawnPoint(Spawn.Position, 100, 200);
+            if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetSlowRoadSpawnPoint(Spawn.Position, 80, 300);
             if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 30, 50);
             if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 50, 80);
             if (spawn2 == Spawnpoint.Zero)
             {
                 spawn2.Position = World.GetNextPositionOnStreet(CalloutPosition.Around2D(Peralatan.Random.Next(30, 50)));
                 spawn2.Heading = SpawnManager.GetRoadHeading(spawn2.Position);
-            }
-            try
-            {
-                PlayerPed.RelationshipGroup.Name.ToLog();
-            }
-            catch (Exception e ) { e.ToString().ToLog(); }
-            Gang1Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement());
-            Gang2Model = new List<Model>(Globals.GangPedModels.Values.ToList().GetRandomElement(m => m != Gang1Model));
+            }           
+            var tmp = Globals.GangPedModels.Values.GetRandomNumberOfElements(3);
+            Gang1Model = new List<Model>(tmp.First().Where(x => x.IsInCdImage));
+            Gang2Model = new List<Model>(tmp.Last().Where(x => x.IsInCdImage));
+            Gang1Model.ForEach(m => m.LoadAndWait());
+            Gang2Model.ForEach(m => m.LoadAndWait());
             CalloutPosition = Spawn;
             gangMemberCount = Peralatan.Random.Next(3, 8);
             CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
@@ -78,11 +76,9 @@ namespace BarbarianCall.Callouts
         }
         public override bool OnCalloutAccepted()
         {
-            Gang1Model.ForEach(m => m.LoadAndWait());
-            Gang2Model.ForEach(m => m.LoadAndWait());
             for (int i = 1; i <= gangMemberCount; i++)
             {
-                Ped gangMember = new(Gang1Model.GetRandomElement(), Position.Around2D(3f).ToGround(), SpawnHeading);
+                Ped gangMember = new(Gang1Model.GetRandomElement(), Position.Around2D(5f).ToGround(), SpawnHeading);
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -91,12 +87,9 @@ namespace BarbarianCall.Callouts
                 gangMember.RelationshipGroup = gang1Relationship;
                 gangMember.Metadata.BAR_Entity = true;
             }
-            Vector3 sp2 = spawn2.Position;
-            if (sp2 == Vector3.Zero) SpawnManager.GetVehicleSpawnPoint2(Spawn.Position, 30, 50);
-            if (sp2 == Vector3.Zero) sp2 = World.GetNextPositionOnStreet(sp2.Around(30, 50));
             for (int i = 1; i <= gangMemberCount; i++)
             {
-                Ped gangMember = new(Gang2Model.GetRandomElement(), sp2.Around2D(3f).ToGround(), SpawnHeading);
+                Ped gangMember = new(Gang2Model.GetRandomElement(), Position.Around2D(5f).ToGround(), SpawnHeading);
                 gangMember.MakeMissionPed();
                 Participant.Add(gangMember);
                 CalloutEntities.Add(gangMember);
@@ -149,7 +142,6 @@ namespace BarbarianCall.Callouts
                     }
                 });
             }
-            if (checkpoint) checkpoint.Delete();
             Extension.DeleteRelationshipGroup(gang1Relationship);
             Extension.DeleteRelationshipGroup(gang2Relationship);
             Gang1.Clear();
@@ -167,7 +159,6 @@ namespace BarbarianCall.Callouts
         }
         private void DisplaySummary()
         {
-            if (checkpoint) checkpoint.Delete();
             $"Suspect Count~s~: {gangMemberCount * 2}~n~~g~Arrested~s~: {arrestedCount}~n~~r~Dead~s~: {deadCount}~n~~o~Escaped~s~: {escapedCount}".
                 DisplayNotifWithLogo("Mass Street Fighting", hudColor: RAGENativeUI.HudColor.GreenDark);
             End();
@@ -182,10 +173,11 @@ namespace BarbarianCall.Callouts
                     TextTimerBar deadBar = new("Dead: ", "");
                     TextTimerBar arrestedBar = new("Arrested: ", "");
                     TextTimerBar escapedBar = new("Escaped: ", "");
+                    TextTimerBar stuckBar = new("Stuck:", "");
                     deadBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Red));
                     arrestedBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Green));
                     escapedBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Orange));
-                    pool.AddRange(new[] {arrestedBar, escapedBar, deadBar});
+                    pool.AddRange(new[] {arrestedBar, escapedBar, deadBar, stuckBar});
                     while (CalloutRunning)
                     {
                         switch (status)
@@ -195,10 +187,8 @@ namespace BarbarianCall.Callouts
                                 SendCIMessage("2 Gang members are on a melee war");
                                 SendCIMessage($"Number of ivolved: {Participant.Count}");
                                 status = 1;
-                                LSPDFR.RequestBackup(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Code2, LSPD_First_Response.EBackupUnitType.LocalUnit);
                                 break;
-                            case 1:
-                                LSPDFR.RequestBackup(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Code2, LSPD_First_Response.EBackupUnitType.LocalUnit);
+                            case 1:                                
                                 if (PlayerPed.DistanceToSquared(Position) < 10000f)
                                 {                                
                                     status = 2;
@@ -206,16 +196,22 @@ namespace BarbarianCall.Callouts
                                 }
                                 break;
                             case 2:
+                                LSPDFR.RequestBackup(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Code2, LSPD_First_Response.EBackupUnitType.LocalUnit);
+                                LSPDFR.RequestBackup(PlayerPed.Position, LSPD_First_Response.EBackupResponseType.Code2, LSPD_First_Response.EBackupUnitType.LocalUnit);
                                 foreach (Ped ped in Participant)
                                 {
                                     if (ped)
                                     {
                                         ped.GetCombatProperty().Aggressive = true;
-                                        ped.GetCombatProperty().AlwaysEquipBestWeapon = false;
+                                        ped.GetCombatProperty().AlwaysFight = true;
                                         ped.GetCombatProperty().CanChaseTargetOnFoot = true;
                                         ped.GetCombatProperty().DisableFleeFromCombat = true;
                                         ped.GetCombatProperty().CanUseVehicles = false;
                                         ped.GetCombatProperty().CanCommandeerVehicles = false;
+                                        ped.GetCombatProperty().DisableBulletReactions = true;
+                                        ped.GetCombatProperty().DisableReactToBuddyShot = true;
+                                        ped.GetCombatProperty().MinimumDistanceToTarget = 10f;
+                                        ped.GetCombatProperty().MaintainMinDistanceToTarget = true;
                                         ped.Tasks.FightAgainstClosestHatedTarget(650f);
                                         Blip blip = new Blip(ped)
                                         {
@@ -241,6 +237,7 @@ namespace BarbarianCall.Callouts
                                 Pursuit = LSPDFR.CreatePursuit();
                                 foreach (Ped ped in Participant.Where(x => x && x.IsAlive && !LSPDFR.IsPedArrested(x) && !LSPDFR.IsPedGettingArrested(x)))
                                 {
+                                    ped.Tasks.Clear();
                                     LSPDFR.AddPedToPursuit(Pursuit, ped);
                                     LSPDFR.GetPedPursuitAttributes(ped).ExhaustionDuration = 15000;
                                     LSPDFR.GetPedPursuitAttributes(ped).ExhaustionInterval = 40000;
@@ -262,7 +259,8 @@ namespace BarbarianCall.Callouts
                         if (status == -1) break;
                         deadBar.Text = deadCount.ToString();
                         arrestedBar.Text = arrestedCount.ToString();
-                        escapedBar.Text = escapedCount.ToString();                       
+                        escapedBar.Text = escapedCount.ToString();   
+                        stuckBar.Text = stuckCount.ToString();
                         pool.Draw();
                         GameFiber.Yield();
                     }
@@ -312,12 +310,16 @@ namespace BarbarianCall.Callouts
         void TaskMonitor()
         {
             foreach (Ped ped in Participant)
-            {         
-                if (ped.IsTaskActive(PedTask.DoNothing))
+            {  
+                if (ped)
                 {
-                    ped.Tasks.Clear();
-                    ped.Tasks.FightAgainstClosestHatedTarget(650f);
-                }
+                    if (ped.IsAlive && !ped.IsTaskActive(PedTask.Combat) && !LSPDFR.IsPedGettingArrested(ped) && !ped.IsRagdoll)
+                    {
+                        stuckCount++;
+                        ped.Tasks.Clear();
+                        ped.Tasks.FightAgainstClosestHatedTarget(650f);
+                    }
+                }            
             }
         }     
     }
