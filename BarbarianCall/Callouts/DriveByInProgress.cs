@@ -21,7 +21,7 @@ namespace BarbarianCall.Callouts
         private int deadCount = 0;
         private int arrestedCount = 0;
         private int escapedCount = 0;
-        private List<Ped> suspectInAction = new List<Ped>();
+        private List<Ped> suspectDone = new List<Ped>();
         private List<Ped> allSuspect = new List<Ped>();
         private Model model1;
         private Model model2;
@@ -118,7 +118,6 @@ namespace BarbarianCall.Callouts
             CalloutEntities.AddRange(new Entity[] { veh1, veh2, chasingHeli, pilot });
             lastPositionRevealed = veh1.Position;
             updatePositionTime = Globals.GameTimer;
-            suspectInAction = new List<Ped>(allSuspect);
             LogikaInformatika();
             CalloutMainFiber.Start();
             return base.OnCalloutAccepted();
@@ -151,7 +150,14 @@ namespace BarbarianCall.Callouts
                 $"All Suspect prepared".ToLog();
                 veh1.PlaceOnGroundProperly();
                 veh2.PlaceOnGroundProperly();
-                Tasker();
+                GameFiber.Sleep(500);
+                driver1.VehicleMission(veh1, GetGotoPoint(), MissionType.GoTo, 25f, Globals.Sheeesh, 1000f, 5f, true);
+                driver2.VehicleMission(veh2, veh1, MissionType.Escort, veh2.TopSpeed, Globals.Sheeesh, 10f, 5f, true);
+                pilot.HeliMission(chasingHeli, veh1, null, Vector3.Zero, MissionType.Escort, 50f, 80f, -1.0f, 50, 30, 0);
+                foreach (Ped ped in veh1.Passengers.Concat(veh2.Passengers))
+                {
+                    ped.CombatAgainstHatedTargetAroundPed(350f);
+                }
                 var statusLog = status;
                 var previousStatus = status;
                 try
@@ -164,8 +170,8 @@ namespace BarbarianCall.Callouts
                             case 0:
                                 $"Started callout logic. {veh1.TopSpeed}.{veh2.TopSpeed}".ToLog();
                                 SendCIMessage($"2 Vehicles Involved");
-                                SendCIMessage($"First one is {veh1.GetDisplayName()} - {veh1.LicensePlate} with {veh1.Occupants.Length} occupants");
-                                SendCIMessage($"Second one is {veh2.GetDisplayName()} - {veh2.LicensePlate} with {veh2.Occupants.Length} occupants");
+                                SendCIMessage($"First one is {veh1.GetDisplayName()} - {veh1.LicensePlate} with {model1.NumberOfSeats} occupants");
+                                SendCIMessage($"Second one is {veh2.GetDisplayName()} - {veh2.LicensePlate} with {model2.NumberOfSeats} occupants");
                                 status = 1;
                                 break;
                             case 1:
@@ -198,7 +204,7 @@ namespace BarbarianCall.Callouts
                                 }
                                 L.SetPursuitIsActiveForPlayer(Pursuit, true);
                                 L.SetPursuitAsCalledIn(Pursuit);
-                                L.AddCopToPursuit(Pursuit, chasingHeli.Driver);
+                                L.AddCopToPursuit(Pursuit, pilot);
                                 L.SetPursuitDisableAIForPed(pilot, true);
                                 L.RequestBackup(veh1.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
                                 SendCIMessage($"Unit {Peralatan.GetRandomUnitNumber()} is dispatching");
@@ -233,25 +239,25 @@ namespace BarbarianCall.Callouts
                                 {
                                     if (ped)
                                     {
-                                        if (!suspectInAction.Contains(ped)) continue;
+                                        if (!suspectDone.Contains(ped)) continue;
                                         if (ped.IsDead)
                                         {
                                             deadCount++;
-                                            suspectInAction.Remove(ped);
+                                            suspectDone.Add(ped);
                                         }
                                         else if (L.IsPedArrested(ped))
                                         {
                                             arrestedCount++;
-                                            suspectInAction.Remove(ped);
+                                            suspectDone.Add(ped);
                                         }
                                         else if (!ped.IsValid())
                                         {
                                             escapedCount++;
-                                            suspectInAction.Remove(ped);
+                                            suspectDone.Add(ped);
                                         }
-                                    }
-                                    if (!suspectInAction.Any()) status = 4;
+                                    }                                    
                                 }
+                                if (suspectDone.Count == allSuspect.Count) status = 4;
                                 taskMonitor = veh1.GetActiveMissionType() == MissionType.GoTo && veh2.GetActiveMissionType() == MissionType.Escort &&
                                 chasingHeli.GetActiveMissionType() == MissionType.Escort;
                                 if (!taskMonitor)
@@ -269,7 +275,7 @@ namespace BarbarianCall.Callouts
                                 if (NeedToReassignDriveTask(driver1, veh1, MissionType.GoTo))
                                 {
                                     $"Reassign task to the driver of the first vehicle. {veh1.GetActiveMissionType()}".ToLogDebug();
-                                    driver1.VehicleMission(veh1, GetGotoPoint(), MissionType.GoTo, 50f, Globals.Sheeesh, 1000f, 5f, true);
+                                    driver1.VehicleMission(veh1, GetGotoPoint(), MissionType.GoTo, 25f, Globals.Sheeesh, 1000f, 5f, true);
                                     idle = false;
                                 }
                                 if (NeedToReassignDriveTask(driver2, veh2, MissionType.Escort))
@@ -305,7 +311,7 @@ namespace BarbarianCall.Callouts
                                     searchingBlip.Color = Yellow;
                                     searchingBlip.Alpha = 0.80f;
                                     searchingBlip.EnableRoute(Yellow);
-                                    var speed = MathHelper.ConvertMetersPerSecondToKilometersPerHourRounded((veh1.Speed + veh2.Speed) / 2);
+                                    var speed = MathHelper.ConvertMetersPerSecondToKilometersPerHourRounded(veh1.Speed);
                                     SendCIMessage($"Suspect last seen: {L.GetZoneAtPosition(veh1.Position).RealAreaName}. Speed is: {speed}");
                                     updatePositionTime = Globals.GameTimer;
                                     lastPositionRevealed = veh1.Position;
@@ -367,18 +373,7 @@ namespace BarbarianCall.Callouts
                     ped.WarpIntoVehicle(vehicle, i);
                 }
             }
-        }
-        void Tasker()
-        {
-            GameFiber.Sleep(500);
-            driver1.VehicleMission(veh1, GetGotoPoint(), MissionType.GoTo, veh1.TopSpeed, Globals.Sheeesh, 1000f, 5f, true);
-            driver2.VehicleMission(veh2, veh1, MissionType.Escort, veh2.TopSpeed, Globals.Sheeesh, 10f, 5f, true);
-            pilot.HeliMission(chasingHeli, veh1, null, Vector3.Zero, MissionType.Escort, 50f, 80f, -1.0f, 50, 30, 0);
-            foreach (Ped ped in veh1.Passengers.Concat(veh2.Passengers))
-            {
-                ped.CombatAgainstHatedTargetAroundPed(350f);
-            }
-        }
+        }      
         void SetHealth(Vehicle vehicle, int amount)
         {
             if (vehicle)
@@ -394,7 +389,7 @@ namespace BarbarianCall.Callouts
         {
             List<Spawnpoint> spawnpoints = DivisiXml.Deserialization.GetSpawnPointFromXml(path);
             Spawnpoint ret = spawnpoints.OrderByDescending(x => x.Position.DistanceToSquared(veh1.Position)).Take(4).GetRandomElement();
-            $"Docks located in {L.GetZoneAtPosition(ret.Position).RealAreaName} {World.GetStreetName(ret.Position)}".ToLog();
+            $"Destination located in {L.GetZoneAtPosition(ret.Position).RealAreaName} {World.GetStreetName(ret.Position)}".ToLog();
             spawnpoints.Clear();
             return ret;
         }

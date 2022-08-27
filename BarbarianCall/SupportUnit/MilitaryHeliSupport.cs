@@ -20,8 +20,6 @@ namespace BarbarianCall.SupportUnit
         {
             "BUZZARD",
             "BUZZARD2",
-            "ANNIHILATOR",
-            "ANNIHILATOR2",
             "MAVERICK",
             "FROGGER",
         };

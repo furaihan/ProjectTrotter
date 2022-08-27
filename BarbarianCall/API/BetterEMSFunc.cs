@@ -1,5 +1,6 @@
 ﻿using BetterEMS.API;
 using Rage;
+using System.Collections.Generic;
 
 namespace BarbarianCall.API
 {
@@ -13,6 +14,7 @@ namespace BarbarianCall.API
         }
         public static uint GetOriginalDeathWeaponAssetHash(Ped p)
         {
+            LinkedList<int> test = new LinkedList<int>();
             if (p && p.IsDead)
             {
                 return EMSFunctions.GetOriginalDeathWeaponAsset(p).Hash;

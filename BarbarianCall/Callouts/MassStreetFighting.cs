@@ -120,6 +120,8 @@ namespace BarbarianCall.Callouts
         }
         public override void OnCalloutNotAccepted()
         {
+            Gang1Model.ForEach(m => m.Dismiss());
+            Gang2Model.ForEach(m => m.Dismiss());
             Gang1.Clear();
             Gang2.Clear();
             Gang1Model.Clear();
@@ -146,6 +148,8 @@ namespace BarbarianCall.Callouts
             Extension.DeleteRelationshipGroup(gang2Relationship);
             Gang1.Clear();
             Gang2.Clear();
+            Gang1Model.ForEach(m => m.Dismiss());
+            Gang2Model.ForEach(m => m.Dismiss());
             Gang1Model.Clear();
             Gang2Model.Clear();
             Participant.Clear();
@@ -174,10 +178,17 @@ namespace BarbarianCall.Callouts
                     TextTimerBar arrestedBar = new("Arrested: ", "");
                     TextTimerBar escapedBar = new("Escaped: ", "");
                     TextTimerBar stuckBar = new("Stuck:", "");
-                    deadBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Red));
-                    arrestedBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Green));
-                    escapedBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Orange));
-                    pool.AddRange(new[] {arrestedBar, escapedBar, deadBar, stuckBar});
+                    BarTimerBar complete = new("Code 4")
+                    {
+                        ForegroundColor = Green,
+                        BackgroundColor = Color.FromArgb(120, Green),
+                        Accent = Color.Green,
+                        Highlight = Red,
+                    };
+                    deadBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: Red);
+                    arrestedBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: Green);
+                    escapedBar.LabelStyle = TimerBarBase.DefaultLabelStyle.With(color: Orange);
+                    pool.AddRange(new TimerBarBase[] {complete, arrestedBar, escapedBar, deadBar, stuckBar});
                     while (CalloutRunning)
                     {
                         switch (status)
@@ -215,11 +226,12 @@ namespace BarbarianCall.Callouts
                                         ped.Tasks.FightAgainstClosestHatedTarget(650f);
                                         Blip blip = new Blip(ped)
                                         {
-                                            Color = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Red),
+                                            Color = Red,
                                             Scale = 0.7445659999f,
                                             Alpha = 0.654487f,
                                         };
                                         CalloutBlips.Add(blip);
+                                        ped.Metadata.BAR_AttachedBlip = blip;
                                     }
                                 }
                                 status = 3;
@@ -241,6 +253,8 @@ namespace BarbarianCall.Callouts
                                     LSPDFR.AddPedToPursuit(Pursuit, ped);
                                     LSPDFR.GetPedPursuitAttributes(ped).ExhaustionDuration = 15000;
                                     LSPDFR.GetPedPursuitAttributes(ped).ExhaustionInterval = 40000;
+                                    LSPDFR.GetPedPursuitAttributes(ped).CanUseCars = false;
+                                    LSPDFR.GetPedPursuitAttributes(ped).MaxRunningSpeed = (float)Math.Round(1.75f + (MyRandom.NextDouble() * 2 * 0.16), 3, MidpointRounding.ToEven);
                                 }
                                 LSPDFR.SetPursuitAsCalledIn(Pursuit);
                                 LSPDFR.SetPursuitCopsCanJoin(Pursuit, true);
@@ -261,6 +275,7 @@ namespace BarbarianCall.Callouts
                         arrestedBar.Text = arrestedCount.ToString();
                         escapedBar.Text = escapedCount.ToString();   
                         stuckBar.Text = stuckCount.ToString();
+                        complete.Percentage = pedTakenCare.Count / (gangMemberCount * 2);
                         pool.Draw();
                         GameFiber.Yield();
                     }
@@ -289,13 +304,21 @@ namespace BarbarianCall.Callouts
                     if (ped.IsDead)
                     {
                         deadCount++;
-                        ped.GetAttachedBlips().Where(x => CalloutBlips.Contains(x)).FirstOrDefault()?.Delete();
+                        if (ped.Metadata.BAR_AttachedBlip != null)
+                        {
+                            Blip b = ped.Metadata.BAR_AttachedBlip as Blip;
+                            if (b) b.Delete();
+                        }
                         pedTakenCare.Add(ped);
                     }
                     if (LSPDFR.IsPedArrested(ped))
                     {
                         arrestedCount++;
-                        ped.GetAttachedBlips().Where(x => CalloutBlips.Contains(x)).FirstOrDefault()?.Delete();
+                        if (ped.Metadata.BAR_AttachedBlip != null)
+                        {
+                            Blip b = ped.Metadata.BAR_AttachedBlip as Blip;
+                            if (b) b.Delete();
+                        }
                         pedTakenCare.Add(ped);
                     }
 

@@ -44,6 +44,11 @@ namespace BarbarianCall.Callouts
         public GameFiber CalloutMainFiber;
         public StaticFinalizer Finalizer { get; private set; }
         public readonly System.Drawing.Color Yellow = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Yellow);
+        public readonly System.Drawing.Color Red = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Red);
+        public readonly System.Drawing.Color Blue = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Blue);
+        public readonly System.Drawing.Color Green = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Green);
+        public readonly System.Drawing.Color Orange = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Orange);
+        public readonly System.Drawing.Color Purple = RAGENativeUI.HudColorExtensions.GetColor(RAGENativeUI.HudColor.Purple);
         public string FilePath;
         public static readonly uint[] WeaponHashes = { 0x1B06D571, 0xBFE256D4, 0x5EF9FEC4, 0x22D8FE39, 0x99AEEB3B, 0x2B5EF5EC, 0x78A97CD0, 0x1D073A89, 0x555AF99A, 0xBD248B55, 0x13532244, 0x624FE830 };
         protected bool Displayed = true;
@@ -164,7 +169,7 @@ namespace BarbarianCall.Callouts
                 }
                 $"Callout ended successfully, that callout took {(DateTime.UtcNow - dateTime).TotalSeconds:0.00} seconds".ToLog();
                 GameFiber.Hibernate();
-            }, "[BarbarianCall] Callout End Listener");
+            }, "[BarbarianCall] Callout End Key Listener");
         }
         protected void DisplayGPNotif()
         {
@@ -209,20 +214,6 @@ namespace BarbarianCall.Callouts
                 new UIMenuNumericScrollerItem<float>("Minimum Distance", "Set the callout minimum distance", 100f, 500f, 20f),
                 new UIMenuNumericScrollerItem<float>("Maximum Distance", "Set the callout maximum distance", 500f, 2000f, 50f)
             };
-        }
-        protected class SuspectProperty
-        {
-            public ESuspectStates SuspectState { get; set; }
-            public string FullName { get; set; }
-            public uint? MugshotHandle { get; set; }
-            public string MugshotTexture { get; set; }
-            public SuspectProperty(ESuspectStates suspectState, string name, uint? mugshotHandle, string mugshotTexture)
-            {
-                SuspectState = suspectState;
-                FullName = name;
-                MugshotHandle = mugshotHandle;
-                MugshotTexture = mugshotTexture;
-            }
         }
     }
 }
