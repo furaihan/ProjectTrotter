@@ -102,53 +102,7 @@ namespace BarbarianCall
             }
             GameFiber.Wait(durationMillisecond);
             checkpoints.ForEach(x => x.Delete());
-        }
-        [ConsoleCommand(Name = "DisplayUIChoice", Description = "Display AssortedCallout-Like UI")]
-        private static void DisplayUI(int timeoutMilisecond)
-        {
-            GameFiber.StartNew(() =>
-            {
-                List<string> files = Directory.EnumerateFiles(Path.Combine("lspdfr", "audio", "scanner", "STREETS")).ToList();
-                PopupChoiceUI choiceUI = new(files.GetRandomNumberOfElements(4, true).ToList(), "Choose One", true);
-                choiceUI.LineHeight = 30;
-                choiceUI.BackgroundColor = Color.Chocolate;
-                choiceUI.TextColor = Color.White;
-                choiceUI.Opacity = 150;
-                choiceUI.BackgroundSize = new Size(520, 680);
-                choiceUI.Point = new Point(30, 40);
-                choiceUI.TextScale = 0.40f;
-                choiceUI.Process();
-                Stopwatch sw = Stopwatch.StartNew();
-                string selected = "Timeout";
-                while (true)
-                {
-                    GameFiber.Yield();
-                    choiceUI.Draw();
-                    if (sw.ElapsedMilliseconds > timeoutMilisecond) break;
-                    if (Game.IsKeyDown(System.Windows.Forms.Keys.D1))
-                    {
-                        selected = choiceUI.Choices[0];
-                        break;
-                    }
-                    else if (Game.IsKeyDown(System.Windows.Forms.Keys.D2))
-                    {
-                        selected = choiceUI.Choices[1];
-                        break;
-                    }
-                    else if (Game.IsKeyDown(System.Windows.Forms.Keys.D3))
-                    {
-                        selected = choiceUI.Choices[2];
-                        break;
-                    }
-                    else if (Game.IsKeyDown(System.Windows.Forms.Keys.D4))
-                    {
-                        selected = choiceUI.Choices[3];
-                        break;
-                    }
-                }
-                Game.DisplaySubtitle($"Selected: {selected}");
-            });
-        }       
+        }  
         private static List<HeliSupport> Helis = new();
         [ConsoleCommand]
         private static void Command_CallHeli([ConsoleCommandParameter(AutoCompleterType =typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)

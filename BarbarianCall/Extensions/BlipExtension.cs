@@ -28,7 +28,7 @@ namespace BarbarianCall.Extensions
             NativeFunction.Natives.SET_BLIP_SECONDARY_COLOUR(blip, color.R, color.G, color.B);
         }
         public static void HideOutlineColor(Blip blip) => NativeFunction.Natives.SHOW_OUTLINE_INDICATOR_ON_BLIP(blip, false);
-        public static void SetBlipShrink(Blip blip, bool shrink) => NativeFunction.Natives.x2B6D467DAB714E8D(blip, shrink);
+        public static void SetBlipShrink(Blip blip, bool shrink) => NativeFunction.Natives.SET_BLIP_AS_MINIMAL_ON_EDGE(blip, shrink);
         public enum BlipDisplayType : int
         {
             Minimap = 5,

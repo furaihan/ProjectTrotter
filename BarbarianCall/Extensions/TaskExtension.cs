@@ -195,6 +195,6 @@ namespace BarbarianCall.Extensions
             return Task.GetTask(ped, "TASK_VEHICLE_MISSION_COORS_TARGET");
         }
         public static void StopEntityAnimation(this Entity entity, AnimationDictionary animDict, string animName) => Natives.STOP_ENTITY_ANIM(entity, animName, animDict.Name, 0);
-        public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.x1F0B79228E461EC9<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM       
+        public static bool IsEntityPlayingAnim(this Entity entity, AnimationDictionary animDict, string animName) => Natives.IS_ENTITY_PLAYING_ANIM<bool>(entity, animDict.Name, animName, 3); //IS_ENTITY_PLAYING_ANIM       
     }
 }

@@ -144,25 +144,6 @@ namespace BarbarianCall.Extensions
             float heading2 = entity.GetHeadingTowards(otherEntity);
             return Math.Abs(heading1 - heading2) <= degreeTolerance;
         }
-        /// <summary>
-        /// Find all possible <see cref="bool"/> combination
-        /// </summary>
-        /// <remarks>Experiment <a href="https://dotnetfiddle.net/Y76GWj">here</a></remarks>
-        public static List<List<bool>> GetAllPossibleCombinationsOfBooleanValues(int numberOfBoolean)
-        {
-            List<List<bool>> ret = new();
-            int sampleRoom = (int)Math.Pow(2, numberOfBoolean);
-            for (int i = 0; i < sampleRoom; i++)
-            {
-                List<bool> bools = new();
-                for (int j = 0; j < numberOfBoolean; j++)
-                {
-                    bools.Add((i & (1 << j)) != 0);
-                }
-                ret.Add(bools);
-            }
-            return ret;
-        }
         public static float DistanceToSquared(this Vector3 vector3, Vector3 to) => Vector3.DistanceSquared(vector3, to);
         public static float DistanceToSquared(this ISpatial spatial, Vector3 to) => Vector3.DistanceSquared(spatial.Position, to);
         public static float DistanceToSquared(this Vector3 vector3, ISpatial spatial) => Vector3.DistanceSquared(vector3, spatial.Position);

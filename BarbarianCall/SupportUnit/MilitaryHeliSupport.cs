@@ -70,7 +70,7 @@ namespace BarbarianCall.SupportUnit
                     }
                     Pilot.WarpIntoVehicle(Helicopter, -1);
                     Pilot.HeliMission(Helicopter, null, Game.LocalPlayer.Character, Vector3.Zero, MissionType.Follow, Helicopter.TopSpeed, 40f, -1.0f, 50, 10, 0, -1.0f);
-                    if (N.Natives.xE43701C36CAFF1A4<bool>(Helicopter))
+                    if (N.Natives.GET_VEHICLE_HAS_LANDING_GEAR<bool>(Helicopter))
                     {
                         N.Natives.CONTROL_LANDING_GEAR(Helicopter, 1);
                     }
@@ -290,7 +290,7 @@ namespace BarbarianCall.SupportUnit
         }
         private float GetHeight()
         {
-            float z = N.Natives.x29C24BFBED8AB8FB<float>(Game.LocalPlayer.Character.Position.X, Game.LocalPlayer.Character.Position.Y);
+            float z = N.Natives.GET_APPROX_HEIGHT_FOR_POINT<float>(Game.LocalPlayer.Character.Position.X, Game.LocalPlayer.Character.Position.Y);
             z = z < 85f ? 85f : z;
             return z;
         }

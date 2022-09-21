@@ -51,14 +51,14 @@
     {
         public static HeadBlendData GetDataFromPed(Ped ped)
         {
-            NativeFunction.Natives.x2746BD9D88C5C5D0<bool>(ped, out HeadBlendData result);
+            NativeFunction.Natives.GET_PED_HEAD_BLEND_DATA<bool>(ped, out HeadBlendData result);
 
             return result;
         }
 
         public static void SetPedHeadBlendData(Ped ped, HeadBlendData headBlendData)
         {
-            NativeFunction.Natives.SetPedHeadBlendData(ped, headBlendData.shapeFirstID, headBlendData.shapeSecondID,
+            NativeFunction.Natives.SET_PED_HEAD_BLEND_DATA(ped, headBlendData.shapeFirstID, headBlendData.shapeSecondID,
                 headBlendData.shapeThirdID, headBlendData.skinFirstID, headBlendData.skinSecondID,
                 headBlendData.skinThirdID, headBlendData.shapeMix, headBlendData.skinMix, headBlendData.thirdMix,
                 headBlendData.isParent);
@@ -66,59 +66,59 @@
 
         public static void UpdatePedHeadBlendData(Ped ped, float shapeMix, float skinMix, float thirdMix)
         {
-            NativeFunction.Natives.UpdatePedHeadBlendData(ped, shapeMix, skinMix, thirdMix);
+            NativeFunction.Natives.UPDATE_PED_HEAD_BLEND_DATA(ped, shapeMix, skinMix, thirdMix);
         }
 
         public static void SetPedEyeColor(Ped ped, EyeColor eyeColor) => SetPedEyeColor(ped, (int)eyeColor);
         public static void SetPedEyeColor(Ped ped, int index)
         {
-            NativeFunction.Natives.x50B56988B170AFDF(ped, index);
+            NativeFunction.Natives.SET_HEAD_BLEND_EYE_COLOR(ped, index);
         }
         public static EyeColor GetPedEyeColor(Ped ped)
         {
-            int eyeColor = NativeFunction.Natives.x76BBA2CEE66D47E9<int>(ped);
+            int eyeColor = NativeFunction.Natives.GET_HEAD_BLEND_EYE_COLOR<int>(ped);
             return (EyeColor)eyeColor;
         
         }       
         public static void SetPedHeadOverlay(Ped ped, OverlayId overlayId, int index, float opacity)
         {
-            NativeFunction.Natives.SetPedHeadOverlay(ped, (int)overlayId, index, opacity);
+            NativeFunction.Natives.SET_PED_HEAD_OVERLAY(ped, (int)overlayId, index, opacity);
         }
 
         public static int GetPedHeadOverlayValue(Ped ped, OverlayId overlayId)
         {
-            return NativeFunction.Natives.xA60EF3B6461A4D43<int>(ped, (int)overlayId);
+            return NativeFunction.Natives.GET_PED_HEAD_OVERLAY<int>(ped, (int)overlayId);
         }
 
         public static int GetNumHeadOverlayValues(OverlayId overlayId)
         {
-            return NativeFunction.Natives.xCF1CE768BB43480E<int>((int)overlayId);
+            return NativeFunction.Natives.GET_PED_HEAD_OVERLAY_NUM<int>((int)overlayId);
         }
 
         public static void SetPedHeadOverlayColor(Ped ped, OverlayId overlayId, ColorType colorType, int colorId,
             int secondColorId)
         {
-            NativeFunction.Natives.x497BF74A7B9CB952(ped, (int)overlayId, (int)colorType, colorId, secondColorId);
+            NativeFunction.Natives.SET_PED_HEAD_OVERLAY_TINT(ped, (int)overlayId, (int)colorType, colorId, secondColorId);
         }
 
         public static void SetPedHairColor(Ped ped, int colorId, int highlightColorId)
         {
-            NativeFunction.Natives.x4CFFC65454C93A49(ped, colorId, highlightColorId);
+            NativeFunction.Natives.SET_PED_HAIR_TINT(ped, colorId, highlightColorId);
         }
 
         public static int GetNumberOfPedHairColors()
         {
-            return NativeFunction.Natives.xE5C0CF872C2AD150<int>();
+            return NativeFunction.Natives.GET_NUM_PED_HAIR_TINTS<int>();
         }
 
         public static int GetNumberOfMakeupColors()
         {
-            return NativeFunction.Natives.xD1F7CA1535D22818<int>();
+            return NativeFunction.Natives.GET_NUM_PED_MAKEUP_TINTS<int>();
         }
 
         public static Color GetHairColor(int colorId)
         {
-            NativeFunction.Natives.x4852FC386E2E1BB5(colorId, out int r, out int g, out int b);
+            NativeFunction.Natives.GET_PED_HAIR_TINT_COLOR(colorId, out int r, out int g, out int b);
             Color color = Color.FromArgb(r, g, b);
 
             return color;
@@ -126,7 +126,7 @@
 
         public static Color GetLipstickColor(int colorId)
         {
-            NativeFunction.Natives.x013E5CFC38CD5387(colorId, out int r, out int g, out int b);
+            NativeFunction.Natives.GET_PED_MAKEUP_TINT_COLOR(colorId, out int r, out int g, out int b);
             Color color = Color.FromArgb(r, g, b);
 
             return color;
@@ -134,37 +134,37 @@
 
         public static bool IsPedHairColorValid(int colorId)
         {
-            return NativeFunction.Natives.xE0D36E5D9E99CC21<bool>(colorId);
+            return NativeFunction.Natives.IS_PED_HAIR_TINT_FOR_BARBER<bool>(colorId);
         }
 
         public static bool IsPedLipstickColorValid(int colorId)
         {
-            return NativeFunction.Natives.x0525A2C2562F3CD4<bool>(colorId);
+            return NativeFunction.Natives.IS_PED_LIPSTICK_TINT_FOR_BARBER<bool>(colorId);
         }
 
         public static bool IsPedBlushColorValid(int colorId)
         {
-            return NativeFunction.Natives.x604E810189EE3A59<bool>(colorId);
+            return NativeFunction.Natives.IS_PED_BLUSH_TINT_FOR_BARBER<bool>(colorId);
         }
 
         public static void SetPedFaceFeature(Ped ped, FaceFeature faceFeature, float scale)
         {
-            NativeFunction.Natives.x71A5C1DBA060049E(ped, (int)faceFeature, scale);
+            NativeFunction.Natives.SET_PED_MICRO_MORPH(ped, (int)faceFeature, scale);
         }
 
         public static bool HasPedHeadBlendFinished(Ped ped)
         {
-            return NativeFunction.Natives.HasPedHeadBlendFinished<bool>(ped);
+            return NativeFunction.Natives.HAS_PED_HEAD_BLEND_FINISHED<bool>(ped);
         }
 
         public static int GetFirstParentIdForPedType(PedType pedType)
         {
-            return NativeFunction.Natives.x68D353AB88B97E0C<int>((int)pedType);
+            return NativeFunction.Natives.GET_PED_HEAD_BLEND_FIRST_INDEX<int>((int)pedType);
         }
 
         public static int GetNumParentPedsOfType(PedType pedType)
         {
-            return NativeFunction.Natives.x5EF37013A6539C9D<int>((int)pedType);
+            return NativeFunction.Natives.GET_PED_HEAD_BLEND_NUM_HEADS<int>((int)pedType);
         }
     }
     public enum PedType

@@ -209,10 +209,6 @@ namespace BarbarianCall.Freemode
         public static FreemodePed FromRegularPed(Ped ped) => new(ped.Handle);
         public void RandomizeAppearance()
         {
-            byte[] box = new byte[4];
-            RNGCryptoServiceProvider provider = new();
-            provider.GetNonZeroBytes(box);
-            SHA512CryptoServiceProvider sHA512 = new();
             //https://s.id/BkZuh
             #region local variable
             int[] mothers = { 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 45 };
@@ -272,7 +268,7 @@ namespace BarbarianCall.Freemode
             }
             EyeColor = normalEyeColors.GetRandomElement(true);
             HB.SetPedHairColor(this, hairColor, MyRandom.Next(10) == 0 ? hairHighlightColor.GetRandomElement(true) : hairColor);
-            N.Natives.FinalizeHeadBlend(this);
+            N.Natives.FINALIZE_HEAD_BLEND(this);
             foreach (FaceFeature faceFeature in selectedFaceFeatures)
             {
                 float scale = (float)Math.Round(MyRandom.Next(2) == 1 ? MyRandom.NextDouble() : MyRandom.NextDouble() * -1, 3, MidpointRounding.ToEven);

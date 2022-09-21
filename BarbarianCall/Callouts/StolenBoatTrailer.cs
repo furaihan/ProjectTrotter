@@ -77,9 +77,9 @@ namespace BarbarianCall.Callouts
             CalloutEntities.Add(truck);
             CalloutEntities.Add(trailer);
             CalloutEntities.Add(boat);
-            NativeFunction.Natives.x0419B167EE128F33(trailer, 1);
-            NativeFunction.Natives.xF3B0E0AED097A3F5(trailer, 0f);
-            NativeFunction.Natives.xD3E51C0AB8C26EEE(trailer, 0f);
+            NativeFunction.Natives.VEHICLE_SET_OVERRIDE_EXTENABLE_SIDE_RATIO(trailer, 1);
+            NativeFunction.Natives.VEHICLE_SET_EXTENABLE_SIDE_TARGET_RATIO(trailer, 0f);
+            NativeFunction.Natives.VEHICLE_SET_OVERRIDE_SIDE_RATIO(trailer, 0f);
             Driver = new FreemodePed(Position, true);
             PreparePed(Driver);
             Driver.WarpIntoVehicle(truck, -1);

@@ -127,7 +127,7 @@ namespace BarbarianCall.SupportUnit
                             vehicleTaken.Add(TargetVehicle);
                             break;
                         }
-                        Vector3 hookPos = NativeFunction.Natives.xCBDB9B923CACC92D<Vector3>(Cargobob);
+                        Vector3 hookPos = NativeFunction.Natives.GET_ATTACHED_PICK_UP_HOOK_POSITION<Vector3>(Cargobob);
                         Vector3[] positionToChecks = {  TargetVehicle.FrontPosition, TargetVehicle.RearPosition, TargetVehicle.LeftPosition, TargetVehicle.RightPosition, TargetVehicle.AbovePosition,
                                                     TargetVehicle.Position, TargetVehicle.Position + rearDimensions, TargetVehicle.Position + frontDimensions };
                         float distanceSquared = positionToChecks.Select(x => Vector3.DistanceSquared(x, hookPos)).OrderBy(x => x).FirstOrDefault();
@@ -239,12 +239,12 @@ namespace BarbarianCall.SupportUnit
                 NativeFunction.Natives.SET_ENTITY_COORDS_NO_OFFSET(TargetVehicle, offset, false, false, true);
                 TargetVehicle.IsCollisionProof = true;
                 TargetVehicle.IsCollisionEnabled = false;
-                NativeFunction.Natives.xA1DD82F3CCF9A01E(Cargobob, TargetVehicle, -1, 0f, 0f, 0f);
+                NativeFunction.Natives.ATTACH_ENTITY_TO_CARGOBOB(Cargobob, TargetVehicle, -1, 0f, 0f, 0f);
                 NativeFunction.Natives.STABILISE_ENTITY_ATTACHED_TO_HELI(Cargobob, TargetVehicle, -0.1f);
             }
             else
             {
-                NativeFunction.Natives.xAF03011701811146(Cargobob, TargetVehicle);
+                NativeFunction.Natives.DETACH_ENTITY_FROM_CARGOBOB(Cargobob, TargetVehicle);
                 NativeFunction.Natives.DETACH_ENTITY(TargetVehicle, true, true);
             }
         }

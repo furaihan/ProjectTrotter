@@ -96,9 +96,9 @@ namespace BarbarianCall.Extensions
         }
         internal static bool IsFreemodePed(this Ped ped) => ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8;
         internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);        
-        internal static string GetVehicleMakeName(Model model) => NativeFunction.Natives.xF7AF4F159FF99F97<string>(model.Hash);
+        internal static string GetVehicleMakeName(Model model) => NativeFunction.Natives.GET_MAKE_NAME_FROM_VEHICLE_MODEL<string>(model.Hash);
         internal static bool IsPointOnRoad(this Vector3 position) => NativeFunction.Natives.IS_POINT_ON_ROAD<bool>(position.X, position.Y, position.Z, 0);
-        internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.xADCDE75E1C60F32D<bool>(position.X, position.Y, position.Z, 3f, false, true, true, false, false, 0, false); //IS_POSITION_OCCUPIED
+        internal static bool IsOccupied(this Vector3 position) => NativeFunction.Natives.IS_POSITION_OCCUPIED<bool>(position.X, position.Y, position.Z, 3f, false, true, true, false, false, 0, false); //IS_POSITION_OCCUPIED
         internal static bool IsSuitableCar(this Model model) => model.IsCar && !model.IsBigVehicle && (model.NumberOfSeats == 2 || model.NumberOfSeats == 4) && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle;
         internal static bool IsSuitableMotor(this Model model) => model.IsBike && !model.IsEmergencyVehicle && !model.IsLawEnforcementVehicle && !model.IsCar && !model.IsBigVehicle && model.NumberOfSeats <= 2;
         internal static bool IsAmbientOnFoot(this Ped ped)
@@ -139,7 +139,7 @@ namespace BarbarianCall.Extensions
         internal static bool IsPed(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_PED<bool>(entity);
         internal static bool IsVehicle(this Entity entity) => NativeFunction.Natives.IS_ENTITY_A_VEHICLE<bool>(entity);
         internal static bool IsObject(this Entity entity) => NativeFunction.Natives.IS_ENTITY_AN_OBJECT<bool>(entity);
-        internal static int GetLiveries(this Vehicle veh) => NativeFunction.Natives.x87B63E25A529D526<int>(veh);
+        internal static int GetLiveries(this Vehicle veh) => NativeFunction.Natives.GET_VEHICLE_LIVERY_COUNT<int>(veh);
         internal static void SetLivery(this Vehicle veh, int liveryIndex) => NativeFunction.Natives.SET_VEHICLE_LIVERY(veh, liveryIndex);
         internal static bool IsStuckOnRoof(this Vehicle vehicle) => NativeFunction.Natives.IS_VEHICLE_STUCK_ON_ROOF<bool>(vehicle);
         internal static MissionType GetActiveMissionType(this Vehicle vehicle)
@@ -196,16 +196,16 @@ namespace BarbarianCall.Extensions
             }
             return "Unknown version";
         }
-        internal static bool CanSee(this Ped ped, Ped target) => NativeFunction.Natives.x6CD5A433374D4CFB<bool>(ped, target);
+        internal static bool CanSee(this Ped ped, Ped target) => NativeFunction.Natives.CAN_PED_SEE_HATED_PED<bool>(ped, target);
         internal static Vector3 ToGround(this Vector3 position)
         {
-            if (NativeFunction.Natives.x9E82F0F362881B29<bool>(position.X, position.Y, 1250.0125f, out float groundPosition, 0,0)) //_GET_GROUND_Z_FOR_3D_COORD_2
+            if (NativeFunction.Natives.GET_GROUND_Z_EXCLUDING_OBJECTS_FOR_3D_COORD<bool>(position.X, position.Y, 1250.0125f, out float groundPosition, 0,0)) //_GET_GROUND_Z_FOR_3D_COORD_2
             {
                 return new Vector3(position.X, position.Y, groundPosition);
             }
             return position;
         }
-        internal static Vector3 GetEntryPositionOfVehicleDoor(Vehicle vehicle, int doorIndex) => NativeFunction.Natives.xC0572928C0ABFDA3<Vector3>(vehicle, doorIndex);
+        internal static Vector3 GetEntryPositionOfVehicleDoor(Vehicle vehicle, int doorIndex) => NativeFunction.Natives.GET_ENTRY_POINT_POSITION<Vector3>(vehicle, doorIndex);
         internal static Vector3 GetEntryPositionOfVehicleDoor(Vehicle vehicle, VehicleDoorIndex doorIndex)
         {
             Vector3 ret = GetEntryPositionOfVehicleDoor(vehicle, (int)doorIndex);
@@ -216,7 +216,7 @@ namespace BarbarianCall.Extensions
         internal static void DeleteRelationshipGroup(RelationshipGroup relationshipGroup)
         {
             bool exist = false;
-            exist = NativeFunction.Natives.xCC6E3B6BB69501F1<bool>(relationshipGroup.Hash); //_DOES_RELATIONSHIP_GROUP_EXIST
+            exist = NativeFunction.Natives.DOES_RELATIONSHIP_GROUP_EXIST<bool>(relationshipGroup.Hash); //_DOES_RELATIONSHIP_GROUP_EXIST
             if (exist) NativeFunction.Natives.REMOVE_RELATIONSHIP_GROUP(relationshipGroup.Hash);
         }          
 

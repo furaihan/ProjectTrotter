@@ -46,7 +46,7 @@ namespace BarbarianCall.Types
             {
                 if (!_valid) return;
                 uint handle = Handle;
-                N.Natives.x4B5B4DA5D79F1943(handle, value);
+                N.Natives.SET_CHECKPOINT_INSIDE_CYLINDER_HEIGHT_SCALE(handle, value);
                 Scale = value;
             } 
         }

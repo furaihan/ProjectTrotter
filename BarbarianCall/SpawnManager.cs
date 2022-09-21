@@ -15,12 +15,12 @@ namespace BarbarianCall
         {
             try
             {
-                int nodeType = Natives.x22D7275A79FE8215<int>(v.X, v.Y, v.Z, 1, 0, 3f, 0f);
-                if (Natives.x1EAF30FCFBF5AF74<bool>(nodeType)) /*IS_VEHICLE_NODE_ID_VALID*/
+                int nodeType = Natives.GET_NTH_CLOSEST_VEHICLE_NODE_ID<int>(v.X, v.Y, v.Z, 1, 0, 3f, 0f);
+                if (Natives.IS_VEHICLE_NODE_ID_VALID<bool>(nodeType))
                 {
-                    if (!Natives.x4F5070AA58F69279<bool>(nodeType))/*GET_VEHICLE_NODE_IS_SWITCHED_OFF*/
+                    if (!Natives.GET_VEHICLE_NODE_IS_SWITCHED_OFF<bool>(nodeType))
                     {
-                        if (Natives.xA2AE5C478B96E3B6<bool>(nodeType))/*GET_VEHICLE_NODE_IS_GPS_ALLOWED*/
+                        if (Natives.GET_VEHICLE_NODE_IS_GPS_ALLOWED<bool>(nodeType))
                         {
                             return true;
                         }
@@ -57,8 +57,8 @@ namespace BarbarianCall
                 "Unsuccessfull Getting node flag value".ToLog();
             }
         }
-        public static bool IsOnScreen(this Vector3 pos) => Natives.xF9904D11F1ACBEC3<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); //GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION
-        private static bool IsSlowRoad(Vector3 position) => CallByHash<bool>(0b10_0010_1101_0111_0010_0111_0101_1010_0111_1001_1111_1110_1000_0010_0001_0101, position.X, position.Y, position.Z, 1, 5, 1077936128, 0f);
+        public static bool IsOnScreen(this Vector3 pos) => Natives.GET_HUD_SCREEN_POSITION_FROM_WORLD_POSITION<bool>(pos.X, pos.Y, pos.Z, out float _, out float _); 
+        private static bool IsSlowRoad(Vector3 position) => Natives.GET_NTH_CLOSEST_VEHICLE_NODE_ID<bool>(position.X, position.Y, position.Z, 1, 5, 1077936128, 0f);
         internal static float GetRoadHeading(Vector3 pos)
         {
             Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 _, out float heading, 12, 0x40400000, 0);
@@ -84,7 +84,7 @@ namespace BarbarianCall
                     GameFiber.Yield();
                 }
 
-                if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
+                if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z, out Vector3 nodeP, out float nodeH, 12, 3.0f, 0))
                 {
                     if (Natives.GET_VEHICLE_NODE_PROPERTIES<bool>(nodeP.X, nodeP.Y, nodeP.Z, out int _, out int flag))
                     {
@@ -338,7 +338,7 @@ namespace BarbarianCall
                         continue;
                     }
 
-                    if (Natives.xB61C8E878A4199CA<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] { 17, 1, 16 }).GetRandomElement()))
+                    if (Natives.GET_SAFE_COORD_FOR_PED<bool>(major.X, major.Y, major.Z, true, out Vector3 nodeP, (new[] { 17, 1, 16 }).GetRandomElement()))
                     {
                         if (nodeP.DistanceToSquared(pos) < minimalDistanceSquared || nodeP.DistanceToSquared(pos) > maximumDistanceSquared)
                         {
@@ -537,10 +537,9 @@ namespace BarbarianCall
             for (int i = 1; i < 600; i++)
             {
                 Vector3 pos = entity.GetOffsetPositionFront(Peralatan.Random.Next(1, 6) + favoredDistance - 10);
-                if (Natives.x45905BE8654AE067<bool>(pos.X, pos.Y, pos.Z, fav.X, fav.Y, fav.Z, i % 2 + 1, out Vector3 nodeP, out float nodeH, 0, 0x40400000, 0))
-                //GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION
+                if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION<bool>(pos.X, pos.Y, pos.Z, fav.X, fav.Y, fav.Z, i % 2 + 1, out Vector3 nodeP, out float nodeH, 0, 0x40400000, 0))
                 {
-                    if (Natives.xA0F8A7517A273C05<bool>(nodeP.X, nodeP.Y, nodeP.Z, nodeH, out Vector3 roadSide))
+                    if (Natives.GET_ROAD_BOUNDARY_USING_HEADING<bool>(nodeP.X, nodeP.Y, nodeP.Z, nodeH, out Vector3 roadSide))
                     {
                         if (roadSide.DistanceTo(entity) < 35 + favoredDistance && !roadSide.IsOccupied() && !IsOnScreen(roadSide))
                         {
@@ -571,9 +570,9 @@ namespace BarbarianCall
                 for (int i = 1; i < 600; i++)
                 {
                     Vector3 v = pos.AroundPosition(Peralatan.Random.Next(1, 6));
-                    if (Natives.xA0F8A7517A273C05<bool>(v.X, v.Y, v.Z, heading.Value, out Vector3 rsPos)) //_GET_ROAD_SIDE_POINT_WITH_HEADING
+                    if (Natives.GET_ROAD_BOUNDARY_USING_HEADING<bool>(v.X, v.Y, v.Z, heading.Value, out Vector3 rsPos))
                     {
-                        if (Natives.xFF071FB798B803B0<bool>(rsPos.X, rsPos.Y, rsPos.Z, out Vector3 _, out float nodeHeading, 5, 3.0f, 0))
+                        if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(rsPos.X, rsPos.Y, rsPos.Z, out Vector3 _, out float nodeHeading, 5, 3.0f, 0))
                         {
                             if (rsPos.DistanceTo(pos) < 100f && !rsPos.IsOccupied())
                             {
@@ -595,9 +594,9 @@ namespace BarbarianCall
                 for (int i = 1; i < 600; i++)
                 {
                     Vector3 v = pos.AroundPosition(Peralatan.Random.Next(5, 15), Peralatan.Random.Next(20, 35));
-                    if (Natives.xFF071FB798B803B0<bool>(v.X, v.Y, v.Z, out Vector3 nodePos, out float nodeHeading, 5, 3.0f, 0))
+                    if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(v.X, v.Y, v.Z, out Vector3 nodePos, out float nodeHeading, 5, 3.0f, 0))
                     {
-                        if (Natives.xA0F8A7517A273C05<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos)) //_GET_ROAD_SIDE_POINT_WITH_HEADING
+                        if (Natives.GET_ROAD_BOUNDARY_USING_HEADING<bool>(nodePos.X, nodePos.Y, nodePos.Z, nodeHeading, out Vector3 rsPos))
                         {
                             if (rsPos.DistanceTo(pos) < 100f && !rsPos.IsOccupied())
                             {
@@ -617,9 +616,9 @@ namespace BarbarianCall
             for (int i = 1; i < 600; i++)
             {
                 Vector3 v = pos.AroundPosition(Peralatan.Random.Next(25));
-                if (Natives.x16F46FB18C8009E4<bool>(v.X, v.Y, v.Z, 0, out Vector3 roadSide)) //_GET_POINT_ON_ROAD_SIDE
+                if (Natives.GET_POSITION_BY_SIDE_OF_ROAD<bool>(v.X, v.Y, v.Z, 0, out Vector3 roadSide))
                 {
-                    if (Natives.xFF071FB798B803B0<bool>(roadSide.X, roadSide.Y, roadSide.Z, out Vector3 nodePos, out float nodeHeading, 12, 0x40400000, 0))
+                    if (Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(roadSide.X, roadSide.Y, roadSide.Z, out Vector3 nodePos, out float nodeHeading, 12, 0x40400000, 0))
                     {
                         if (nodePos.DistanceTo(roadSide) < 50f && roadSide.DistanceTo(pos) < 100f && !roadSide.IsOccupied())
                         {
@@ -642,7 +641,7 @@ namespace BarbarianCall
         internal static Vector3 GetRoadSidePointWithHeading(Entity entity)
         {
             var pos = entity.FrontPosition;
-            if (Natives.xA0F8A7517A273C05<bool>(pos.X, pos.Y, pos.Z, entity.Heading, out Vector3 result))
+            if (Natives.GET_ROAD_BOUNDARY_USING_HEADING<bool>(pos.X, pos.Y, pos.Z, entity.Heading, out Vector3 result))
             {
                 return result;
             }
@@ -659,12 +658,12 @@ namespace BarbarianCall
                 }
 
                 Vector3 v = pos.AroundPosition(Peralatan.Random.Next((int)minimumDistance, (int)(maximumDistance + 1)));
-                if (Natives.xE50E52416CCF948B<bool>(v.X, v.Y, v.Z, i % 5, out Vector3 randomNode, true, 0f, 0f))
+                if (Natives.GET_NTH_CLOSEST_VEHICLE_NODE<bool>(v.X, v.Y, v.Z, i % 5, out Vector3 randomNode, true, 0f, 0f))
                 {
-                    int nodeId = Natives.x22D7275A79FE8215<int>(randomNode.X, randomNode.Y, randomNode.Z, 1, 11077936128f, 0f);
-                    if (Natives.x1EAF30FCFBF5AF74<bool>(nodeId))
+                    int nodeId = Natives.GET_NTH_CLOSEST_VEHICLE_NODE_ID<int>(randomNode.X, randomNode.Y, randomNode.Z, 1, 11077936128f, 0f);
+                    if (Natives.IS_VEHICLE_NODE_ID_VALID<bool>(nodeId))
                     {
-                        if (Natives.x4F5070AA58F69279<bool>(nodeId))
+                        if (Natives.GET_VEHICLE_NODE_IS_SWITCHED_OFF<bool>(nodeId))
                         {
                             if (randomNode.DistanceTo(pos) < maximumDistance && randomNode.DistanceTo(pos) > minimumDistance && !IsOnScreen(randomNode) && pos.HeightDiff(randomNode) < 18f)
                             {
@@ -748,7 +747,7 @@ namespace BarbarianCall
                                     pedDisCount++;
                                     continue;
                                 }
-                                bool success = Natives.x16F46FB18C8009E4<bool>(pedNodePos.X, pedNodePos.Y, pedNodePos.Z, -1, out Vector3 roadSidePos);
+                                bool success = Natives.GET_POSITION_BY_SIDE_OF_ROAD<bool>(pedNodePos.X, pedNodePos.Y, pedNodePos.Z, -1, out Vector3 roadSidePos);
                                 if (!success)
                                 {
                                     propCount++;

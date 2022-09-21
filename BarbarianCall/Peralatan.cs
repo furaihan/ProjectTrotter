@@ -141,17 +141,20 @@ namespace BarbarianCall
             var integer = BitConverter.ToInt32(bytes, 0);
             return Math.Abs(integer % maxValue);
         }
-        internal static string GetLabelText(string gxtEntry) => !string.IsNullOrEmpty(gxtEntry) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(gxtEntry) ? N.Natives.x7B5280EBA9840C72<string>(gxtEntry) : string.Empty;
+        internal static string GetLabelText(string gxtEntry) => !string.IsNullOrEmpty(gxtEntry) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(gxtEntry) ?
+            N.Natives.GET_FILENAME_FOR_AUDIO_CONVERSATION<string>(gxtEntry) : string.Empty;
         internal static string GetDisplayName(this Model vehicleModel)
         {
             string text = N.Natives.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL<string>(vehicleModel.Hash);
-            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? N.Natives.x7B5280EBA9840C72<string>(text) : "CARNOTFOUND";
+            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ?
+                N.Natives.GET_FILENAME_FOR_AUDIO_CONVERSATION<string>(text) : "CARNOTFOUND";
         }
         internal static string GetDisplayName(this Vehicle vehicle) => GetDisplayName(vehicle.Model);
         internal static string GetMakeName(this Model vehicleModel, string emptyReturn = "Unknown Manufacturer")
         {
-            string text = N.Natives.xF7AF4F159FF99F97<string>(vehicleModel.Hash);
-            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? N.Natives.x7B5280EBA9840C72<string>(text) : emptyReturn;
+            string text = N.Natives.GET_MAKE_NAME_FROM_VEHICLE_MODEL<string>(vehicleModel.Hash);
+            return !string.IsNullOrEmpty(text) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(text) ? 
+                N.Natives.GET_FILENAME_FOR_AUDIO_CONVERSATION<string>(text) : emptyReturn;
         }
         internal static string GetMakeName(this Vehicle vehicle, string emptyReturn = "Unknown Manufacturer") => GetMakeName(vehicle.Model, emptyReturn);
         internal static string GetPoliceScannerAudio(Vehicle vehicle)
@@ -322,7 +325,7 @@ namespace BarbarianCall
                 GameFiber.Yield();
                 if (sw.ElapsedMilliseconds > 1000) break;
             }
-            if (hudColor.HasValue) N.Natives.x92F0DA1E27DB96DC((int)hudColor.Value); //_THEFEED_SET_NEXT_POST_BACKGROUND_COLOR
+            if (hudColor.HasValue) N.Natives.THEFEED_SET_BACKGROUND_COLOR_FOR_NEXT_POST((int)hudColor.Value);
             N.Natives.BEGIN_TEXT_COMMAND_THEFEED_POST("CELL_EMAIL_BCON");
             AddLongString(msg);
             N.Natives.END_TEXT_COMMAND_THEFEED_POST_MESSAGETEXT<uint>(textureDict, textureName, fadeIn, (int)icon, title, subtitle);
@@ -354,7 +357,7 @@ namespace BarbarianCall
                                           $"~{modifierKey.GetInstructionalId()}~ ~+~ ~{key.GetInstructionalId()}~";
         internal static bool CheckKey(Keys modifierKey, Keys key)
         {
-            bool keyboardInputCheck = N.Natives.x0CF2B696BBF945AE<int>() == 0;
+            bool keyboardInputCheck = N.Natives.UPDATE_ONSCREEN_KEYBOARD<int>() == 0;
             if (!keyboardInputCheck)
             {
                 if (Game.IsKeyDown(key) && modifierKey == Keys.None) return true;
@@ -391,7 +394,7 @@ namespace BarbarianCall
                     "Attempting to register ped headshot".ToLog();
                     ped.GetVariation(1, out int draw, out int tex);
                     ped.SetVariation(1, 0, 0);
-                    uint headshotHandle = N.Natives.xBA8805A1108A2515<uint>(ped);
+                    uint headshotHandle = N.Natives.REGISTER_PEDHEADSHOT_HIRES<uint>(ped);
                     var timer = new TimeSpan(0, 0, 10);
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     while (true)
@@ -404,12 +407,12 @@ namespace BarbarianCall
                         }
                         if (stopwatch.Elapsed > timer) break;
                     }
-                    string txd = N.Natives.GetPedheadshotTxdString<string>(headshotHandle);
+                    string txd = N.Natives.GET_PEDHEADSHOT_TXD_STRING<string>(headshotHandle);
                     ped.SetVariation(1, draw, tex);
                     Game.DisplayNotification(txd, txd, title, subtitle, text);
                     //GameFiber.Wait(200);
                     Globals.RegisteredPedHeadshot.Add(headshotHandle);
-                    N.Natives.UnregisterPedheadshot<uint>(headshotHandle);
+                    N.Natives.UNREGISTER_PEDHEADSHOT<uint>(headshotHandle);
                     $"Register ped headshot is took {stopwatch.ElapsedMilliseconds} ms".ToLog();
                 }
                 catch (Exception e)
@@ -427,13 +430,13 @@ namespace BarbarianCall
             try
             {
                 if (!ped) throw new Rage.Exceptions.InvalidHandleableException(ped);
-                uint headshotHandle = N.Natives.RegisterPedheadshot<uint>(ped);
+                uint headshotHandle = N.Natives.REGISTER_PEDHEADSHOT<uint>(ped);
                 int startTime = Environment.TickCount;
                 Stopwatch sw = Stopwatch.StartNew();
                 while (true)
                 {
                     GameFiber.Yield();
-                    if (N.Natives.x7085228842B13A67<bool>(headshotHandle))
+                    if (N.Natives.IS_PEDHEADSHOT_READY<bool>(headshotHandle))
                     {
                         $"Ped Headshot found with handle {headshotHandle}, took {sw.ElapsedMilliseconds} ms".ToLog();
                         break;
@@ -460,7 +463,7 @@ namespace BarbarianCall
         {
             if (handle.HasValue)
             {
-                if (N.Natives.IS_PEDHEADSHOT_VALID<bool>(handle.Value)) N.Natives.UnregisterPedheadshot<uint>(handle.Value);
+                if (N.Natives.IS_PEDHEADSHOT_VALID<bool>(handle.Value)) N.Natives.UNREGISTER_PEDHEADSHOT<uint>(handle.Value);
                 else ToLog($"headshot with handle {handle.Value} is invalid");
             }
         }

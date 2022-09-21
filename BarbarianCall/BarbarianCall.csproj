@@ -107,8 +107,6 @@
     <Compile Include="Freemode\OutfitMale.cs" />
     <Compile Include="Freemode\PedCombatProperty.cs" />
     <Compile Include="Freemode\PedComponentCollection.cs" />
-    <Compile Include="Freemode\PedFaceFeature.cs" />
-    <Compile Include="Freemode\PedHeadOverlay.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="DivisiXml\Coordinate.cs" />
     <Compile Include="DivisiXml\Deserialization.cs" />
@@ -138,7 +136,6 @@
     <Compile Include="Types\Manusia.cs" />
     <Compile Include="Types\Marker.cs" />
     <Compile Include="Types\Mugshot.cs" />
-    <Compile Include="Types\PopupChoiceUI.cs" />
     <Compile Include="Types\Spawnpoint.cs" />
     <Compile Include="Types\Speech.cs" />
     <Compile Include="Types\VehicleColor.cs" />

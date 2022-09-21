@@ -20,7 +20,7 @@ namespace BarbarianCall.Types
             GameFiber.StartNew(() =>
             {
                 Ped = ped;
-                int _handle = isTransparent ? N.Natives.x953563CE563143AF<int>(ped) : N.Natives.REGISTER_PEDHEADSHOT<int>(ped);
+                int _handle = isTransparent ? N.Natives.REGISTER_PEDHEADSHOT_TRANSPARENT<int>(ped) : N.Natives.REGISTER_PEDHEADSHOT<int>(ped);
                 Handle = new PoolHandle((uint)_handle);
                 IsTransparentBackground = isTransparent;
                 GameFiber.SleepUntil(() => IsReady, 1000);

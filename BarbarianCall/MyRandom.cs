@@ -9,7 +9,7 @@ namespace BarbarianCall
 {
     internal static class MyRandom
     {
-        private static int Sample() => NativeFunction.Natives.xF2D49816A804D134<int>(0, int.MaxValue);
+        private static int Sample() => NativeFunction.Natives.GET_RANDOM_MWC_INT_IN_RANGE<int>(0, int.MaxValue);
         internal static int Next() => Sample();
         internal static int Next(int max)
         {
