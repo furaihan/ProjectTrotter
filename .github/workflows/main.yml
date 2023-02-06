@@ -7,13 +7,13 @@ jobs:
     name: Build
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3.3.0
 
       - name: Setup MS Build
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v1.1.3
         
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.6
+        uses: NuGet/setup-nuget@v1.1.1
      
       - name: Restore NuGet Packages
         run: nuget restore BarbarianCall.sln
@@ -26,7 +26,7 @@ jobs:
         run: echo "::set-output name=today::$(date +'%d%m%y-%H%M%S')"
                 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: BarbarianCall_${{ steps.date.outputs.today }}
           path: Resources\
