@@ -87,7 +87,7 @@ namespace BarbarianCall
                 "",
                 "=========================================================================================================",
             };
-            log.ForEach(Peralatan.ToLog);
+            log.ForEach(Logger.ToLog);
         }
         internal static bool IsRageNativeUIInstalled() => File.Exists("RAGENativeUI.dll");
         internal static DateTime GetCompileTime()

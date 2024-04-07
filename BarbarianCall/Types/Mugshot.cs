@@ -24,7 +24,7 @@ namespace BarbarianCall.Types
                 Handle = new PoolHandle((uint)_handle);
                 IsTransparentBackground = isTransparent;
                 GameFiber.SleepUntil(() => IsReady, 1000);
-                Peralatan.ToLog($"Mugshot creation is success: {IsReady}");
+                Logger.ToLog($"Mugshot creation is success: {IsReady}");
                 Texture = IsReady ? N.Natives.GET_PEDHEADSHOT_TXD_STRING<string>((uint)Handle) : "CHAR_BLANK_ENTRY";
                 ped.Metadata.BAR_MugshotCreated = true;
             });          

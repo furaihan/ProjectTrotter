@@ -25,10 +25,6 @@ namespace BarbarianCall.Callouts
             CalloutRunning = false;
             PursuitCreated = false;
             Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 425, 725, true);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 425, 725);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 425, 725);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint4(PlayerPed.Position, 425, 725);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 425, 725);
             if (Spawn == Spawnpoint.Zero)
             {
                 $"{GetType().Name} | Spawnpoint is not found, cancelling the callout".ToLog();

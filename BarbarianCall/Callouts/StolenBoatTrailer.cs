@@ -43,7 +43,7 @@ namespace BarbarianCall.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(XmlPath), 1000f, 600f);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 1000f, 500f, true);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 1000f, 500f, true);
             if (Spawn == Spawnpoint.Zero)
             {
                 return false;

@@ -42,7 +42,7 @@ namespace BarbarianCall
         [ConsoleCommand(Name = "GetPlayerPosFlags", Description = "Gets the flags of the player position")]
         public static void GetFlags()
         {
-            Game.LocalPlayer.Character.Position.GetFlags();
+            Game.LocalPlayer.Character.Position.LogNodePropertiesAndFlags();
         }        
         private enum PNF
         {
@@ -59,8 +59,8 @@ namespace BarbarianCall
             GameFiber.StartNew(() =>
             {
                 Vector3 pros;
-                if (SpawnManager.GetSafeCoordForPed(Game.LocalPlayer.Character.Position, true, out var result, (int)flag)) pros = result;
-                else if (SpawnManager.GetSafeCoordForPed(Game.LocalPlayer.Character.Position, false, out var result1, (int)flag)) pros = result1;
+                if (SpawnpointUtils.GetSafeCoordForPed(Game.LocalPlayer.Character.Position, true, out var result, (int)flag)) pros = result;
+                else if (SpawnpointUtils.GetSafeCoordForPed(Game.LocalPlayer.Character.Position, false, out var result1, (int)flag)) pros = result1;
                 else
                 {
                     Game.LogTrivial("Safe Coordinate is not found");
@@ -76,33 +76,6 @@ namespace BarbarianCall
                 if (checkpoint) checkpoint.Delete();
             });
         }
-        [ConsoleCommand]
-        private static void GetSpawnPoint(int durationMillisecond)
-        {
-            var ppos = Game.LocalPlayer.Character.Position;
-            Spawnpoint[] spawnpoints =
-            {
-                SpawnManager.GetVehicleSpawnPoint(ppos, 300, 500),
-                SpawnManager.GetVehicleSpawnPoint2(ppos, 300, 500),
-                SpawnManager.GetVehicleSpawnPoint3(ppos, 300, 500),
-                SpawnManager.GetVehicleSpawnPoint4(ppos, 300, 500),
-                SpawnManager.GetVehicleSpawnPoint5(ppos, 300, 500),
-            };
-            List<Checkpoint> checkpoints = new(); 
-            for (int i = 0; i < spawnpoints.Length; i++)
-            {
-                Spawnpoint v = spawnpoints[i];
-                if (v != Spawnpoint.Zero)
-                {
-                    Checkpoint cp = new(CheckpointIcon.CylinderTripleArrow, v.Position, v.Position.ForwardVector(v.Heading), 5f, 60f, HudColor.Blue.GetColor(), HudColor.PureWhite.GetColor(), false);
-                    checkpoints.Add(cp);
-                    $"{i + 1}. {v}".ToLog();
-                }
-                else $"Spawnpoint number {i + 1} is not found".ToLog();
-            }
-            GameFiber.Wait(durationMillisecond);
-            checkpoints.ForEach(x => x.Delete());
-        }  
         private static List<HeliSupport> Helis = new();
         [ConsoleCommand]
         private static void Command_CallHeli([ConsoleCommandParameter(AutoCompleterType =typeof(ConsoleCommandAutoCompleterVehicleAliveOnly))] Vehicle vehicle)

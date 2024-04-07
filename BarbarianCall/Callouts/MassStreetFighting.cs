@@ -59,7 +59,7 @@ namespace BarbarianCall.Callouts
             if (spawn2 == Spawnpoint.Zero)
             {
                 spawn2.Position = World.GetNextPositionOnStreet(CalloutPosition.Around2D(Peralatan.Random.Next(30, 50)));
-                spawn2.Heading = SpawnManager.GetRoadHeading(spawn2.Position);
+                spawn2.Heading = SpawnpointUtils.GetRoadHeading(spawn2.Position);
             }           
             var tmp = Globals.GangPedModels.Values.GetRandomNumberOfElements(3);
             Gang1Model = new List<Model>(tmp.First().Where(x => x.IsInCdImage));

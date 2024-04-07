@@ -39,11 +39,7 @@ namespace BarbarianCall.Callouts
             CalloutRunning = false;
             PursuitCreated = false;
             Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 425, 725, true);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 425, 725);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 425, 725);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 350, 800);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 350, 800);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 350, 800);
             if (Spawn == Spawnpoint.Zero)
             {
                 $"{GetType().Name} | Spawnpoint is not found, cancelling the callout".ToLog();
@@ -78,7 +74,7 @@ namespace BarbarianCall.Callouts
                 Color = Yellow
             };
             Blip.EnableRoute(Yellow);
-            Peralatan.ToLog($"{GetType().Name} | Preparing suspect...");
+            Logger.ToLog($"{GetType().Name} | Preparing suspect...");
             Driver = new FreemodePed(Spawn, SpawnHeading, true);
             Passenger1 = new FreemodePed(Position, SpawnHeading, true);
             Passenger2 = new FreemodePed(Position, SpawnHeading, true);
@@ -319,13 +315,11 @@ namespace BarbarianCall.Callouts
                             $"In water: {SuspectCar.IsInWater}",
                             $"Speed: {SuspectCar.Speed}",
                         };
-                        log.ForEach(Peralatan.ToLog);
+                        log.ForEach(Logger.ToLog);
                         var raycast = World.TraceLine(MathExtension.GameplayCameraPosition, SuspectCar.Position, TraceFlags.IntersectWorld, PlayerPed);
                         bool onScreen = raycast.HitEntity && raycast.HitEntity == SuspectCar;
                         Vector3 pos = onScreen ? SuspectCar.Position : curPos;
                         Spawnpoint sp = SpawnManager.GetVehicleSpawnPoint(pos, 20.0f, 50.0f);
-                        if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint2(pos, 20.0f, 50.0f);
-                        if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint3(pos, 20.0f, 50.0f);
                         if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(pos, 25.0f, 60.0f);
                         if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(pos, 20.0f, 75.0f);
                         if (sp == Spawnpoint.Zero) sp = SpawnManager.GetVehicleSpawnPoint(pos, 15.0f, 100.0f);
@@ -590,7 +584,7 @@ namespace BarbarianCall.Callouts
                             var pursuitPeds = LSPDFR.GetPursuitPeds(Pursuit);
                             if (pursuitPeds.Any(s => s && Suspects.Contains(s)))
                             {
-                                Peralatan.ToLog("Suspect is fleeing, setting up a pursuit");
+                                Logger.ToLog("Suspect is fleeing, setting up a pursuit");
                                 PursuitCreated = true;
                                 Suspects.ForEach(s =>
                                 {
@@ -612,7 +606,7 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     if (!PursuitCreated)
                     {
-                        Peralatan.ToLog("Telling all suspect to leave their vehicle");
+                        Logger.ToLog("Telling all suspect to leave their vehicle");
                         Suspects.ForEach(x =>
                         {
                             if (x)

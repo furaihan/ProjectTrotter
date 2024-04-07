@@ -51,17 +51,17 @@ namespace BarbarianCall.Callouts
             model1 = carModelPool[rnd];
             model2 = carModelPool[rnd - 2];
             $"Car Model: {model1.Name} & {model2.Name}".ToLog();
-            Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 900, 985);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 425, 825);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 420, 850);
-            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint5(PlayerPed.Position, 325, 875);
+            Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 900, 985);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 425, 825);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 420, 850);
+            if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 325, 875);
             if (Spawn == Spawnpoint.Zero)
             {
                 $"{GetType().Name} | Spawnpoint is not found, cancelling the callout".ToLog();
                 return false;
             }
             var tempSp = World.GetNextPositionOnStreet(Spawn.Position.Around2D(25f));
-            var tempH = SpawnManager.GetRoadHeading(tempSp);
+            var tempH = SpawnpointUtils.GetRoadHeading(tempSp);
             spawn2 = new Spawnpoint(tempSp, tempH);
             var tmp = Globals.GangPedModels.Values.GetRandomNumberOfElements(3);
             Gang1Model = new List<Model>(tmp.First().Where(x => x.IsInCdImage));
@@ -183,7 +183,7 @@ namespace BarbarianCall.Callouts
                                     status = 2;
                                     break;
                                 }
-                                if ((Globals.GameTimer - updatePositionTime) > 50000 && veh1.DistanceToSquared(lastPositionRevealed) > 10000)
+                                if (Globals.GameTimer - updatePositionTime > 50000 && veh1.DistanceToSquared(lastPositionRevealed) > 10000)
                                     status = 0b111;
                                 bool taskMonitor = veh1.GetActiveMissionType() == MissionType.GoTo && veh2.GetActiveMissionType() == MissionType.Escort &&
                                 chasingHeli.GetActiveMissionType() == MissionType.Escort;
@@ -200,6 +200,7 @@ namespace BarbarianCall.Callouts
                                 foreach (Ped ped in allSuspect)
                                 {
                                     L.AddPedToPursuit(Pursuit, ped);
+                                    $"Add {LSPDFRFunc.GetPedPersona(ped).FullName} to pursuit".ToLog();
                                     L.SetPursuitDisableAIForPed(ped, true);
                                 }
                                 L.SetPursuitIsActiveForPlayer(Pursuit, true);
@@ -305,8 +306,8 @@ namespace BarbarianCall.Callouts
                                 break;
                             case 7:
                                 {
-                                    L.PlayScannerAudioUsingPosition(string.Format("SUSPECT_HEADING {0} IN_OR_ON_POSITION",
-                                        veh1.GetCardinalDirectionLowDetailedAudio()), veh1.Position);
+                                    L.PlayScannerAudioUsingPosition(
+                                        $"SUSPECT_HEADING {veh1.GetCardinalDirectionLowDetailedAudio()} IN_OR_ON_POSITION", veh1.Position);
                                     searchingBlip.Position = veh1.Position.Around2D(50f);
                                     searchingBlip.Color = Yellow;
                                     searchingBlip.Alpha = 0.80f;

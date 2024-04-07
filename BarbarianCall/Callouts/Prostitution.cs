@@ -43,7 +43,7 @@ namespace BarbarianCall.Callouts
             CalloutAdvisory = "Be careful, your siren may draw an attention";
             if (CalloutPosition == Vector3.Zero)
             {
-                Peralatan.ToLog("Solicitation | No suitable location found after 600 tries");
+                Logger.ToLog("Solicitation | No suitable location found after 600 tries");
                 Displayed = false;
                 return false;
             }
@@ -169,8 +169,6 @@ namespace BarbarianCall.Callouts
                     try
                     {
                         var sp = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 100, 300);
-                        if (sp == Spawnpoint.Zero) SpawnManager.GetVehicleSpawnPoint2(PlayerPed.Position, 100, 300);
-                        if (sp == Spawnpoint.Zero) SpawnManager.GetVehicleSpawnPoint3(PlayerPed.Position, 100, 300);
                         if (sp == Spawnpoint.Zero) continue;
                         GameFiber.Wait(Peralatan.Random.Next(3000, 15001));
                         var rv = new Vehicle(m => m.IsSuitableCar() && Globals.AudibleCarModel.Contains(m) && m.IsValid, sp.Position, sp.Heading);
@@ -271,7 +269,7 @@ namespace BarbarianCall.Callouts
                                     $"Has Passenger: {SuspectCar.HasPassengers}, Count: {SuspectCar.Passengers.Length}",
                                     $"Distance: {Vector3.Distance(SuspectCar.Position, Hooker)}"
                                 };
-                                log.ForEach(Peralatan.ToLog);
+                                log.ForEach(Logger.ToLog);
                                 AssignedToHookTask.Add(SuspectCar);
                                 if (SuspectCar && SuspectCar.Driver) SuspectCar.Driver.Tasks.CruiseWithVehicle(15f, Globals.Normal);
                                 GameFiber.Wait(Peralatan.Random.Next(5000, 8000));
@@ -336,7 +334,7 @@ namespace BarbarianCall.Callouts
                         while (CalloutRunning)
                         {
                             GameFiber.Yield();
-                            var park = SpawnManager.GetRoadSidePointWithHeading(suspectVeh);
+                            var park = SpawnpointUtils.GetRoadSidePointWithHeading(suspectVeh);
                             if (park != Vector3.Zero)
                             {
                                 checkpoint.Position = park;
@@ -344,7 +342,7 @@ namespace BarbarianCall.Callouts
                             }
                             if (parkSw.ElapsedMilliseconds > 10000)
                             {
-                                Peralatan.ToLog("Abort Park: Timeout");
+                                Logger.ToLog("Abort Park: Timeout");
                                 break;
                             }
                         }
@@ -361,12 +359,12 @@ namespace BarbarianCall.Callouts
                         var chance = Peralatan.Random.NextDouble();
                         if (suspect && suspectVeh && Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge()) >= 20)
                         {
-                            Peralatan.ToLog($"Hook unsuccessful, Age Different: {Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge())}");
+                            Logger.ToLog($"Hook unsuccessful, Age Different: {Math.Abs(Func.GetPersonaForPed(suspect).GetAge() - Func.GetPersonaForPed(Hooker).GetAge())}");
                             chance = 0.0005;
                         }
                         else if (richClasses.Any(x => suspectVeh.Class == x))
                         {
-                            Peralatan.ToLog($"Susoect vehicle is special, chance of success increased");
+                            Logger.ToLog($"Susoect vehicle is special, chance of success increased");
                             if (Peralatan.Random.NextDouble() < 0.8095285f)
                             {
                                 chance = 0.9f;
@@ -375,7 +373,7 @@ namespace BarbarianCall.Callouts
                         var str = $"Chance: {chance:0.000}, ";
                         if (chance > 0.5f)
                         {
-                            Peralatan.ToLog(str + "Hook Successful");
+                            Logger.ToLog(str + "Hook Successful");
                             Hooker.Tasks.EnterVehicle(suspectVeh, 0).WaitForCompletion();
                             var speedRnd = Peralatan.Random.Next(15, 21);
                             suspect.WanderWithVehicle(speedRnd, (VehicleDrivingFlags)0xC00AB);
@@ -386,7 +384,7 @@ namespace BarbarianCall.Callouts
                         }
                         else
                         {
-                            Peralatan.ToLog(str + "Hook Unsuccessful");
+                            Logger.ToLog(str + "Hook Unsuccessful");
                             Hooker.Tasks.FollowNavigationMeshToPosition(CalloutPosition, SolicitationSpawn, 1f).WaitForCompletion(10000);
                             if (Hooker.DistanceTo(CalloutPosition) < 2f)
                             {

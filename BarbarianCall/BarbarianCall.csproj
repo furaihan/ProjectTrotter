@@ -116,6 +116,7 @@
     <Compile Include="Freemode\FreemodePed.cs" />
     <Compile Include="Freemode\PedComponent.cs" />
     <Compile Include="Initialization.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Menus\MainMenu.cs" />
     <Compile Include="Menus\MenuHandler.cs" />
@@ -124,9 +125,11 @@
     <Compile Include="Extensions\NetExtension.cs" />
     <Compile Include="Menus\VehicleMenu.cs" />
     <Compile Include="MyRandom.cs" />
+    <Compile Include="NodeUtils.cs" />
     <Compile Include="Peralatan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnManager.cs" />
+    <Compile Include="SpawnpointUtils.cs" />
     <Compile Include="SupportUnit\CargobobServices.cs" />
     <Compile Include="SupportUnit\HeliSupport.cs" />
     <Compile Include="SupportUnit\Mechanic.cs" />

@@ -167,9 +167,6 @@ namespace BarbarianCall.Callouts
                         });
                     });                 
                     Spawnpoint ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint(CalloutPosition, 100, 150);
-                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint2(CalloutPosition, 100, 150);
-                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint3(CalloutPosition, 100, 150);
-                    if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = SpawnManager.GetVehicleSpawnPoint3(CalloutPosition, 80, 175);
                     if (ambulanceSpawn == Spawnpoint.Zero) ambulanceSpawn = new Spawnpoint(World.GetNextPositionOnStreet(CalloutPosition.Around2D(250)), 0f);
                     if (UltimateBackupRunning)
                     {

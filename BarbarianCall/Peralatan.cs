@@ -31,66 +31,44 @@ namespace BarbarianCall
             float min = minDistance * minDistance;
             try
             {
-                ToLog("Calculating the best location for callout");
+                Logger.ToLog("Calculating the best location for callout");
                 List<Spawnpoint> suitable = spawnPoints.Where(sp => Vector3.DistanceSquared(sp,PlayerPed)  < max && Vector3.DistanceSquared(sp, PlayerPed) > min
                  && sp.Position.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
                 if (suitable.Count > 0)
                 {
-                    ToLog($"Found {suitable.Count} suitable location, choosing a random location from that list");
+                    Logger.ToLog($"Found {suitable.Count} suitable location, choosing a random location from that list");
                     Spawnpoint selected = suitable.GetRandomElement(true);
-                    ToLog(string.Format("Location selected is {0} in {1}", selected, GetZoneName(selected.Position)));
+                    Logger.ToLog(string.Format("Location selected is {0} in {1}", selected, GetZoneName(selected.Position)));
                     return selected;
                 }
             }
             catch (Exception e)
             {
-                ToLog(string.Format("We have problem when selecting a spawnpoint | {0}", e.Message));
-                ToLog(e.ToString());
+                Logger.ToLog(string.Format("We have problem when selecting a spawnpoint | {0}", e.Message));
+                Logger.ToLog(e.ToString());
                 NetExtension.SendError(e);
             }         
             return Spawnpoint.Zero;
         }
-        internal static void Print(this string msg) => Game.Console.Print(msg);
-        private static readonly Stopwatch LogStopwatch = new();
-        private static readonly StringBuilder LogBuilder = new();
-        internal static void ToLogDebug(this string micin)
-        {
-#if DEBUG
-            ToLog(micin);
-#endif
-        }
-        internal static void ToLogDebug(this string micin, bool makeUppercase)
-        {
-#if DEBUG
-            ToLog(micin, makeUppercase);
-#endif
-        }
-        internal static void ToLog(this string micin) => ToLog(micin, false);
-        internal static void ToLog(this string micin, bool makeUppercase)
-        {
-            if (!LogStopwatch.IsRunning) LogStopwatch.Start();
-            string text = makeUppercase ? micin.ToUpper() : micin;
-            Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " + text : "[BarbarianCall]: " + text);
-            LogBuilder.AppendLine(string.Format("[{0}]: {1}", DateTime.Now.ToString("d MMM yyyy - HH:mm:ss:FFFFF"), text));
-            if (LogStopwatch.ElapsedMilliseconds > 20000)
-            {
-                LogStopwatch.Restart();
-                string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "BarbarianCall.log");
-                if (File.Exists(path)) File.AppendAllText(path, LogBuilder.ToString());
-                else Game.LogTrivial("Your log file doesnt exist");
-                LogBuilder.Clear();
-            }
-        }
+
         internal static string GetRandomUnitNumber()
         {
-            List<string> list = new List<string>()
+            // List of unit names
+            List<string> unitNames = new List<string>()
             {
                 "adam", "boy", "charles", "david", "edward", "frank", "george", "henry", "ida", "john", "king",
                 "lincoln", "mary", "noah", "ocean", "paul", "queen", "robert", "sam", "tom", "union", "victor",
                 "william", "xray", "young", "zebra"
             };
-            return $"{Random.Next(1, 11)}-{list.GetRandomElement()}-{Random.Next(1, 25)}";
+
+            // Generate a random unit number
+            int randomNumber1 = Random.Next(1, 11);
+            string randomUnitName = unitNames.GetRandomElement();
+            int randomNumber2 = Random.Next(1, 25);
+
+            return $"{randomNumber1}-{randomUnitName}-{randomNumber2}";
         }
+
         internal static string GetLicensePlateAudio(Vehicle veh) => GetLicensePlateAudio(veh.LicensePlate);
         internal static string GetLicensePlateAudio(string licensePlate)
         {
@@ -127,7 +105,7 @@ namespace BarbarianCall
             if (vehicle)
             {
                 string plate = GetRandomPlateNumber();
-                ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate));
+                Logger.ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate));
             }           
         }
         internal static int RandomNextSecure(int minValue, int maxValue) => RandomNextSecure(maxValue - minValue) + minValue;
@@ -210,7 +188,7 @@ namespace BarbarianCall
         internal static bool Speaking;
         internal static void HandleSpeech(List<string> Dialogue, params Ped[] talkers)
         {
-            ToLog("Speech Started");
+            Logger.ToLog("Speech Started");
             Speaking = true;
             Ped playerPed = Game.LocalPlayer.Character;
             Vector3 playerPos = Game.LocalPlayer.Character.Position;
@@ -443,7 +421,7 @@ namespace BarbarianCall
                     }
                     if (sw.ElapsedMilliseconds > TimeSpan.FromSeconds(5).TotalMilliseconds)
                     {
-                        ToLog(string.Format("failed to get headshot because of timeout. {0}, {1}", Functions.GetPersonaForPed(ped).FullName, ped.Model.Name));
+                        Logger.ToLog(string.Format("failed to get headshot because of timeout. {0}, {1}", Functions.GetPersonaForPed(ped).FullName, ped.Model.Name));
                         return failedReturn;
                     }
                 }
@@ -464,7 +442,7 @@ namespace BarbarianCall
             if (handle.HasValue)
             {
                 if (N.Natives.IS_PEDHEADSHOT_VALID<bool>(handle.Value)) N.Natives.UNREGISTER_PEDHEADSHOT<uint>(handle.Value);
-                else ToLog($"headshot with handle {handle.Value} is invalid");
+                else Logger.ToLog($"headshot with handle {handle.Value} is invalid");
             }
         }
 
@@ -481,7 +459,7 @@ namespace BarbarianCall
         {
             if (list.Count >= byte.MaxValue)
             {
-                ToLog("ShuffleSecure is not supported on this list");
+                Logger.ToLog("ShuffleSecure is not supported on this list");
                 Shuffle(list);
                 return;
             }

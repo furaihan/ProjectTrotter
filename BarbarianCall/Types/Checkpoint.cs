@@ -148,7 +148,7 @@ namespace BarbarianCall.Types
             }
             catch (Exception e)
             {
-                Peralatan.ToLog("Failed to create checkpoint");
+                Logger.ToLog("Failed to create checkpoint");
                 e.ToString().ToLog();
             }          
         }

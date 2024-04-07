@@ -220,7 +220,6 @@ namespace BarbarianCall.SupportUnit
                                 findRoadSide = true;
                                 Vector3 front = MechanicVehicle.GetOffsetPositionFront(35f);
                                 Spawnpoint roadSide = SpawnManager.GetRoadSideSpawnPoint(front, MechanicVehicle.Heading);
-                                if (roadSide == Spawnpoint.Zero) roadSide = SpawnManager.GetRoadSideSpawnPointFavored(MechanicVehicle, 35);
                                 if (roadSide != Spawnpoint.Zero)
                                 {
                                     try { parkCheckpoint = new Checkpoint(CheckpointIcon.CylinderCheckerboard, roadSide.Position, 5f, 120f, Color.Gold, Color.IndianRed, true); } catch (Exception e) { e.ToString().ToLog(); }
