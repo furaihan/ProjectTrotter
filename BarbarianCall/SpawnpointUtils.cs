@@ -11,20 +11,18 @@ namespace BarbarianCall
 {
     internal static class SpawnpointUtils
     {
-
         internal static void LogNodePropertiesAndFlags(this Vector3 position)
         {
             if (Natives.GetVehicleNodeProperties<bool>(position, out uint density, out uint flag))
             {
                 LogNodeFlags(position, flag);
-                Logger.ToLog($"Density: {density}. Flag: {flag}");
+                Logger.Log($"Density: {density}. Flag: {flag}");
             }
             else
             {
                 "Unsuccessful Getting node flag value".ToLog();
             }
         }
-
         internal static float GetRoadHeading(Vector3 pos)
         {
             Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(pos.X, pos.Y, pos.Z, out Vector3 _, out float heading, 12, 0x40400000, 0);
@@ -188,7 +186,6 @@ namespace BarbarianCall
             "Failed to find a favored direction spawn point after maximum attempts".ToLog();
             return Spawnpoint.Zero;
         }
-        internal static Spawnpoint GetRoadSideSpawnPoint(Entity entity) => GetRoadSideSpawnPoint(entity.Position, entity.Heading);
         internal static Spawnpoint GetRoadSideSpawnPoint(Vector3 pos, float? heading = null)
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -409,7 +406,7 @@ namespace BarbarianCall
             $"Solicitation spawnpoint was not successfull, {sw.ElapsedMilliseconds} ms".ToLog();
             $"Distance: {distanceCount}, Node: {nodeCount} Flag1: {flagCount}, Flag2: {flag2Count}, Safe: {safeCount}, Prop: {propCount}, Ped Node Distance: {pedDisCount}, Density: {densityCount}".ToLog();
             var groups = flags.GroupBy(v => v).ToList();
-            groups.ForEach(g => Logger.ToLog($"Value {g.Key} has {g.Count()} items"));
+            groups.ForEach(g => Logger.Log($"Value {g.Key} has {g.Count()} items"));
             return Spawnpoint.Zero;
         }
         internal static Spawnpoint GetRandomFleeingPoint(Ped fleeingPed)
@@ -426,15 +423,15 @@ namespace BarbarianCall
                     if (MathExtension.FloatDiff(pos.GetHeadingTowards(nodeP), pos.GetHeadingTowards(Game.LocalPlayer.Character)) > 90f)
                     {
                         Spawnpoint ret = new(nodeP, heading);
-                        Logger.ToLog($"Fleeing point is found {ret}");
+                        Logger.Log($"Fleeing point is found {ret}");
                         return ret;
                     }
                     else dirCount++;
                 }
                 else nodeCount++;
             }
-            Logger.ToLog($"Fleeing point is not found");
-            Logger.ToLog($"Node: {nodeCount}, Direction: {dirCount}");
+            Logger.Log($"Fleeing point is not found");
+            Logger.Log($"Node: {nodeCount}, Direction: {dirCount}");
             return Spawnpoint.Zero;
         }
         public static bool GetSafeCoordForPed(Vector3 pos, bool onFootpath, out Vector3 result, int flag)
@@ -474,12 +471,6 @@ namespace BarbarianCall
         {
             return Natives.GET_SAFE_COORD_FOR_PED<bool>(position.X, position.Y, position.Z, true, out safePosition, (new[] { 17, 1, 16 }).GetRandomElement());
         }
-        private static void LogSpawnPointFound(Spawnpoint spawnPoint, Vector3 pos, int attempt, long elapsedMilliseconds)
-        {
-            $"Ped sidewalk spawn found {spawnPoint} Distance: {spawnPoint.Position.DistanceTo(pos)}".ToLog();
-            $"Attempt {attempt} took {elapsedMilliseconds} milliseconds".ToLog();
-            spawnPoint.Position.LogNodePropertiesAndFlags();
-        }
         private static void LogStatistics(int nodeCount, int flagCount, int distanceCount, int safeCount, int propCount, SortedSet<float> distanceSquaredValues)
         {
             $"Safe coord not found".ToLog();
@@ -492,6 +483,12 @@ namespace BarbarianCall
                 float avgDistance = (float)Math.Sqrt(distanceSquaredValues.Sum() / distanceSquaredValues.Count);
                 $"Distance: Max: {maxDistance}, Min: {minDistance}, Avg: {avgDistance}".ToLog();
             }
+        }
+        private static void LogSpawnPointFound(Spawnpoint spawnPoint, Vector3 pos, int attempt, long elapsedMilliseconds)
+        {
+            $"Ped sidewalk spawn found {spawnPoint} Distance: {spawnPoint.Position.DistanceTo(pos)}".ToLog();
+            $"Attempt {attempt} took {elapsedMilliseconds} milliseconds".ToLog();
+            spawnPoint.Position.LogNodePropertiesAndFlags();
         }
         private static void LogSpawnPointFound(Spawnpoint spawnPoint, int attempt, long elapsedMilliseconds)
         {
@@ -508,7 +505,7 @@ namespace BarbarianCall
         private static void LogStatistics(int distanceCount, int propCount, int flagCount, int screenNode, int dirCount, HashSet<int> flags)
         {
             var groups = flags.GroupBy(v => v).ToList();
-            groups.ForEach(g => Logger.ToLog($"({(NodeFlags)g.Key}) has {g.Count()} items"));
+            groups.ForEach(g => Logger.Log($"({(NodeFlags)g.Key}) has {g.Count()} items"));
             $"Distance: {distanceCount}, Prop: {propCount}, Flag: {flagCount}, SafeNode: {screenNode}, Direction: {dirCount}".ToLog();
         }
         private static void LogNodeFlags(Vector3 position, uint flag)
@@ -520,11 +517,11 @@ namespace BarbarianCall
 
             if (flagNames.Any())
             {
-                Logger.ToLog($"Flags: {string.Join(", ", flagNames)}");
+                Logger.Log($"Flags: {string.Join(", ", flagNames)}");
             }
             else
             {
-                Logger.ToLog("No flags set");
+                Logger.Log("No flags set");
             }
         }
         private static IEnumerable<string> GetFlagNames(this NodeFlags flags)

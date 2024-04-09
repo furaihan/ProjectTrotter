@@ -56,7 +56,7 @@ namespace BarbarianCall
         /// <returns>The roadside spawnpoint.</returns>
         internal static Spawnpoint GetRoadSideSpawnPoint(Entity entity)
         {
-            return SpawnpointUtils.GetRoadSideSpawnPoint(entity);
+            return SpawnpointUtils.GetRoadSideSpawnPoint(entity.Position, entity.Heading);
         }
 
         /// <summary>

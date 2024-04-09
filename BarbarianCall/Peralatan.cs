@@ -31,21 +31,21 @@ namespace BarbarianCall
             float min = minDistance * minDistance;
             try
             {
-                Logger.ToLog("Calculating the best location for callout");
+                Logger.Log("Calculating the best location for callout");
                 List<Spawnpoint> suitable = spawnPoints.Where(sp => Vector3.DistanceSquared(sp,PlayerPed)  < max && Vector3.DistanceSquared(sp, PlayerPed) > min
                  && sp.Position.HeightDiff(Game.LocalPlayer.Character) < 35f).ToList();
                 if (suitable.Count > 0)
                 {
-                    Logger.ToLog($"Found {suitable.Count} suitable location, choosing a random location from that list");
+                    Logger.Log($"Found {suitable.Count} suitable location, choosing a random location from that list");
                     Spawnpoint selected = suitable.GetRandomElement(true);
-                    Logger.ToLog(string.Format("Location selected is {0} in {1}", selected, GetZoneName(selected.Position)));
+                    Logger.Log(string.Format("Location selected is {0} in {1}", selected, GetZoneName(selected.Position)));
                     return selected;
                 }
             }
             catch (Exception e)
             {
-                Logger.ToLog(string.Format("We have problem when selecting a spawnpoint | {0}", e.Message));
-                Logger.ToLog(e.ToString());
+                Logger.Log(string.Format("We have problem when selecting a spawnpoint | {0}", e.Message));
+                Logger.Log(e.ToString());
                 NetExtension.SendError(e);
             }         
             return Spawnpoint.Zero;
@@ -105,7 +105,7 @@ namespace BarbarianCall
             if (vehicle)
             {
                 string plate = GetRandomPlateNumber();
-                Logger.ToLog(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate));
+                Logger.Log(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate));
             }           
         }
         internal static int RandomNextSecure(int minValue, int maxValue) => RandomNextSecure(maxValue - minValue) + minValue;
@@ -188,7 +188,7 @@ namespace BarbarianCall
         internal static bool Speaking;
         internal static void HandleSpeech(List<string> Dialogue, params Ped[] talkers)
         {
-            Logger.ToLog("Speech Started");
+            Logger.Log("Speech Started");
             Speaking = true;
             Ped playerPed = Game.LocalPlayer.Character;
             Vector3 playerPos = Game.LocalPlayer.Character.Position;
@@ -421,7 +421,7 @@ namespace BarbarianCall
                     }
                     if (sw.ElapsedMilliseconds > TimeSpan.FromSeconds(5).TotalMilliseconds)
                     {
-                        Logger.ToLog(string.Format("failed to get headshot because of timeout. {0}, {1}", Functions.GetPersonaForPed(ped).FullName, ped.Model.Name));
+                        Logger.Log(string.Format("failed to get headshot because of timeout. {0}, {1}", Functions.GetPersonaForPed(ped).FullName, ped.Model.Name));
                         return failedReturn;
                     }
                 }
@@ -442,7 +442,7 @@ namespace BarbarianCall
             if (handle.HasValue)
             {
                 if (N.Natives.IS_PEDHEADSHOT_VALID<bool>(handle.Value)) N.Natives.UNREGISTER_PEDHEADSHOT<uint>(handle.Value);
-                else Logger.ToLog($"headshot with handle {handle.Value} is invalid");
+                else Logger.Log($"headshot with handle {handle.Value} is invalid");
             }
         }
 
@@ -459,7 +459,7 @@ namespace BarbarianCall
         {
             if (list.Count >= byte.MaxValue)
             {
-                Logger.ToLog("ShuffleSecure is not supported on this list");
+                Logger.Log("ShuffleSecure is not supported on this list");
                 Shuffle(list);
                 return;
             }

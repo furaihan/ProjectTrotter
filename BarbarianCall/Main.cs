@@ -60,9 +60,9 @@ namespace BarbarianCall
                     typeof(Callouts.StolenBoatTrailer), typeof(Callouts.DriveByInProgress)};
                 foreach (Type callout in callouts)
                 {
-                    Logger.ToLog(string.Format("Registering {0} callout", callout.Name));
+                    Logger.Log(string.Format("Registering {0} callout", callout.Name));
                     Functions.RegisterCallout(callout);
-                    Logger.ToLog(string.Format("{0} has been registered successfully", callout.Name));
+                    Logger.Log(string.Format("{0} has been registered successfully", callout.Name));
                 }
                 $"Adding Console Command".ToLog();
                 Game.AddConsoleCommands(new[] { typeof(Commands) });

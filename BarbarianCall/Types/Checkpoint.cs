@@ -148,7 +148,7 @@ namespace BarbarianCall.Types
             }
             catch (Exception e)
             {
-                Logger.ToLog("Failed to create checkpoint");
+                Logger.Log("Failed to create checkpoint");
                 e.ToString().ToLog();
             }          
         }

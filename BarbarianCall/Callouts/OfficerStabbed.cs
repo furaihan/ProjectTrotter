@@ -51,8 +51,8 @@ namespace BarbarianCall.Callouts
             SpawnHeading = Spawn;
             if (Position == Vector3.Zero || SpawnHeading == 0f)
             {
-                Logger.ToLog("Officer Stabbed callout aborted");
-                Logger.ToLog("No nearby location found");
+                Logger.Log("Officer Stabbed callout aborted");
+                Logger.Log("No nearby location found");
                 return false;
             }           
             ShowCalloutAreaBlipBeforeAccepting(Position, 40f);

@@ -74,7 +74,7 @@ namespace BarbarianCall.Callouts
                 Color = Yellow
             };
             Blip.EnableRoute(Yellow);
-            Logger.ToLog($"{GetType().Name} | Preparing suspect...");
+            Logger.Log($"{GetType().Name} | Preparing suspect...");
             Driver = new FreemodePed(Spawn, SpawnHeading, true);
             Passenger1 = new FreemodePed(Position, SpawnHeading, true);
             Passenger2 = new FreemodePed(Position, SpawnHeading, true);
@@ -584,7 +584,7 @@ namespace BarbarianCall.Callouts
                             var pursuitPeds = LSPDFR.GetPursuitPeds(Pursuit);
                             if (pursuitPeds.Any(s => s && Suspects.Contains(s)))
                             {
-                                Logger.ToLog("Suspect is fleeing, setting up a pursuit");
+                                Logger.Log("Suspect is fleeing, setting up a pursuit");
                                 PursuitCreated = true;
                                 Suspects.ForEach(s =>
                                 {
@@ -606,7 +606,7 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     if (!PursuitCreated)
                     {
-                        Logger.ToLog("Telling all suspect to leave their vehicle");
+                        Logger.Log("Telling all suspect to leave their vehicle");
                         Suspects.ForEach(x =>
                         {
                             if (x)

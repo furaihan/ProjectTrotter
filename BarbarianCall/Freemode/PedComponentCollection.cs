@@ -23,7 +23,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Torso) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Torso) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -38,7 +38,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Head) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Head) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -53,7 +53,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Mask) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Mask) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -68,7 +68,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Shoes) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Shoes) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -83,7 +83,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Leg) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Leg) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -98,7 +98,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Parachute) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Parachute) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -113,7 +113,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Decal) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Decal) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -128,7 +128,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.UnderShirt) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.UnderShirt) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -143,7 +143,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.HairStyle) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.HairStyle) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -158,7 +158,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.BodyArmor) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.BodyArmor) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -173,7 +173,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Tops) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Tops) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);
@@ -188,7 +188,7 @@ namespace BarbarianCall.Freemode
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Accessories) Logger.ToLog("Wrong componentID");
+                if (value.ComponentID != PedComponent.EComponentID.Accessories) Logger.Log("Wrong componentID");
                 else
                 {
                     PedComponent.SetPedComponent(_owner, value);

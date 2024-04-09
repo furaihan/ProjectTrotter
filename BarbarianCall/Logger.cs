@@ -1,46 +1,98 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using Rage;
 
 namespace BarbarianCall
 {
     internal static class Logger
     {
-        internal static void Print(this string msg) => Game.Console.Print(msg);
-        private static readonly Stopwatch LogStopwatch = new();
-        private static readonly StringBuilder LogBuilder = new();
-        internal static void ToLogDebug(this string micin)
+        private static readonly object LockObject = new object();
+        private static readonly ConcurrentQueue<string> LogQueue = new ConcurrentQueue<string>();
+        private static readonly Thread LoggerThread;
+        private static readonly AutoResetEvent LogEvent = new AutoResetEvent(false);
+        private static readonly StringBuilder LogBuilder = new StringBuilder();
+        private static readonly string LogFilePath = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "BarbarianCall.log");
+        private static readonly int MaxLogFileSize = 10 * 1024 * 1024; // 10 MB
+        private static long CurrentLogFileSize;
+
+        static Logger()
         {
-#if DEBUG
-            ToLog(micin);
-#endif
+            LoggerThread = new Thread(LoggerWorker) { IsBackground = true };
+            LoggerThread.Start();
         }
-        internal static void ToLogDebug(this string micin, bool makeUppercase)
+
+        internal static void Print(this string msg) => Game.LogTrivial(msg);
+        internal static void ToLog(this string msg) => Log(msg, LogLevel.Info);
+        internal static void ToLogDebug(this string msg) => Log(msg, LogLevel.Debug);
+        internal static void Log(string message, LogLevel logLevel = LogLevel.Info)
         {
-#if DEBUG
-            ToLog(micin, makeUppercase);
-#endif
-        }
-        internal static void ToLog(this string micin) => ToLog(micin, false);
-        internal static void ToLog(this string micin, bool makeUppercase)
-        {
-            if (!LogStopwatch.IsRunning) LogStopwatch.Start();
-            string text = makeUppercase ? micin.ToUpper() : micin;
-            Game.LogTrivial(makeUppercase ? "[BARBARIAN-CALL]: " + text : "[BarbarianCall]: " + text);
-            LogBuilder.AppendLine(string.Format("[{0}]: {1}", DateTime.Now.ToString("d MMM yyyy - HH:mm:ss:FFFFF"), text));
-            if (LogStopwatch.ElapsedMilliseconds > 20000)
+            string logMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{logLevel}] {message}";
+            LogQueue.Enqueue(logMessage);
+            LogEvent.Set();
+
+            switch (logLevel)
             {
-                LogStopwatch.Restart();
-                string path = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", "BarbarianCall.log");
-                if (File.Exists(path)) File.AppendAllText(path, LogBuilder.ToString());
-                else Game.LogTrivial("Your log file doesnt exist");
-                LogBuilder.Clear();
+                case LogLevel.Debug:
+                    if (DebugHelper.IsDebugBuild())
+                    {
+                        Game.LogTrivial(logMessage);
+                    }
+                    break;
+                case LogLevel.Info:
+                    Game.LogTrivial(logMessage);
+                    break;
+                case LogLevel.Warning:
+                    Game.LogTrivial("WARNING: " + logMessage);
+                    break;
+                case LogLevel.Error:
+                    Game.LogTrivial("ERROR: " + logMessage);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
             }
         }
+
+        private static void LoggerWorker()
+        {
+            while (true)
+            {
+                LogEvent.WaitOne();
+
+                lock (LockObject)
+                {
+                    while (LogQueue.TryDequeue(out string logMessage))
+                    {
+                        LogBuilder.AppendLine(logMessage);
+                        CurrentLogFileSize += Encoding.UTF8.GetByteCount(logMessage + Environment.NewLine);
+
+                        if (CurrentLogFileSize >= MaxLogFileSize)
+                        {
+                            RollOverLogFile();
+                        }
+                    }
+
+                    File.AppendAllText(LogFilePath, LogBuilder.ToString());
+                    LogBuilder.Clear();
+                }
+            }
+        }
+
+        private static void RollOverLogFile()
+        {
+            string backupFilePath = Path.Combine("Plugins", "LSPDFR", "BarbarianCall", $"BarbarianCall_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
+            File.Move(LogFilePath, backupFilePath);
+            CurrentLogFileSize = 0;
+        }
+    }
+
+    internal enum LogLevel
+    {
+        Debug,
+        Info,
+        Warning,
+        Error
     }
 }

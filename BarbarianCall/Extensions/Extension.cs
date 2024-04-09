@@ -79,7 +79,7 @@ namespace BarbarianCall.Extensions
             {
                 string file = x.Replace("_01", "");
                 file = file.Replace("_", "").ToLower();
-                //Logger.ToLog($"Reading car model {file}");
+                //Logger.Log($"Reading car model {file}");
                 for (int i = 2; i <= 9; i++)
                 {
                     Model model = new(file + i.ToString());

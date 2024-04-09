@@ -28,8 +28,8 @@ namespace BarbarianCall.Callouts
             SpawnHeading = Spawn;
             if (Position == Vector3.Zero || SpawnHeading == 0f)
             {
-                Logger.ToLog("Strange Looking Vehicle callout aborted");
-                Logger.ToLog("No nearby location found");
+                Logger.Log("Strange Looking Vehicle callout aborted");
+                Logger.Log("No nearby location found");
                 return false;
             }
             CarModel = Globals.CarsToSelect.GetRandomElement(m => m.IsValid, true);

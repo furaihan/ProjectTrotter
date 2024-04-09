@@ -24,7 +24,7 @@ namespace BarbarianCall.DivisiXml
         {
             try
             {
-                Logger.ToLog(string.Format("Reading XML File {0}", Path.GetFullPath(filename)));
+                Logger.Log(string.Format("Reading XML File {0}", Path.GetFullPath(filename)));
                 Stopwatch sw = Stopwatch.StartNew();
                 List<Spawnpoint> ret = new();
                 XmlDocument xmlDocument = new();
@@ -38,13 +38,13 @@ namespace BarbarianCall.DivisiXml
                         Convert.ToSingle(coordinate.ChildNodes[0].InnerText));
                     ret.Add(spawnpoint);
                 }
-                Logger.ToLog(string.Format("Deserialized {0} locations from {1}", ret.Count, Path.GetFileName(filename)));
-                Logger.ToLog(string.Format("Reading this XML file took {0} ms", sw.ElapsedMilliseconds));
+                Logger.Log(string.Format("Deserialized {0} locations from {1}", ret.Count, Path.GetFileName(filename)));
+                Logger.Log(string.Format("Reading this XML file took {0} ms", sw.ElapsedMilliseconds));
                 return ret;
             }
             catch (Exception e)
             {
-                Logger.ToLog(string.Format("Failed to deserialize {0} : {1}", Path.GetFullPath(filename), e.Message));
+                Logger.Log(string.Format("Failed to deserialize {0} : {1}", Path.GetFullPath(filename), e.Message));
                 e.ToString().ToLog();
             }
             return new List<Spawnpoint>();
@@ -57,7 +57,7 @@ namespace BarbarianCall.DivisiXml
         {
             try
             {
-                Logger.ToLog(string.Format("Reading XML File {0}", Path.GetFullPath(PedDecalXml)));
+                Logger.Log(string.Format("Reading XML File {0}", Path.GetFullPath(PedDecalXml)));
                 Stopwatch sw = Stopwatch.StartNew();
                 List<Tuple<string, string>> ret = new();
                 XmlDocument xmlDocument = new();
@@ -74,8 +74,8 @@ namespace BarbarianCall.DivisiXml
                         }
                     }
                 }
-                Logger.ToLog(string.Format("Deserialized {0} decal from {1}", ret.Count, Path.GetFileName(PedDecalXml)));
-                Logger.ToLog(string.Format("Reading this XML file took {0} ms", sw.ElapsedMilliseconds));
+                Logger.Log(string.Format("Deserialized {0} decal from {1}", ret.Count, Path.GetFileName(PedDecalXml)));
+                Logger.Log(string.Format("Reading this XML file took {0} ms", sw.ElapsedMilliseconds));
                 return ret;
             }
             catch (Exception e)
