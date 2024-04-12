@@ -186,7 +186,7 @@ namespace BarbarianCall.Callouts
                         if (Paramedic2) Paramedic2.WarpIntoVehicle(Ambulance, 0);
                     }
                     if (Ambulance) Ambulance.Heading = ambulanceSpawn;
-                    if (Ambulance) Ambulance.RandomiseLicensePlate();
+                    if (Ambulance) Ambulance.RandomizeLicensePlate();
                     List<Entity> ambulanceEntities = new() { Ambulance, Paramedic1, Paramedic2 };
                     ambulanceEntities.ForEach(e => e.MakePersistent());
                     ambulanceEntities.ForEach(e => CalloutEntities.Add(e));
@@ -253,7 +253,7 @@ namespace BarbarianCall.Callouts
                     if (Paramedic2) Paramedic2.Tasks.AchieveHeading(Paramedic2.GetHeadingTowards(Civilian)).WaitForCompletion(1000);
                     if (Paramedic1) Paramedic1.PlayScenarioAction(PedScenario.CODE_HUMAN_MEDIC_KNEEL, true);
                     if (Paramedic2) Paramedic2.PlayScenarioAction(PedScenario.CODE_HUMAN_MEDIC_TEND_TO_DEAD, true);
-                    GameFiber.Wait(Peralatan.Random.Next(5000, 10000));
+                    GameFiber.Wait(MyRandom.Next(5000, 10000));
                     if (Paramedic1) Paramedic1.Tasks.Clear();
                     if (Paramedic2) Paramedic2.Tasks.Clear();
                     if (Civilian) Civilian.Tasks.Clear();
@@ -280,7 +280,7 @@ namespace BarbarianCall.Callouts
                         }
                     });
                     Spawnpoint hospital = Globals.Hospitals.OrderBy(x => Vector3.DistanceSquared(PlayerPed.Position, x.Position)).FirstOrDefault();
-                    Peralatan.DisplayNotifWithLogo("Please escort this ambulance to the hospital", icon: NotificationIcon.Email, hudColor: RAGENativeUI.HudColor.BlueDark);
+                    GenericUtils.DisplayNotifWithLogo("Please escort this ambulance to the hospital", icon: NotificationIcon.Email, hudColor: RAGENativeUI.HudColor.BlueDark);
                     if (Blip) Blip.Delete();
                     Blip = new Blip(hospital)
                     {

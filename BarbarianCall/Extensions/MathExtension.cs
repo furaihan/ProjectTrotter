@@ -119,8 +119,8 @@ namespace BarbarianCall.Extensions
         }
         public static Vector3 AroundPosition(this Vector3 vector3, float minDistance, float maxDistance)
         {
-            float x = Peralatan.Random.NextDouble() > 0.5 ? GetRandomFloatInRange(minDistance, maxDistance) : -GetRandomFloatInRange(minDistance, maxDistance);
-            float y = Peralatan.Random.NextDouble() > 0.5 ? GetRandomFloatInRange(minDistance, maxDistance) : -GetRandomFloatInRange(minDistance, maxDistance);
+            float x = MyRandom.NextDouble() > 0.5 ? GetRandomFloatInRange(minDistance, maxDistance) : -GetRandomFloatInRange(minDistance, maxDistance);
+            float y = MyRandom.NextDouble() > 0.5 ? GetRandomFloatInRange(minDistance, maxDistance) : -GetRandomFloatInRange(minDistance, maxDistance);
             return vector3 + new Vector3(x, y, 0.0f);
         }
         public static float ToHeading(this Vector3 v) => (float)((Math.Atan2(v.X, -v.Y) + Math.PI) * (180.0 / Math.PI));

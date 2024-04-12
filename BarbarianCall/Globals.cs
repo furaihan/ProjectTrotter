@@ -82,7 +82,7 @@
         /// <summary>
         /// Defines the AudibleCarModel.
         /// </summary>
-        public static Model[] AudibleCarModel;
+        public static Model[] ScannerVehicleModel;
         public static Dictionary<uint, string> AudioHash = new();
 
         /// <summary>
@@ -585,6 +585,7 @@
         internal static Dictionary<WeaponAsset, List<string>> WeaponMKIIAndItsComponents = new()
         {
             {
+                //Bullpup Rifle MK2
                 0x84D6FAFD, new List<string>()
                 {
                     "COMPONENT_BULLPUPRIFLE_MK2_CLIP_02",
@@ -596,6 +597,7 @@
                 }
             },
             {
+                // Special Carbine MK2
                 0x969C3D67, new List<string>()
                 {
                     "COMPONENT_SPECIALCARBINE_MK2_CLIP_02",
@@ -607,6 +609,7 @@
                 }
             },
             {
+                // Assault Rifle MK2
                 0x394F415C, new List<string>()
                 {
                     "COMPONENT_ASSAULTRIFLE_MK2_CLIP_02",
@@ -618,6 +621,7 @@
                 }
             },
             {
+                // Carbine Rifle MK2
                 0xFAD1F1C9, new List<string>()
                 {
                     "COMPONENT_CARBINERIFLE_MK2_CLIP_02",
@@ -629,6 +633,7 @@
                 }
             },
             {
+                // Pump Shotgun MK2
                 0x555AF99A, new List<string>()
                 {
                     "COMPONENT_PUMPSHOTGUN_MK2_CLIP_HOLLOWPOINT",
@@ -638,7 +643,8 @@
                 }
             },
             {
-                0xDBBD7280, new List<string>()//Combat-MG MK2
+                // Combat MG MK2
+                0xDBBD7280, new List<string>()
                 {
                     "COMPONENT_COMBATMG_MK2_CLIP_02",
                     "COMPONENT_AT_AR_AFGRIP_02",

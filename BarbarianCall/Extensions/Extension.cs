@@ -46,53 +46,69 @@ namespace BarbarianCall.Extensions
         }
         internal static Model GetRandomMaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsMale && !x.IsFreemodePed() && !L.IsPedACop(x) && !x.CreatedByTheCallingPlugin).Select(x => x.Model).GetRandomElement();
         internal static Model GetRandomFemaleModel() => World.GetAllPeds().Where(x => x && x.IsHuman && x.IsFemale && !x.IsFreemodePed() && !L.IsPedACop(x) && !x.CreatedByTheCallingPlugin).Select(x => x.Model).GetRandomElement();
-        internal static void GetAudibleVehicleModel()
+        internal static void GetVehicleScannerAudio()
         {
-            IEnumerable<string> files = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL", "*.wav", SearchOption.AllDirectories).Select(Path.GetFileNameWithoutExtension).Where(x => !x.ToLower().StartsWith("0x"));
-            files = files.Select(x => x.Replace("_01", "")).Select(x => x.Replace("_", ""));
-            List<uint> hashes = files.Select(x => Game.GetHashKey(x.ToLower())).ToList();
-            List<Model> ret = Model.VehicleModels.Where(m => hashes.Contains(m.Hash)).ToList();
-            int c = 0;
-            IEnumerable<string> fb = Directory.EnumerateFiles(@"lspdfr\audio\scanner\CAR_MODEL", "*.wav", SearchOption.AllDirectories).Select(Path.GetFileNameWithoutExtension);
-            foreach (var x in fb)
+            // Get all .wav files in the lspdfr\audio\scanner\CAR\_MODEL directory and its subdirectories
+            var carModelFiles = Directory.GetFiles(@"lspdfr\audio\scanner\CAR_MODEL", "*.wav", SearchOption.AllDirectories)
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(x => !x.ToLower().StartsWith("0x"));
+
+            // Remove the "_01" and "_" substrings from the file names
+            var cleanedFileNames = carModelFiles.Select(x => x.Replace("_01", "")).Select(x => x.Replace("_", ""));
+
+            // Get the hashes of the cleaned file names
+            var hashes = cleanedFileNames.Select(x => Game.GetHashKey(x.ToLower())).ToList();
+
+            // Get the valid vehicle models with hashes matching the cleaned file names
+            var validVehicleModels = Model.VehicleModels.Where(m => hashes.Contains(m.Hash) && m.IsInCdImage && m.IsValid).ToList();
+
+            // Process files starting with "0x"
+            var processedCount = 0;
+            var filesStartingWithZeroX = Directory.EnumerateFiles(@"lspdfr\audio\scanner\CAR\_MODEL", "*.wav", SearchOption.AllDirectories)
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(x => x.ToLower().StartsWith("0x"));
+
+            foreach (var file in filesStartingWithZeroX)
             {
-                if (x.ToLower().StartsWith("0x"))
+                if (uint.TryParse(file, out var hash))
                 {
-                    if (uint.TryParse(x, out var hash))
+                    var model = new Model(hash);
+                    if (model.IsInCdImage && model.IsValid && !validVehicleModels.Contains(model))
                     {
-                        Model model = new(hash);
-                        if (model.IsInCdImage && model.IsValid && !ret.Contains(model))
-                        {
-                            ret.Add(model);
-                            if (!Globals.AudioHash.ContainsKey(model.Hash)) Globals.AudioHash.Add(model.Hash, x.Replace("_01", ""));
-                            c++;
-                            if (c % 10 == 0) GameFiber.Yield();
-                        }
+                        validVehicleModels.Add(model);
+                        var cleanedFileName = file.Replace("_01", "");
+                        if (!Globals.AudioHash.ContainsKey(model.Hash))
+                            Globals.AudioHash.Add(model.Hash, cleanedFileName);
+
+                        processedCount++;
+                        if (processedCount % 10 == 0)
+                            GameFiber.Yield();
                     }
                 }
-                else
-                {
-                    var name = x.Replace("_01", "").Replace("_", "");
-                }
             }
-            foreach (var x in fb)
+
+            // Process files with numerical suffixes (2-9)
+            foreach (var file in cleanedFileNames)
             {
-                string file = x.Replace("_01", "");
-                file = file.Replace("_", "").ToLower();
-                //Logger.Log($"Reading car model {file}");
                 for (int i = 2; i <= 9; i++)
                 {
-                    Model model = new(file + i.ToString());
-                    if (model.IsInCdImage && model.IsValid && !ret.Contains(model))
+                    var modelName = $"{file}{i}";
+                    var model = new Model(modelName);
+                    if (model.IsInCdImage && model.IsValid && !validVehicleModels.Contains(model))
                     {
-                        ret.Add(model);
-                        if (!Globals.AudioHash.ContainsKey(model.Hash)) Globals.AudioHash.Add(model.Hash, x.Replace("_01", ""));
+                        validVehicleModels.Add(model);
+                        var originalFileName = carModelFiles.FirstOrDefault(f => f.Replace("_01", "").Replace("_", "").ToLower() == modelName);
+                        if (!Globals.AudioHash.ContainsKey(model.Hash) && !string.IsNullOrEmpty(originalFileName))
+                            Globals.AudioHash.Add(model.Hash, originalFileName.Replace("_01", ""));
                     }
+
+                    processedCount++;
+                    if (processedCount % 10 == 0)
+                        GameFiber.Yield();
                 }
-                c++;
-                if (c % 10 == 0) GameFiber.Yield();
             }
-            Globals.AudibleCarModel = ret.Where(x => x.IsInCdImage && x.IsValid).ToArray();
+
+            Globals.ScannerVehicleModel = validVehicleModels.ToArray();
         }
         internal static bool IsFreemodePed(this Ped ped) => ped.Model.Hash == 0x705E61F2 || ped.Model.Hash == 0x9C9EFFD8;
         internal static Vector3 GetOffsetFromEntityGivenWorldCoords(Entity entity, Vector3 position) => NativeFunction.Natives.GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS<Vector3>(entity, position.X, position.Y, position.Z);        

@@ -58,7 +58,7 @@ namespace BarbarianCall.Callouts
             if (spawn2 == Spawnpoint.Zero) spawn2 = SpawnManager.GetVehicleSpawnPoint(Spawn.Position, 50, 80);
             if (spawn2 == Spawnpoint.Zero)
             {
-                spawn2.Position = World.GetNextPositionOnStreet(CalloutPosition.Around2D(Peralatan.Random.Next(30, 50)));
+                spawn2.Position = World.GetNextPositionOnStreet(CalloutPosition.Around2D(MyRandom.Next(30, 50)));
                 spawn2.Heading = SpawnpointUtils.GetRoadHeading(spawn2.Position);
             }           
             var tmp = Globals.GangPedModels.Values.GetRandomNumberOfElements(3);
@@ -67,7 +67,7 @@ namespace BarbarianCall.Callouts
             Gang1Model.ForEach(m => m.LoadAndWait());
             Gang2Model.ForEach(m => m.LoadAndWait());
             CalloutPosition = Spawn;
-            gangMemberCount = Peralatan.Random.Next(3, 8);
+            gangMemberCount = MyRandom.Next(3, 8);
             CalloutAdvisory = string.Format("Total number of suspects is {0}", gangMemberCount * 2);
             CalloutMessage = "Mass Street Fighting";
             ShowCalloutAreaBlipBeforeAccepting(Spawn, 80f);

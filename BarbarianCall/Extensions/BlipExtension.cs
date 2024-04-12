@@ -6,8 +6,18 @@ namespace BarbarianCall.Extensions
 {
     public static class BlipExtension
     {
-        public static bool DoesBlipExist(Blip blip) => NativeFunction.Natives.DOES_BLIP_EXIST<bool>(blip);
-        public static void SetBlipDisplayType(Blip blip, BlipDisplayType displayType) => NativeFunction.Natives.SET_BLIP_DISPLAY(blip, (int)displayType);
+        /// <summary>
+        /// Gets whether the blip exists.
+        /// </summary>
+        /// <param name="blip"></param>
+        /// <returns></returns>
+        internal static bool DoesBlipExist(Blip blip) => NativeFunction.Natives.DOES_BLIP_EXIST<bool>(blip);
+        /// <summary>
+        /// Sets the blip display type.
+        /// </summary>
+        /// <param name="blip"> The blip to set the display type for. </param>
+        /// <param name="displayType"> The display type to set. </param>
+        internal static void SetBlipDisplayType(Blip blip, BlipDisplayType displayType) => NativeFunction.Natives.SET_BLIP_DISPLAY(blip, (int)displayType);
         public static void SetBlipHighDetail(Blip blip, bool highDetail) => NativeFunction.Natives.SET_BLIP_HIGH_DETAIL(blip, highDetail);
         public static void SetBlipHiddenOnLegend(Blip blip, bool hidden) => NativeFunction.Natives.SET_BLIP_HIDDEN_ON_LEGEND(blip, hidden);
         /// <summary>

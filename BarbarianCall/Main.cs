@@ -28,7 +28,7 @@ namespace BarbarianCall
                     }
                 }
             }
-            Globals.RegisteredPedHeadshot.ForEach(Peralatan.UnregisterPedHeadshot);
+            Globals.RegisteredPedHeadshot.ForEach(GenericUtils.UnregisterPedHeadshot);
             "Unloaded successfully".ToLog();           
         }
 

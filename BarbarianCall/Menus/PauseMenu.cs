@@ -94,7 +94,7 @@ namespace BarbarianCall.Menus
                 GameFiber.Yield();
                 pauseMenu.Update();
                 MainMenu.Pool.ProcessMenus();
-                if (!UIMenu.IsAnyMenuVisible && Peralatan.CheckKey(Keys.RControlKey, Keys.D0))
+                if (!UIMenu.IsAnyMenuVisible && GenericUtils.CheckKey(Keys.RControlKey, Keys.D0))
                 {
                     MainMenu.BarbarianCallMenu.Visible = !MainMenu.BarbarianCallMenu.Visible;
                 }

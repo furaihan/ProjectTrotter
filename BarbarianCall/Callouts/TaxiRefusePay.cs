@@ -37,7 +37,7 @@ namespace BarbarianCall.Callouts
             PursuitCreated = false;
             CalloutRunning = false;
             DeclareVariable();
-            Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "TrafficStop.xml")));
+            Spawn = GenericUtils.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "TrafficStop.xml")));
             Position = Spawn;
             SpawnHeading = Spawn;
             if (Position == Vector3.Zero || SpawnHeading == 0f)
@@ -64,7 +64,7 @@ namespace BarbarianCall.Callouts
             Taxi = new Vehicle(TaxiModel, Position, SpawnHeading);
             Taxi.MakePersistent();
             Taxi.Mods.ApplyAllMods();
-            Taxi.RandomiseLicensePlate();
+            Taxi.RandomizeLicensePlate();
             TaxiDriver = Taxi.CreateRandomDriver();
             TaxiDriver.MakeMissionPed();
             TaxiDriver.RelationshipGroup = TaxiRelation;
@@ -88,9 +88,9 @@ namespace BarbarianCall.Callouts
             Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, TaxiRelation, Relationship.Neutral);
             Game.SetRelationshipBetweenRelationshipGroups(RelationshipGroup.Cop, CriminalRelation, Relationship.Neutral);
             suspectManWoman = Suspect.IsMale ? "Man" : "Woman";
-            int calloutScenario = Peralatan.Random.Next(1, 300);
+            int calloutScenario = MyRandom.Next(1, 300);
             $"Callout scenario {calloutScenario}".ToLog();
-            if (Peralatan.Random.Next() % 2 == 0) SituationCommon();
+            if (MyRandom.Next() % 2 == 0) SituationCommon();
             else if (calloutScenario < 100) SituationFight();
             else if (calloutScenario < 200) SituationHostage();
             else SituationDead();
@@ -204,7 +204,7 @@ namespace BarbarianCall.Callouts
                     suspectManWoman = Suspect.IsMale ? "Man" : "Woman";
                     Suspect.DisplayNotificationsWithPedHeadshot("Passenger Details", $"~y~Name~s~: {SuspectPersona.FullName}~n~" +
                         $"~y~BirthDay~s~: {SuspectPersona.Birthday.ToShortDateString()}");
-                    if (Peralatan.Random.Next(2500, 3500) % 4 == 0)
+                    if (MyRandom.Next(2500, 3500) % 4 == 0)
                     {
                         Suspect.SetPedAsWanted();
                     }
@@ -224,7 +224,7 @@ namespace BarbarianCall.Callouts
                     TaxiDriver.Tasks.FightAgainst(Suspect);
                     Suspect.PlayAmbientSpeech(null, InsultSpeech.GetRandomElement(), 0, SpeechModifier.AllowRepeat);
                     TaxiDriver.PlayAmbientSpeech(null, InsultSpeech.GetRandomElement(), 0, SpeechModifier.AllowRepeat);
-                    Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout");
+                    Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout");
                     Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     GameFiber.StartNew(() =>
                     {
@@ -233,7 +233,7 @@ namespace BarbarianCall.Callouts
                             if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 12000L)
                             {
                                 Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                                Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout");
+                                Game.DisplayHelp($"~y~Handle the situation as you see fit~n~~y~press {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ to end the callout");
                             }                                                        
                             GameFiber.Yield();
                             if (SuspectStopped) break;
@@ -348,7 +348,7 @@ namespace BarbarianCall.Callouts
                             GameFiber.Yield();
                         }
                     });
-                    int HostageScenario = Peralatan.Random.Next(1, 4000);
+                    int HostageScenario = MyRandom.Next(1, 4000);
                     $"Callout scenario: {HostageScenario}".ToLog();
                     while (CalloutRunning)
                     {
@@ -467,7 +467,7 @@ namespace BarbarianCall.Callouts
                     WitnessCar = new Vehicle(Globals.CarsToSelect.GetRandomElement(m => m.IsValid, true),
                         Taxi.Position + Taxi.ForwardVector * 9f, Taxi.Heading);
                     Witness.WarpIntoVehicle(WitnessCar, -1);
-                    if (Peralatan.Random.Next() % 5 == 0)
+                    if (MyRandom.Next() % 5 == 0)
                     {
                         Ped witnPass = new(Position, SpawnHeading);
                         witnPass.MakeMissionPed();
@@ -483,15 +483,15 @@ namespace BarbarianCall.Callouts
                     WitnessBlip = Witness.AttachBlip();
                     WitnessBlip.Color = Color.Orange;
                     CalloutBlips.Add(WitnessBlip);
-                    Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
+                    Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, press {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
                     Functions.RequestBackup(TaxiDriver.Position, EBackupResponseType.Code3, EBackupUnitType.Ambulance);
                     "Ambulance is en route to the scene".DisplayNotifWithLogo("~y~Taxi Passenger Refuse To Pay");
-                    Game.DisplayHelp($"~y~Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~y~ to speak with the witness");
+                    Game.DisplayHelp($"~y~Press {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~y~ to speak with the witness");
                     Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y))
+                        if (GenericUtils.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y))
                         {
                             if (PlayerPed.DistanceToSquared(Witness) < 25f && PlayerPed.IsOnFoot) break;
                             else Game.DisplayHelp("~s~Please move ~p~closer~s~ and ~o~leave~s~ from vehicle");
@@ -499,7 +499,7 @@ namespace BarbarianCall.Callouts
                         if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Timer > 12000)
                         {
                             Timer = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                            Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
+                            Game.DisplayHelp($"~s~Please move closer to the ~o~witness~s~, Press {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)}~s~ to speak with the witness");
                         }
                     }
                     if (!CalloutRunning) return;
@@ -523,7 +523,7 @@ namespace BarbarianCall.Callouts
                      };
                     Witness.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
                     Time = DateTime.UtcNow;
-                    Peralatan.HandleSpeech(witnessFlow, Witness);
+                    GenericUtils.HandleSpeech(witnessFlow, Witness);
                     GameFiber.StartNew(() =>
                     {
                         GameFiber.Wait(8000);
@@ -532,7 +532,7 @@ namespace BarbarianCall.Callouts
                     });
                     Game.DisplayHelp("~y~Dispatch is trying to find ~o~suspect~y~ information, please wait...", 10000);
                     $"Conversation is took {(DateTime.UtcNow - Time).TotalSeconds} seconds".ToLog();
-                    GameFiber.Wait(Peralatan.Random.Next(7500, 10000));
+                    GameFiber.Wait(MyRandom.Next(7500, 10000));
                     Manusia = new Manusia(Suspect, SuspectPersona);
                     Game.HideHelp();
                     Functions.PlayScannerAudioUsingPosition("ATTENTION_ALL_UNITS SUSPECT_LAST_SEEN IN_OR_ON_POSITION", Suspect.Position);
@@ -574,7 +574,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Yield();
                     }
                     if (!CalloutRunning) return;
-                    if (Peralatan.Random.Next(2150, 3500) % 8 == 0)
+                    if (MyRandom.Next(2150, 3500) % 8 == 0)
                     {
                         Suspect.Tasks.PutHandsUp(-1, PlayerPed);
                         Game.DisplayHelp("~y~Suspect is ~g~surrendered~y~, please perform an ~o~arrest~y~ to the ~r~suspect");
@@ -628,8 +628,8 @@ namespace BarbarianCall.Callouts
                     Suspect.Tasks.LeaveVehicle(Taxi, LeaveVehicleFlags.None);
                     if (StopThePedRunning)
                     {
-                        int rand1 = Peralatan.Random.Next();
-                        int rand2 = Peralatan.Random.Next(1, 1000);
+                        int rand1 = MyRandom.Next();
+                        int rand2 = MyRandom.Next(1, 1000);
                         if (rand1 % 2 == 0)
                         {
                             API.StopThePedFunc.SetPedAlcoholOverLimit(Suspect, true);
@@ -637,7 +637,7 @@ namespace BarbarianCall.Callouts
                         else if (rand2 < 50) API.StopThePedFunc.SetPedUnderDrugsInfluence(Suspect, true);
                         else API.StopThePedFunc.InjectPedDangerousItem(Suspect);
                     }
-                    if (Peralatan.Random.Next() % 5 == 0) Suspect.SetPedAsWanted();
+                    if (MyRandom.Next() % 5 == 0) Suspect.SetPedAsWanted();
                     SuspectPersona = Functions.GetPersonaForPed(Suspect);
                     Manusia = new Manusia(Suspect, SuspectPersona);
                     Manusia.DisplayNotif();
@@ -648,16 +648,16 @@ namespace BarbarianCall.Callouts
                     Blip = Suspect.AttachBlip();
                     Blip.Color = Color.Yellow;
                     Blip.Scale = 0.75f;
-                    Game.DisplayHelp($"Get closer with the driver, and press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
+                    Game.DisplayHelp($"Get closer with the driver, and press {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
                     Time = DateTime.UtcNow + TimeSpan;
                     while (CalloutRunning)
                     {
                         if (DateTime.UtcNow > Time)
                         {
                             Time = DateTime.UtcNow + TimeSpan;
-                            Game.DisplayHelp($"Get closer with the driver, Press {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
+                            Game.DisplayHelp($"Get closer with the driver, Press {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y)} to talk");
                         }
-                        if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y))
+                        if (GenericUtils.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Y))
                         {
                             if (!PlayerPed.IsInAnyVehicle(false))
                             {
@@ -671,7 +671,7 @@ namespace BarbarianCall.Callouts
                     if (!CalloutRunning) return;
                     TaxiDriver.Tasks.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen).WaitForCompletion(4000);
                     if (TaxiDriver.IsInVehicle(Taxi, false)) TaxiDriver.Tasks.LeaveVehicle(LeaveVehicleFlags.WarpOut).WaitForCompletion(500);
-                    if (Peralatan.Random.Next() % 4 == 0)
+                    if (MyRandom.Next() % 4 == 0)
                     {
                         Suspect.Tasks.Flee(PlayerPed, 500f, -1);
                         GameFiber.Wait(2000);
@@ -691,15 +691,15 @@ namespace BarbarianCall.Callouts
                         DisplayCodeFourMessage();
                         CalloutRunning = false;
                     }
-                    else Peralatan.HandleSpeech(commond.GetRandomElement(), TaxiDriver, Suspect);
+                    else GenericUtils.HandleSpeech(commond.GetRandomElement(), TaxiDriver, Suspect);
                     if (!CalloutRunning) return;
                     Game.DisplayHelp("~y~Handle the situation as you see fit, you can do some investigation ~g~(e.g. ped check, frisk, or ask some question)~s~~n~" +
-                        $"To end the callout, press and ~y~hold~s~ {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}");
+                        $"To end the callout, press and ~y~hold~s~ {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}");
                     DisplayGPNotif();
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
-                        if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End))
+                        if (GenericUtils.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End))
                         {
                             GameFiber.Sleep(320);
                             if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
@@ -707,7 +707,7 @@ namespace BarbarianCall.Callouts
                                 GameFiber.Sleep(1600);
                                 if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End)) break;
                             }
-                            else Game.DisplayHelp($"To end the callout, press and ~y~hold~s~ {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}");
+                            else Game.DisplayHelp($"To end the callout, press and ~y~hold~s~ {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}");
                         }
                         if (SuspectState != ESuspectStates.InAction) break;
                     }

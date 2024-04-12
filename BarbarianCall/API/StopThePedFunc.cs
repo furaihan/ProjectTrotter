@@ -120,7 +120,7 @@ namespace BarbarianCall.API
 
         public static void InjectPedDangerousItem(Rage.Ped ped)
         {
-            List<string> items = Globals.DangerousPedItem.GetRandomNumberOfElements(Peralatan.Random.Next(1, 3), true).ToList();
+            List<string> items = Globals.DangerousPedItem.GetRandomNumberOfElements(MyRandom.Next(1, 3), true).ToList();
             items.Shuffle();
             ped.Metadata.searchPed = "~r~" + items.GetRandomElement() + "~s~";
             Func.injectPedSearchItems(ped);
@@ -150,7 +150,7 @@ namespace BarbarianCall.API
                     case EStopThePedVehicleSearch.SearchPassenger: vehicle.Metadata.searchPassenger = item; break;
                     case EStopThePedVehicleSearch.SearchTrunk: vehicle.Metadata.searchTrunk = item; break;
                     default:
-                        int rand = Peralatan.Random.Next(1, 4000);
+                        int rand = MyRandom.Next(1, 4000);
                         if (rand < 2000) vehicle.Metadata.searchTrunk = item;
                         else if (rand < 3000) vehicle.Metadata.searchDriver = item;
                         else vehicle.Metadata.searchPassenger = item;

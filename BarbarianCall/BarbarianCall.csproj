@@ -103,6 +103,7 @@
     <Compile Include="DebugHelper.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Extensions\MathExtension.cs" />
+    <Compile Include="Extensions\RandomExtension.cs" />
     <Compile Include="Extensions\XmlExtension.cs" />
     <Compile Include="Freemode\OutfitFemale.cs" />
     <Compile Include="Freemode\OutfitMale.cs" />
@@ -127,7 +128,7 @@
     <Compile Include="Menus\VehicleMenu.cs" />
     <Compile Include="MyRandom.cs" />
     <Compile Include="NodeUtils.cs" />
-    <Compile Include="Peralatan.cs" />
+    <Compile Include="GenericUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpawnManager.cs" />
     <Compile Include="SpawnpointUtils.cs" />

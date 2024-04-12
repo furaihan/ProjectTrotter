@@ -87,7 +87,7 @@ namespace BarbarianCall.Menus
                         while (true)
                         {
                             GameFiber.Yield();
-                            if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Tab))
+                            if (GenericUtils.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Tab))
                             {
                                 break;
                             }

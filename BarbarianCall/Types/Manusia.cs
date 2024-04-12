@@ -55,7 +55,7 @@ namespace BarbarianCall.Types
             if (Car && WithVehicle)
             {
                 GameFiber.Wait(575);
-                Peralatan.DisplayNotifWithLogo($"~y~Model~s~: {Car.GetDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}", "~y~Vehicle Details~s~", "mpcarhud", "transport_car_icon");
+                GenericUtils.DisplayNotifWithLogo($"~y~Model~s~: {Car.GetDisplayName()}~n~~y~Color~s~: {CarColor}~n~~y~License Plate~s~: {Car.LicensePlate}", "~y~Vehicle Details~s~", "mpcarhud", "transport_car_icon");
             }
         }
         private string GetCarColor()

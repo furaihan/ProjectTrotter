@@ -42,7 +42,7 @@ namespace BarbarianCall.Callouts
         private Rage.Object boat;
         public override bool OnBeforeCalloutDisplayed()
         {
-            Spawn = Peralatan.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(XmlPath), 1000f, 600f);
+            Spawn = GenericUtils.SelectNearbySpawnpoint(DivisiXml.Deserialization.GetSpawnPointFromXml(XmlPath), 1000f, 600f);
             if (Spawn == Spawnpoint.Zero) Spawn = SpawnManager.GetVehicleSpawnPoint(PlayerPed.Position, 1000f, 500f, true);
             if (Spawn == Spawnpoint.Zero)
             {
@@ -163,23 +163,23 @@ namespace BarbarianCall.Callouts
                         SendCIMessage("Shots Fired!!");
                         GameFiber.Wait(1000);
                         SendCIMessage("Warning all nearby unit");
-                        GameFiber.Wait(Peralatan.Random.Next(500, 1500));
+                        GameFiber.Wait(MyRandom.Next(500, 1500));
                         if (CalloutRunning)
                         {
                             LSPDFR.RequestBackup(truck.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
-                            SendCIMessage($"unit ${Peralatan.GetRandomUnitNumber()} is responding to the scene");
+                            SendCIMessage($"unit ${GenericUtils.GetRandomUnitNumber()} is responding to the scene");
                         }                      
-                        if (Peralatan.Random.Next(2) == 1 && CalloutRunning)
+                        if (MyRandom.Next(2) == 1 && CalloutRunning)
                         {
-                            GameFiber.Wait(Peralatan.Random.Next(500, 1500));
+                            GameFiber.Wait(MyRandom.Next(500, 1500));
                             LSPDFR.RequestBackup(truck.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
-                            SendCIMessage($"unit ${Peralatan.GetRandomUnitNumber()} is responding to the scene");
+                            SendCIMessage($"unit ${GenericUtils.GetRandomUnitNumber()} is responding to the scene");
                         }
-                        if (Peralatan.Random.Next(10) == 1 && CalloutRunning)
+                        if (MyRandom.Next(10) == 1 && CalloutRunning)
                         {
-                            GameFiber.Wait(Peralatan.Random.Next(500, 1500));
+                            GameFiber.Wait(MyRandom.Next(500, 1500));
                             LSPDFR.RequestBackup(truck.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
-                            SendCIMessage($"unit ${Peralatan.GetRandomUnitNumber()} is responding to the scene");
+                            SendCIMessage($"unit ${GenericUtils.GetRandomUnitNumber()} is responding to the scene");
                         }
                     }, "[BarbarianCall] : Additional Callout Fiber");                  
                     while (CalloutRunning)
@@ -284,7 +284,7 @@ namespace BarbarianCall.Callouts
             if (ped)
             {
                 ped.MakeMissionPed();
-                ped.Accuracy = Peralatan.Random.Next(80, 100);
+                ped.Accuracy = MyRandom.Next(80, 100);
                 ped.RelationshipGroup = Criminal;
                 NativeFunction.Natives.GIVE_DELAYED_WEAPON_TO_PED(ped, 0x22D8FE39, -1, true);
                 NativeFunction.Natives.SET_PED_COMBAT_ATTRIBUTES(ped, 5, true);

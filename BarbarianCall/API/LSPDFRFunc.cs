@@ -38,14 +38,14 @@ namespace BarbarianCall.API
         public static void WaitAudioScannerCompletion(int timeoutMilliseconds) => WaitAudioScannerCompletion(TimeSpan.FromMilliseconds(timeoutMilliseconds));
         public static void RequestBackup(Vector3 location, EBackupResponseType responseType)
         {
-            int rand = Peralatan.Random.Next(1, 1000);
+            int rand = MyRandom.Next(1, 1000);
             if (rand < 500) LF.RequestBackup(location, responseType, EBackupUnitType.LocalUnit);
             else if (rand < 825) LF.RequestBackup(location, responseType, EBackupUnitType.StateUnit);
             else LF.RequestBackup(location, responseType, EBackupUnitType.SwatTeam);
         }
         public static void RequestAirUnit(Vector3 location, EBackupResponseType responseType)
         {
-            int rand = Peralatan.Random.Next(1, 1000);
+            int rand = MyRandom.Next(1, 1000);
             if (rand < 800) LF.RequestBackup(location, responseType, EBackupUnitType.AirUnit);
             else LF.RequestBackup(location, responseType, EBackupUnitType.NooseAirUnit);
         }

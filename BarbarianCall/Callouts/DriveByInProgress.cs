@@ -47,7 +47,7 @@ namespace BarbarianCall.Callouts
                 $"{GetType().Name} | Cannot find suitable car model".ToLog();
                 return false;
             }
-            int rnd = Peralatan.Random.Next(2, carModelPool.Count);
+            int rnd = MyRandom.Next(2, carModelPool.Count);
             model1 = carModelPool[rnd];
             model2 = carModelPool[rnd - 2];
             $"Car Model: {model1.Name} & {model2.Name}".ToLog();
@@ -83,8 +83,8 @@ namespace BarbarianCall.Callouts
             veh2 = new Vehicle(model2, spawn2, spawn2);
             veh1.MakePersistent();
             veh2.MakePersistent();
-            veh1.RandomiseLicensePlate();
-            veh2.RandomiseLicensePlate();
+            veh1.RandomizeLicensePlate();
+            veh2.RandomizeLicensePlate();
             veh2.CanTiresBurst = false;
             veh2.Mods.ApplyAllMods();
             SetHealth(veh1, 5000);
@@ -92,7 +92,7 @@ namespace BarbarianCall.Callouts
             FillVehicle(veh1, Gang1Model, RelationshipGroup.Gang1);
             FillVehicle(veh2, Gang2Model, RelationshipGroup.Gang2);
             uint[] heliModelsToChooseFrom = { 0x2F03547B, 0x2C75F0DD, 0x1517D4D9 };
-            chasingHeli = new Vehicle(heliModelsToChooseFrom.GetRandomElement(), (Spawn.Position + new Vector3(0, 0, 650)).Around2D(Peralatan.Random.Next(350, 800)));
+            chasingHeli = new Vehicle(heliModelsToChooseFrom.GetRandomElement(), (Spawn.Position + new Vector3(0, 0, 650)).Around2D(MyRandom.Next(350, 800)));
             pilot = chasingHeli.CreateRandomDriver();
             chasingHeli.MakePersistent();
             RelationshipGroup.Gang1.SetRelationshipWith(RelationshipGroup.Gang2, Relationship.Hate);
@@ -208,28 +208,28 @@ namespace BarbarianCall.Callouts
                                 L.AddCopToPursuit(Pursuit, pilot);
                                 L.SetPursuitDisableAIForPed(pilot, true);
                                 L.RequestBackup(veh1.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
-                                SendCIMessage($"Unit {Peralatan.GetRandomUnitNumber()} is dispatching");
+                                SendCIMessage($"Unit {GenericUtils.GetRandomUnitNumber()} is dispatching");
                                 GameFiber.StartNew(() =>
                                 {
-                                    GameFiber.Wait(Peralatan.Random.Next(5000, 12500));
+                                    GameFiber.Wait(MyRandom.Next(5000, 12500));
                                     if (CalloutRunning)
                                     {
                                         L.RequestBackup(veh1.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
-                                        SendCIMessage($"Unit {Peralatan.GetRandomUnitNumber()} is dispatching");
+                                        SendCIMessage($"Unit {GenericUtils.GetRandomUnitNumber()} is dispatching");
                                     }
-                                    GameFiber.Wait(Peralatan.Random.Next(3000, 5500));
-                                    if (Peralatan.Random.Next(2) == 1)
+                                    GameFiber.Wait(MyRandom.Next(3000, 5500));
+                                    if (MyRandom.Next(2) == 1)
                                     {
                                         if (CalloutRunning)
                                         {
                                             L.RequestBackup(veh1.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
-                                            SendCIMessage($"Unit {Peralatan.GetRandomUnitNumber()} is dispatching");
+                                            SendCIMessage($"Unit {GenericUtils.GetRandomUnitNumber()} is dispatching");
                                         }
                                         GameFiber.Wait(3000);
-                                        if (Peralatan.Random.Next(5) == 3 && CalloutRunning)
+                                        if (MyRandom.Next(5) == 3 && CalloutRunning)
                                         {
                                             L.RequestBackup(veh1.Position, LSPD_First_Response.EBackupResponseType.Pursuit, LSPD_First_Response.EBackupUnitType.SwatTeam);
-                                            SendCIMessage($"Unit {Peralatan.GetRandomUnitNumber()} is dispatching");
+                                            SendCIMessage($"Unit {GenericUtils.GetRandomUnitNumber()} is dispatching");
                                         }
                                     }
                                 });

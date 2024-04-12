@@ -111,7 +111,7 @@ namespace BarbarianCall.SupportUnit
                         };
                         MechanicVehicle.Metadata.BAR_Entity = true;
                         MechanicVehicle.PlaceOnGroundProperly();
-                        MechanicVehicle.RandomiseLicensePlate();
+                        MechanicVehicle.RandomizeLicensePlate();
 
                         MechanicPed = new FreemodePed(Position, Heading, true)
                         {
@@ -181,7 +181,7 @@ namespace BarbarianCall.SupportUnit
                                 GameFiber.StartNew(() =>
                                 {
                                     Game.DisplayHelp($"Mechanic engineering is ~o~not moving~s~ or ~o~too far away~s~, Press "
-                                        + $"{Peralatan.FormatKeyBinding(Keys.None, Keys.Back)} ~y~[Backspace]~s~ to force spawn nearby", 7500);
+                                        + $"{GenericUtils.FormatKeyBinding(Keys.None, Keys.Back)} ~y~[Backspace]~s~ to force spawn nearby", 7500);
                                     Stopwatch helpSW = Stopwatch.StartNew();
                                     while (State == EMechanicState.Driving)
                                     {
@@ -189,7 +189,7 @@ namespace BarbarianCall.SupportUnit
                                         if (helpSW.ElapsedMilliseconds > 18000L)
                                         {
                                             Game.DisplayHelp($"Mechanic engineering is ~o~not moving~s~ or ~o~too far away~s~, Press and hold"
-                                                + $"{Peralatan.FormatKeyBinding(Keys.None, Keys.Back)} ~y~[Backspace]~s~ to force spawn nearby", 7500);
+                                                + $"{GenericUtils.FormatKeyBinding(Keys.None, Keys.Back)} ~y~[Backspace]~s~ to force spawn nearby", 7500);
                                             helpSW.Restart();
                                         }
                                         if (Game.IsKeyDown(Keys.Back))
@@ -200,7 +200,7 @@ namespace BarbarianCall.SupportUnit
                                                 GameFiber.Sleep(1650);
                                                 if (Game.IsKeyDownRightNow(Keys.Back)) warped = true;
                                             }
-                                            else Game.DisplayHelp($"To warp mechanic service, press and hold {Peralatan.FormatKeyBinding(Keys.None, Keys.Back)} ~y~[Backspace]~s~ for 2 seconds");
+                                            else Game.DisplayHelp($"To warp mechanic service, press and hold {GenericUtils.FormatKeyBinding(Keys.None, Keys.Back)} ~y~[Backspace]~s~ for 2 seconds");
                                         }
                                     }
                                 });
@@ -273,7 +273,7 @@ namespace BarbarianCall.SupportUnit
                         GameFiber.Wait(1000);
                         if (MechanicPed) MechanicPed.Tasks.Clear();
                         if (!VehicleToFix) throw new Rage.Exceptions.InvalidHandleableException("Vehicle does not exist");
-                        GameFiber.Wait(Peralatan.Random.Next(1000, 2001));
+                        GameFiber.Wait(MyRandom.Next(1000, 2001));
                         State = EMechanicState.GetCloseWithVehicle;
                         Vector3 repairPos = VehicleToFix.FrontPosition + (VehicleToFix.ForwardVector * 0.25f);
                         jc.LoadAndWait();
@@ -358,7 +358,7 @@ namespace BarbarianCall.SupportUnit
                     GameFiber.Yield(); if (!VehicleToFix) throw new ArgumentException("Vehicle does not exist");
                 }
                 string selectedTalk;
-                if (Peralatan.Random.NextDouble() < SuccessProbability)
+                if (MyRandom.NextDouble() < SuccessProbability)
                 {
                     VehicleToFix.Repair();
                     VehicleToFix.Health = VehicleToFix.MaxHealth;
@@ -394,7 +394,7 @@ namespace BarbarianCall.SupportUnit
                 Game.DisplaySubtitle(selectedTalk, 1000000);
                 State = EMechanicState.Finish;
                 VehicleToFix.LockStatus = VehicleLockStatus.Unlocked;
-                Game.DisplayHelp($"Press {Peralatan.FormatKeyBinding(Keys.None, Keys.NumPad0)} to dissmiss the mechanic", 10000);
+                Game.DisplayHelp($"Press {GenericUtils.FormatKeyBinding(Keys.None, Keys.NumPad0)} to dissmiss the mechanic", 10000);
                 GameFiber.SleepUntil(() => Game.IsKeyDown(Keys.NumPad0), 10000);
                 Game.DisplaySubtitle("");
                 Game.HideHelp();

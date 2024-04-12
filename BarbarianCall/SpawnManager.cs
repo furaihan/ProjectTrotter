@@ -17,6 +17,14 @@ namespace BarbarianCall
         {
             return SpawnpointUtils.GetVehicleSpawnPoint(spatial.Position, minimalDistance, maximumDistance, considerDirection);
         }
+        /// <summary>
+        /// Gets a vehicle spawnpoint based on the provided position, minimal distance, and maximum distance.
+        /// </summary>
+        /// <param name="position"> The position.</param>
+        /// <param name="minimalDistance"> The minimal distance from the position.</param>
+        /// <param name="maximumDistance"> The maximum distance from the position.</param>
+        /// <param name="considerDirection"> Whether to consider the direction of the position.</param>
+        /// <returns> The vehicle spawnpoint.</returns>
         internal static Spawnpoint GetVehicleSpawnPoint(Vector3 position, float minimalDistance, float maximumDistance, bool considerDirection = false)
         {
             return SpawnpointUtils.GetVehicleSpawnPoint(position, minimalDistance, maximumDistance, considerDirection);
@@ -33,6 +41,13 @@ namespace BarbarianCall
         {
             return SpawnpointUtils.GetPedSpawnPoint(pos, minimalDistance, maximumDistance);
         }
+        /// <summary>
+        /// Gets a pedestrian spawnpoint based on the provided spatial object, minimal distance, and maximum distance.
+        /// </summary>
+        /// <param name="spatial"> The spatial object.</param>
+        /// <param name="minimalDistance"> The minimal distance from the spatial object.</param>
+        /// <param name="maximumDistance"> The maximum distance from the spatial object.</param>
+        /// <returns> The pedestrian spawnpoint.</returns>
         internal static Spawnpoint GetPedSpawnPoint(ISpatial spatial, float minimalDistance, float maximumDistance)
         {
             return SpawnpointUtils.GetPedSpawnPoint(spatial.Position, minimalDistance, maximumDistance);
@@ -69,6 +84,12 @@ namespace BarbarianCall
         {
             return SpawnpointUtils.GetRoadSideSpawnPoint(spatial.Position, heading);
         }
+        /// <summary>
+        /// Gets a roadside spawnpoint based on the provided position and an optional heading.
+        /// </summary>
+        /// <param name="position"> The position.</param>
+        /// <param name="heading"> The optional heading.</param>
+        /// <returns> The roadside spawnpoint.</returns>
         internal static Spawnpoint GetRoadSideSpawnPoint(Vector3 position, float? heading = null)
         {
             return SpawnpointUtils.GetRoadSideSpawnPoint(position, heading);

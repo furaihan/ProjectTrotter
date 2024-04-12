@@ -43,25 +43,25 @@ namespace BarbarianCall.Callouts
 
         public override bool OnCalloutAccepted()
         {
-            CarModel = Globals.AudibleCarModel.GetRandomElement(m => m.IsInCdImage && m.IsValid && (m.IsCar || m.IsBike)
+            CarModel = Globals.ScannerVehicleModel.GetRandomElement(m => m.IsInCdImage && m.IsValid && (m.IsCar || m.IsBike)
            && !m.IsEmergencyVehicle && !m.IsLawEnforcementVehicle && !m.IsBigVehicle && m.NumberOfSeats >= 2, true);
             CarModel.LoadAndWait();
             VehicleSkin skin = new(CarModel);
-            skin.LicensePlate = Peralatan.GetRandomPlateNumber();
+            skin.LicensePlate = GenericUtils.GetRandomPlateNumber();
             SuspectCar = VehicleSkin.CreateVehicle(skin, CalloutPosition, Spawn.Heading);
             CalloutEntities.Add(SuspectCar);
             SuspectCar.IsPersistent = true;
             SuspectCar.Mods.ApplyAllMods();
-            SuspectCar.IsStolen = Peralatan.Random.Next() % 4 == 1;
-            Suspect = new FreemodePed(Position, Peralatan.Random.Next() % 2 == 1);
+            SuspectCar.IsStolen = MyRandom.Next() % 4 == 1;
+            Suspect = new FreemodePed(Position, MyRandom.Next() % 2 == 1);
             CalloutEntities.Add(Suspect);
-            Passenger = new FreemodePed(Position, Peralatan.Random.Next() % 2 == 1);
+            Passenger = new FreemodePed(Position, MyRandom.Next() % 2 == 1);
             CalloutEntities.Add(Passenger);
             Suspect.MakeMissionPed();
             Passenger.MakeMissionPed();
-            Suspect.MaxHealth = Peralatan.Random.Next(2750, 3750);
+            Suspect.MaxHealth = MyRandom.Next(2750, 3750);
             Suspect.Health = Suspect.MaxHealth; 
-            Passenger.MaxHealth = Peralatan.Random.Next(2550, 3200);
+            Passenger.MaxHealth = MyRandom.Next(2550, 3200);
             Passenger.Health = Suspect.MaxHealth;
             Suspect.Armor = 1000;
             Passenger.Armor = 1000;
@@ -99,7 +99,7 @@ namespace BarbarianCall.Callouts
                 Manusia.DisplayNotif();
                 GameFiber.Wait(1500);
                 LSPDFRFunc.WaitAudioScannerCompletion();
-                LSPDFRFunc.PlayScannerAudio($"SUSPECT_IS DRIVING_A {SuspectCar.GetColorAudio()} {Peralatan.GetPoliceScannerAudio(SuspectCar)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}", true);
+                LSPDFRFunc.PlayScannerAudio($"SUSPECT_IS DRIVING_A {SuspectCar.GetColorAudio()} {GenericUtils.GetPoliceScannerAudio(SuspectCar)} BAR_TARGET_PLATE {GenericUtils.GetLicensePlateAudio(SuspectCar)}", true);
                 GameFiber.Wait(2500);
                 DisplayGPNotif();
             });

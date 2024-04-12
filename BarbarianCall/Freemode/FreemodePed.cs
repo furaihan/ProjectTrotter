@@ -394,11 +394,11 @@ namespace BarbarianCall.Freemode
         internal void SetMechanicComponent()
         {
             if (Gender == Gender.Female) return;
-            Torso = new PedComponent(PedComponent.EComponentID.Torso, 194, Peralatan.Random.Next(1, 8));
-            Leg = new PedComponent(PedComponent.EComponentID.Leg, 15, Peralatan.Random.Next(1, 16));
-            Tops = new PedComponent(PedComponent.EComponentID.Tops, 69, Peralatan.Random.Next(1, 5));
+            Torso = new PedComponent(PedComponent.EComponentID.Torso, 194, MyRandom.Next(1, 8));
+            Leg = new PedComponent(PedComponent.EComponentID.Leg, 15, MyRandom.Next(1, 16));
+            Tops = new PedComponent(PedComponent.EComponentID.Tops, 69, MyRandom.Next(1, 5));
             Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 25, 0, 0);
-            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 136, Peralatan.Random.Next(21));
+            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 136, MyRandom.Next(21));
             //Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 45, 0, 0);
         }
     }

@@ -27,8 +27,8 @@ namespace BarbarianCall
             GameFiber.StartNew(delegate
             {
                 $"RAGENativeUI is installed: {IsRageNativeUIInstalled()}".ToLog();               
-                Extension.GetAudibleVehicleModel();
-                $"Model that can be played with police scanner: {Globals.AudibleCarModel.Length}".ToLog();
+                Extension.GetVehicleScannerAudio();
+                $"Model that can be played with police scanner: {Globals.ScannerVehicleModel.Length}".ToLog();
                 GameFiber.Wait(5600);
                 Game.DisplayNotification("BarbarianCalls Loaded ~g~Successfully");
                 CheckPluginRunning();

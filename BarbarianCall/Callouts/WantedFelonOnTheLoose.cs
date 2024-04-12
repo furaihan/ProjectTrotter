@@ -47,7 +47,7 @@ namespace BarbarianCall.Callouts
             }
             Position = Spawn;
             SpawnHeading = Spawn;
-            CarModel = Globals.AudibleCarModel.GetRandomElement(m => m.IsInCdImage && m.IsVehicle && m.IsCar && !m.IsBigVehicle && m.NumberOfSeats >= 4 && !m.IsLawEnforcementVehicle && !m.IsEmergencyVehicle, true);          
+            CarModel = Globals.ScannerVehicleModel.GetRandomElement(m => m.IsInCdImage && m.IsVehicle && m.IsCar && !m.IsBigVehicle && m.NumberOfSeats >= 4 && !m.IsLawEnforcementVehicle && !m.IsEmergencyVehicle, true);          
             CalloutAdvisory = string.Format("Vehicle Is: {0}", CarModel.GetDisplayName());
             CalloutMessage = "A Wanted Felon On The Loose";
             FriendlyName = "Wanted Felon On The Loose";
@@ -66,7 +66,7 @@ namespace BarbarianCall.Callouts
             SuspectCar.SetRandomColor();
             SuspectCar.MakePersistent();
             SuspectCar.SetPositionZ(SuspectCar.Position.ToGround().Z);
-            SuspectCar.RandomiseLicensePlate();
+            SuspectCar.RandomizeLicensePlate();
             CarModel.Dismiss();
             SuspectCar.Metadata.BAR_Entity = true;
             Blip = new Blip(Spawn, 150)
@@ -85,8 +85,8 @@ namespace BarbarianCall.Callouts
             Passenger2.MakePersistent();
             Passenger3.MakePersistent();
             SuspectCar.MakePersistent();
-            SuspectCar.IsStolen = Peralatan.Random.Next(5) == 1;
-            var outfit = OutfitMale.Casual.OrderBy(x => Peralatan.Random.Next(100)).Take(4).ToArray();
+            SuspectCar.IsStolen = MyRandom.Next(5) == 1;
+            var outfit = OutfitMale.Casual.OrderBy(x => MyRandom.Next(100)).Take(4).ToArray();
             outfit[0](Driver);
             outfit[1](Passenger1);
             outfit[2](Passenger2);
@@ -105,7 +105,7 @@ namespace BarbarianCall.Callouts
             Passenger3State = ESuspectStates.InAction;
             var drivePos = SpawnManager.GetRandomFleeingPoint(Driver);
             Driver.VehicleMission(PlayerPed, MissionType.Flee, 35f, (VehicleDrivingFlags)20, 350f, 15f, true);
-            int num = Peralatan.Random.Next(4);
+            int num = MyRandom.Next(4);
             switch (num)
             {
                 case 0:
@@ -131,7 +131,7 @@ namespace BarbarianCall.Callouts
                 Manusia.DisplayNotif();
                 GameFiber.Wait(1500);
                 LSPDFRFunc.WaitAudioScannerCompletion();
-                LSPDFRFunc.PlayScannerAudio($"SUSPECT_IS DRIVING_A {SuspectCar.GetColorAudio()} {Peralatan.GetPoliceScannerAudio(SuspectCar)} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}", true);
+                LSPDFRFunc.PlayScannerAudio($"SUSPECT_IS DRIVING_A {SuspectCar.GetColorAudio()} {GenericUtils.GetPoliceScannerAudio(SuspectCar)} BAR_TARGET_PLATE {GenericUtils.GetLicensePlateAudio(SuspectCar)}", true);
                 GameFiber.Wait(2500);
                 DisplayGPNotif();
             });
@@ -465,7 +465,7 @@ namespace BarbarianCall.Callouts
                     GameFiber.Wait(75);
                     GetClose();
                     if (!CalloutRunning) return;
-                    double ch = Peralatan.Random.NextDouble();
+                    double ch = MyRandom.NextDouble();
                     string.Format("Get out scenario: {0}", ch).ToLog();
                     List<Ped> getOutPeds;
                     if (ch < 0.275)
@@ -632,7 +632,7 @@ namespace BarbarianCall.Callouts
                         });
                     }
                     StopWatch = Stopwatch.StartNew();
-                    int waitTime = Peralatan.Random.Next(6500, 10001);
+                    int waitTime = MyRandom.Next(6500, 10001);
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();

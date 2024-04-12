@@ -16,13 +16,13 @@ namespace BarbarianCall
             List<Vector3> vehicleNodes = new();
             for (int i = 1; i <= 1000; i++)
             {
-                Vector3 randomPosition = pos.AroundPosition(Peralatan.Random.Next((int)minimalDistance, (int)maximumDistance)).ToGround();
+                Vector3 randomPosition = pos.AroundPosition(MyRandom.Next((int)minimalDistance, (int)maximumDistance)).ToGround();
                 if (i % 40 == 0)
                 {
                     GameFiber.Yield();
                 }
 
-                Vector3 desiredPosition = randomPosition + new Vector3(MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * Peralatan.Random.Next(2) == 1 ? 1f : -1f, 0f);
+                Vector3 desiredPosition = randomPosition + new Vector3(MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * MyRandom.Next(2) == 1 ? 1f : -1f, MathExtension.GetRandomFloatInRange(1.0f, 25.0f) * MyRandom.Next(2) == 1 ? 1f : -1f, 0f);
 
                 vehicleNodes.AddRange(GetVehicleNodesAtPosition(randomPosition, desiredPosition));
             }

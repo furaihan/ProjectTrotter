@@ -132,7 +132,7 @@ namespace BarbarianCall.Menus
                             while (true)
                             {
                                 GameFiber.Yield();
-                                if (PlayerPed.DistanceTo(pos.Position) > 1500f || Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Tab))
+                                if (PlayerPed.DistanceTo(pos.Position) > 1500f || GenericUtils.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.Tab))
                                 {
                                     break;
                                 }

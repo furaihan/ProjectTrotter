@@ -113,7 +113,7 @@ namespace BarbarianCall.Callouts
         public override void End()
         {
             CalloutRunning = false;
-            Peralatan.Speaking = false;
+            GenericUtils.Speaking = false;
             if (Displayed && Accepted)"~g~We Are CODE 4".DisplayNotifWithLogo(CalloutMessage);
             //StopWatch = null;
             if (Suspect && !Functions.IsPedArrested(Suspect)) Suspect.Dismiss();
@@ -156,7 +156,7 @@ namespace BarbarianCall.Callouts
                 while (CalloutRunning)
                 {
                     GameFiber.Yield();
-                    if (Peralatan.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End))
+                    if (GenericUtils.CheckKey(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End))
                     {
                         GameFiber.Sleep(300);
                         if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End))
@@ -164,7 +164,7 @@ namespace BarbarianCall.Callouts
                             GameFiber.Sleep(1850);
                             if (Game.IsKeyDownRightNow(System.Windows.Forms.Keys.End)) End();
                         }
-                        else Game.DisplayHelp($"~y~To force end the callout, press and hold down {Peralatan.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ for 2 second");
+                        else Game.DisplayHelp($"~y~To force end the callout, press and hold down {GenericUtils.FormatKeyBinding(System.Windows.Forms.Keys.None, System.Windows.Forms.Keys.End)}~y~ for 2 second");
                     }
                 }
                 $"Callout ended successfully, that callout took {(DateTime.UtcNow - dateTime).TotalSeconds:0.00} seconds".ToLog();

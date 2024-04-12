@@ -18,7 +18,7 @@ using BarbarianCall.Extensions;
 
 namespace BarbarianCall
 {
-    internal static class Peralatan
+    internal static class GenericUtils
     {
         public static Random Random = new(
             N.Natives.xF2D49816A804D134<int>(1000, 90080) ^ N.Natives.xD53343AA4FB7DD28<int>(2500, 91800)
@@ -90,34 +90,23 @@ namespace BarbarianCall
         internal static string GetRandomPlateNumber()
         {
             StringBuilder plate = new(8);
-            plate.Append(RandomNextSecure(10));
-            plate.Append(RandomNextSecure(10));
-            plate.Append((char)RandomNextSecure(65, 91));
-            plate.Append((char)RandomNextSecure(65, 91));
-            plate.Append((char)RandomNextSecure(65, 91));
-            plate.Append(RandomNextSecure(10));
-            plate.Append(RandomNextSecure(10));
-            plate.Append(RandomNextSecure(10));
+            plate.Append(MyRandom.Next(10));
+            plate.Append(MyRandom.Next(10));
+            plate.Append((char)MyRandom.Next(65, 91));
+            plate.Append((char)MyRandom.Next(65, 91));
+            plate.Append((char)MyRandom.Next(65, 91));
+            plate.Append(MyRandom.Next(10));
+            plate.Append(MyRandom.Next(10));
+            plate.Append(MyRandom.Next(10));
             return plate.ToString();
         }
-        internal static void RandomiseLicensePlate(this Vehicle vehicle)
+        internal static void RandomizeLicensePlate(this Vehicle vehicle)
         {
             if (vehicle)
             {
                 string plate = GetRandomPlateNumber();
                 Logger.Log(string.Format("Set {0} license plate to {1}", vehicle.GetDisplayName(), plate));
             }           
-        }
-        internal static int RandomNextSecure(int minValue, int maxValue) => RandomNextSecure(maxValue - minValue) + minValue;
-        internal static int RandomNextSecure(int maxValue)
-        {
-            RNGCryptoServiceProvider provider = new();
-            byte[] box = new byte[4];
-            provider.GetBytes(box);
-            HashAlgorithm provider1 = MD5.Create();
-            var bytes = provider1.ComputeHash(box);
-            var integer = BitConverter.ToInt32(bytes, 0);
-            return Math.Abs(integer % maxValue);
         }
         internal static string GetLabelText(string gxtEntry) => !string.IsNullOrEmpty(gxtEntry) && N.Natives.DOES_TEXT_LABEL_EXIST<bool>(gxtEntry) ?
             N.Natives.GET_FILENAME_FOR_AUDIO_CONVERSATION<string>(gxtEntry) : string.Empty;
@@ -455,28 +444,6 @@ namespace BarbarianCall
                 (list[k], list[n]) = (list[n], list[k]);
             }
         }
-        public static void ShuffleSecure<T>(this IList<T> list)
-        {
-            if (list.Count >= byte.MaxValue)
-            {
-                Logger.Log("ShuffleSecure is not supported on this list");
-                Shuffle(list);
-                return;
-            }
-            RNGCryptoServiceProvider provider = new();
-            int n = list.Count;
-            while (n > 1)
-            {
-                byte[] box = new byte[1];
-                do provider.GetBytes(box);
-                while (!(box[0] < n * (byte.MaxValue / n)));
-                int k = box[0] % n;
-                n--;
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
-        }
 
         public static T GetRandomElement<T>(this IList<T> list, bool shuffle = false)
         {
@@ -521,7 +488,6 @@ namespace BarbarianCall
             }
             return l;
         }
-
         public static IEnumerable<T> GetRandomNumberOfElements<T>(this IEnumerable<T> enumarable, int numOfElements, bool shuffle = false)
         {
             List<T> givenList = new(enumarable);

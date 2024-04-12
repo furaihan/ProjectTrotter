@@ -15,7 +15,7 @@ namespace BarbarianCall.AmbientEvent
         {          
             while (true)
             {
-                GameFiber.Sleep(Peralatan.Random.Next((int)TimeSpan.FromSeconds(300).TotalMilliseconds, (int)TimeSpan.FromSeconds(800).TotalMilliseconds));
+                GameFiber.Sleep(MyRandom.Next((int)TimeSpan.FromSeconds(300).TotalMilliseconds, (int)TimeSpan.FromSeconds(800).TotalMilliseconds));
             }
         }
     }

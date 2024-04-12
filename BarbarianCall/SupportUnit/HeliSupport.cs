@@ -31,7 +31,7 @@ namespace BarbarianCall.SupportUnit
                 Name = "Heli Support Unit",
             };
             N.Natives.SET_HELI_BLADES_FULL_SPEED(Helicopter);
-            Pilot = new FreemodePed(Vector3.Zero, Peralatan.Random.Next(5) != 1);
+            Pilot = new FreemodePed(Vector3.Zero, MyRandom.Next(5) != 1);
             SetPedPilotComponent();
             Pilot.WarpIntoVehicle(Helicopter, -1);
             Pilot.HeliMission(Helicopter, (Vehicle)(TargetEntity.IsVehicle() ? TargetEntity : null), (Ped)(TargetEntity.IsPed() ? TargetEntity : null), Vector3.Zero, MissionType.Circle, 35f, 30f, -1.0f, -1, 80, 2048);
@@ -48,10 +48,10 @@ namespace BarbarianCall.SupportUnit
         }
         private Vector3 FindSpawnPoint(Vector3 targetPos)
         {
-            Vector3 vector3 = targetPos.Around2D(Peralatan.Random.Next(450, 801)) + Vector3.WorldUp * 450.0f;
+            Vector3 vector3 = targetPos.Around2D(MyRandom.Next(450, 801)) + Vector3.WorldUp * 450.0f;
             while (targetPos.DistanceTo(vector3) < 400.0f)
             {
-                vector3 = targetPos.Around2D(Peralatan.Random.Next(450, 801)) + Vector3.WorldUp * 450.0f;
+                vector3 = targetPos.Around2D(MyRandom.Next(450, 801)) + Vector3.WorldUp * 450.0f;
                 GameFiber.Yield();
             }
             return vector3;
@@ -67,7 +67,7 @@ namespace BarbarianCall.SupportUnit
                     Pilot.Tops = new PedComponent(PedComponent.EComponentID.Tops, 48, 0);
                     Pilot.Leg = new PedComponent(PedComponent.EComponentID.Leg, 30, 0);
                     Pilot.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 24, 0);
-                    Pilot.Torso = new PedComponent(PedComponent.EComponentID.Torso, 18, Peralatan.Random.Next(5));
+                    Pilot.Torso = new PedComponent(PedComponent.EComponentID.Torso, 18, MyRandom.Next(5));
                 }
                 else if (Pilot.Gender == LSPD_First_Response.Gender.Female)
                 {
@@ -75,7 +75,7 @@ namespace BarbarianCall.SupportUnit
                     Pilot.Tops = new PedComponent(PedComponent.EComponentID.Tops, 41, 0);
                     Pilot.Leg = new PedComponent(PedComponent.EComponentID.Leg, 29, 0);
                     Pilot.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 24, 0);
-                    Pilot.Torso = new PedComponent(PedComponent.EComponentID.Torso, 19, Peralatan.Random.Next(5));
+                    Pilot.Torso = new PedComponent(PedComponent.EComponentID.Torso, 19, MyRandom.Next(5));
                 }
             }
             else "Pilot not exist".ToLog();

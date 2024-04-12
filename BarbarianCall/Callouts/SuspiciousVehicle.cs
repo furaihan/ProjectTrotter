@@ -23,7 +23,7 @@ namespace BarbarianCall.Callouts
             DeclareVariable();
             FilePath = @"Plugins/LSPDFR/BarbarianCall/Locations/";
             List<Types.Spawnpoint> spawnPoints = DivisiXml.Deserialization.GetSpawnPointFromXml(System.IO.Path.Combine(FilePath, "SuspiciousVehicle.xml"));
-            Spawn = Peralatan.SelectNearbySpawnpoint(spawnPoints);
+            Spawn = GenericUtils.SelectNearbySpawnpoint(spawnPoints);
             Position = Spawn;
             SpawnHeading = Spawn;
             if (Position == Vector3.Zero || SpawnHeading == 0f)
@@ -49,13 +49,13 @@ namespace BarbarianCall.Callouts
         {
             CalloutRunning = true;
             GangModels = Globals.GangPedModels.Values.GetRandomElement();
-            SuspectCar.RandomiseLicensePlate();
+            SuspectCar.RandomizeLicensePlate();
             SuspectCar.SetRandomColor();
             Suspect = new Ped(GangModels.GetRandomElement(m=> m.IsValid), Spawn, SpawnHeading);
             Suspect.MakeMissionPed();
             Suspect.WarpIntoVehicle(SuspectCar, -1);
             SuspectState = ESuspectStates.InAction;
-            if (Peralatan.Random.Next() % 4 == 0)
+            if (MyRandom.Next() % 4 == 0)
             {
                 Passenger = new Ped(GangModels.GetRandomElement(m=> m.IsValid), Position, SpawnHeading);
                 CalloutEntities.Add(Passenger);
@@ -63,9 +63,9 @@ namespace BarbarianCall.Callouts
                 Passenger.MakeMissionPed();
                 GameFiber.Wait(75);
                 PassengerState = ESuspectStates.InAction;
-                if (Peralatan.Random.Next() % 3 == 0) Passenger.SetPedAsWanted();
+                if (MyRandom.Next() % 3 == 0) Passenger.SetPedAsWanted();
             }
-            if (Peralatan.Random.Next() % 10 == 0) Suspect.SetPedAsWanted();
+            if (MyRandom.Next() % 10 == 0) Suspect.SetPedAsWanted();
             SuspectPersona = Functions.GetPersonaForPed(Suspect);
             Blip = new Blip(Spawn, 45f);
             Blip.Color = Color.Yellow;
@@ -162,8 +162,8 @@ namespace BarbarianCall.Callouts
                     SuspectCar.Heading = Spawn;
                     SuspectCar.IsEngineStarting = true;
                     Suspect.SetPedAsWanted();
-                    if (Passenger && Peralatan.Random.Next() % 3 == 0) Passenger.SetPedAsWanted();
-                    if (Peralatan.Random.Next() % 7 == 0) SuspectCar.Mods.ApplyAllMods();
+                    if (Passenger && MyRandom.Next() % 3 == 0) Passenger.SetPedAsWanted();
+                    if (MyRandom.Next() % 7 == 0) SuspectCar.Mods.ApplyAllMods();
                     if (!Suspect.IsInVehicle(SuspectCar, false)) Suspect.WarpIntoVehicle(SuspectCar, -1);
                     if (Passenger && !Passenger.IsInVehicle(SuspectCar, false)) Passenger.WarpIntoVehicle(SuspectCar, 0);
                     Manusia = new Types.Manusia(Suspect, SuspectPersona, SuspectCar);
@@ -172,7 +172,7 @@ namespace BarbarianCall.Callouts
                     {
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(2500);
-                        PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                        PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {GenericUtils.GetLicensePlateAudio(SuspectCar)}");
                         GameFiber.Sleep(1000);
                         Manusia.DisplayNotif();
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
@@ -198,7 +198,7 @@ namespace BarbarianCall.Callouts
                     if (Passenger) Functions.AddPedToPursuit(Pursuit, Passenger);
                     bool air = false;
                     StopWatch = System.Diagnostics.Stopwatch.StartNew();
-                    int airTime = Peralatan.Random.Next(6000, 15000);
+                    int airTime = MyRandom.Next(6000, 15000);
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();
@@ -209,7 +209,7 @@ namespace BarbarianCall.Callouts
                             API.LSPDFRFunc.RequestAirUnit(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                             air = true;
                         }
-                        if (Peralatan.CheckKey(Keys.NumPad9, Keys.D1)) throw new UnauthorizedAccessException("Net Extension Check");
+                        if (GenericUtils.CheckKey(Keys.NumPad9, Keys.D1)) throw new UnauthorizedAccessException("Net Extension Check");
                     }
                     DisplayCodeFourMessage();
                 }
@@ -251,7 +251,7 @@ namespace BarbarianCall.Callouts
                         GameFiber.Wait(1000);
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         PlayScannerWithCallsign($"CITIZENS_REPORT VEHICLE BAR_IS BAR_A_CONJ " +
-                            $"{Peralatan.GetPoliceScannerAudio(SuspectCar)} {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {Peralatan.GetLicensePlateAudio(SuspectCar)}");
+                            $"{GenericUtils.GetPoliceScannerAudio(SuspectCar)} {SuspectCar.GetColor().PrimaryColor.GetPoliceScannerColorAudio()} BAR_TARGET_PLATE {GenericUtils.GetLicensePlateAudio(SuspectCar)}");
                         API.LSPDFRFunc.WaitAudioScannerCompletion();
                         GameFiber.Wait(2000);
                         DisplayGPNotif();
@@ -273,7 +273,7 @@ namespace BarbarianCall.Callouts
                     API.LSPDFRFunc.RequestBackup(Suspect.Position, LSPD_First_Response.EBackupResponseType.Pursuit);
                     StopWatch = System.Diagnostics.Stopwatch.StartNew();
                     bool air = false;
-                    TimeSpan airtime = new(0, 0, 0, Peralatan.Random.Next(6, 15), Peralatan.Random.Next(2525));
+                    TimeSpan airtime = new(0, 0, 0, MyRandom.Next(6, 15), MyRandom.Next(2525));
                     while (CalloutRunning)
                     {
                         GameFiber.Yield();

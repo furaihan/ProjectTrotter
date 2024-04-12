@@ -204,10 +204,10 @@ namespace BarbarianCall.SupportUnit
         }
         private Vector3 FindSpawnPoint(Vector3 targetPos)
         {
-            Vector3 vector3 = targetPos.Around2D(Peralatan.Random.Next(450, 801)) + Vector3.WorldUp * 850.0f;
+            Vector3 vector3 = targetPos.Around2D(MyRandom.Next(450, 801)) + Vector3.WorldUp * 850.0f;
             while (targetPos.DistanceToSquared(vector3) < 160000.0f)
             {
-                vector3 = targetPos.Around2D(Peralatan.Random.Next(450, 801)) + Vector3.WorldUp * Peralatan.Random.Next(500, 850);
+                vector3 = targetPos.Around2D(MyRandom.Next(450, 801)) + Vector3.WorldUp * MyRandom.Next(500, 850);
                 GameFiber.Yield();
             }
             return vector3;
@@ -246,7 +246,7 @@ namespace BarbarianCall.SupportUnit
                 Functions.SetPedAsCop(pass);
                 Functions.SetCopAsBusy(pass, true);
                 Functions.SetCopIgnoreAmbientCombatControl(pass, true);
-                pass.Accuracy = Peralatan.Random.Next(95, 101);
+                pass.Accuracy = MyRandom.Next(95, 101);
                 pass.MaxHealth = 1500;
                 pass.Health = 1500;
                 pass.RelationshipGroup = Game.LocalPlayer.Character.RelationshipGroup;

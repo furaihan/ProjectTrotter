@@ -29,6 +29,7 @@ namespace BarbarianCall
         internal static void ToLogDebug(this string msg) => Log(msg, LogLevel.Debug);
         internal static void Log(string message, LogLevel logLevel = LogLevel.Info)
         {
+            string logConsoleMessage = $"[BCallout]: {message}";
             string logMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{logLevel}] {message}";
             LogQueue.Enqueue(logMessage);
             LogEvent.Set();
@@ -38,17 +39,17 @@ namespace BarbarianCall
                 case LogLevel.Debug:
                     if (DebugHelper.IsDebugBuild())
                     {
-                        Game.LogTrivial(logMessage);
+                        Game.LogTrivial(logConsoleMessage);
                     }
                     break;
                 case LogLevel.Info:
-                    Game.LogTrivial(logMessage);
+                    Game.LogTrivial(logConsoleMessage);
                     break;
                 case LogLevel.Warning:
-                    Game.LogTrivial("WARNING: " + logMessage);
+                    Game.LogTrivial("WARNING: " + logConsoleMessage);
                     break;
                 case LogLevel.Error:
-                    Game.LogTrivial("ERROR: " + logMessage);
+                    Game.LogTrivial("ERROR: " + logConsoleMessage);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
