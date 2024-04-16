@@ -7,7 +7,7 @@ using Rage.Native;
 using System.Diagnostics;
 using System.IO;
 using BarbarianCall.Types;
-using BarbarianCall.Freemode;
+using BarbarianCall.MyPed;
 using L = LSPD_First_Response.Mod.API.Functions;
 
 namespace BarbarianCall.Extensions

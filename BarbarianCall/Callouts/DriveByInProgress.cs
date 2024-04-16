@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BarbarianCall.Types;
 using BarbarianCall.Extensions;
 using BarbarianCall.API;
 using Rage;
-using Rage.Native;
 using L = LSPD_First_Response.Mod.API.Functions;
 using LSPD_First_Response.Mod.Callouts;
 

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rage;
-using BarbarianCall.Extensions;
-
-namespace BarbarianCall.Freemode
+﻿namespace BarbarianCall.MyPed
 {
     public class PedComponentCollection
     {

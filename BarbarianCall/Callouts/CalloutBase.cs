@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using LSPD_First_Response.Mod.API;
 using Rage;
@@ -77,7 +76,6 @@ namespace BarbarianCall.Callouts
                 }
             });
             //CalloutMainFiber?.Abort();
-            Manusia.CurrentManusia = null;
             Functions.PlayScannerAudio("BAR_AI_RESPOND");
             CalloutBlips.Clear();
             CalloutEntities.Clear();
@@ -121,7 +119,6 @@ namespace BarbarianCall.Callouts
             if (Blip) Blip.Delete();
             if (GrammarPoliceRunning && Menus.PauseMenu.autoAvailable.Checked) API.GrammarPoliceFunc.SetStatus(API.GrammarPoliceFunc.EGrammarPoliceStatusType.Available);
             if (Pursuit != null && Functions.IsPursuitStillRunning(Pursuit)) Functions.ForceEndPursuit(Pursuit);
-            Manusia.CurrentManusia = null;
             CalloutBlips.ForEach(b => { if (b) b.Delete(); });
             CalloutEntities.ForEach(e =>
             {

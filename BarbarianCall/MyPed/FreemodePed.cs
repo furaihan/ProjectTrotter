@@ -2,14 +2,12 @@
 using System.Linq;
 using Rage;
 using LSPD_First_Response;
-using BarbarianCall.Extensions;
-using HB = BarbarianCall.Freemode.HeadBlend;
+using HB = BarbarianCall.MyPed.HeadBlend;
 using N = Rage.Native.NativeFunction;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Diagnostics;
 
-namespace BarbarianCall.Freemode
+namespace BarbarianCall.MyPed
 {
     public class FreemodePed : Ped
     {
@@ -326,11 +324,11 @@ namespace BarbarianCall.Freemode
                     switch (headOverlay)
                     {
                         case OverlayId.Eyebrows:
-                            HB.SetPedHeadOverlayColor(this, headOverlay, ColorType.EyebrowBeardChestHair , hairColor, 0);
+                            HB.SetPedHeadOverlayColor(this, headOverlay, ColorType.EyebrowBeardChestHair, hairColor, 0);
                             break;
                         case OverlayId.Blush:
                         case OverlayId.Lipstick:
-                            HB.SetPedHeadOverlayColor(this, headOverlay, ColorType.BlushLipstick , MyRandom.Next(26), 0);
+                            HB.SetPedHeadOverlayColor(this, headOverlay, ColorType.BlushLipstick, MyRandom.Next(26), 0);
                             break;
                         default: break;
                     }
@@ -390,7 +388,7 @@ namespace BarbarianCall.Freemode
             var decal = Globals.DecalBadge.GetRandomElement();
             $"DECAL | Collection: {decal.Item1}, Decal: {decal.Item2}".ToLog();
             N.Natives.ADD_​PED_​DECORATION_​FROM_​HASHES(this, Game.GetHashKey(decal.Item1), Game.GetHashKey(decal.Item2));
-        }               
+        }
         internal void SetMechanicComponent()
         {
             if (Gender == Gender.Female) return;

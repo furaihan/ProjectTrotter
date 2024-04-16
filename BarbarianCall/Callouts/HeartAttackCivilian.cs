@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
-using System.Diagnostics;
 using Rage;
 using LSPDFR = LSPD_First_Response.Mod.API.Functions;
 using LSPD_First_Response.Engine.Scripting.Entities;

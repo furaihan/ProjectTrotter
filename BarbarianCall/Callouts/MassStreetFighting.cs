@@ -8,7 +8,6 @@ using LSPDFR = LSPD_First_Response.Mod.API.Functions;
 using RAGENativeUI.Elements;
 using BarbarianCall.Extensions;
 using BarbarianCall.Types;
-using BarbarianCall.API;
 
 namespace BarbarianCall.Callouts
 {

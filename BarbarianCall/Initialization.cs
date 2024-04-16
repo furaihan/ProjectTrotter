@@ -3,9 +3,7 @@ using Rage;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using BarbarianCall.AmbientEvent;
 using BarbarianCall.Extensions;
 
 [assembly: Rage.Attributes.Plugin("BarbarianCall", Description = "INSTALL IN GTAV/PLUGINS/LSPDFR", Author = "furaihan")]

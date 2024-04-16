@@ -1,9 +1,10 @@
-﻿namespace BarbarianCall.Freemode
+﻿namespace BarbarianCall.MyPed
 {
     using System.Drawing;
     using System.Runtime.InteropServices;
     using Rage.Native;
     using Rage;
+
     [StructLayout(LayoutKind.Explicit, Size = 80)]
     public struct HeadBlendData
     {
@@ -78,8 +79,8 @@
         {
             int eyeColor = NativeFunction.Natives.GET_HEAD_BLEND_EYE_COLOR<int>(ped);
             return (EyeColor)eyeColor;
-        
-        }       
+
+        }
         public static void SetPedHeadOverlay(Ped ped, OverlayId overlayId, int index, float opacity)
         {
             NativeFunction.Natives.SET_PED_HEAD_OVERLAY(ped, (int)overlayId, index, opacity);

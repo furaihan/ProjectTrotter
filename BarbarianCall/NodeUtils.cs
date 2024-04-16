@@ -1,10 +1,7 @@
 ﻿using BarbarianCall.Extensions;
 using Rage;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Rage.Native.NativeFunction;
 
 namespace BarbarianCall

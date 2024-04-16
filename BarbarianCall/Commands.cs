@@ -3,19 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
-using System.IO;
 using System.Diagnostics;
 using Rage;
-using Rage.Native;
 using Rage.ConsoleCommands.AutoCompleters;
 using Rage.Attributes;
-using BarbarianCall.Extensions;
 using BarbarianCall.Types;
 using BarbarianCall.SupportUnit;
 using BarbarianCall.DivisiXml;
-using RAGENativeUI;
-using RAGENativeUI.Elements;
-using LSPD_First_Response.Mod.API;
+using BarbarianCall.MyPed;
 
 namespace BarbarianCall
 {
@@ -34,7 +29,7 @@ namespace BarbarianCall
         {
             var pos = Game.LocalPlayer.Character.Position + Game.LocalPlayer.Character.ForwardVector * 8f;
             float heading = Game.LocalPlayer.Character.Heading - 180f;
-            Freemode.FreemodePed freemodePed = new(pos, heading, isMale);
+            FreemodePed freemodePed = new(pos, heading, isMale);
             GameFiber.Wait(2000);
             freemodePed.RandomizeOutfit();
             freemodePed.Dismiss();

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
-using System.Windows.Forms;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 using Rage;
@@ -10,6 +9,7 @@ using System.Drawing;
 using BarbarianCall.SupportUnit;
 using BarbarianCall.Types;
 using BarbarianCall.Extensions;
+using BarbarianCall.MyPed;
 
 namespace BarbarianCall.Menus
 {
@@ -80,7 +80,7 @@ namespace BarbarianCall.Menus
                     Ped player = Game.LocalPlayer.Character;
                     Vector3 pos = player.Position + player.ForwardVector * 8f;
                     float heading = player.Heading + 180f;
-                    Freemode.FreemodePed ped = new(pos, heading, (selected as UIMenuListScrollerItem<string>).SelectedItem.ToLower() == "male");
+                    FreemodePed ped = new(pos, heading, (selected as UIMenuListScrollerItem<string>).SelectedItem.ToLower() == "male");
                     ped.Metadata.BAR_Entity = true;
                     if (ped) ped.Dismiss();
                 }

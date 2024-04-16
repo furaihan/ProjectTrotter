@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Rage;
-using System.Reflection;
-using System.Drawing;
 using BarbarianCall.Extensions;
 
 namespace BarbarianCall.Types
@@ -17,7 +13,6 @@ namespace BarbarianCall.Types
         public bool WithVehicle { get; internal set; }
         public Vehicle Car { get; internal set; }
         public string CarColor { get; private set; }
-        public static Manusia CurrentManusia { get; internal set; }
         public Manusia(Ped ped, LSPD_First_Response.Engine.Scripting.Entities.Persona persona)
         {
             Pedestrian = ped;
@@ -26,7 +21,6 @@ namespace BarbarianCall.Types
             Location = ped.Position;
             WithVehicle = false;
             Car = null;
-            CurrentManusia = this;
         }
         public Manusia(Ped ped, LSPD_First_Response.Engine.Scripting.Entities.Persona persona, Vehicle vehicle)
         {
@@ -45,11 +39,9 @@ namespace BarbarianCall.Types
                 Car = null;
                 WithVehicle = false;
             }
-            CurrentManusia = this;
         }
         public void DisplayNotif()
         {
-            if (CurrentManusia == null || this == null) return;
             Pedestrian.DisplayNotificationsWithPedHeadshot("Ped Database", $"~y~Name~s~: {Fullname}~n~~y~DOB~s~: {BirthDay.ToShortDateString()} ({GetAge()} Y.O)~n~~y~Last Seen~s~: {Pedestrian.GetZoneName()}, " +
                 $"{World.GetStreetName(Pedestrian.Position)}");
             if (Car && WithVehicle)

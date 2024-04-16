@@ -1,7 +1,6 @@
 ﻿using Rage;
 using static Rage.Native.NativeFunction;
 using System;
-using System.Runtime.InteropServices;
 
 namespace BarbarianCall.Extensions
 {

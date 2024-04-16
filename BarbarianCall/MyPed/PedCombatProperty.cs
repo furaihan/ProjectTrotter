@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Rage;
+﻿using Rage;
 using Rage.Native;
 
-namespace BarbarianCall.Freemode
+namespace BarbarianCall.MyPed
 {
     public class PedCombatProperty
     {

@@ -1,4 +1,4 @@
-﻿namespace BarbarianCall.Freemode
+﻿namespace BarbarianCall.MyPed
 {
     using Rage.Native;
     public class PedComponent
