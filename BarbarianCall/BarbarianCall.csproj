@@ -104,6 +104,7 @@
     <Compile Include="Extensions\MathExtension.cs" />
     <Compile Include="Extensions\RandomExtension.cs" />
     <Compile Include="Extensions\XmlExtension.cs" />
+    <Compile Include="MyPed\MyPed.cs" />
     <Compile Include="MyPed\OutfitFemale.cs" />
     <Compile Include="MyPed\OutfitMale.cs" />
     <Compile Include="MyPed\PedCombatProperty.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Menus\PauseMenu.cs" />
     <Compile Include="Extensions\NetExtension.cs" />
     <Compile Include="Menus\VehicleMenu.cs" />
+    <Compile Include="MyPed\PedComponentType.cs" />
     <Compile Include="MyRandom.cs" />
     <Compile Include="NodeUtils.cs" />
     <Compile Include="GenericUtils.cs" />

@@ -10,10 +10,10 @@ using BarbarianCall.MyPed;
 
 namespace BarbarianCall.SupportUnit
 {
-    public class MilitaryHeliSupport
+    internal class MilitaryHeliSupport
     {
         private static int _activeNumber = 0;
-        public static bool IsAnyMilitaryHeliSupportActive => _activeNumber > 0;
+        internal static bool IsAnyMilitaryHeliSupportActive => _activeNumber > 0;
         internal static List<MilitaryHeliSupport> InternalList = new();
         private readonly List<Model> heliModels = new()
         {
@@ -23,18 +23,18 @@ namespace BarbarianCall.SupportUnit
             "FROGGER",
         };
         private Model _model;
-        public Vehicle Helicopter { get; private set; }
-        public Ped Pilot { get; private set; }
-        public List<FreemodePed> Passengers { get; private set; } = new List<FreemodePed>();
-        public Blip Blip { get; private set; }
-        public Ped CurrentTargetPed { get; private set; }
-        public Vector3 SpawnLocation { get; private set; }
+        internal Vehicle Helicopter { get; private set; }
+        internal Ped Pilot { get; private set; }
+        internal List<FreemodePed> Passengers { get; private set; } = new List<FreemodePed>();
+        internal Blip Blip { get; private set; }
+        internal Ped CurrentTargetPed { get; private set; }
+        internal Vector3 SpawnLocation { get; private set; }
         private bool cleaned = false;
         private bool added = false;
         TimerBarPool MyPool = new();
         TextTimerBar TimerBar = new("Mission Type", "");
         TextTimerBar targetDistance = new("Target", "");
-        public MilitaryHeliSupport()
+        internal MilitaryHeliSupport()
         {
             GameFiber.StartNew(() =>
             {
@@ -317,7 +317,7 @@ namespace BarbarianCall.SupportUnit
             Helicopter.FuelTankHealth = 2000.0f;
             Helicopter.Health = 2000;
         }
-        public void CleanUp()
+        internal void CleanUp()
         {
             if (Pilot && Helicopter && Pilot.IsAlive && Helicopter.IsAlive && Helicopter.IsInAir)
             {

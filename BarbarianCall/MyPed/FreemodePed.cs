@@ -9,187 +9,37 @@ using System.Diagnostics;
 
 namespace BarbarianCall.MyPed
 {
-    public class FreemodePed : Ped
+    internal class FreemodePed : MyPed
     {
-        private PedComponentCollection _wardrobe;
-        private PedCombatProperty _combatProperty;
-        public HeadBlendData HeadBlendData
+        internal HeadBlendData HeadBlendData
         {
             get => HB.GetDataFromPed(this);
             set => HB.SetPedHeadBlendData(this, value);
         }
-        public EyeColor EyeColor
+        internal EyeColor EyeColor
         {
             get => HB.GetPedEyeColor(this);
             set => HB.SetPedEyeColor(this, value);
         }
-        public Gender Gender => Model.Hash == 0x705E61F2 ? Gender.Male : Gender.Female;
+        internal Gender Gender => Model.Hash == 0x705E61F2 ? Gender.Male : Gender.Female;
         /// <summary>
         /// Gets a value that indicates whether this <see cref="FreemodePed"/> is male
         /// </summary>
         /// <value><c>true</c> if this <see cref="FreemodePed"/> is male, otherwise <c>false</c></value>
-        public new bool IsMale => Model == 0x705E61F2;
+        internal new bool IsMale => Model == 0x705E61F2;
         /// <summary>
         /// Gets a value that indicates whether this <see cref="FreemodePed"/> is female
         /// </summary>
         /// <value><c>true</c> if this <see cref="FreemodePed"/> is female, otherwise <c>false</c></value>
-        public new bool IsFemale => Model == 0x9C9EFFD8;
-        public PedComponentCollection Wardrobe => _wardrobe ??= new PedComponentCollection(this);
-        public PedCombatProperty CombatProperty => _combatProperty ??= new PedCombatProperty(this);
-        #region COMPONENT
-        public PedComponent Torso
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Torso);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Torso) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Head
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Head);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Head) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Mask
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Mask);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Mask) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Shoes
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Shoes);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Shoes) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Leg
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Leg);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Leg) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Parachute
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Parachute);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Parachute) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Decal
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Decal);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Decal) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent UnderShirt
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.UnderShirt);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.UnderShirt) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent HairStyle
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.HairStyle);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.HairStyle) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent BodyArmor
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.BodyArmor);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.BodyArmor) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Tops
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Tops);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Tops) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        public PedComponent Accessories
-        {
-            get => PedComponent.GetPedComponent(this, PedComponent.EComponentID.Accessories);
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Accessories) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(this, value);
-                }
-            }
-        }
-        #endregion
-        public FreemodePed(Vector3 position, float heading, bool isMale) : base(isMale ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, heading)
+        internal new bool IsFemale => Model == 0x9C9EFFD8;
+        internal FreemodePed(Vector3 position, float heading, bool isMale) : base(isMale ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, heading)
         {
             MakePersistent();
             RandomizeAppearance();
             Metadata.BAR_FreemodePed = true;
             Metadata.BAR_Entity = true;
         }
-        public FreemodePed(Vector3 position, bool isMale) : base(isMale ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, 0f)
+        internal FreemodePed(Vector3 position, bool isMale) : base(isMale ? 0x705E61F2/*mp_m_freemode_01*/ : 0x9C9EFFD8/*mp_f_freemode_01*/, position, 0f)
         {
             MakePersistent();
             RandomizeAppearance();
@@ -199,13 +49,11 @@ namespace BarbarianCall.MyPed
         private FreemodePed(PoolHandle handle) : base(handle)
         {
         }
-        /// <summary>
-        /// Get freemode ped from regular ped, only work if the ped model is equal to <c>mp_m_freemode_01</c> or <c>mp_f_freemode_01</c>
-        /// </summary>
-        /// <param name="ped"></param>
-        /// <returns>return the ped instance as freemode ped, if it failed, then will return <c>null</c></returns>
-        public static FreemodePed FromRegularPed(Ped ped) => new(ped.Handle);
-        public void RandomizeAppearance()
+        internal static new FreemodePed FromRegularPed(Ped ped)
+        {
+            return new FreemodePed(ped.Handle);
+        }
+        internal void RandomizeAppearance()
         {
             //https://s.id/BkZuh
             #region local variable
@@ -275,7 +123,7 @@ namespace BarbarianCall.MyPed
             if (IsMale)
             {
                 Voice = Globals.MaleVoiceName.GetRandomElement(true);
-                HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, maleHairModel.GetRandomElement(true), 0, 0);
+                Wardrobe[PedComponentType.HairStyle] = new PedComponent(maleHairModel.GetRandomElement(true), 0, 0);
                 foreach (OverlayId headOverlay in selectedOverlayIds)
                 {
                     int index = headOverlay switch
@@ -304,7 +152,7 @@ namespace BarbarianCall.MyPed
             else if (IsFemale)
             {
                 Voice = Globals.FemaleVoiceName.GetRandomElement();
-                HairStyle = new PedComponent(PedComponent.EComponentID.HairStyle, femaleHairModel.GetRandomElement(true), 0, 0);
+                Wardrobe[PedComponentType.HairStyle] = new PedComponent(femaleHairModel.GetRandomElement(true), 0, 0);
                 foreach (OverlayId headOverlay in selectedOverlayIds)
                 {
                     int index = headOverlay switch
@@ -336,67 +184,14 @@ namespace BarbarianCall.MyPed
             }
             HeadBlendData.ToString().ToLog();
         }
-        public void RandomizeOutfit()
-        {
-            bool jaketan = MyRandom.Next() % 2 == 0;
-            if (IsMale)
-            {
-                var selectedTops = Globals.AtasanCowokPolos.GetRandomElement();
-                var selectedBottoms = Globals.BawahanCowok.GetRandomElement();
-                var selectedShoes = Globals.AlasKaki.GetRandomElement();
-                var topTex = selectedTops.Value.GetRandomElement();
-                var botTex = selectedBottoms.Value.GetRandomElement();
-                var shoTex = selectedShoes.Value.GetRandomElement();
-                if (jaketan)
-                {
-                    $"Jaketan".ToLog();
-                    selectedTops = Globals.JaketCowok.GetRandomElement();
-                    botTex = selectedTops.Value.GetRandomElement();
-                    var selectedUndershirt = Globals.UndershirtMale.GetRandomElement();
-                    var usTex = selectedUndershirt.Value.GetRandomElement();
-                    $"UNDERSHIRT | Draw: {selectedUndershirt.Key}. Tex: {usTex}".ToLog();
-                    Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, selectedUndershirt.Key, usTex);
-                    if (MyRandom.Next() % 5 != 0) Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 184, 0, 0);
-                    else Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 180, MyRandom.Next(7));
-                }
-                $"TOP | Draw: {selectedTops.Key}. Tex: {topTex}".ToLog();
-                $"BOTTOM | Draw: {selectedBottoms.Key}. Tex: {botTex}".ToLog();
-                $"SHOES | Draw: {selectedShoes.Key}. Tex: {shoTex}".ToLog();
-                Wardrobe.Tops = new PedComponent(PedComponent.EComponentID.Tops, selectedTops.Key, topTex);
-                Wardrobe.Leg = new PedComponent(PedComponent.EComponentID.Leg, selectedBottoms.Key, botTex);
-                Wardrobe.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, selectedShoes.Key, shoTex);
-                Wardrobe.UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, -1, 0);
-                if (selectedTops.Key == 238 && !jaketan) Wardrobe.Torso = new PedComponent(PedComponent.EComponentID.Torso, 2, 0);
-                if (MyRandom.Next() % 2 == 0)
-                {
-                    var kcmt = Globals.KacamataCowok.GetRandomElement();
-                    N.Natives.SET_PED_PROP_INDEX(this, 1, kcmt.Key, kcmt.Value.GetRandomElement(), true);
-                }
-                if (MyRandom.Next() % 2 == 0)
-                {
-                    var topi = Globals.TopiCowok.GetRandomElement();
-                    N.Natives.SET_PED_PROP_INDEX(this, 0, topi.Key, topi.Value.GetRandomElement(), true);
-                }
-                if (MyRandom.Next() % 2 == 0)
-                {
-                    int maxWatch = N.Natives.GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS<int>(this, 6);
-                    int selected = MyRandom.Next(maxWatch);
-                    int maxTex = N.Natives.GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS<int>(this, 6, selected);
-                    N.Natives.SET_PED_PROP_INDEX(this, 6, selected, MyRandom.Next(maxTex), true);
-                }
-            }
-            var decal = Globals.DecalBadge.GetRandomElement();
-            $"DECAL | Collection: {decal.Item1}, Decal: {decal.Item2}".ToLog();
-            N.Natives.ADD_​PED_​DECORATION_​FROM_​HASHES(this, Game.GetHashKey(decal.Item1), Game.GetHashKey(decal.Item2));
-        }
         internal void SetMechanicComponent()
         {
             if (Gender == Gender.Female) return;
-            Torso = new PedComponent(PedComponent.EComponentID.Torso, 194, MyRandom.Next(1, 8));
-            Leg = new PedComponent(PedComponent.EComponentID.Leg, 15, MyRandom.Next(1, 16));
-            Tops = new PedComponent(PedComponent.EComponentID.Tops, 69, MyRandom.Next(1, 5));
-            Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 25, 0, 0);
-            UnderShirt = new PedComponent(PedComponent.EComponentID.UnderShirt, 136, MyRandom.Next(21));
+            Wardrobe[PedComponentType.Torso] = new(194, MyRandom.Next(1, 8), 0);
+            Wardrobe[PedComponentType.Leg] = new(15, MyRandom.Next(1, 16), 0);
+            Wardrobe[PedComponentType.Tops] = new(69, MyRandom.Next(1, 5), 0);
+            Wardrobe[PedComponentType.Shoes] = new(25, 0, 0);
+            Wardrobe[PedComponentType.UnderShirt] = new(136, MyRandom.Next(21), 0);
             //Parachute = new PedComponent(PedComponent.EComponentID.Parachute, 45, 0, 0);
         }
     }

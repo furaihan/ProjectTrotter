@@ -31,7 +31,6 @@ namespace BarbarianCall
             float heading = Game.LocalPlayer.Character.Heading - 180f;
             FreemodePed freemodePed = new(pos, heading, isMale);
             GameFiber.Wait(2000);
-            freemodePed.RandomizeOutfit();
             freemodePed.Dismiss();
         }       
         [ConsoleCommand(Name = "GetPlayerPosFlags", Description = "Gets the flags of the player position")]

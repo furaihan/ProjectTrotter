@@ -30,7 +30,7 @@ namespace BarbarianCall.SupportUnit
                 return fixQueue;
             }
         }
-        public FreemodePed MechanicPed { get; private set; }
+        internal FreemodePed MechanicPed { get; private set; }
         public Vehicle MechanicVehicle { get; private set; }
         public Vehicle VehicleToFix { get; private set; }
         public Blip Blip { get; private set; }

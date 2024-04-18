@@ -11,7 +11,7 @@ namespace BarbarianCall.SupportUnit
         public Vector3 SpawnLocation { get; private set; }
         public Entity TargetEntity { get; private set; }
         public Vehicle Helicopter { get; private set; }
-        public FreemodePed Pilot { get; private set; }
+        internal FreemodePed Pilot { get; private set; }
         private Blip Blip { get; set; }
         private HeliSupport(Entity target)
         {
@@ -58,25 +58,26 @@ namespace BarbarianCall.SupportUnit
         private void SetPedPilotComponent()
         {
             "Setting heli unit pilot component".ToLog();
-            if (Pilot)
+            if (Pilot != null)
             {
                 if (Pilot.Gender == LSPD_First_Response.Gender.Male)
                 {
-                    Pilot.Mask = new PedComponent(PedComponent.EComponentID.Mask, 27, 0);
-                    Pilot.Tops = new PedComponent(PedComponent.EComponentID.Tops, 48, 0);
-                    Pilot.Leg = new PedComponent(PedComponent.EComponentID.Leg, 30, 0);
-                    Pilot.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 24, 0);
-                    Pilot.Torso = new PedComponent(PedComponent.EComponentID.Torso, 18, MyRandom.Next(5));
+                    Pilot.Wardrobe[PedComponentType.Mask] = new PedComponent(27, 0);
+                    Pilot.Wardrobe[PedComponentType.Tops] = new PedComponent(48, 0);
+                    Pilot.Wardrobe[PedComponentType.Leg] = new PedComponent(30, 0);
+                    Pilot.Wardrobe[PedComponentType.Shoes] = new PedComponent(24, 0);
+                    Pilot.Wardrobe[PedComponentType.Torso] = new PedComponent(18, MyRandom.Next(5));
                 }
                 else if (Pilot.Gender == LSPD_First_Response.Gender.Female)
                 {
-                    Pilot.Mask = new PedComponent(PedComponent.EComponentID.Mask, 27, 0);
-                    Pilot.Tops = new PedComponent(PedComponent.EComponentID.Tops, 41, 0);
-                    Pilot.Leg = new PedComponent(PedComponent.EComponentID.Leg, 29, 0);
-                    Pilot.Shoes = new PedComponent(PedComponent.EComponentID.Shoes, 24, 0);
-                    Pilot.Torso = new PedComponent(PedComponent.EComponentID.Torso, 19, MyRandom.Next(5));
+                    Pilot.Wardrobe[PedComponentType.Mask] = new PedComponent(27, 0);
+                    Pilot.Wardrobe[PedComponentType.Tops] = new PedComponent(41, 0);
+                    Pilot.Wardrobe[PedComponentType.Leg] = new PedComponent(29, 0);
+                    Pilot.Wardrobe[PedComponentType.Shoes] = new PedComponent(24, 0);
+                    Pilot.Wardrobe[PedComponentType.Torso] = new PedComponent(19, MyRandom.Next(5));
                 }
             }
+
             else "Pilot not exist".ToLog();
         }      
         public void CleanUp()

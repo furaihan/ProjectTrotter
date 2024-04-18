@@ -1,220 +1,56 @@
-﻿namespace BarbarianCall.MyPed
+﻿using System.Collections.Generic;
+using Rage.Native;
+
+namespace BarbarianCall.MyPed
 {
     public class PedComponentCollection
     {
-        private readonly FreemodePed _owner;
-        internal PedComponentCollection(FreemodePed owner)
+        private readonly MyPed _owner;
+        private readonly Dictionary<PedComponentType, PedComponent> _components;
+        internal PedComponentCollection(MyPed owner)
         {
             _owner = owner;
         }
-        public PedComponent Torso
+        internal PedComponent this[PedComponentType componentType]
         {
             get
             {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Torso);
+                if (_components.TryGetValue(componentType, out var component))
+                    return component;
+
+                int drawable = NativeFunction.Natives.GET_PED_DRAWABLE_VARIATION<int>(_owner, componentType);
+                int texture = NativeFunction.Natives.GET_PED_TEXTURE_VARIATION<int>(_owner, componentType);
+                int pallete = NativeFunction.Natives.GET_PED_PALETTE_VARIATION<int>(_owner, componentType);
+                component = new PedComponent(drawable, texture, pallete);
+                _components[componentType] = component;
+                return component;
             }
             set
             {
-                if (value.ComponentID != PedComponent.EComponentID.Torso) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
+                if (!ValidateDrawable(componentType, value) || !ValidateTexture(componentType, value)) return;
+                _components[componentType] = value;
+                NativeFunction.Natives.SET_PED_COMPONENT_VARIATION(_owner, componentType, value.DrawableID, value.TextureID, value.PalleteID);
             }
         }
-        public PedComponent Head
+        private bool ValidateDrawable(PedComponentType type, PedComponent pedComponent)
         {
-            get
+            int max = NativeFunction.Natives.GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS<int>(_owner, type);
+            if (pedComponent.DrawableID < 0 || pedComponent.DrawableID >= max)
             {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Head);
+                Logger.Log($"DrawableID {pedComponent.DrawableID} is out of range for {type}");
+                return false;
             }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Head) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
+            return true;
         }
-        public PedComponent Mask
+        private bool ValidateTexture(PedComponentType type, PedComponent pedComponent)
         {
-            get
+            int max = NativeFunction.Natives.GET_NUMBER_OF_PED_TEXTURE_VARIATIONS<int>(_owner, type, pedComponent.DrawableID);
+            if (pedComponent.TextureID < 0 || pedComponent.TextureID >= max)
             {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Mask);
+                Logger.Log($"TextureID {pedComponent.TextureID} is out of range for {type}");
+                return false;
             }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Mask) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent Shoes
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Shoes);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Shoes) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent Leg
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Leg);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Leg) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent Parachute
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Parachute);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Parachute) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent Decal
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Decal);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Decal) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent UnderShirt
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.UnderShirt);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.UnderShirt) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent HairStyle
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.HairStyle);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.HairStyle) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent BodyArmor
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.BodyArmor);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.BodyArmor) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent Tops
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Tops);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Tops) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public PedComponent Accessories
-        {
-            get
-            {
-                return PedComponent.GetPedComponent(_owner, PedComponent.EComponentID.Accessories);
-            }
-            set
-            {
-                if (value.ComponentID != PedComponent.EComponentID.Accessories) Logger.Log("Wrong componentID");
-                else
-                {
-                    PedComponent.SetPedComponent(_owner, value);
-                }
-            }
-        }
-        public void ApplyToAnotherPed(FreemodePed target, bool includingHairStyle = false)
-        {
-            target.Wardrobe.Accessories = Accessories;
-            target.Wardrobe.BodyArmor = BodyArmor;
-            target.Wardrobe.Decal = Decal;
-            if (includingHairStyle) target.Wardrobe.HairStyle = HairStyle;
-            target.Wardrobe.Leg = Leg;
-            target.Wardrobe.Mask = Mask;
-            target.Wardrobe.Parachute = Parachute;
-            target.Wardrobe.Shoes = Shoes;
-            target.Wardrobe.Tops = Tops;
-            target.Wardrobe.Torso = Torso;
-            target.Wardrobe.UnderShirt = UnderShirt;
-        }
-        public void CopyFromPed(FreemodePed ped, bool includeHairstyle = false)
-        {
-            $"Aks = {Accessories} Aks = {ped.Wardrobe.Accessories} Ped exist: {ped.Exists()}".ToLog();
-            Accessories = ped.Wardrobe.Accessories;
-            BodyArmor = ped.Wardrobe.BodyArmor;
-            Decal = ped.Wardrobe.Decal;
-            if (includeHairstyle) HairStyle = ped.Wardrobe.HairStyle;
-            Leg = ped.Wardrobe.Leg;
-            Mask = ped.Wardrobe.Mask;
-            Parachute = ped.Wardrobe.Parachute;
-            Shoes = ped.Wardrobe.Shoes;
-            Tops = ped.Wardrobe.Tops;
-            Torso = ped.Wardrobe.Torso;
-            UnderShirt = ped.Wardrobe.UnderShirt;
+            return true;
         }
     }
 }
