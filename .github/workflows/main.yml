@@ -7,27 +7,27 @@ jobs:
     name: Build
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v4.1.3
 
       - name: Setup MS Build
-        uses: microsoft/setup-msbuild@v1.1.3
+        uses: microsoft/setup-msbuild@v2
         
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.1.1
+        uses: NuGet/setup-nuget@v2.0.0
      
       - name: Restore NuGet Packages
-        run: nuget restore BarbarianCall.sln
+        run: nuget restore ProjectTrotter.sln
       
       - name: Build Release Library
-        run:  msbuild BarbarianCall.sln /p:Configuration=Debug
+        run:  msbuild ProjectTrotter.sln /p:Configuration=Debug
         
       - name: Setting Date Variable
         id: date
         run: echo "::set-output name=today::$(date +'%d%m%y-%H%M%S')"
                 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4.3.2
         with:
-          name: BarbarianCall_${{ steps.date.outputs.today }}
+          name: ProjectTrotter_${{ steps.date.outputs.today }}
           path: Resources\
           retention-days: 2
