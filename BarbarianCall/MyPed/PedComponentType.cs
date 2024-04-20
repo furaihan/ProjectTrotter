@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BarbarianCall.MyPed
 {
+    /// <summary>
+    /// Enum to represent the component slots of a <see cref="Rage.Ped"/>
+    /// </summary>
     internal enum PedComponentType
     {
         Head,

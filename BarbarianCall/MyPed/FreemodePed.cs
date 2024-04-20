@@ -123,7 +123,7 @@ namespace BarbarianCall.MyPed
             if (IsMale)
             {
                 Voice = Globals.MaleVoiceName.GetRandomElement(true);
-                Wardrobe[PedComponentType.HairStyle] = new PedComponent(maleHairModel.GetRandomElement(true), 0, 0);
+                Wardrobe[PedComponentType.HairStyle] = new PedComponentVariation(maleHairModel.GetRandomElement(true), 0, 0);
                 foreach (OverlayId headOverlay in selectedOverlayIds)
                 {
                     int index = headOverlay switch
@@ -152,7 +152,7 @@ namespace BarbarianCall.MyPed
             else if (IsFemale)
             {
                 Voice = Globals.FemaleVoiceName.GetRandomElement();
-                Wardrobe[PedComponentType.HairStyle] = new PedComponent(femaleHairModel.GetRandomElement(true), 0, 0);
+                Wardrobe[PedComponentType.HairStyle] = new PedComponentVariation(femaleHairModel.GetRandomElement(true), 0, 0);
                 foreach (OverlayId headOverlay in selectedOverlayIds)
                 {
                     int index = headOverlay switch

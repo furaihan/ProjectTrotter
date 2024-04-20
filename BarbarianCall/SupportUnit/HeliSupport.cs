@@ -62,19 +62,19 @@ namespace BarbarianCall.SupportUnit
             {
                 if (Pilot.Gender == LSPD_First_Response.Gender.Male)
                 {
-                    Pilot.Wardrobe[PedComponentType.Mask] = new PedComponent(27, 0);
-                    Pilot.Wardrobe[PedComponentType.Tops] = new PedComponent(48, 0);
-                    Pilot.Wardrobe[PedComponentType.Leg] = new PedComponent(30, 0);
-                    Pilot.Wardrobe[PedComponentType.Shoes] = new PedComponent(24, 0);
-                    Pilot.Wardrobe[PedComponentType.Torso] = new PedComponent(18, MyRandom.Next(5));
+                    Pilot.Wardrobe[PedComponentType.Mask] = new PedComponentVariation(27, 0);
+                    Pilot.Wardrobe[PedComponentType.Tops] = new PedComponentVariation(48, 0);
+                    Pilot.Wardrobe[PedComponentType.Leg] = new PedComponentVariation(30, 0);
+                    Pilot.Wardrobe[PedComponentType.Shoes] = new PedComponentVariation(24, 0);
+                    Pilot.Wardrobe[PedComponentType.Torso] = new PedComponentVariation(18, MyRandom.Next(5));
                 }
                 else if (Pilot.Gender == LSPD_First_Response.Gender.Female)
                 {
-                    Pilot.Wardrobe[PedComponentType.Mask] = new PedComponent(27, 0);
-                    Pilot.Wardrobe[PedComponentType.Tops] = new PedComponent(41, 0);
-                    Pilot.Wardrobe[PedComponentType.Leg] = new PedComponent(29, 0);
-                    Pilot.Wardrobe[PedComponentType.Shoes] = new PedComponent(24, 0);
-                    Pilot.Wardrobe[PedComponentType.Torso] = new PedComponent(19, MyRandom.Next(5));
+                    Pilot.Wardrobe[PedComponentType.Mask] = new PedComponentVariation(27, 0);
+                    Pilot.Wardrobe[PedComponentType.Tops] = new PedComponentVariation(41, 0);
+                    Pilot.Wardrobe[PedComponentType.Leg] = new PedComponentVariation(29, 0);
+                    Pilot.Wardrobe[PedComponentType.Shoes] = new PedComponentVariation(24, 0);
+                    Pilot.Wardrobe[PedComponentType.Torso] = new PedComponentVariation(19, MyRandom.Next(5));
                 }
             }
 

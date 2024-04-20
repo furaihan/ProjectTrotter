@@ -9,7 +9,7 @@ namespace BarbarianCall.MyPed
 {
     internal class MyPed : Ped
     {
-        private PedComponentCollection _pedComponentCollection;
+        private PedWardrobe _pedComponentCollection;
         private PedCombatProperty _pedCombatProperty;
         internal MyPed(Model model, Vector3 position, float heading) : base(model, position, heading)
         {
@@ -30,11 +30,11 @@ namespace BarbarianCall.MyPed
                 return _pedCombatProperty ??= new PedCombatProperty(this);
             }
         }
-        internal PedComponentCollection Wardrobe
+        internal PedWardrobe Wardrobe
         {
             get
             {
-                return _pedComponentCollection ??= new PedComponentCollection(this);
+                return _pedComponentCollection ??= new PedWardrobe(this);
             }
         }
         internal static MyPed FromRegularPed(Ped ped)
