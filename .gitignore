@@ -339,5 +339,6 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /Resources/plugins/LSPDFR/BarbarianCall.dll
+/Resources/plugins/LSPDFR/ProjectTrotter.dll
 /Resources/plugins/LSPDFR/RAGENativeUI.dll
 /Resources/RAGENativeUI.dll
