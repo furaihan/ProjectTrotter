@@ -14,10 +14,8 @@ jobs:
         run: |
          $today = Get-Date -Format "ddMMyyHHmmss"
          echo "Today's date is: $today"
-         echo "today=$today" >> $GITHUB_OUTPUT
-        shell: pwsh
+         echo "today=$today" >> $env:GITHUB_OUTPUT
       
       - name: Print Today Variable
         run: |
           echo "The value of 'today' is: ${{ steps.date.outputs.today }}"
-        shell: pwsh
