@@ -21,13 +21,15 @@ jobs:
       - name: Build Release Library
         run:  msbuild ProjectTrotter.sln /p:Configuration=Debug
         
-      - name: Setting Date Variable
+      - name: Set Date Variable
         id: date
-        run: echo "::set-output name=today::$(date +'%d%m%y-%H%M%S')"
-                
+        run: |
+         today=$(date +'%d%m%y-%H%M%S')
+         echo "today=$today" >> $GITHUB_OUTPUT
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4.3.2
         with:
-          name: ProjectTrotter_${{ steps.date.outputs.today }}
-          path: Resources\
-          retention-days: 2
+            name: ProjectTrotter_${{ steps.date.outputs.today }}
+            path: Resources\
+            retention-days: 2
