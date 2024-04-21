@@ -8,15 +8,29 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4.1.3
-  
+
+      - name: Setup MS Build
+        uses: microsoft/setup-msbuild@v2
+        
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2.0.0
+     
+      - name: Restore NuGet Packages
+        run: nuget restore ProjectTrotter.sln
+      
+      - name: Build Release Library
+        run:  msbuild ProjectTrotter.sln /p:Configuration=Debug
+
       - name: Set Date Variable
         id: date
         shell: pwsh
         run: |
           $today = Get-Date -Format "ddMMyyHHmmss"
-          echo "Today's date is: $today"
           echo today=$today >> $env:GITHUB_OUTPUT
-      
-      - name: Print Today Variable
-        run: |
-          echo "The value of 'today' is: ${{ steps.date.outputs.today }}"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4.3.2
+        with:
+            name: ProjectTrotter_${{ steps.date.outputs.today }}
+            path: Resources\
+            retention-days: 2
