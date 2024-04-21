@@ -13,8 +13,8 @@ jobs:
         id: date
         run: |
          $today = Get-Date -Format "ddMMyyHHmmss"
-         echo "today=$today" >> $GITHUB_OUTPUT
          echo "Today's date is: $today"
+         echo "today=$today" >> $GITHUB_OUTPUT
       
       - name: Print Today Variable
         run: |
