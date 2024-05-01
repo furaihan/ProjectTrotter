@@ -554,5 +554,21 @@ namespace ProjectTrotter
             }
             return string.Empty;            
         }
+        internal static uint Joaat(string str, bool lower = true)
+        {
+            if (lower) str = str.ToLower();
+            // Manual joaat hash
+            uint hash = 0;
+            foreach (char c in str)
+            {
+                hash += c;
+                hash += hash << 10;
+                hash ^= hash >> 6;
+            }
+            hash += hash << 3;
+            hash ^= hash >> 11;
+            hash += hash << 15;
+            return hash;
+        }
     }
 }
